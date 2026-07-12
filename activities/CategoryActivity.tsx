@@ -1,6 +1,5 @@
 import { useFlow, useActivity } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { motion } from "framer-motion";
 
 type CategoryParams = {
   category: string;
@@ -19,16 +18,12 @@ export const CategoryActivity: React.FC<any> = ({ params }: any) => {
           {[1, 2, 3, 4, 5].map((item) => (
             <button
               key={item}
-              onClick={() => push("DetailActivity", { title: `${params.category} Item ${item}`, id: item.toString() }, { animate: false })}
+              onClick={() => push("DetailActivity", { title: `${category} Item ${item}`, id: item.toString() })}
               className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl text-left active:bg-gray-100 dark:active:bg-gray-800 transition-colors"
             >
-              <motion.span 
-                layoutId={isTop ? `title-${item}` : undefined}
-                className={`relative z-[9999] inline-block font-semibold ${params.category === 'Lifestyle' ? 'text-black dark:text-black text-lg' : ''}`}
-                transition={{ duration: 0 }}
-              >
-                View {params.category} Item {item}
-              </motion.span>
+              <span className={`inline-block font-semibold ${category === 'Lifestyle' ? 'text-black dark:text-black text-lg' : ''}`}>
+                View {category} Item {item}
+              </span>
             </button>
           ))}
         </div>
