@@ -1,6 +1,18 @@
 import { useActivity } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { motion } from "framer-motion";
+import { Button } from "../components/ui/button";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle,
+  DrawerTrigger,
+} from "../components/ui/drawer";
 
 type DetailParams = {
   title: string;
@@ -41,6 +53,74 @@ export const DetailActivity: React.FC<any> = ({ params }: any) => {
             <p>
               Notice how the title animated from the card to the header, and how you can simply swipe back or press the back button in the App Bar to go to the previous screen.
             </p>
+            <div className="pt-4">
+              <Drawer>
+                <DrawerTrigger render={<Button variant="outline" />}>
+                  Nested drawers
+                </DrawerTrigger>
+                <DrawerPopup showBar>
+                  <DrawerHeader className="text-center">
+                    <DrawerTitle>First step</DrawerTitle>
+                    <DrawerDescription>
+                      This is the first step. Tap the button below to continue to the next
+                      screen.
+                    </DrawerDescription>
+                  </DrawerHeader>
+                  <DrawerFooter
+                    className="justify-center sm:justify-center"
+                    variant="bare"
+                  >
+                    <DrawerClose render={<Button variant="ghost" />}>Cancel</DrawerClose>
+                    <Drawer>
+                      <DrawerTrigger render={<Button variant="outline" />}>
+                        Continue
+                      </DrawerTrigger>
+                      <DrawerPopup showBar>
+                        <DrawerHeader className="text-center">
+                          <DrawerTitle>Second step</DrawerTitle>
+                          <DrawerDescription>
+                            You&apos;ve reached the second step. Tap the button below to
+                            continue to the next screen.
+                          </DrawerDescription>
+                        </DrawerHeader>
+                        <DrawerPanel>
+                          <div className="flex justify-center">
+                            <div className="size-48 shrink-0 rounded-xl border bg-muted" />
+                          </div>
+                        </DrawerPanel>
+                        <DrawerFooter
+                          className="justify-center sm:justify-center"
+                          variant="bare"
+                        >
+                          <DrawerClose render={<Button variant="ghost" />}>
+                            Back
+                          </DrawerClose>
+                          <Drawer>
+                            <DrawerTrigger render={<Button variant="outline" />}>
+                              Continue
+                            </DrawerTrigger>
+                            <DrawerPopup showBar>
+                              <DrawerHeader className="text-center">
+                                <DrawerTitle>Third step</DrawerTitle>
+                                <DrawerDescription>
+                                  You&apos;ve reached the final step. You can close this
+                                  drawer or go back.
+                                </DrawerDescription>
+                              </DrawerHeader>
+                              <DrawerPanel>
+                                <div className="flex justify-center">
+                                  <div className="size-32 shrink-0 rounded-full border bg-muted" />
+                                </div>
+                              </DrawerPanel>
+                            </DrawerPopup>
+                          </Drawer>
+                        </DrawerFooter>
+                      </DrawerPopup>
+                    </Drawer>
+                  </DrawerFooter>
+                </DrawerPopup>
+              </Drawer>
+            </div>
           </div>
         </div>
       </motion.div>
