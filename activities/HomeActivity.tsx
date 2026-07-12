@@ -1,12 +1,12 @@
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { BottomNav } from "../components/BottomNav";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 export const HomeActivity: React.FC<any> = () => {
   const { push } = useFlow();
 
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -16,7 +16,7 @@ export const HomeActivity: React.FC<any> = () => {
     }
   };
 
-  const item = {
+  const item: Variants = {
     hidden: { opacity: 0, x: 50 },
     show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
   };
