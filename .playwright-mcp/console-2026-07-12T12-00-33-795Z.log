@@ -1,0 +1,7 @@
+[      76ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[      88ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[      95ms] [WARNING] Stackflow - Some plugin overrides an "initialActivity" option. The "initialActivity" option you set to "HomeActivity" in the "stackflow" is ignored. @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[   70838ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[   70867ms] [LOG] [Fast Refresh] done in 23ms @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  116257ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  116286ms] [LOG] [Fast Refresh] done in 12ms @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477

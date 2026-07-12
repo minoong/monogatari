@@ -1,0 +1,19 @@
+- generic [active] [ref=f1e1]:
+  - main [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - generic [ref=f1e8]:
+        - generic [ref=f1e9]: Home
+        - button [ref=f1e10] [cursor=pointer]
+      - generic [ref=f1e12]:
+        - generic [ref=f1e13]:
+          - heading "Categories" [level=2] [ref=f1e14]
+          - generic [ref=f1e15]:
+            - button "Technology" [ref=f1e16]
+            - button "Lifestyle" [ref=f1e17]
+            - button "Education" [ref=f1e18]
+        - generic [ref=f1e19]:
+          - button "Home" [ref=f1e20]
+          - button "Search" [ref=f1e24]
+          - button "Profile" [ref=f1e28]
+  - button "Open Next.js Dev Tools" [ref=f1e37] [cursor=pointer]
+  - alert [ref=f1e41]

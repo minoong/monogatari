@@ -1,0 +1,436 @@
+[      81ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[     114ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[     138ms] [WARNING] Stackflow - Some plugin overrides an "initialActivity" option. The "initialActivity" option you set to "HomeActivity" in the "stackflow" is ignored. @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[   96427ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[   96457ms] [LOG] [Fast Refresh] done in 36ms @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[   99677ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[   99706ms] [LOG] [Fast Refresh] done in 20ms @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  100862ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  100890ms] [LOG] [Fast Refresh] done in 22ms @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  102902ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  102964ms] [LOG] [Fast Refresh] done in 36ms @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  103007ms] [WARNING] Stackflow - Some plugin overrides an "initialActivity" option. The "initialActivity" option you set to "HomeActivity" in the "stackflow" is ignored. @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  321428ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  321458ms] [LOG] [Fast Refresh] done in 14ms @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  322688ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  322717ms] [LOG] [Fast Refresh] done in 17ms @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  398310ms] [ERROR] ./test-app/activities/CategoryActivity.tsx:50:3
+Return statement is not allowed here
+  48 | };
+  49 |
+> 50 |   return (
+     |   ^^^^^^^
+> 51 |     <AppScreen appBar={{ title: params.category }}>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |       <div className="flex flex-col p-4">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 53 |         <h2 className="text-xl font-bold mb-4">{params.category} Items</h2>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 54 |         <div className="flex flex-col gap-3">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |           {[1, 2, 3, 4, 5].map((item) => (
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 56 |             <button
+     | ^^^^^^^^^^^^^^^^^^^
+> 57 |               key={item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |               onClick={() => handleCardClick(item)}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 59 |               style={{ viewTransitionName: `card-${item}` } as any}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 60 |               className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl t...
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 61 |             >
+     | ^^^^^^^^^^^^^
+> 62 |               View {params.category} Item {item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 63 |             </button>
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 64 |           ))}
+     | ^^^^^^^^^^^^^
+> 65 |         </div>
+     | ^^^^^^^^^^^^^^
+> 66 |       </div>
+     | ^^^^^^^^^^^^
+> 67 |     </AppScreen>
+     | ^^^^^^^^^^^^^^^^
+> 68 |   );
+     | ^^^^
+  69 | };
+  70 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./test-app/activities/CategoryActivity.tsx [Client Component Browser]
+    ./test-app/components/stackflow.ts [Client Component Browser]
+    ./test-app/app/page.tsx [Client Component Browser]
+    ./test-app/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./test-app/activities/CategoryActivity.tsx [Client Component SSR]
+    ./test-app/components/stackflow.ts [Client Component SSR]
+    ./test-app/app/page.tsx [Client Component SSR]
+    ./test-app/app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:3318
+[  398367ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  410414ms] [ERROR] ./test-app/activities/CategoryActivity.tsx:50:3
+Return statement is not allowed here
+  48 | };
+  49 |
+> 50 |   return (
+     |   ^^^^^^^
+> 51 |     <AppScreen appBar={{ title: params.category }}>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |       <div className="flex flex-col p-4">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 53 |         <h2 className="text-xl font-bold mb-4">{params.category} Items</h2>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 54 |         <div className="flex flex-col gap-3">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |           {[1, 2, 3, 4, 5].map((item) => (
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 56 |             <button
+     | ^^^^^^^^^^^^^^^^^^^
+> 57 |               key={item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |               onClick={() => handleCardClick(item)}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 59 |               style={{ viewTransitionName: `card-${item}` } as any}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 60 |               className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl t...
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 61 |             >
+     | ^^^^^^^^^^^^^
+> 62 |               View {params.category} Item {item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 63 |             </button>
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 64 |           ))}
+     | ^^^^^^^^^^^^^
+> 65 |         </div>
+     | ^^^^^^^^^^^^^^
+> 66 |       </div>
+     | ^^^^^^^^^^^^
+> 67 |     </AppScreen>
+     | ^^^^^^^^^^^^^^^^
+> 68 |   );
+     | ^^^^
+  69 | };
+  70 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./test-app/activities/CategoryActivity.tsx [Client Component Browser]
+    ./test-app/components/stackflow.ts [Client Component Browser]
+    ./test-app/app/page.tsx [Client Component Browser]
+    ./test-app/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./test-app/activities/CategoryActivity.tsx [Client Component SSR]
+    ./test-app/components/stackflow.ts [Client Component SSR]
+    ./test-app/app/page.tsx [Client Component SSR]
+    ./test-app/app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:3318
+[  410515ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  410652ms] [ERROR] ./test-app/activities/CategoryActivity.tsx:50:3
+Return statement is not allowed here
+  48 | };
+  49 |
+> 50 |   return (
+     |   ^^^^^^^
+> 51 |     <AppScreen appBar={{ title: params.category }}>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |       <div className="flex flex-col p-4">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 53 |         <h2 className="text-xl font-bold mb-4">{params.category} Items</h2>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 54 |         <div className="flex flex-col gap-3">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |           {[1, 2, 3, 4, 5].map((item) => (
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 56 |             <button
+     | ^^^^^^^^^^^^^^^^^^^
+> 57 |               key={item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |               onClick={() => handleCardClick(item)}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 59 |               style={{ viewTransitionName: `card-${item}` } as any}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 60 |               className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl t...
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 61 |             >
+     | ^^^^^^^^^^^^^
+> 62 |               View {params.category} Item {item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 63 |             </button>
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 64 |           ))}
+     | ^^^^^^^^^^^^^
+> 65 |         </div>
+     | ^^^^^^^^^^^^^^
+> 66 |       </div>
+     | ^^^^^^^^^^^^
+> 67 |     </AppScreen>
+     | ^^^^^^^^^^^^^^^^
+> 68 |   );
+     | ^^^^
+  69 | };
+  70 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./test-app/activities/CategoryActivity.tsx [Client Component Browser]
+    ./test-app/components/stackflow.ts [Client Component Browser]
+    ./test-app/app/page.tsx [Client Component Browser]
+    ./test-app/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./test-app/activities/CategoryActivity.tsx [Client Component SSR]
+    ./test-app/components/stackflow.ts [Client Component SSR]
+    ./test-app/app/page.tsx [Client Component SSR]
+    ./test-app/app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:3318
+[  410753ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  410799ms] [ERROR] ./test-app/activities/CategoryActivity.tsx:50:3
+Return statement is not allowed here
+  48 | };
+  49 |
+> 50 |   return (
+     |   ^^^^^^^
+> 51 |     <AppScreen appBar={{ title: params.category }}>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |       <div className="flex flex-col p-4">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 53 |         <h2 className="text-xl font-bold mb-4">{params.category} Items</h2>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 54 |         <div className="flex flex-col gap-3">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |           {[1, 2, 3, 4, 5].map((item) => (
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 56 |             <button
+     | ^^^^^^^^^^^^^^^^^^^
+> 57 |               key={item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |               onClick={() => handleCardClick(item)}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 59 |               style={{ viewTransitionName: `card-${item}` } as any}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 60 |               className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl t...
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 61 |             >
+     | ^^^^^^^^^^^^^
+> 62 |               View {params.category} Item {item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 63 |             </button>
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 64 |           ))}
+     | ^^^^^^^^^^^^^
+> 65 |         </div>
+     | ^^^^^^^^^^^^^^
+> 66 |       </div>
+     | ^^^^^^^^^^^^
+> 67 |     </AppScreen>
+     | ^^^^^^^^^^^^^^^^
+> 68 |   );
+     | ^^^^
+  69 | };
+  70 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./test-app/activities/CategoryActivity.tsx [Client Component Browser]
+    ./test-app/components/stackflow.ts [Client Component Browser]
+    ./test-app/app/page.tsx [Client Component Browser]
+    ./test-app/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./test-app/activities/CategoryActivity.tsx [Client Component SSR]
+    ./test-app/components/stackflow.ts [Client Component SSR]
+    ./test-app/app/page.tsx [Client Component SSR]
+    ./test-app/app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:3318
+[  410934ms] [ERROR] ./test-app/activities/CategoryActivity.tsx:50:3
+Return statement is not allowed here
+  48 | };
+  49 |
+> 50 |   return (
+     |   ^^^^^^^
+> 51 |     <AppScreen appBar={{ title: params.category }}>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |       <div className="flex flex-col p-4">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 53 |         <h2 className="text-xl font-bold mb-4">{params.category} Items</h2>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 54 |         <div className="flex flex-col gap-3">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |           {[1, 2, 3, 4, 5].map((item) => (
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 56 |             <button
+     | ^^^^^^^^^^^^^^^^^^^
+> 57 |               key={item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |               onClick={() => handleCardClick(item)}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 59 |               style={{ viewTransitionName: `card-${item}` } as any}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 60 |               className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl t...
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 61 |             >
+     | ^^^^^^^^^^^^^
+> 62 |               View {params.category} Item {item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 63 |             </button>
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 64 |           ))}
+     | ^^^^^^^^^^^^^
+> 65 |         </div>
+     | ^^^^^^^^^^^^^^
+> 66 |       </div>
+     | ^^^^^^^^^^^^
+> 67 |     </AppScreen>
+     | ^^^^^^^^^^^^^^^^
+> 68 |   );
+     | ^^^^
+  69 | };
+  70 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./test-app/activities/CategoryActivity.tsx [Client Component Browser]
+    ./test-app/components/stackflow.ts [Client Component Browser]
+    ./test-app/app/page.tsx [Client Component Browser]
+    ./test-app/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./test-app/activities/CategoryActivity.tsx [Client Component SSR]
+    ./test-app/components/stackflow.ts [Client Component SSR]
+    ./test-app/app/page.tsx [Client Component SSR]
+    ./test-app/app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:3318
+[  410987ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  411469ms] [ERROR] ./test-app/activities/CategoryActivity.tsx:50:3
+Return statement is not allowed here
+  48 | };
+  49 |
+> 50 |   return (
+     |   ^^^^^^^
+> 51 |     <AppScreen appBar={{ title: params.category }}>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |       <div className="flex flex-col p-4">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 53 |         <h2 className="text-xl font-bold mb-4">{params.category} Items</h2>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 54 |         <div className="flex flex-col gap-3">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |           {[1, 2, 3, 4, 5].map((item) => (
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 56 |             <button
+     | ^^^^^^^^^^^^^^^^^^^
+> 57 |               key={item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |               onClick={() => handleCardClick(item)}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 59 |               style={{ viewTransitionName: `card-${item}` } as any}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 60 |               className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl t...
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 61 |             >
+     | ^^^^^^^^^^^^^
+> 62 |               View {params.category} Item {item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 63 |             </button>
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 64 |           ))}
+     | ^^^^^^^^^^^^^
+> 65 |         </div>
+     | ^^^^^^^^^^^^^^
+> 66 |       </div>
+     | ^^^^^^^^^^^^
+> 67 |     </AppScreen>
+     | ^^^^^^^^^^^^^^^^
+> 68 |   );
+     | ^^^^
+  69 | };
+  70 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./test-app/activities/CategoryActivity.tsx [Client Component Browser]
+    ./test-app/components/stackflow.ts [Client Component Browser]
+    ./test-app/app/page.tsx [Client Component Browser]
+    ./test-app/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./test-app/activities/CategoryActivity.tsx [Client Component SSR]
+    ./test-app/components/stackflow.ts [Client Component SSR]
+    ./test-app/app/page.tsx [Client Component SSR]
+    ./test-app/app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:3318
+[  411548ms] [ERROR] ./test-app/activities/CategoryActivity.tsx:50:3
+Return statement is not allowed here
+  48 | };
+  49 |
+> 50 |   return (
+     |   ^^^^^^^
+> 51 |     <AppScreen appBar={{ title: params.category }}>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |       <div className="flex flex-col p-4">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 53 |         <h2 className="text-xl font-bold mb-4">{params.category} Items</h2>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 54 |         <div className="flex flex-col gap-3">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |           {[1, 2, 3, 4, 5].map((item) => (
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 56 |             <button
+     | ^^^^^^^^^^^^^^^^^^^
+> 57 |               key={item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |               onClick={() => handleCardClick(item)}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 59 |               style={{ viewTransitionName: `card-${item}` } as any}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 60 |               className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl t...
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 61 |             >
+     | ^^^^^^^^^^^^^
+> 62 |               View {params.category} Item {item}
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 63 |             </button>
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 64 |           ))}
+     | ^^^^^^^^^^^^^
+> 65 |         </div>
+     | ^^^^^^^^^^^^^^
+> 66 |       </div>
+     | ^^^^^^^^^^^^
+> 67 |     </AppScreen>
+     | ^^^^^^^^^^^^^^^^
+> 68 |   );
+     | ^^^^
+  69 | };
+  70 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./test-app/activities/CategoryActivity.tsx [Client Component Browser]
+    ./test-app/components/stackflow.ts [Client Component Browser]
+    ./test-app/app/page.tsx [Client Component Browser]
+    ./test-app/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./test-app/activities/CategoryActivity.tsx [Client Component SSR]
+    ./test-app/components/stackflow.ts [Client Component SSR]
+    ./test-app/app/page.tsx [Client Component SSR]
+    ./test-app/app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:3318
+[  411617ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  412933ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
+[  412987ms] [LOG] [Fast Refresh] done in 26ms @ http://localhost:3000/_next/static/chunks/1nrc_next_dist_10f3puc._.js:2477
