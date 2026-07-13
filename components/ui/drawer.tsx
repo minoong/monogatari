@@ -258,7 +258,6 @@ export function DrawerFooter({
   render,
   ...props
 }: useRender.ComponentProps<"div"> & {
-  variant?: "default" | "bare";
   variant?: "default" | "bare" | "plain";
   allowSelection?: boolean;
 }): React.ReactElement {
