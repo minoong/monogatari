@@ -175,36 +175,36 @@ export function DrawerPopup({
               cn(
                 position === "bottom" && "rounded-t-2xl",
                 position === "top" &&
-                  "rounded-b-2xl **:data-[slot=drawer-footer]:rounded-b-[calc(var(--radius-2xl)-1px)]",
+                  "rounded-b-2xl **:data-[slot=drawer-footer]:rounded-b-[calc(var(--radius-2xl)_-_1px)]",
                 position === "left" &&
-                  "rounded-e-2xl **:data-[slot=drawer-footer]:rounded-ee-[calc(var(--radius-2xl)-1px)]",
+                  "rounded-e-2xl **:data-[slot=drawer-footer]:rounded-ee-[calc(var(--radius-2xl)_-_1px)]",
                 position === "right" &&
-                  "rounded-s-2xl **:data-[slot=drawer-footer]:rounded-es-[calc(var(--radius-2xl)-1px)]",
+                  "rounded-s-2xl **:data-[slot=drawer-footer]:rounded-es-[calc(var(--radius-2xl)_-_1px)]",
               ),
             variant === "default" &&
               cn(
                 position === "bottom" &&
-                  "before:rounded-t-[calc(var(--radius-2xl)-1px)]",
+                  "before:rounded-t-[calc(var(--radius-2xl)_-_1px)]",
                 position === "top" &&
-                  "before:rounded-b-[calc(var(--radius-2xl)-1px)]",
+                  "before:rounded-b-[calc(var(--radius-2xl)_-_1px)]",
                 position === "left" &&
-                  "before:rounded-e-[calc(var(--radius-2xl)-1px)]",
+                  "before:rounded-e-[calc(var(--radius-2xl)_-_1px)]",
                 position === "right" &&
-                  "before:rounded-s-[calc(var(--radius-2xl)-1px)]",
+                  "before:rounded-s-[calc(var(--radius-2xl)_-_1px)]",
               ),
             variant === "inset" &&
-              "before:hidden sm:rounded-2xl sm:border sm:after:bg-transparent sm:before:rounded-[calc(var(--radius-2xl)-1px)] sm:**:data-[slot=drawer-footer]:rounded-b-[calc(var(--radius-2xl)-1px)]",
+              "before:hidden sm:rounded-2xl sm:border sm:after:bg-transparent sm:before:rounded-[calc(var(--radius-2xl)_-_1px)] sm:**:data-[slot=drawer-footer]:rounded-b-[calc(var(--radius-2xl)_-_1px)]",
             variant === "straight" && "[--stack-step:0]",
             (position === "bottom" || position === "top") &&
               "h-(--drawer-height,auto) [--height:max(0px,calc(var(--drawer-frontmost-height,var(--drawer-height))))] data-nested-drawer-open:h-(--height)",
             position === "bottom" &&
-              "data-nested-drawer-open:transform-[translateY(calc(var(--drawer-swipe-movement-y)-var(--stack-peek-offset)-(var(--shrink)*var(--height))))_scale(var(--scale))] origin-[50%_calc(100%-var(--inset))]",
+              "data-nested-drawer-open:transform-[translateY(calc(var(--drawer-swipe-movement-y)_-_var(--stack-peek-offset)_-_(var(--shrink)_*_var(--height))))_scale(var(--scale))] origin-[50%_calc(100%_-_var(--inset))]",
             position === "top" &&
-              "data-nested-drawer-open:transform-[translateY(calc(var(--drawer-swipe-movement-y)+var(--stack-peek-offset)+(var(--shrink)*var(--height))))_scale(var(--scale))] origin-[50%_var(--inset)]",
+              "data-nested-drawer-open:transform-[translateY(calc(var(--drawer-swipe-movement-y)_+_var(--stack-peek-offset)_+_(var(--shrink)_*_var(--height))))_scale(var(--scale))] origin-[50%_var(--inset)]",
             position === "left" &&
-              "data-nested-drawer-open:transform-[translateX(calc(var(--drawer-swipe-movement-x)+var(--stack-peek-offset)))_scale(var(--scale))] origin-right",
+              "data-nested-drawer-open:transform-[translateX(calc(var(--drawer-swipe-movement-x)_+_var(--stack-peek-offset)))_scale(var(--scale))] origin-right",
             position === "right" &&
-              "data-nested-drawer-open:transform-[translateX(calc(var(--drawer-swipe-movement-x)-var(--stack-peek-offset)))_scale(var(--scale))] origin-left",
+              "data-nested-drawer-open:transform-[translateX(calc(var(--drawer-swipe-movement-x)_-_var(--stack-peek-offset)))_scale(var(--scale))] origin-left",
             className,
           )}
           data-slot="drawer-popup"
@@ -266,9 +266,9 @@ export function DrawerFooter({
       "flex flex-col-reverse gap-2 px-6 pb-(--safe-area-inset-bottom,0px) sm:flex-row sm:justify-end",
       !allowSelection && "cursor-default",
       variant === "default" &&
-        "border-t bg-muted/72 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(4))]",
+        "border-t bg-muted/72 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)_+_--spacing(4))]",
       variant === "bare" &&
-        "in-[[data-slot=drawer-popup]:has([data-slot=drawer-panel])]:pt-3 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(6))]",
+        "in-[[data-slot=drawer-popup]:has([data-slot=drawer-panel])]:pt-3 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)_+_--spacing(6))]",
       className,
     ),
     "data-slot": "drawer-footer",
@@ -538,10 +538,10 @@ export function DrawerMenuCheckboxItem({
         <>
           <span className="col-start-1">{children}</span>
           <CheckboxPrimitive.Indicator
-            className="inset-shadow-[0_1px_--theme(--color-black/4%)] col-start-2 inline-flex h-[calc(var(--thumb-size)+2px)] w-[calc(var(--thumb-size)*2-2px)] shrink-0 items-center rounded-full p-px outline-none transition-[background-color,box-shadow] duration-200 [--thumb-size:--spacing(4)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background data-checked:bg-primary data-unchecked:bg-input data-disabled:opacity-64 sm:[--thumb-size:--spacing(3)]"
+            className="inset-shadow-[0_1px_--theme(--color-black/4%)] col-start-2 inline-flex h-[calc(var(--thumb-size)_+_2px)] w-[calc(var(--thumb-size)*2_-_2px)] shrink-0 items-center rounded-full p-px outline-none transition-[background-color,box-shadow] duration-200 [--thumb-size:--spacing(4)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background data-checked:bg-primary data-unchecked:bg-input data-disabled:opacity-64 sm:[--thumb-size:--spacing(3)]"
             keepMounted
           >
-            <span className="pointer-events-none block aspect-square h-full in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:origin-[var(--thumb-size)_50%] origin-left in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:translate-x-[calc(var(--thumb-size)-4px)] in-[[data-slot=drawer-menu-checkbox-item]:active]:not-data-disabled:scale-x-110 in-[[data-slot=drawer-menu-checkbox-item]:active]:rounded-[var(--thumb-size)/calc(var(--thumb-size)*1.10)] rounded-(--thumb-size) bg-background shadow-sm/5 will-change-transform [transition:translate_.15s,border-radius_.15s,scale_.1s_.1s,transform-origin_.15s]" />
+            <span className="pointer-events-none block aspect-square h-full in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:origin-[var(--thumb-size)_50%] origin-left in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:translate-x-[calc(var(--thumb-size)_-_4px)] in-[[data-slot=drawer-menu-checkbox-item]:active]:not-data-disabled:scale-x-110 in-[[data-slot=drawer-menu-checkbox-item]:active]:rounded-[var(--thumb-size)/calc(var(--thumb-size)*1.10)] rounded-(--thumb-size) bg-background shadow-sm/5 will-change-transform [transition:translate_.15s,border-radius_.15s,scale_.1s_.1s,transform-origin_.15s]" />
           </CheckboxPrimitive.Indicator>
         </>
       ) : (
