@@ -16,7 +16,7 @@ export const CategoryActivity: React.FC<any> = ({ params }: any) => {
       <div className="flex flex-col p-4">
         <h2 className="text-xl font-bold mb-4">{params.category} Items</h2>
         <div className="flex flex-col gap-3">
-          {[1, 2, 3, 4, 5].map((item) => (
+          {Array.from({ length: 30 }, (_, i) => i + 1).map((item) => (
             <button
               key={item}
               onClick={() => push("DetailActivity", { title: `${category} Item ${item}`, id: item.toString() })}

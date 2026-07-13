@@ -127,6 +127,15 @@ export const DetailActivity: React.FC<any> = ({ params }: any) => {
             </div>
           </div>
         </div>
+
+        <div className="pt-8 pb-24 flex flex-col gap-3">
+          <h3 className="font-bold text-lg px-2">More Details (Scroll Test)</h3>
+          {Array.from({ length: 30 }, (_, i) => (
+            <div key={i} className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+              Detailed Item {i + 1}
+            </div>
+          ))}
+        </div>
       </motion.div>
     </AppScreen>
   );
