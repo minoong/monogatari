@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+  div {
+    width: 100px;
+    height: 100px;
+    background: red;
+    transition: transform 1s;
+    transform: translateY(calc(0px + env(safe-area-inset-bottom, 10px)));
+  }
+  @starting-style {
+    div {
+      transform: translateY(calc(100px + env(safe-area-inset-bottom, 10px)));
+    }
+  }
+</style>
+</head>
+<body>
+  <div></div>
+</body>
+</html>

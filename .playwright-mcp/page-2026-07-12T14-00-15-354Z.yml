@@ -1,0 +1,23 @@
+- generic [ref=f17e1]:
+  - main [ref=f17e2]:
+    - generic [ref=f17e71]:
+      - generic [ref=f17e74]:
+        - button [ref=f17e94] [cursor=pointer]
+        - generic [ref=f17e80]:
+          - generic [ref=f17e81]: Technology Item 1
+          - button [ref=f17e82] [cursor=pointer]
+      - generic [ref=f17e86]:
+        - paragraph [ref=f17e87]: "Item ID: 1"
+        - generic [ref=f17e88]:
+          - paragraph [ref=f17e89]: This is the deep detail view. We are now 3 levels deep into the stack!
+          - paragraph [ref=f17e90]: Notice how the title animated from the card to the header, and how you can simply swipe back or press the back button in the App Bar to go to the previous screen.
+          - button [expanded] [ref=f17e95] [cursor=pointer]: Nested drawers
+  - button "Open Next.js Dev Tools" [ref=f17e38] [cursor=pointer]
+  - alert [ref=f17e42]
+  - dialog [active] [ref=f17e99]:
+    - generic [ref=f17e100]:
+      - heading "First step" [level=2] [ref=f17e101]
+      - paragraph [ref=f17e102]: This is the first step. Tap the button below to continue to the next screen.
+    - generic [ref=f17e103]:
+      - button "Cancel" [ref=f17e104] [cursor=pointer]
+      - button "Continue" [ref=f17e105] [cursor=pointer]
