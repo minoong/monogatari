@@ -354,13 +354,31 @@ export const ChecklistActivity: React.FC = () => {
             </div>
           ) : (
             <>
-              <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-3">마스터 체크리스트 (공통)</h3>
+              <div className="flex items-center gap-2 mb-3">
+                <Avatar className="w-5 h-5">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">C</AvatarFallback>
+                </Avatar>
+                <h3 className="font-bold text-gray-700 dark:text-gray-300 text-sm">마스터 체크리스트 (공통)</h3>
+              </div>
               {renderList(masterItems, "all")}
 
-              <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-3">가현쨩 짐싸기</h3>
+              <div className="flex items-center gap-2 mb-3 mt-6">
+                <Avatar className="w-5 h-5">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">G</AvatarFallback>
+                </Avatar>
+                <h3 className="font-bold text-gray-700 dark:text-gray-300 text-sm">가현쨩 짐싸기</h3>
+              </div>
               {renderList(gahyunItems, "gahyun")}
 
-              <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-3">미누쿤 짐싸기</h3>
+              <div className="flex items-center gap-2 mb-3 mt-6">
+                <Avatar className="w-5 h-5">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">M</AvatarFallback>
+                </Avatar>
+                <h3 className="font-bold text-gray-700 dark:text-gray-300 text-sm">미누쿤 짐싸기</h3>
+              </div>
               {renderList(minuItems, "minu")}
             </>
           )}
