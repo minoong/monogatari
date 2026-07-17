@@ -100,19 +100,21 @@ export const ExchangeActivity: React.FC = () => {
   const thbValue = krw ? krw / rates.THB : 0;
   const usdValue = krw ? krw / rates.USD : 0;
 
-  // 가변 사이즈 로직: 숫자가 길어지면 폰트를 줄임
+  // 가변 사이즈 로직: 모바일 환경에 맞춰 극단적으로 줄이도록 조정
   const getFontSize = (val: number | undefined) => {
-    if (!val) return "text-6xl md:text-8xl";
+    if (!val) return "text-6xl";
     const len = String(val).length;
-    if (len > 12) return "text-3xl md:text-5xl";
-    if (len > 9) return "text-4xl md:text-6xl";
-    if (len > 6) return "text-5xl md:text-7xl";
-    return "text-6xl md:text-8xl";
+    if (len > 12) return "text-2xl";
+    if (len > 9) return "text-3xl";
+    if (len > 7) return "text-4xl";
+    if (len > 5) return "text-5xl";
+    return "text-6xl";
   };
 
   return (
     <AppScreen appBar={{ title: "환율 계산기" }}>
-      <div className="flex flex-col flex-1 bg-neutral-950 text-white pb-20 overflow-y-auto">
+      {/* 가로 스크롤 완전 차단을 위해 overflow-x-hidden 추가 */}
+      <div className="flex flex-col flex-1 bg-neutral-950 text-white pb-20 overflow-y-auto overflow-x-hidden">
         
         {/* 상단 컨트롤 영역 */}
         <div className="flex justify-between items-center p-4 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur z-10 sticky top-0">
@@ -130,22 +132,23 @@ export const ExchangeActivity: React.FC = () => {
         </div>
 
         {/* 메인 KRW 입력 영역 */}
-        <div className="flex flex-col items-center justify-center p-8 min-h-[40vh] border-b border-neutral-900 relative overflow-hidden">
+        <div className="flex flex-col items-center justify-center p-8 min-h-[40vh] border-b border-neutral-900 relative overflow-hidden w-full max-w-full">
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center w-full"
+            className="text-center w-full max-w-full"
           >
             <p className="text-neutral-500 text-sm mb-6 font-medium tracking-widest uppercase">
               Enter KRW Amount
             </p>
-            <div className="flex justify-center w-full overflow-visible">
+            <div className="flex justify-center w-full max-w-full">
               <NumberFlowInput
                 value={krw}
                 onChange={(val) => setKrw(val)}
                 format
                 placeholder="0"
-                className={`font-semibold tracking-tighter w-full bg-transparent outline-none text-center transition-all duration-300 ease-out ${getFontSize(krw)}`}
+                maxLength={14}
+                className={`font-semibold tracking-tighter w-full max-w-full bg-transparent outline-none text-center transition-all duration-300 ease-out ${getFontSize(krw)}`}
               />
             </div>
           </motion.div>
