@@ -149,6 +149,8 @@ export const ExchangeActivity: React.FC = () => {
                 format
                 placeholder="0"
                 maxLength={14}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                {...({ inputMode: "numeric", pattern: "[0-9]*" } as any)}
                 className={`font-semibold tracking-tighter max-w-full bg-transparent outline-none transition-all duration-300 ease-out ${getFontSize(krw)}`}
               />
             </div>
