@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { supabase } from "../lib/supabase";
-import { Save } from "lucide-react";
+import { Save, X } from "lucide-react";
 import NumberFlow from "@number-flow/react";
 import { NumberFlowInput } from "@daformat/react-number-flow-input";
 import { motion } from "framer-motion";
@@ -183,6 +183,20 @@ export const ExchangeActivity: React.FC = () => {
                         {...({ inputMode: "numeric", pattern: "[0-9]*" } as any)}
                         className={`font-extrabold tracking-tighter bg-transparent outline-none text-slate-800 dark:text-white`}
                       />
+                      {isFocused && thb !== undefined && String(thb).length > 0 && (
+                        <button
+                          type="button"
+                          onPointerDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            isPristine.current = false;
+                            setThb(undefined);
+                          }}
+                          className="ml-2 p-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
+                        >
+                          <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                        </button>
+                      )}
                       {/* Blinking Cursor Animation (Only when NOT focused) */}
                       {!isFocused && (
                         <motion.div 
