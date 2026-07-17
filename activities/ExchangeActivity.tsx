@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { supabase } from "../lib/supabase";
 import { Save } from "lucide-react";
@@ -21,7 +21,7 @@ export const ExchangeActivity: React.FC = () => {
   const [rates, setRates] = useState<{ THB: number; USD: number }>({ THB: 38.5, USD: 1380 });
   // 한화 1000원을 기준으로 한 바트 값을 기본값으로 설정 (약 25.97 밧)
   const [thb, setThb] = useState<number | undefined>(Number((1000 / 38.5).toFixed(2)));
-  const isPristine = React.useRef(true);
+  const isPristine = useRef(true);
   const [loading, setLoading] = useState(true);
 
   const fetchRatesFromDB = React.useCallback(async () => {
@@ -109,54 +109,38 @@ export const ExchangeActivity: React.FC = () => {
               <motion.div layout className={`relative ${isFocused ? 'py-2 px-4' : 'p-6'}`}>
                 <motion.div layout className={`flex flex-col`}>
                   
-                  {/* The flying flag (Unfocused State) */}
-                  {!isFocused && (
-                    <motion.div 
-                      layout
-                      className="flex justify-center z-10 mb-3"
-                    >
-                      <motion.div layoutId="thb-flag-circle" className="relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 size-14 ring-4 shadow-sm">
-                        <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
-                      </motion.div>
-                    </motion.div>
-                  )}
-
-                  {/* The disappearing text */}
-                  <AnimatePresence>
-                    {!isFocused && (
-                      <motion.div 
-                        layout
-                        initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                        animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
-                        exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                        className="flex justify-center overflow-hidden w-full"
-                      >
-                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                          태국 바트 (THB)
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  
                   <motion.div 
                     layout
-                    id="thb-input-container"
-                    className={`flex ${isFocused ? 'justify-between min-h-[40px]' : 'justify-center min-h-[72px]'} items-center w-full max-w-full cursor-text ${getFontSize(thb)}`} 
-                    onClick={() => inputRef.current?.focus()}
+                    className={`flex ${isFocused ? 'flex-row justify-between items-center min-h-[40px]' : 'flex-col justify-center items-center min-h-[72px]'} w-full max-w-full cursor-text`} 
+                    onClick={() => {
+                      setIsFocused(true);
+                      inputRef.current?.focus();
+                    }}
                   >
-                    {/* The flying flag (Focused State) */}
-                    {isFocused && (
-                      <motion.div 
-                        layout
-                        className="flex items-center shrink-0 mr-4"
-                      >
-                        <motion.div layoutId="thb-flag-circle" className="relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 size-6 ring-2 shadow-sm">
-                          <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
-                        </motion.div>
-                      </motion.div>
-                    )}
+                    {/* The Flag */}
+                    <motion.div layout className={`relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 ${isFocused ? 'size-6 ring-2' : 'size-14 ring-4 mb-3'}`}>
+                      <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
+                    </motion.div>
 
-                    <motion.div layout className="flex items-center">
+                    {/* The disappearing text */}
+                    <AnimatePresence>
+                      {!isFocused && (
+                        <motion.div 
+                          layout
+                          initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                          animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
+                          exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                          className="flex justify-center overflow-hidden w-full shrink-0"
+                        >
+                          <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                            태국 바트 (THB)
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* The Input Row */}
+                    <motion.div layout className={`flex items-center ${isFocused ? '' : 'justify-center w-full'} ${getFontSize(thb)}`}>
                       <span className={`font-bold text-slate-400 dark:text-slate-600 mr-2 ${isFocused ? 'text-4xl' : ''}`}>฿</span>
                       <NumberFlowInput
                         ref={inputRef}
