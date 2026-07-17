@@ -112,15 +112,15 @@ export const ExchangeActivity: React.FC = () => {
     if (isFocused) {
       if (!val) return "text-4xl";
       const len = String(val).length;
-      if (len > 10) return "text-2xl";
-      if (len > 8) return "text-3xl";
+      if (len > 12) return "text-2xl";
+      if (len > 9) return "text-3xl";
       return "text-4xl";
     }
-    if (!val) return "text-6xl";
+    if (!val) return "text-7xl";
     const len = String(val).length;
-    if (len > 10) return "text-4xl";
-    if (len > 7) return "text-5xl";
-    if (len > 5) return "text-6xl";
+    if (len > 11) return "text-4xl";
+    if (len > 9) return "text-5xl";
+    if (len > 7) return "text-6xl";
     return "text-7xl";
   };
 
