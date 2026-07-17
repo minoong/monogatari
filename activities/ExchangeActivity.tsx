@@ -45,7 +45,6 @@ export const ExchangeActivity: React.FC = () => {
         duration: 0.4,
         ease: "power2.out", // Match framer motion easeOut
         scale: false, // Animate width/height natively instead of scaling to avoid text squishing
-        absolute: ".thb-flip-target", // Make moving elements absolute to prevent layout jumps
         nested: true,
       });
       flipState.current = null;
@@ -158,7 +157,7 @@ export const ExchangeActivity: React.FC = () => {
 
                     {/* The Input Row */}
                     <div className={`thb-flip-target flex items-center ${isFocused ? '' : 'justify-center w-full'} ${getFontSize(thb)}`}>
-                      <span className={`thb-flip-target font-bold text-slate-400 dark:text-slate-600 mr-2 ${isFocused ? 'text-4xl' : ''}`}>฿</span>
+                      <span className="font-bold text-slate-400 dark:text-slate-600 mr-2">฿</span>
                       <NumberFlowInput
                         ref={inputRef}
                         value={thb}
