@@ -98,18 +98,28 @@ export const ExchangeActivity: React.FC = () => {
                   </p>
                 </div>
                 
-                <div className="flex justify-center items-center w-full max-w-full">
+                <div className="flex justify-center items-center w-full max-w-full relative group cursor-text" onClick={() => document.getElementById('thb-input')?.focus()}>
                   <span className={`font-bold text-slate-400 dark:text-slate-600 mr-2 ${getFontSize(thb)}`}>฿</span>
-                  <NumberFlowInput
-                    value={thb}
-                    onChange={(val) => setThb(val)}
-                    format
-                    placeholder="0"
-                    maxLength={10}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    {...({ inputMode: "numeric", pattern: "[0-9]*" } as any)}
-                    className={`font-extrabold tracking-tighter max-w-full bg-transparent outline-none text-slate-800 dark:text-white ${getFontSize(thb)}`}
-                  />
+                  <div className="relative flex items-center">
+                    <NumberFlowInput
+                      id="thb-input"
+                      value={thb}
+                      onChange={(val) => setThb(val)}
+                      format
+                      placeholder="0"
+                      maxLength={10}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      {...({ inputMode: "numeric", pattern: "[0-9]*" } as any)}
+                      className={`font-extrabold tracking-tighter bg-transparent outline-none text-slate-800 dark:text-white ${getFontSize(thb)}`}
+                    />
+                    {/* Blinking Cursor Animation */}
+                    <motion.div 
+                      animate={{ opacity: [1, 0] }} 
+                      transition={{ repeat: Infinity, duration: 0.9, ease: "easeInOut" }}
+                      className={`w-[3px] h-[70%] bg-indigo-500 dark:bg-indigo-400 ml-1 rounded-full ${thb === 0 || thb === undefined ? 'block' : 'opacity-70'}`}
+                      style={{ height: '1em' }}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
