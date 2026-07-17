@@ -28,6 +28,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({
@@ -38,9 +39,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable, interHeading.variable)}
+      className={cn("fixed w-full h-[100dvh] overflow-hidden overscroll-none", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable, interHeading.variable)}
     >
-      <body className="isolate min-h-full flex flex-col">{children}</body>
+      <body className="fixed w-full h-[100dvh] overflow-hidden overscroll-none isolate flex flex-col">{children}</body>
     </html>
   );
 }
