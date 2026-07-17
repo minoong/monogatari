@@ -399,10 +399,6 @@ const DynamicIslandContent = ({
           stiffness,
           damping,
         },
-        clipPath: `none`,
-        transitionEnd: {
-          clipPath: `url(#squircle-${state.size})`,
-        },
       }}
       style={{ willChange }}
       {...props}
