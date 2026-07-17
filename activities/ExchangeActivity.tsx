@@ -109,22 +109,10 @@ export const ExchangeActivity: React.FC = () => {
               <motion.div layout className={`relative ${isFocused ? 'py-2 px-4' : 'p-6'}`}>
                 <motion.div layout className={`flex flex-col`}>
                   
-                  {/* The flying flag (Focused State) */}
-                  {isFocused && (
-                    <motion.div 
-                      layoutId="thb-flag-wrapper"
-                      className="absolute -top-2 -left-2 z-10"
-                    >
-                      <motion.div layoutId="thb-flag-circle" className="relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 size-4 ring-1 shadow-md">
-                        <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
-                      </motion.div>
-                    </motion.div>
-                  )}
-
                   {/* The flying flag (Unfocused State) */}
                   {!isFocused && (
                     <motion.div 
-                      layoutId="thb-flag-wrapper"
+                      layout
                       className="flex justify-center z-10 mb-3"
                     >
                       <motion.div layoutId="thb-flag-circle" className="relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 size-14 ring-4 shadow-sm">
@@ -153,11 +141,23 @@ export const ExchangeActivity: React.FC = () => {
                   <motion.div 
                     layout
                     id="thb-input-container"
-                    className={`flex ${isFocused ? 'justify-end min-h-[40px]' : 'justify-center min-h-[72px]'} items-center w-full max-w-full cursor-text ${getFontSize(thb)}`} 
+                    className={`flex ${isFocused ? 'justify-between min-h-[40px]' : 'justify-center min-h-[72px]'} items-center w-full max-w-full cursor-text ${getFontSize(thb)}`} 
                     onClick={() => inputRef.current?.focus()}
                   >
+                    {/* The flying flag (Focused State) */}
+                    {isFocused && (
+                      <motion.div 
+                        layout
+                        className="flex items-center shrink-0 mr-4"
+                      >
+                        <motion.div layoutId="thb-flag-circle" className="relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 size-6 ring-2 shadow-sm">
+                          <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
+                        </motion.div>
+                      </motion.div>
+                    )}
+
                     <motion.div layout className="flex items-center">
-                      <span className={`font-bold text-slate-400 dark:text-slate-600 mr-2 ${isFocused ? 'text-4xl' : 'text-6xl'}`}>฿</span>
+                      <span className={`font-bold text-slate-400 dark:text-slate-600 mr-2 ${isFocused ? 'text-4xl' : ''}`}>฿</span>
                       <NumberFlowInput
                         ref={inputRef}
                         value={thb}
