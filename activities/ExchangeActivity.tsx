@@ -121,13 +121,13 @@ export const ExchangeActivity: React.FC = () => {
                   </motion.div>
 
                   {/* The disappearing text */}
-                  <AnimatePresence>
+                  <AnimatePresence mode="popLayout">
                     {!isFocused && (
                       <motion.div 
-                        initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                        animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
-                        exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                        className="flex justify-center overflow-hidden"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex justify-center overflow-hidden mb-8 w-full"
                       >
                         <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                           태국 바트 (THB)
