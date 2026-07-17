@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 import { Save } from "lucide-react";
 import NumberFlow from "@number-flow/react";
 import { NumberFlowInput } from "@daformat/react-number-flow-input";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Card, CardContent } from "../components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { gsap } from "gsap";
@@ -149,7 +149,7 @@ export const ExchangeActivity: React.FC = () => {
                     </div>
 
                     {/* The disappearing text */}
-                    <div className={`thb-flip-text flex justify-center w-full shrink-0 overflow-hidden ${isFocused ? 'h-0 opacity-0 mb-0' : 'h-[20px] opacity-100 mb-8'}`}>
+                    <div className={`thb-flip-text flex justify-center w-full shrink-0 overflow-hidden ${isFocused ? 'absolute opacity-0 h-0 mb-0 pointer-events-none' : 'relative opacity-100 h-[20px] mb-8'}`}>
                       <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                         태국 바트 (THB)
                       </p>
@@ -165,7 +165,7 @@ export const ExchangeActivity: React.FC = () => {
                           isPristine.current = false;
                           setThb(val);
                         }}
-                        onFocus={(e) => {
+                        onFocus={() => {
                           if (!isFocused) handleFocusToggle(true);
                           setTimeout(() => {
                             const activeEl = document.activeElement as HTMLInputElement;
