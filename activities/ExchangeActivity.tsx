@@ -126,7 +126,7 @@ export const ExchangeActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "환율 계산기" }}>
-      <div className="flex flex-col h-[calc(100dvh-64px)] bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 dark:from-slate-950 dark:via-gray-950 dark:to-indigo-950/30 text-gray-900 dark:text-white pb-20 overflow-y-auto overflow-x-hidden">
+      <div className="flex flex-col min-h-[calc(100vh-64px)] bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 dark:from-slate-950 dark:via-gray-950 dark:to-indigo-950/30 text-gray-900 dark:text-white pb-20 overflow-x-hidden">
         
         <motion.div layout className={`flex flex-col px-4 pb-4 gap-3 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-6'}`}>
           
@@ -172,6 +172,7 @@ export const ExchangeActivity: React.FC = () => {
                             if (activeEl && typeof activeEl.select === 'function') {
                               activeEl.select();
                             }
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
                           }, 50);
                         }}
                         onBlur={() => handleFocusToggle(false)}
@@ -199,12 +200,12 @@ export const ExchangeActivity: React.FC = () => {
           </motion.div>
 
           {/* 환산 결과 (KRW, USD) */}
-          <div className="grid grid-cols-1 gap-4 mt-2">
+          <div className="grid grid-cols-1 gap-3 mt-2">
             
             {/* KRW 카드 */}
             <motion.div layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
               <Card className="border-white/60 dark:border-white/10 shadow-[0_4px_20px_rgb(0,0,0,0.04)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.15)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl transition-transform hover:scale-[1.01]">
-                <CardContent className="px-4 py-3 flex flex-col gap-2">
+                <CardContent className="px-4 py-2 flex flex-col gap-1.5">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2.5">
                       <Avatar className="size-7 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
@@ -240,7 +241,7 @@ export const ExchangeActivity: React.FC = () => {
             {/* USD 카드 */}
             <motion.div layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}>
               <Card className="border-white/60 dark:border-white/10 shadow-[0_4px_20px_rgb(0,0,0,0.04)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.15)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl transition-transform hover:scale-[1.01]">
-                <CardContent className="px-4 py-3 flex flex-col gap-2">
+                <CardContent className="px-4 py-2 flex flex-col gap-1.5">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2.5">
                       <Avatar className="size-7 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
