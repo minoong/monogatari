@@ -101,7 +101,7 @@ export const ExchangeActivity: React.FC = () => {
     <AppScreen appBar={{ title: "환율 계산기" }}>
       <div className="flex flex-col h-[calc(100dvh-64px)] bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 dark:from-slate-950 dark:via-gray-950 dark:to-indigo-950/30 text-gray-900 dark:text-white pb-20 overflow-y-auto overflow-x-hidden">
         
-        <div className={`flex flex-col p-5 gap-5 max-w-lg mx-auto w-full transition-all duration-300 ${isFocused ? 'pt-2' : 'pt-8'}`}>
+        <motion.div layout className={`flex flex-col p-5 gap-5 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-8'}`}>
           
           {/* 메인 입력 (THB) 카드 */}
           <motion.div layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
@@ -251,7 +251,7 @@ export const ExchangeActivity: React.FC = () => {
             </motion.div>
             
           </div>
-        </div>
+        </motion.div>
 
       </div>
     </AppScreen>
