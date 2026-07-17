@@ -35,7 +35,7 @@ export const ExchangeActivity: React.FC = () => {
 
   const handleFocusToggle = (focused: boolean) => {
     // Capture state of the card container and the moving targets
-    flipState.current = Flip.getState(".thb-flip-container, .thb-flip-target");
+    flipState.current = Flip.getState(".thb-flip-container, .thb-flip-target, .thb-flip-text", { props: "opacity" });
     setIsFocused(focused);
   };
 
@@ -43,7 +43,8 @@ export const ExchangeActivity: React.FC = () => {
     if (flipState.current) {
       Flip.from(flipState.current, {
         duration: 0.4,
-        ease: "power2.inOut",
+        ease: "power2.out", // Match framer motion easeOut
+        scale: false, // Animate width/height natively instead of scaling to avoid text squishing
         absolute: ".thb-flip-target", // Make moving elements absolute to prevent layout jumps
         nested: true,
       });
@@ -149,13 +150,11 @@ export const ExchangeActivity: React.FC = () => {
                     </div>
 
                     {/* The disappearing text */}
-                    {!isFocused && (
-                      <div className="flex justify-center w-full shrink-0 mb-8">
-                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                          태국 바트 (THB)
-                        </p>
-                      </div>
-                    )}
+                    <div className={`thb-flip-text flex justify-center w-full shrink-0 overflow-hidden ${isFocused ? 'h-0 opacity-0 mb-0' : 'h-[20px] opacity-100 mb-8'}`}>
+                      <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                        태국 바트 (THB)
+                      </p>
+                    </div>
 
                     {/* The Input Row */}
                     <div className={`thb-flip-target flex items-center ${isFocused ? '' : 'justify-center w-full'} ${getFontSize(thb)}`}>
