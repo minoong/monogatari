@@ -140,7 +140,7 @@ export const ExchangeActivity: React.FC = () => {
                 <div className={`flex flex-col`}>
                   
                   <div 
-                    className={`thb-flip-container flex ${isFocused ? 'flex-row justify-between items-center min-h-[40px]' : 'flex-col justify-center items-center min-h-[72px]'} w-full max-w-full cursor-text`} 
+                    className={`thb-flip-container flex ${isFocused ? 'flex-row justify-between items-center min-h-[40px] pr-9' : 'flex-col justify-center items-center min-h-[72px]'} w-full max-w-full cursor-text relative`} 
                     onClick={() => {
                       if (!isFocused) handleFocusToggle(true);
                       inputRef.current?.focus();
@@ -191,32 +191,6 @@ export const ExchangeActivity: React.FC = () => {
                         {...({ inputMode: "numeric", pattern: "[0-9]*" } as any)}
                         className={`font-extrabold tracking-tighter bg-transparent outline-none text-slate-800 dark:text-white`}
                       />
-                      <div className={`flex shrink-0 items-center transition-opacity duration-300 ${isFocused && thb !== undefined && String(thb).length > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                        <NeumorphButton
-                          type="button"
-                          intent="secondary"
-                          size="small"
-                          onPointerDown={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            isPristine.current = false;
-                            isClearing.current = true;
-                            setThb(undefined);
-                            setInputKey(prev => prev + 1);
-                            setTimeout(() => {
-                              inputRef.current?.focus();
-                              isClearing.current = false;
-                            }, 50);
-                          }}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                          className="ml-2 !p-1.5 !h-auto !w-auto !rounded-full z-10 relative cursor-pointer"
-                        >
-                          <X className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500" />
-                        </NeumorphButton>
-                      </div>
                       {/* Blinking Cursor Animation (Only when NOT focused) */}
                       {!isFocused && (
                         <motion.div 
@@ -226,6 +200,34 @@ export const ExchangeActivity: React.FC = () => {
                           style={{ height: '0.85em' }}
                         />
                       )}
+                    </div>
+
+                    {/* Absolute Clear Button */}
+                    <div className={`absolute right-0 top-1/2 -translate-y-1/2 flex items-center transition-opacity duration-300 z-10 ${isFocused && thb !== undefined && String(thb).length > 0 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+                      <NeumorphButton
+                        type="button"
+                        intent="secondary"
+                        size="small"
+                        onPointerDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          isPristine.current = false;
+                          isClearing.current = true;
+                          setThb(undefined);
+                          setInputKey(prev => prev + 1);
+                          setTimeout(() => {
+                            inputRef.current?.focus();
+                            isClearing.current = false;
+                          }, 50);
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        className="!p-1.5 !h-auto !w-auto !rounded-full cursor-pointer"
+                      >
+                        <X className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500" />
+                      </NeumorphButton>
                     </div>
                   </div>
                 </div>
