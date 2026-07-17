@@ -82,9 +82,7 @@ export const DiscoverActivity: React.FC = () => {
                   </div>
                 </DrawerPanel>
                 <DrawerFooter className="justify-center mt-6">
-                  <DrawerClose render={<NeumorphButton fullWidth size="large">{null}</NeumorphButton>}>
-                    닫기
-                  </DrawerClose>
+                  <DrawerClose render={<NeumorphButton fullWidth size="large">닫기</NeumorphButton>} />
                 </DrawerFooter>
               </DrawerPopup>
             </Drawer>
