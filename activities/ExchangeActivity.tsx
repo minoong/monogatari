@@ -34,8 +34,8 @@ export const ExchangeActivity: React.FC = () => {
   const flipState = useRef<Flip.FlipState | null>(null);
 
   const handleFocusToggle = (focused: boolean) => {
-    // Capture state of the card container and the moving targets
-    flipState.current = Flip.getState(".thb-flip-container, .thb-flip-target, .thb-flip-text", { props: "opacity" });
+    // Capture state of the card container and the moving targets, including font properties
+    flipState.current = Flip.getState(".thb-flip-container, .thb-flip-target, .thb-flip-text", { props: "opacity,fontSize,lineHeight" });
     setIsFocused(focused);
   };
 
@@ -158,7 +158,7 @@ export const ExchangeActivity: React.FC = () => {
 
                     {/* The Input Row */}
                     <div className={`thb-flip-target flex items-center ${isFocused ? '' : 'justify-center w-full'} ${getFontSize(thb)}`}>
-                      <span className={`font-bold text-slate-400 dark:text-slate-600 mr-2 ${isFocused ? 'text-4xl' : ''}`}>฿</span>
+                      <span className={`thb-flip-target font-bold text-slate-400 dark:text-slate-600 mr-2 ${isFocused ? 'text-4xl' : ''}`}>฿</span>
                       <NumberFlowInput
                         ref={inputRef}
                         value={thb}
