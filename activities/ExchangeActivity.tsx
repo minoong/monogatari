@@ -106,25 +106,20 @@ export const ExchangeActivity: React.FC = () => {
           {/* 메인 입력 (THB) 카드 */}
           <motion.div layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
             <motion.div layout className="border border-white/60 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] bg-white/70 dark:bg-black/40 backdrop-blur-xl overflow-hidden rounded-3xl">
-              <motion.div layout className={`${isFocused ? 'py-2 px-4' : 'p-6'}`}>
+              <motion.div layout className={`relative ${isFocused ? 'py-2 px-4' : 'p-6'}`}>
                 <motion.div layout className={`flex flex-col`}>
-                  <AnimatePresence>
-                    {!isFocused && (
-                      <motion.div 
-                        initial={{ opacity: 0, height: 0, scale: 0.8, marginBottom: 0 }} 
-                        animate={{ opacity: 1, height: 'auto', scale: 1, marginBottom: 32 }} 
-                        exit={{ opacity: 0, height: 0, scale: 0.8, marginBottom: 0 }} 
-                        className="flex flex-col items-center justify-center gap-3 overflow-hidden"
-                      >
-                        <motion.div className="relative flex shrink-0 justify-center items-center size-14 ring-4 ring-white/80 dark:ring-white/10 shadow-sm rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                          <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
-                        </motion.div>
-                        <motion.p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                          태국 바트 (THB)
-                        </motion.p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  
+                  <motion.div 
+                    layout
+                    className={`flex items-center justify-center ${isFocused ? 'absolute top-2 left-4 flex-row gap-1.5' : 'flex-col gap-3 mb-8 relative'}`}
+                  >
+                    <motion.div layout className={`relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 ${isFocused ? 'size-6 ring-1 shadow-none' : 'size-14 ring-4 shadow-sm'}`}>
+                      <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
+                    </motion.div>
+                    <motion.p layout className={`font-bold uppercase tracking-widest ${isFocused ? 'text-[10px] text-slate-400 dark:text-slate-500' : 'text-sm text-slate-500 dark:text-slate-400'}`}>
+                      {isFocused ? 'THB' : '태국 바트 (THB)'}
+                    </motion.p>
+                  </motion.div>
                   
                   <motion.div 
                     layout
