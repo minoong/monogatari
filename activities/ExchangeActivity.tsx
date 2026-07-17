@@ -109,17 +109,31 @@ export const ExchangeActivity: React.FC = () => {
               <motion.div layout className={`relative ${isFocused ? 'py-2 px-4' : 'p-6'}`}>
                 <motion.div layout className={`flex flex-col`}>
                   
+                  {/* The flying flag */}
                   <motion.div 
                     layout
-                    className={`flex items-center justify-center ${isFocused ? 'absolute top-2 left-4 flex-row gap-1.5' : 'flex-col gap-3 mb-8 relative'}`}
+                    className={`flex justify-center ${isFocused ? 'absolute top-4 left-5' : 'mb-3'}`}
                   >
                     <motion.div layout className={`relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 ${isFocused ? 'size-6 ring-1 shadow-none' : 'size-14 ring-4 shadow-sm'}`}>
                       <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
                     </motion.div>
-                    <motion.p layout className={`font-bold uppercase tracking-widest ${isFocused ? 'text-[10px] text-slate-400 dark:text-slate-500' : 'text-sm text-slate-500 dark:text-slate-400'}`}>
-                      {isFocused ? 'THB' : '태국 바트 (THB)'}
-                    </motion.p>
                   </motion.div>
+
+                  {/* The disappearing text */}
+                  <AnimatePresence>
+                    {!isFocused && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                        animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
+                        exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                        className="flex justify-center overflow-hidden"
+                      >
+                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                          태국 바트 (THB)
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   
                   <motion.div 
                     layout
