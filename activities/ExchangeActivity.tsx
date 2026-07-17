@@ -124,8 +124,9 @@ export const ExchangeActivity: React.FC = () => {
                     }}
                     onFocus={(e) => {
                       setIsFocused(true);
-                      const target = e.target;
-                      setTimeout(() => target.select(), 50);
+                      setTimeout(() => {
+                        inputRef.current?.select();
+                      }, 50);
                     }}
                     onBlur={() => setIsFocused(false)}
                     format
