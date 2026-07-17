@@ -10,7 +10,12 @@ import { Skeleton } from "../components/ui/skeleton";
 import NeumorphButton from "../components/ui/neumorph-button";
 import { motion, AnimatePresence } from "framer-motion";
 import { RingChart } from "../components/ui/ring-chart";
-import { Card, CardContent } from "../components/ui/card";
+import {
+  DynamicIslandProvider,
+  DynamicIsland,
+  SIZE_PRESETS,
+  useDynamicIslandSize,
+} from "../components/ui/dynamic-island";
 
 const AnimatedNumber = ({ value }: { value: number }) => {
   const [displayValue, setDisplayValue] = useState(0);
@@ -19,6 +24,103 @@ const AnimatedNumber = ({ value }: { value: number }) => {
     return () => clearTimeout(timer);
   }, [value]);
   return <NumberFlow value={displayValue} />;
+};
+
+const ProgressIslandContent = ({
+  rings,
+  progress,
+  gahyunProgress,
+  minuProgress,
+}: {
+  rings: { progress: number; color: string }[];
+  progress: number;
+  gahyunProgress: number;
+  minuProgress: number;
+}) => {
+  const { setSize, state } = useDynamicIslandSize();
+  const isExpanded = state.size === SIZE_PRESETS.PROGRESS_EXPANDED;
+
+  const toggleExpand = () => {
+    if (isExpanded) {
+      setSize(SIZE_PRESETS.LONG);
+    } else {
+      setSize(SIZE_PRESETS.PROGRESS_EXPANDED);
+    }
+  };
+
+  return (
+    <DynamicIsland id="progress-island">
+      <div 
+        onClick={toggleExpand} 
+        className="w-full h-full flex flex-col p-4 cursor-pointer relative"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between w-full h-[52px]">
+          <div className="flex items-center gap-3">
+            <RingChart rings={rings} size={52} strokeWidth={6} gap={2.5} />
+            <div className="text-left flex flex-col justify-center">
+              <h2 className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-0.5">진행 상황</h2>
+              <span className="text-white font-extrabold flex items-center text-xl tracking-tight leading-none">
+                <AnimatedNumber value={progress} />%
+              </span>
+            </div>
+          </div>
+          
+          <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
+            <ChevronDown size={20} className="text-neutral-500" />
+          </motion.div>
+        </div>
+
+        {/* Expanded Content */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="w-full flex flex-col mt-4"
+            >
+              <div className="pt-3 border-t border-white/10 flex flex-col gap-3 w-full text-left">
+                {/* Total */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="font-bold text-neutral-300">전체</span>
+                    <span className="text-blue-400 font-bold flex items-center"><AnimatedNumber value={progress} />%</span>
+                  </div>
+                  <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
+                    <motion.div className="h-full bg-blue-500 rounded-full" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.5 }} />
+                  </div>
+                </div>
+
+                {/* Gahyun */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="font-bold text-neutral-300">가현쨩</span>
+                    <span className="text-pink-400 font-bold flex items-center"><AnimatedNumber value={gahyunProgress} />%</span>
+                  </div>
+                  <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
+                    <motion.div className="h-full bg-pink-500 rounded-full" initial={{ width: 0 }} animate={{ width: `${gahyunProgress}%` }} transition={{ duration: 0.5 }} />
+                  </div>
+                </div>
+
+                {/* Minu */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="font-bold text-neutral-300">미누쿤</span>
+                    <span className="text-emerald-400 font-bold flex items-center"><AnimatedNumber value={minuProgress} />%</span>
+                  </div>
+                  <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
+                    <motion.div className="h-full bg-emerald-500 rounded-full" initial={{ width: 0 }} animate={{ width: `${minuProgress}%` }} transition={{ duration: 0.5 }} />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </DynamicIsland>
+  );
 };
 
 interface PreparationItem {
@@ -36,7 +138,6 @@ export const ChecklistActivity: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
-  const [progressExpanded, setProgressExpanded] = useState(false);
 
   const fetchItems = async () => {
     try {
@@ -209,76 +310,10 @@ export const ChecklistActivity: React.FC = () => {
   return (
     <AppScreen appBar={{ title: "여행 준비물 체크리스트" }}>
       <div className="flex flex-col h-[calc(100dvh-64px)] bg-white dark:bg-black relative">
-        <div className="p-4 pb-2 shrink-0">
-          <Card className="overflow-hidden border-gray-100 dark:border-gray-800 shadow-sm rounded-2xl">
-            <CardContent className="p-3 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <RingChart rings={rings} size={64} strokeWidth={7} gap={3} />
-                  <div>
-                    <h2 className="text-xs font-bold text-gray-500 dark:text-gray-400">진행 상황</h2>
-                    <span className="text-gray-900 dark:text-gray-100 font-extrabold flex items-center text-2xl tracking-tight">
-                      <NumberFlow value={progress} />%
-                    </span>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setProgressExpanded(!progressExpanded)}
-                  className="p-2 bg-gray-50 dark:bg-gray-900 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                >
-                  <motion.div animate={{ rotate: progressExpanded ? 180 : 0 }}>
-                    <ChevronDown size={20} className="text-gray-500" />
-                  </motion.div>
-                </button>
-              </div>
-
-              <AnimatePresence initial={false}>
-                {progressExpanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-3">
-                      {/* Total */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="font-bold text-gray-700 dark:text-gray-300">전체</span>
-                          <span className="text-blue-500 font-bold flex items-center"><AnimatedNumber value={progress} />%</span>
-                        </div>
-                        <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                          <motion.div className="h-full bg-blue-500 rounded-full" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.5 }} />
-                        </div>
-                      </div>
-
-                      {/* Gahyun */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="font-bold text-gray-700 dark:text-gray-300">가현쨩</span>
-                          <span className="text-pink-500 font-bold flex items-center"><AnimatedNumber value={gahyunProgress} />%</span>
-                        </div>
-                        <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                          <motion.div className="h-full bg-pink-500 rounded-full" initial={{ width: 0 }} animate={{ width: `${gahyunProgress}%` }} transition={{ duration: 0.5 }} />
-                        </div>
-                      </div>
-
-                      {/* Minu */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="font-bold text-gray-700 dark:text-gray-300">미누쿤</span>
-                          <span className="text-emerald-500 font-bold flex items-center"><AnimatedNumber value={minuProgress} />%</span>
-                        </div>
-                        <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                          <motion.div className="h-full bg-emerald-500 rounded-full" initial={{ width: 0 }} animate={{ width: `${minuProgress}%` }} transition={{ duration: 0.5 }} />
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </CardContent>
-          </Card>
+        <div className="py-4 pb-2 shrink-0 flex justify-center w-full">
+          <DynamicIslandProvider initialSize={SIZE_PRESETS.LONG}>
+            <ProgressIslandContent rings={rings} progress={progress} gahyunProgress={gahyunProgress} minuProgress={minuProgress} />
+          </DynamicIslandProvider>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 pb-24">
