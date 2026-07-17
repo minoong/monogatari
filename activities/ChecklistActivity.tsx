@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { BottomNav } from "../components/BottomNav";
-import { Plus, Bell } from "lucide-react";
+import { Plus, Bell, ChevronDown } from "lucide-react";
 import { ChecklistDrawer } from "../components/checklist/ChecklistDrawer";
 import { toast } from "sonner";
 import { supabase } from "../lib/supabase";
 import NumberFlow from "@number-flow/react";
 import { Skeleton } from "../components/ui/skeleton";
 import NeumorphButton from "../components/ui/neumorph-button";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { RingChart } from "../components/ui/ring-chart";
+import { Card, CardContent } from "../components/ui/card";
 
 interface PreparationItem {
   id: string;
@@ -25,6 +27,7 @@ export const ChecklistActivity: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
+  const [progressExpanded, setProgressExpanded] = useState(false);
 
   const fetchItems = async () => {
     try {
@@ -177,30 +180,96 @@ export const ChecklistActivity: React.FC = () => {
     );
   };
 
+  const masterCheckedCount = masterItems.filter((i) => i.completed_by.includes("all")).length;
+  const gahyunCheckedCount = gahyunItems.filter((i) => i.completed_by.includes("gahyun")).length;
+  const minuCheckedCount = minuItems.filter((i) => i.completed_by.includes("minu")).length;
+
   const totalItemsCount = masterItems.length + gahyunItems.length + minuItems.length;
-  const totalCheckedCount =
-    masterItems.filter((i) => i.completed_by.includes("all")).length +
-    gahyunItems.filter((i) => i.completed_by.includes("gahyun")).length +
-    minuItems.filter((i) => i.completed_by.includes("minu")).length;
+  const totalCheckedCount = masterCheckedCount + gahyunCheckedCount + minuCheckedCount;
   
   const progress = totalItemsCount === 0 ? 0 : Math.round((totalCheckedCount / totalItemsCount) * 100);
+  const gahyunProgress = gahyunItems.length === 0 ? 0 : Math.round((gahyunCheckedCount / gahyunItems.length) * 100);
+  const minuProgress = minuItems.length === 0 ? 0 : Math.round((minuCheckedCount / minuItems.length) * 100);
+
+  const rings = [
+    { progress: progress, color: "#3b82f6" }, // blue-500
+    { progress: gahyunProgress, color: "#ec4899" }, // pink-500
+    { progress: minuProgress, color: "#10b981" }, // emerald-500
+  ];
 
   return (
     <AppScreen appBar={{ title: "여행 준비물 체크리스트" }}>
       <div className="flex flex-col h-[calc(100dvh-64px)] bg-white dark:bg-black relative">
-        <div className="p-6 pb-2 border-b">
-          <div className="flex justify-between items-end mb-2">
-            <h2 className="text-lg font-bold">전체 준비 진행률</h2>
-            <span className="text-blue-600 font-bold flex items-center">
-              <NumberFlow value={progress} />%
-            </span>
-          </div>
-          <div className="w-full h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-blue-500 transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+        <div className="p-4 pb-2 shrink-0">
+          <Card className="overflow-hidden border-gray-100 dark:border-gray-800 shadow-sm rounded-2xl">
+            <CardContent className="p-3 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <RingChart rings={rings} size={64} strokeWidth={7} gap={3} />
+                  <div>
+                    <h2 className="text-xs font-bold text-gray-500 dark:text-gray-400">진행 상황</h2>
+                    <span className="text-gray-900 dark:text-gray-100 font-extrabold flex items-center text-2xl tracking-tight">
+                      <NumberFlow value={progress} />%
+                    </span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setProgressExpanded(!progressExpanded)}
+                  className="p-2 bg-gray-50 dark:bg-gray-900 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <motion.div animate={{ rotate: progressExpanded ? 180 : 0 }}>
+                    <ChevronDown size={20} className="text-gray-500" />
+                  </motion.div>
+                </button>
+              </div>
+
+              <AnimatePresence initial={false}>
+                {progressExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-3">
+                      {/* Total */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="font-bold text-gray-700 dark:text-gray-300">전체</span>
+                          <span className="text-blue-500 font-bold flex items-center"><NumberFlow value={progress} />%</span>
+                        </div>
+                        <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                          <motion.div className="h-full bg-blue-500 rounded-full" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.5 }} />
+                        </div>
+                      </div>
+
+                      {/* Gahyun */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="font-bold text-gray-700 dark:text-gray-300">가현쨩</span>
+                          <span className="text-pink-500 font-bold flex items-center"><NumberFlow value={gahyunProgress} />%</span>
+                        </div>
+                        <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                          <motion.div className="h-full bg-pink-500 rounded-full" initial={{ width: 0 }} animate={{ width: `${gahyunProgress}%` }} transition={{ duration: 0.5 }} />
+                        </div>
+                      </div>
+
+                      {/* Minu */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="font-bold text-gray-700 dark:text-gray-300">미누쿤</span>
+                          <span className="text-emerald-500 font-bold flex items-center"><NumberFlow value={minuProgress} />%</span>
+                        </div>
+                        <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                          <motion.div className="h-full bg-emerald-500 rounded-full" initial={{ width: 0 }} animate={{ width: `${minuProgress}%` }} transition={{ duration: 0.5 }} />
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 pb-24">
