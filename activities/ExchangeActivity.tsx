@@ -29,7 +29,9 @@ export const ExchangeActivity: React.FC = () => {
   // 한화 1000원을 기준으로 한 바트 값을 기본값으로 설정 (약 25.97 밧)
   const [thb, setThb] = useState<number | undefined>(Number((1000 / 38.5).toFixed(2)));
   const isPristine = useRef(true);
+  const isClearing = useRef(false);
   const [loading, setLoading] = useState(true);
+  const [inputKey, setInputKey] = useState(0);
 
   const flipState = useRef<Flip.FlipState | null>(null);
 
@@ -159,6 +161,7 @@ export const ExchangeActivity: React.FC = () => {
                     <div className={`thb-flip-target flex items-center ${isFocused ? '' : 'justify-center w-full'} ${getFontSize(thb)}`}>
                       <span className="font-bold text-slate-400 dark:text-slate-600 mr-2">฿</span>
                       <NumberFlowInput
+                        key={`input-reset-${inputKey}`}
                         ref={inputRef}
                         value={thb}
                         onChange={(val) => {
@@ -175,7 +178,11 @@ export const ExchangeActivity: React.FC = () => {
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }, 50);
                         }}
-                        onBlur={() => handleFocusToggle(false)}
+                        onBlur={() => {
+                          if (!isClearing.current) {
+                            handleFocusToggle(false);
+                          }
+                        }}
                         format
                         placeholder="0"
                         maxLength={15}
@@ -186,19 +193,18 @@ export const ExchangeActivity: React.FC = () => {
                       {isFocused && thb !== undefined && String(thb).length > 0 && (
                         <button
                           type="button"
-                          onMouseDown={(e) => e.preventDefault()}
-                          onTouchStart={(e) => e.preventDefault()}
+                          onPointerDown={(e) => e.preventDefault()}
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             isPristine.current = false;
+                            isClearing.current = true;
                             setThb(undefined);
-                            if (inputRef.current) {
-                              const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-                              nativeInputValueSetter?.call(inputRef.current, "");
-                              inputRef.current.dispatchEvent(new Event("input", { bubbles: true }));
-                            }
-                            inputRef.current?.focus();
+                            setInputKey(prev => prev + 1);
+                            setTimeout(() => {
+                              inputRef.current?.focus();
+                              isClearing.current = false;
+                            }, 50);
                           }}
                           className="ml-2 p-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors z-10 relative cursor-pointer"
                         >
