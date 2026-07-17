@@ -44,3 +44,11 @@ When working on navigation and layout in this application, you MUST strictly adh
 1. **Base Card UI**: Always use the shadcn/ui Card component (`https://ui.shadcn.com/docs/components/card`) as the default card container to maintain visual consistency across the app.
 2. **Responsive Grids**: When implementing grid layouts, explicitly define responsive row and column structures that adapt to mobile environments and web design guidelines, prioritizing readability and functional consistency.
 <!-- END:ui-consistency -->
+
+<!-- BEGIN:interaction-animation-gotchas -->
+# Interaction & Animation Gotchas (iOS & GSAP)
+1. **iOS Safari Click/Blur Bug**: When implementing conditionally rendered elements (like a clear button that appears on `isFocused`), using `onClick` will fail on iOS Safari. The input's `blur` event fires first, unmounting the button before `click` can execute. 
+   - **Solution**: Bind the primary action to `onPointerDown={(e) => { e.preventDefault(); ... }}` instead.
+2. **GSAP Flip & Layout Jitter**: Never conditionally mount elements (or dynamically change padding/margins) INSIDE a container that is currently targeted by `GSAP Flip`. This changes the intrinsic layout size instantly and conflicts with libraries like `@number-flow/react`, causing severe visual jitter.
+   - **Solution**: Keep Flip targets stable in size. Place elements like clear buttons entirely OUTSIDE the Flip target using `position: absolute`, ensuring they overlay without affecting flex calculations.
+<!-- END:interaction-animation-gotchas -->
