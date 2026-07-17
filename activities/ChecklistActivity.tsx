@@ -297,9 +297,8 @@ export const ChecklistActivity: React.FC = () => {
     nudgeMutation.mutate(target);
   };
 
-  const masterItems = items.filter((i) => i.type === "master");
-  const gahyunItems = items.filter((i) => i.type === "personal" && i.assignees.includes("gahyun"));
-  const minuItems = items.filter((i) => i.type === "personal" && i.assignees.includes("minu"));
+  const gahyunItems = items.filter((i) => i.assignees.includes("gahyun") || i.type === "master" || i.assignees.includes("all"));
+  const minuItems = items.filter((i) => i.assignees.includes("minu") || i.type === "master" || i.assignees.includes("all"));
 
   const renderList = (list: PreparationItem[], targetUser: string) => {
     if (list.length === 0) {
@@ -353,12 +352,11 @@ export const ChecklistActivity: React.FC = () => {
     );
   };
 
-  const masterCheckedCount = masterItems.filter((i) => i.completed_by.includes("all")).length;
-  const gahyunCheckedCount = gahyunItems.filter((i) => i.completed_by.includes("gahyun")).length;
-  const minuCheckedCount = minuItems.filter((i) => i.completed_by.includes("minu")).length;
+  const gahyunCheckedCount = gahyunItems.filter((i) => i.completed_by.includes("gahyun") || i.completed_by.includes("all")).length;
+  const minuCheckedCount = minuItems.filter((i) => i.completed_by.includes("minu") || i.completed_by.includes("all")).length;
 
-  const totalItemsCount = masterItems.length + gahyunItems.length + minuItems.length;
-  const totalCheckedCount = masterCheckedCount + gahyunCheckedCount + minuCheckedCount;
+  const totalItemsCount = gahyunItems.length + minuItems.length;
+  const totalCheckedCount = gahyunCheckedCount + minuCheckedCount;
   
   const progress = totalItemsCount === 0 ? 0 : Math.round((totalCheckedCount / totalItemsCount) * 100);
   const gahyunProgress = gahyunItems.length === 0 ? 0 : Math.round((gahyunCheckedCount / gahyunItems.length) * 100);
@@ -395,16 +393,7 @@ export const ChecklistActivity: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="flex items-center gap-2 mb-3">
-                <Avatar className="w-5 h-5">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">C</AvatarFallback>
-                </Avatar>
-                <h3 className="font-bold text-gray-700 dark:text-gray-300 text-sm">마스터 체크리스트 (공통)</h3>
-              </div>
-              {renderList(masterItems, "all")}
-
-              <div className="flex items-center gap-2 mb-3 mt-6">
+              <div className="flex items-center gap-2 mb-3 mt-2">
                 <Avatar className="w-5 h-5">
                   <AvatarImage src="" />
                   <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">G</AvatarFallback>

@@ -27,8 +27,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
   const [importance, setImportance] = useState<"high" | "normal" | "low">("normal");
-  const [targets, setTargets] = useState<{ master: boolean; gahyun: boolean; minu: boolean }>({
-    master: false,
+  const [targets, setTargets] = useState<{ gahyun: boolean; minu: boolean }>({
     gahyun: false,
     minu: false,
   });
@@ -39,9 +38,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
     setTargets((prev) => ({ ...prev, [key]: checked }));
   };
 
-  const isFormValid =
-    title.trim().length > 0 &&
-    (targets.master || targets.gahyun || targets.minu);
+  const isFormValid = title.trim() !== "" && (targets.gahyun || targets.minu);
 
   const addMutation = useMutation({
     mutationFn: async (payload: { title: string; type: string; assignees: string[]; importance: string }) => {
@@ -64,7 +61,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
         setTimeout(() => {
           setTitle("");
           setImportance("normal");
-          setTargets({ master: false, gahyun: false, minu: false });
+          setTargets({ gahyun: false, minu: false });
           setSuccess(false);
         }, 300); // 닫히는 애니메이션 시간 대기
       }, 1000);
@@ -78,14 +75,11 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
   const handleSubmit = () => {
     if (!isFormValid) return;
 
-    const isMaster = targets.master;
-    const type = isMaster ? "master" : "personal";
-    const assignees = isMaster ? ["all"] : [];
+    const type = "personal";
+    const assignees: string[] = [];
     
-    if (!isMaster) {
-      if (targets.gahyun) assignees.push("gahyun");
-      if (targets.minu) assignees.push("minu");
-    }
+    if (targets.gahyun) assignees.push("gahyun");
+    if (targets.minu) assignees.push("minu");
 
     addMutation.mutate({ title, type, assignees, importance });
   };
@@ -139,35 +133,19 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
             <div className="flex flex-row gap-4">
               <Label className="flex items-center gap-2 cursor-pointer">
                 <Checkbox
-                  checked={targets.master}
-                  onCheckedChange={handleTargetChange("master")}
+                  checked={targets.gahyun}
+                  onCheckedChange={handleTargetChange("gahyun")}
                 />
-                공통 (마스터)
+                가현쨩
               </Label>
-              {!targets.master && (
-                <>
-                  <Label className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox
-                      checked={targets.gahyun}
-                      onCheckedChange={handleTargetChange("gahyun")}
-                    />
-                    가현쨩
-                  </Label>
-                  <Label className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox
-                      checked={targets.minu}
-                      onCheckedChange={handleTargetChange("minu")}
-                    />
-                    미누쿤
-                  </Label>
-                </>
-              )}
+              <Label className="flex items-center gap-2 cursor-pointer">
+                <Checkbox
+                  checked={targets.minu}
+                  onCheckedChange={handleTargetChange("minu")}
+                />
+                미누쿤
+              </Label>
             </div>
-            {targets.master && (
-              <p className="text-xs text-gray-500">
-                공통 선택 시 개별 할당은 무시됩니다.
-              </p>
-            )}
           </div>
         </DrawerPanel>
 
