@@ -96,7 +96,7 @@ export function ChecklistDrawer({ open, onOpenChange, onSuccess }: ChecklistDraw
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerPopup showBar>
+      <DrawerPopup variant="inset" showBar>
         <DrawerHeader className="text-center">
           <DrawerTitle>준비물 추가</DrawerTitle>
           <DrawerDescription>새로운 여행 준비물을 등록하세요.</DrawerDescription>
