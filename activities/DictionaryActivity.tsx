@@ -10,13 +10,13 @@ const PHRASES = [
   { ko: "고수 빼주세요", th: "마이 싸이 팍치 (ไม่ใส่ผักชี)", pron: "Mai sai phak chi" },
 ];
 
-export const DictionaryActivity: React.FC<any> = () => {
+export const DictionaryActivity: React.FC = () => {
   const [selected, setSelected] = useState(PHRASES[0]);
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
 
   const startListening = () => {
-    // @ts-ignore
+    // @ts-expect-error window extension
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert("이 브라우저에서는 마이크(받아쓰기) 기능이 지원되지 않습니다.");
@@ -32,6 +32,7 @@ export const DictionaryActivity: React.FC<any> = () => {
       setTranscript("말씀해 주세요...");
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
       const text = event.results[0][0].transcript;
       setTranscript(`인식됨: "${text}"`);
@@ -132,17 +133,17 @@ export const DictionaryActivity: React.FC<any> = () => {
 
           <h4 className="font-bold text-gray-700 dark:text-gray-300 mb-3">자주 쓰는 표현</h4>
           <div className="flex flex-wrap gap-2">
-            {PHRASES.map((p, i) => (
+            {PHRASES.map((item, idx) => (
               <button 
-                key={i}
-                onClick={() => setSelected(p)}
+                key={idx}
+                onClick={() => setSelected(item)}
                 className={`px-4 py-3 rounded-full text-sm font-semibold transition-colors ${
-                  selected.ko === p.ko 
+                  selected.ko === item.ko 
                     ? "bg-blue-600 text-white shadow-md" 
                     : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                 }`}
               >
-                {p.ko}
+                {item.ko}
               </button>
             ))}
           </div>
