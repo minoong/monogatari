@@ -38,3 +38,9 @@ When working on navigation and layout in this application, you MUST strictly adh
 3. **Config Driven**: New activities MUST be statically registered in `stackflow.config.ts` (using `defineConfig`) and exposed via the components map in `stackflow.ts`.
 4. **Link Component**: For static links, prefer `<Link activityName="..." />` from `@stackflow/link` if history-sync is enabled.
 <!-- END:stackflow-architecture -->
+
+<!-- BEGIN:ui-consistency -->
+# UI Consistency & Layout Rules
+1. **Base Card UI**: Always use the shadcn/ui Card component (`https://ui.shadcn.com/docs/components/card`) as the default card container to maintain visual consistency across the app.
+2. **Responsive Grids**: When implementing grid layouts, explicitly define responsive row and column structures that adapt to mobile environments and web design guidelines, prioritizing readability and functional consistency.
+<!-- END:ui-consistency -->
