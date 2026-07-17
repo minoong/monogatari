@@ -101,21 +101,22 @@ export const ExchangeActivity: React.FC = () => {
     <AppScreen appBar={{ title: "환율 계산기" }}>
       <div className="flex flex-col h-[calc(100dvh-64px)] bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 dark:from-slate-950 dark:via-gray-950 dark:to-indigo-950/30 text-gray-900 dark:text-white pb-20 overflow-y-auto overflow-x-hidden">
         
-        <motion.div layout className={`flex flex-col p-5 gap-5 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-8'}`}>
+        <motion.div layout transition={{ layout: { duration: 0.3, delay: isFocused ? 0.2 : 0, ease: "easeInOut" } }} className={`flex flex-col p-5 gap-5 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-8'}`}>
           
           {/* 메인 입력 (THB) 카드 */}
-          <motion.div layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
-            <motion.div layout className="border border-white/60 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl">
-              <motion.div layout className={`relative ${isFocused ? 'py-2 px-4' : 'p-6'}`}>
-                <motion.div layout className={`flex flex-col`}>
+          <motion.div layout transition={{ layout: { duration: 0.3, delay: isFocused ? 0.2 : 0, ease: "easeInOut" } }} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
+            <motion.div layout transition={{ layout: { duration: 0.3, delay: isFocused ? 0.2 : 0, ease: "easeInOut" } }} className="border border-white/60 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl">
+              <motion.div layout transition={{ layout: { duration: 0.3, delay: isFocused ? 0.2 : 0, ease: "easeInOut" } }} className={`relative ${isFocused ? 'py-2 px-4' : 'p-6'}`}>
+                <motion.div layout transition={{ layout: { duration: 0.3, delay: isFocused ? 0.2 : 0, ease: "easeInOut" } }} className={`flex flex-col`}>
                   
                   {/* The flying flag */}
                   <motion.div 
                     layout
                     layoutDependency={isFocused}
+                    transition={{ layout: { duration: 0.3, delay: isFocused ? 0.2 : 0, ease: "easeInOut" } }}
                     className={`flex justify-center z-10 ${isFocused ? 'absolute -top-2 -left-2' : 'mb-3'}`}
                   >
-                    <motion.div layout layoutDependency={isFocused} className={`relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 ${isFocused ? 'size-5 ring-1 shadow-md' : 'size-14 ring-4 shadow-sm'}`}>
+                    <motion.div layout layoutDependency={isFocused} transition={{ layout: { duration: 0.3, delay: isFocused ? 0.2 : 0, ease: "easeInOut" } }} className={`relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 ${isFocused ? 'size-5 ring-1 shadow-md' : 'size-14 ring-4 shadow-sm'}`}>
                       <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
                     </motion.div>
                   </motion.div>
@@ -125,8 +126,8 @@ export const ExchangeActivity: React.FC = () => {
                     {!isFocused && (
                       <motion.div 
                         initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                        animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
-                        exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                        animate={{ opacity: 1, height: 'auto', marginBottom: 32, transition: { duration: 0.2, delay: 0.3, ease: "easeOut" } }}
+                        exit={{ opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.2, ease: "easeIn" } }}
                         className="flex justify-center overflow-hidden"
                       >
                         <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -138,11 +139,12 @@ export const ExchangeActivity: React.FC = () => {
                   
                   <motion.div 
                     layout
+                    transition={{ layout: { duration: 0.3, delay: isFocused ? 0.2 : 0, ease: "easeInOut" } }}
                     id="thb-input-container"
                     className={`flex ${isFocused ? 'justify-end min-h-[40px]' : 'justify-center min-h-[72px]'} items-center w-full max-w-full cursor-text ${getFontSize(thb)}`} 
                     onClick={() => inputRef.current?.focus()}
                   >
-                    <motion.div layout className="flex items-center">
+                    <motion.div layout transition={{ layout: { duration: 0.3, delay: isFocused ? 0.2 : 0, ease: "easeInOut" } }} className="flex items-center">
                       <span className="font-bold text-slate-400 dark:text-slate-600 mr-2">฿</span>
                       <NumberFlowInput
                         ref={inputRef}
