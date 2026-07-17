@@ -146,7 +146,7 @@ export const ExchangeActivity: React.FC = () => {
                 className="text-center w-full max-w-full"
               >
                 <div className="flex justify-center items-center w-full max-w-full">
-                  <span className={`font-bold text-gray-400 dark:text-neutral-600 mr-2 transition-all duration-300 ease-out ${getFontSize(thb)}`}>฿</span>
+                  <span className={`font-bold text-gray-400 dark:text-neutral-600 mr-2 ${getFontSize(thb)}`}>฿</span>
                   <NumberFlowInput
                     value={thb}
                     onChange={(val) => setThb(val)}
@@ -155,7 +155,7 @@ export const ExchangeActivity: React.FC = () => {
                     maxLength={10}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     {...({ inputMode: "numeric", pattern: "[0-9]*" } as any)}
-                    className={`font-extrabold tracking-tighter max-w-full bg-transparent outline-none transition-all duration-300 ease-out text-blue-600 dark:text-blue-400 ${getFontSize(thb)}`}
+                    className={`font-extrabold tracking-tighter max-w-full bg-transparent outline-none text-gray-900 dark:text-white ${getFontSize(thb)}`}
                   />
                 </div>
               </motion.div>
