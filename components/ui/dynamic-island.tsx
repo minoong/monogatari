@@ -241,11 +241,11 @@ const DynamicIslandProvider: React.FC<DynamicIslandProviderProps> = ({
   // biome-ignore lint/correctness/useExhaustiveDependencies: needed for dispatch
   const setSize = useCallback(
     (newSize: SizePresets) => {
-      if (state.previousSize !== newSize && newSize !== state.size) {
+      if (newSize !== state.size) {
         dispatch({ type: "SET_SIZE", newSize })
       }
     },
-    [state.previousSize, state.size, dispatch]
+    [state.size, dispatch]
   )
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: needed for dispatch
