@@ -115,7 +115,7 @@ export const ExchangeActivity: React.FC = () => {
                       layoutId="thb-flag-wrapper"
                       className="absolute -top-2 -left-2 z-10"
                     >
-                      <motion.div layoutId="thb-flag-circle" className="relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 size-5 ring-1 shadow-md">
+                      <motion.div layoutId="thb-flag-circle" className="relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 size-4 ring-1 shadow-md">
                         <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
                       </motion.div>
                     </motion.div>
@@ -157,7 +157,7 @@ export const ExchangeActivity: React.FC = () => {
                     onClick={() => inputRef.current?.focus()}
                   >
                     <motion.div layout className="flex items-center">
-                      <span className="font-bold text-slate-400 dark:text-slate-600 mr-2">฿</span>
+                      <span className={`font-bold text-slate-400 dark:text-slate-600 mr-2 ${isFocused ? 'text-4xl' : 'text-6xl'}`}>฿</span>
                       <NumberFlowInput
                         ref={inputRef}
                         value={thb}
