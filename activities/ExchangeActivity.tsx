@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { supabase } from "../lib/supabase";
 import { Save } from "lucide-react";
@@ -7,6 +7,13 @@ import { NumberFlowInput } from "@daformat/react-number-flow-input";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "../components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { gsap } from "gsap";
+import { Flip } from "gsap/Flip";
+import { useGSAP } from "@gsap/react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(Flip, useGSAP);
+}
 
 interface ExchangeRate {
   currency: string;
@@ -23,6 +30,26 @@ export const ExchangeActivity: React.FC = () => {
   const [thb, setThb] = useState<number | undefined>(Number((1000 / 38.5).toFixed(2)));
   const isPristine = useRef(true);
   const [loading, setLoading] = useState(true);
+
+  const flipState = useRef<Flip.FlipState | null>(null);
+
+  const handleFocusToggle = (focused: boolean) => {
+    // Capture state of the card container and the moving targets
+    flipState.current = Flip.getState(".thb-flip-container, .thb-flip-target");
+    setIsFocused(focused);
+  };
+
+  useGSAP(() => {
+    if (flipState.current) {
+      Flip.from(flipState.current, {
+        duration: 0.4,
+        ease: "power2.inOut",
+        absolute: ".thb-flip-target", // Make moving elements absolute to prevent layout jumps
+        nested: true,
+      });
+      flipState.current = null;
+    }
+  }, { dependencies: [isFocused] });
 
   const fetchRatesFromDB = React.useCallback(async () => {
     try {
@@ -104,43 +131,34 @@ export const ExchangeActivity: React.FC = () => {
         <motion.div layout className={`flex flex-col p-5 gap-5 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-8'}`}>
           
           {/* 메인 입력 (THB) 카드 */}
-          <motion.div layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
-            <motion.div layout className="border border-white/60 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl">
-              <motion.div layout className={`relative ${isFocused ? 'py-2 px-4' : 'p-6'}`}>
-                <motion.div layout className={`flex flex-col`}>
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
+            <div className="thb-flip-container border border-white/60 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl overflow-hidden">
+              <div className={`relative ${isFocused ? 'py-2 px-4' : 'p-6'}`}>
+                <div className={`flex flex-col`}>
                   
-                  <motion.div 
-                    layout
-                    className={`flex ${isFocused ? 'flex-row justify-between items-center min-h-[40px]' : 'flex-col justify-center items-center min-h-[72px]'} w-full max-w-full cursor-text`} 
+                  <div 
+                    className={`thb-flip-container flex ${isFocused ? 'flex-row justify-between items-center min-h-[40px]' : 'flex-col justify-center items-center min-h-[72px]'} w-full max-w-full cursor-text`} 
                     onClick={() => {
-                      setIsFocused(true);
+                      if (!isFocused) handleFocusToggle(true);
                       inputRef.current?.focus();
                     }}
                   >
                     {/* The Flag */}
-                    <motion.div layout className={`relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 ${isFocused ? 'size-6 ring-2' : 'size-14 ring-4 mb-3'}`}>
+                    <div className={`thb-flip-target relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 ${isFocused ? 'size-6 ring-2' : 'size-14 ring-4 mb-3'}`}>
                       <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
-                    </motion.div>
+                    </div>
 
                     {/* The disappearing text */}
-                    <AnimatePresence>
-                      {!isFocused && (
-                        <motion.div 
-                          layout
-                          initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                          animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
-                          exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                          className="flex justify-center overflow-hidden w-full shrink-0"
-                        >
-                          <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                            태국 바트 (THB)
-                          </p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {!isFocused && (
+                      <div className="flex justify-center w-full shrink-0 mb-8">
+                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                          태국 바트 (THB)
+                        </p>
+                      </div>
+                    )}
 
                     {/* The Input Row */}
-                    <motion.div layout className={`flex items-center ${isFocused ? '' : 'justify-center w-full'} ${getFontSize(thb)}`}>
+                    <div className={`thb-flip-target flex items-center ${isFocused ? '' : 'justify-center w-full'} ${getFontSize(thb)}`}>
                       <span className={`font-bold text-slate-400 dark:text-slate-600 mr-2 ${isFocused ? 'text-4xl' : ''}`}>฿</span>
                       <NumberFlowInput
                         ref={inputRef}
@@ -150,7 +168,7 @@ export const ExchangeActivity: React.FC = () => {
                           setThb(val);
                         }}
                         onFocus={(e) => {
-                          setIsFocused(true);
+                          if (!isFocused) handleFocusToggle(true);
                           setTimeout(() => {
                             const activeEl = document.activeElement as HTMLInputElement;
                             if (activeEl && typeof activeEl.select === 'function') {
@@ -158,7 +176,7 @@ export const ExchangeActivity: React.FC = () => {
                             }
                           }, 50);
                         }}
-                        onBlur={() => setIsFocused(false)}
+                        onBlur={() => handleFocusToggle(false)}
                         format
                         placeholder="0"
                         maxLength={15}
@@ -175,11 +193,11 @@ export const ExchangeActivity: React.FC = () => {
                           style={{ height: '0.85em' }}
                         />
                       )}
-                    </motion.div>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-            </motion.div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
 
           {/* 환산 결과 (KRW, USD) */}
