@@ -5,6 +5,8 @@ import { Plus, Bell } from "lucide-react";
 import { ChecklistDrawer } from "../components/checklist/ChecklistDrawer";
 import { toast } from "sonner";
 import { supabase } from "../lib/supabase";
+import NumberFlow from "@number-flow/react";
+import { Skeleton } from "../components/ui/skeleton";
 
 interface PreparationItem {
   id: string;
@@ -186,7 +188,9 @@ export const ChecklistActivity: React.FC = () => {
         <div className="p-6 pb-2 border-b">
           <div className="flex justify-between items-end mb-2">
             <h2 className="text-lg font-bold">전체 준비 진행률</h2>
-            <span className="text-blue-600 font-bold">{progress}%</span>
+            <span className="text-blue-600 font-bold flex items-center">
+              <NumberFlow value={progress} />%
+            </span>
           </div>
           <div className="w-full h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
             <div
@@ -198,7 +202,18 @@ export const ChecklistActivity: React.FC = () => {
 
         <div className="flex-1 overflow-y-auto p-4 pb-24">
           {loading ? (
-            <div className="text-center py-10 text-gray-500 text-sm">로딩 중...</div>
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-6 w-32 mb-2" />
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-3 p-4 border-b border-gray-100 dark:border-gray-800 last:border-0">
+                    <Skeleton className="h-5 w-5 rounded-md" />
+                    <Skeleton className="h-5 flex-1" />
+                    <Skeleton className="h-5 w-5 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
             <>
               <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-3">마스터 체크리스트 (공통)</h3>
