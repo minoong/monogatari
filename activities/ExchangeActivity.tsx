@@ -15,11 +15,17 @@ interface ExchangeRate {
 }
 
 export const ExchangeActivity: React.FC = () => {
-  const [thb, setThb] = useState<number | undefined>(1000);
+  const [thb, setThb] = useState<number | undefined>(0);
   const [rates, setRates] = useState<{ THB: number; USD: number }>({ THB: 38.5, USD: 1380 });
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>("");
+
+  useEffect(() => {
+    // 페이지 진입 시 0에서 1000으로 돌아가는 애니메이션 효과 부여
+    const timer = setTimeout(() => setThb(1000), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   const fetchRatesFromDB = React.useCallback(async () => {
     try {
