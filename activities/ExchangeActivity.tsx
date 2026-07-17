@@ -193,6 +193,11 @@ export const ExchangeActivity: React.FC = () => {
                             e.stopPropagation();
                             isPristine.current = false;
                             setThb(undefined);
+                            if (inputRef.current) {
+                              const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
+                              nativeInputValueSetter?.call(inputRef.current, "");
+                              inputRef.current.dispatchEvent(new Event("input", { bubbles: true }));
+                            }
                             inputRef.current?.focus();
                           }}
                           className="ml-2 p-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors z-10 relative cursor-pointer"
