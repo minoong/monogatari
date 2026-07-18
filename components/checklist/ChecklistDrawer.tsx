@@ -39,11 +39,23 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
 
   useEffect(() => {
     if (open) {
+      // 비동기적으로 초기화하여 cascading render 경고 우회
+      const resetTimer = setTimeout(() => {
+        setTitle("");
+        setImportance("normal");
+        setTargets({ gahyun: false, minu: false });
+        setSuccess(false);
+      }, 0);
+
       // 드로워가 올라오는 애니메이션 시간을 고려하여 포커스
-      const timer = setTimeout(() => {
+      const focusTimer = setTimeout(() => {
         inputRef.current?.focus();
       }, 500);
-      return () => clearTimeout(timer);
+
+      return () => {
+        clearTimeout(resetTimer);
+        clearTimeout(focusTimer);
+      };
     }
   }, [open]);
 
