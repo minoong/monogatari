@@ -19,6 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { motion } from "framer-motion";
+import { TextEffect } from "@/components/core/text-effect";
 
 interface ChecklistDrawerProps {
   open: boolean;
@@ -123,7 +124,22 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
           >
             {/* 제목 */}
             <motion.div variants={itemVariants} className="flex flex-col gap-3">
-              <Label htmlFor="title" className="text-base font-bold text-gray-700 dark:text-gray-300">제목</Label>
+              <Label htmlFor="title" className="text-base font-bold text-gray-700 dark:text-gray-300">
+                <TextEffect
+                  per="char"
+                  as="span"
+                  segmentWrapperClassName="overflow-hidden inline-block"
+                  variants={{
+                    container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } },
+                    item: {
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+                    },
+                  }}
+                >
+                  제목
+                </TextEffect>
+              </Label>
               <Input
                 id="title"
                 placeholder="예) 보조배터리 챙기기"
@@ -135,7 +151,22 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
 
             {/* 중요도 */}
             <motion.div variants={itemVariants} className="flex flex-col gap-3">
-              <Label className="text-base font-bold text-gray-700 dark:text-gray-300">중요도</Label>
+              <Label className="text-base font-bold text-gray-700 dark:text-gray-300">
+                <TextEffect
+                  per="char"
+                  as="span"
+                  segmentWrapperClassName="overflow-hidden inline-block"
+                  variants={{
+                    container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } },
+                    item: {
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+                    },
+                  }}
+                >
+                  중요도
+                </TextEffect>
+              </Label>
               <RadioGroup
                 value={importance}
                 onValueChange={(val) => setImportance(val as "high" | "normal" | "low")}
@@ -158,7 +189,22 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
 
             {/* 대상자 */}
             <motion.div variants={itemVariants} className="flex flex-col gap-3">
-              <Label className="text-base font-bold text-gray-700 dark:text-gray-300">대상자 (최소 1명 선택)</Label>
+              <Label className="text-base font-bold text-gray-700 dark:text-gray-300">
+                <TextEffect
+                  per="char"
+                  as="span"
+                  segmentWrapperClassName="overflow-hidden inline-block"
+                  variants={{
+                    container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } },
+                    item: {
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+                    },
+                  }}
+                >
+                  대상자 (최소 1명 선택)
+                </TextEffect>
+              </Label>
               <div className="flex flex-row gap-6 mt-1">
                 <Label className="flex items-center gap-3 cursor-pointer text-base font-medium">
                   <Checkbox
