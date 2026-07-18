@@ -152,11 +152,29 @@ const ProgressIslandContent = ({
 const triggerHapticFeedback = () => {
   if (typeof navigator !== "undefined" && navigator.vibrate) {
     navigator.vibrate(15);
-  } else {
-    // iOS Safari / PWA haptic workaround using <input type="checkbox" switch> (iOS 17.4+)
-    const label = document.getElementById("ios-haptic-label");
-    if (label) {
+  } else if (typeof document !== "undefined") {
+    // iOS Safari / PWA haptic workaround using dynamic <input type="checkbox" switch>
+    try {
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.setAttribute("switch", "");
+      
+      const label = document.createElement("label");
+      label.style.position = "absolute";
+      label.style.left = "-9999px";
+      label.style.top = "-9999px";
+      label.style.opacity = "0";
+      label.style.width = "1px";
+      label.style.height = "1px";
+      
+      label.appendChild(input);
+      document.body.appendChild(label);
+      
       label.click();
+      
+      document.body.removeChild(label);
+    } catch (e) {
+      console.warn("Haptic feedback failed", e);
     }
   }
 };
@@ -563,19 +581,6 @@ export const ChecklistActivity: React.FC = () => {
   return (
     <AppScreen appBar={{ title: "여행 준비물 체크리스트" }}>
       <div className="flex flex-col h-[calc(100dvh-64px)] bg-white dark:bg-black relative">
-        {/* iOS PWA Haptic Feedback Workaround Target */}
-        <label
-          id="ios-haptic-label"
-          htmlFor="ios-haptic-input"
-          style={{ position: "absolute", left: "-9999px", top: "-9999px", opacity: 0, width: "1px", height: "1px" }}
-        >
-          <input
-            type="checkbox"
-            // @ts-expect-error: React typings do not yet support the standard switch attribute for checkboxes
-            switch=""
-            id="ios-haptic-input"
-          />
-        </label>
 
         <div className="py-4 pb-2 shrink-0 flex justify-center w-full">
           <DynamicIslandProvider initialSize={SIZE_PRESETS.PROGRESS_COLLAPSED}>
