@@ -9,7 +9,8 @@ import NumberFlow from "@number-flow/react";
 import { Skeleton } from "../components/ui/skeleton";
 import { Badge } from "../components/ui/badge";
 import NeumorphButton from "../components/ui/neumorph-button";
-import { motion, AnimatePresence, useMotionValue, animate, useTransform } from "framer-motion";
+import { Checkbox } from "../components/animate-ui/components/radix/checkbox";
+import { motion, AnimatePresence, useMotionValue, animate, useTransform, type Transition } from "framer-motion";
 import { RingChart } from "../components/ui/ring-chart";
 import { useRef } from "react";
 import {
@@ -148,6 +149,19 @@ const ProgressIslandContent = ({
     </DynamicIsland>
   );
 };
+
+const getPathAnimate = (isChecked: boolean) => ({
+  pathLength: isChecked ? 1 : 0,
+  opacity: isChecked ? 1 : 0,
+});
+
+const getPathTransition = (isChecked: boolean): Transition => ({
+  pathLength: { duration: 1, ease: 'easeInOut' },
+  opacity: {
+    duration: 0.01,
+    delay: isChecked ? 0 : 1,
+  },
+});
 
 
 
@@ -290,55 +304,51 @@ const SwipeableItem = ({
           isHighlighted ? "bg-yellow-50 dark:bg-yellow-900/20" : ""
         }`}
       >
-        <label className="flex items-center gap-3 flex-1 cursor-pointer py-1">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              onToggleCheck(item.id, !isChecked, targetUser);
+        <div className="flex items-center gap-3 flex-1 py-1">
+          <Checkbox
+            variant="default"
+            checked={isChecked}
+            onCheckedChange={(val) => {
+              onToggleCheck(item.id, val === true, targetUser);
             }}
-            className="flex-shrink-0 focus:outline-none"
-          >
-            <motion.div
-              animate={{
-                scale: isChecked ? [1, 0.8, 1.1, 1] : 1,
-                backgroundColor: isChecked ? "#3b82f6" : "transparent",
-                borderColor: isChecked ? "#3b82f6" : "#d1d5db"
-              }}
-              transition={{ duration: 0.3 }}
-              className="w-6 h-6 rounded-full border-2 flex items-center justify-center dark:border-gray-600"
-            >
-              {isChecked && (
-                <motion.svg
-                  initial={{ opacity: 0, pathLength: 0 }}
-                  animate={{ opacity: 1, pathLength: 1 }}
-                  transition={{ duration: 0.3 }}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-4 h-4"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </motion.svg>
-              )}
-            </motion.div>
-          </button>
+            id={`checkbox-${item.id}`}
+            className="flex-shrink-0 cursor-pointer"
+          />
           <div className="flex items-center flex-1 gap-2 flex-wrap">
-            <span
-              className={`text-[16px] font-medium tracking-tight transition-all ${
-                isChecked ? "text-gray-400 dark:text-gray-500 line-through" : "text-gray-800 dark:text-gray-100"
-              }`}
-            >
-              {item.title}
-            </span>
+            <div className="relative inline-block cursor-pointer">
+              <label
+                htmlFor={`checkbox-${item.id}`}
+                className={`text-[16px] font-medium tracking-tight transition-all cursor-pointer select-none ${
+                  isChecked ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-100"
+                }`}
+              >
+                {item.title}
+              </label>
+              <motion.svg
+                width="340"
+                height="32"
+                viewBox="0 0 340 32"
+                className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none z-20 w-full h-10"
+              >
+                <motion.path
+                  d="M 10 16.91 s 79.8 -11.36 98.1 -11.34 c 22.2 0.02 -47.82 14.25 -33.39 22.02 c 12.61 6.77 124.18 -27.98 133.31 -17.28 c 7.52 8.38 -26.8 20.02 4.61 22.05 c 24.55 1.93 113.37 -20.36 113.37 -20.36"
+                  vectorEffect="non-scaling-stroke"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeMiterlimit={10}
+                  fill="none"
+                  initial={false}
+                  animate={getPathAnimate(isChecked)}
+                  transition={getPathTransition(isChecked)}
+                  className="stroke-neutral-400 dark:stroke-neutral-600"
+                />
+              </motion.svg>
+            </div>
             <Badge variant={item.importance as "high" | "normal" | "low"} className="px-1.5 py-0 h-5 text-[11px] font-medium rounded-md">
               {item.importance === "high" ? "높음" : item.importance === "low" ? "낮음" : "보통"}
             </Badge>
           </div>
-        </label>
+        </div>
       </motion.div>
     </motion.div>
   );
