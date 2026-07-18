@@ -252,7 +252,7 @@ const SwipeableItem = ({
           <div className="flex-shrink-0 relative w-6 h-6">
             <div
               className="absolute inset-0 z-10"
-              onChange={() => {
+              onClick={() => {
                 triggerHapticFeedback();
                 onToggleCheck(item.id, !isChecked, targetUser);
               }}

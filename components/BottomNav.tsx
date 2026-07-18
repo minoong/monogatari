@@ -36,7 +36,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
         <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
           <div
             className="absolute inset-0 z-10"
-            onChange={() => handleNav("HomeActivity", "home")}
+            onClick={() => handleNav("HomeActivity", "home")}
             dangerouslySetInnerHTML={{
               __html: `<input type="checkbox" switch ${active === "home" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
             }}
@@ -53,7 +53,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
         <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
           <div
             className="absolute inset-0 z-10"
-            onChange={() => handleNav("ScheduleActivity", "schedule")}
+            onClick={() => handleNav("ScheduleActivity", "schedule")}
             dangerouslySetInnerHTML={{
               __html: `<input type="checkbox" switch ${active === "schedule" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
             }}
@@ -70,7 +70,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
         <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
           <div
             className="absolute inset-0 z-10"
-            onChange={() => handleNav("ChecklistActivity", "checklist")}
+            onClick={() => handleNav("ChecklistActivity", "checklist")}
             dangerouslySetInnerHTML={{
               __html: `<input type="checkbox" switch ${active === "checklist" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
             }}
@@ -87,7 +87,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
         <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
           <div
             className="absolute inset-0 z-10"
-            onChange={() => handleNav("DictionaryActivity", "dictionary")}
+            onClick={() => handleNav("DictionaryActivity", "dictionary")}
             dangerouslySetInnerHTML={{
               __html: `<input type="checkbox" switch ${active === "dictionary" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
             }}
