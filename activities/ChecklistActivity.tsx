@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { BottomNav } from "../components/BottomNav";
+import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
 import { Plus, Bell, ChevronDown, Trash2 } from "lucide-react";
 import { ChecklistDrawer } from "../components/checklist/ChecklistDrawer";
 import { toast } from "sonner";
@@ -149,17 +149,7 @@ const ProgressIslandContent = ({
   );
 };
 
-const triggerHapticFeedback = () => {
-  if (typeof navigator !== "undefined" && navigator.vibrate) {
-    navigator.vibrate(15);
-  } else {
-    // iOS Safari / PWA haptic workaround using static <input type="checkbox" switch>
-    const label = document.getElementById("ios-haptic-label");
-    if (label) {
-      label.click();
-    }
-  }
-};
+
 
 interface PreparationItem {
   id: string;
@@ -565,18 +555,6 @@ export const ChecklistActivity: React.FC = () => {
   return (
     <AppScreen appBar={{ title: "여행 준비물 체크리스트" }}>
       <div className="flex flex-col h-[calc(100dvh-64px)] bg-white dark:bg-black relative">
-        {/* iOS PWA Haptic Feedback Workaround Target */}
-        <label
-          id="ios-haptic-label"
-          style={{ position: "absolute", left: "-9999px", top: "-9999px", opacity: 0, width: "1px", height: "1px" }}
-        >
-          <input
-            type="checkbox"
-            // @ts-expect-error: React typings do not support the standard switch attribute for checkboxes
-            switch={true}
-            id="ios-haptic-input"
-          />
-        </label>
 
         <div className="py-4 pb-2 shrink-0 flex justify-center w-full">
           <DynamicIslandProvider initialSize={SIZE_PRESETS.PROGRESS_COLLAPSED}>
