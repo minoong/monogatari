@@ -377,8 +377,6 @@ export const ChecklistActivity: React.FC = () => {
     return (
       <motion.div
         ref={itemRef}
-        initial={{ opacity: 1, height: 0 }}
-        animate={{ height: "auto" }}
         exit={{ opacity: 0, height: 0 }}
         transition={{ duration: 0.25, ease: "easeOut" }}
         style={{ overflow: "hidden" }}
