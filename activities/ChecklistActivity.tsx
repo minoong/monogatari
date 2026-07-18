@@ -596,36 +596,33 @@ export const ChecklistActivity: React.FC = () => {
         </div>
 
         {/* Floating Action Button */}
-        <div 
-          className="fixed right-6 w-14 h-14 z-50 shadow-xl"
+        <NeumorphButton
+          intent="primary"
+          className="fixed right-6 w-14 h-14 !rounded-full !p-0 z-50 flex items-center justify-center shadow-xl overflow-hidden"
           style={{ bottom: "calc(88px + env(safe-area-inset-bottom))" }}
+          onClick={() => {
+            if (drawerOpen) return;
+            setRotation((prev) => prev + 90);
+            setTimeout(() => {
+              setDrawerOpen(true);
+            }, 150);
+          }}
         >
+          {/* iOS Haptic Trigger Switch Overlay */}
           <div
-            className="absolute inset-0 z-10"
-            onClick={() => {
-              if (drawerOpen) return;
-              setRotation((prev) => prev + 90);
-              setTimeout(() => {
-                setDrawerOpen(true);
-              }, 150);
-            }}
+            className="absolute inset-0 z-10 rounded-full overflow-hidden"
             dangerouslySetInnerHTML={{
               __html: `<input type="checkbox" switch class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
             }}
           />
-          <NeumorphButton
-            intent="primary"
-            className="w-full h-full !rounded-full !p-0 flex items-center justify-center pointer-events-none"
+          <motion.div
+            animate={{ rotate: rotation }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="flex items-center justify-center pointer-events-none"
           >
-            <motion.div
-              animate={{ rotate: rotation }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="flex items-center justify-center"
-            >
-              <Plus size={24} />
-            </motion.div>
-          </NeumorphButton>
-        </div>
+            <Plus size={24} />
+          </motion.div>
+        </NeumorphButton>
 
         <ChecklistDrawer
           open={drawerOpen}
