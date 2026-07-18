@@ -248,18 +248,21 @@ const SwipeableItem = ({
           isHighlighted ? "bg-yellow-50 dark:bg-yellow-900/20" : ""
         }`}
       >
-        <label className="flex items-center gap-3 flex-1 cursor-pointer py-1">
+        {/* Full-row transparent switch for iOS haptic */}
+        <div
+          className="absolute inset-0 z-10"
+          onClick={() => {
+            triggerHapticFeedback();
+            onToggleCheck(item.id, !isChecked, targetUser);
+          }}
+          dangerouslySetInnerHTML={{
+            __html: `<input type="checkbox" switch ${isChecked ? "checked" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
+          }}
+        />
+
+        {/* Custom UI content (behind transparent switch, pointer-events-none) */}
+        <div className="flex items-center gap-3 flex-1 py-1 pointer-events-none select-none">
           <div className="flex-shrink-0 relative w-6 h-6">
-            <div
-              className="absolute inset-0 z-10"
-              onClick={() => {
-                triggerHapticFeedback();
-                onToggleCheck(item.id, !isChecked, targetUser);
-              }}
-              dangerouslySetInnerHTML={{
-                __html: `<input type="checkbox" switch ${isChecked ? "checked" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
-              }}
-            />
             <motion.div
               animate={{
                 scale: isChecked ? [1, 0.8, 1.1, 1] : 1,
@@ -299,11 +302,17 @@ const SwipeableItem = ({
               {item.importance === "high" ? "높음" : item.importance === "low" ? "낮음" : "보통"}
             </Badge>
           </div>
-        </label>
+        </div>
+
+        {/* Nudge button (above the transparent switch, z-20) */}
         {!isChecked && item.type === "personal" && (
           <button
-            onClick={() => onNudge(targetUser)}
-            className="p-2 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-full transition-colors flex-shrink-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              triggerHapticFeedback();
+              onNudge(targetUser);
+            }}
+            className="relative z-20 p-2 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-full transition-colors flex-shrink-0"
             aria-label="재촉하기"
           >
             <Bell size={20} />
@@ -607,6 +616,7 @@ export const ChecklistActivity: React.FC = () => {
           className="fixed right-6 w-14 h-14 !rounded-full !p-0 z-50 flex items-center justify-center shadow-xl"
           style={{ bottom: "calc(88px + env(safe-area-inset-bottom))" }}
           onClick={() => {
+            triggerHapticFeedback();
             if (drawerOpen) return;
             setRotation((prev) => prev + 90);
             setTimeout(() => {

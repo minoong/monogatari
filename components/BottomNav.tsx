@@ -10,6 +10,13 @@ export const triggerHapticFeedback = () => {
   if (typeof navigator !== "undefined" && navigator.vibrate) {
     navigator.vibrate(15);
   }
+  // Programmatic click for iOS WebKit inside trusted gestures (like touchend/click)
+  if (typeof document !== "undefined") {
+    const input = document.getElementById("ios-haptic-input-global");
+    if (input) {
+      (input as HTMLInputElement).click();
+    }
+  }
 };
 
 export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
@@ -20,9 +27,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
     name: "home" | "schedule" | "checklist" | "dictionary"
   ) => {
     if (active === name) return; // 중복 탭 방지
-    if (typeof navigator !== "undefined" && navigator.vibrate) {
-      navigator.vibrate(15);
-    }
+    triggerHapticFeedback();
     replace(target, {}, { animate: false });
   };
 
@@ -31,6 +36,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
       className="fixed bottom-0 left-0 right-0 bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800 z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
+      {/* Global iOS PWA Haptic Feedback Target */}
+      <div
+        style={{ position: "absolute", left: "-9999px", top: "-9999px", width: "1px", height: "1px", overflow: "hidden", pointerEvents: "none" }}
+        dangerouslySetInnerHTML={{
+          __html: `<input type="checkbox" switch id="ios-haptic-input-global" class="opacity-[0.01]" style="width: 1px; height: 1px;" />`
+        }}
+      />
+
       <div className="flex justify-around items-center px-4 h-16">
         {/* 홈 탭 */}
         <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
