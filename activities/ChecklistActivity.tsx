@@ -9,7 +9,7 @@ import NumberFlow from "@number-flow/react";
 import { Skeleton } from "../components/ui/skeleton";
 import { Badge } from "../components/ui/badge";
 import NeumorphButton from "../components/ui/neumorph-button";
-import { motion, AnimatePresence, useMotionValue, animate, useTransform, useInView } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, animate, useTransform } from "framer-motion";
 import { RingChart } from "../components/ui/ring-chart";
 import { useRef } from "react";
 import {
@@ -350,31 +350,25 @@ export const ChecklistActivity: React.FC = () => {
     deleteMutation.mutate({ id, assignees, targetUser });
   };
 
-  const SwipeableItem = ({ item, targetUser, isHighlighted, rootRef, drawerOpen }: { item: PreparationItem, targetUser: string, isHighlighted: boolean, rootRef: React.RefObject<HTMLDivElement | null>, drawerOpen: boolean }) => {
+  const SwipeableItem = ({ item, targetUser, isHighlighted, rootRef }: { item: PreparationItem, targetUser: string, isHighlighted: boolean, rootRef: React.RefObject<HTMLDivElement | null> }) => {
     const isChecked = item.completed_by.includes(targetUser);
     const [willDelete, setWillDelete] = useState(false);
     const x = useMotionValue(0);
     const backgroundOpacity = useTransform(x, [0, -20], [0, 1]);
-    
-    const ref = useRef<HTMLDivElement>(null);
-    const inView = useInView(ref, { root: rootRef, amount: 0.4, once: false });
-    const [isVisible, setIsVisible] = useState(true);
-
-    useEffect(() => {
-      if (!drawerOpen) {
-        setIsVisible(inView);
-      }
-    }, [inView, drawerOpen]);
 
     return (
       <motion.div
-        ref={ref}
         initial={{ opacity: 0, height: 0, scale: 0.8 }}
         animate={{ 
-          opacity: isVisible ? 1 : 0.3,
+          opacity: 0.3,
           height: "auto",
-          scale: isVisible ? 1 : 0.9
+          scale: 0.9
         }}
+        whileInView={{
+          opacity: 1,
+          scale: 1
+        }}
+        viewport={{ root: rootRef, amount: 0.4, once: false }}
         exit={{ opacity: 0, height: 0, scale: 0.8 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
         style={{ overflow: "hidden" }}
@@ -498,7 +492,6 @@ export const ChecklistActivity: React.FC = () => {
                 targetUser={targetUser}
                 isHighlighted={isHighlighted}
                 rootRef={scrollRef}
-                drawerOpen={drawerOpen}
               />
             );
           })}
