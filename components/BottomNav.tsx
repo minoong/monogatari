@@ -34,14 +34,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
       <div className="flex justify-around items-center px-4 h-16">
         {/* 홈 탭 */}
         <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
-          <input
-            type="checkbox"
-            // @ts-expect-error: React typings do not support the standard switch attribute for checkboxes
-            switch={true}
-            disabled={active === "home"}
+          <div
+            className="absolute inset-0 z-10"
             onChange={() => handleNav("HomeActivity", "home")}
-            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-default z-10"
-            style={{ WebkitTapHighlightColor: "transparent" }}
+            dangerouslySetInnerHTML={{
+              __html: `<input type="checkbox" switch ${active === "home" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
+            }}
           />
           <Home 
             size={22} 
@@ -53,14 +51,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
         
         {/* 일정표 탭 */}
         <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
-          <input
-            type="checkbox"
-            // @ts-expect-error: React typings do not support the standard switch attribute for checkboxes
-            switch={true}
-            disabled={active === "schedule"}
+          <div
+            className="absolute inset-0 z-10"
             onChange={() => handleNav("ScheduleActivity", "schedule")}
-            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-default z-10"
-            style={{ WebkitTapHighlightColor: "transparent" }}
+            dangerouslySetInnerHTML={{
+              __html: `<input type="checkbox" switch ${active === "schedule" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
+            }}
           />
           <Calendar 
             size={22} 
@@ -72,14 +68,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
 
         {/* 준비물 탭 */}
         <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
-          <input
-            type="checkbox"
-            // @ts-expect-error: React typings do not support the standard switch attribute for checkboxes
-            switch={true}
-            disabled={active === "checklist"}
+          <div
+            className="absolute inset-0 z-10"
             onChange={() => handleNav("ChecklistActivity", "checklist")}
-            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-default z-10"
-            style={{ WebkitTapHighlightColor: "transparent" }}
+            dangerouslySetInnerHTML={{
+              __html: `<input type="checkbox" switch ${active === "checklist" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
+            }}
           />
           <ClipboardCheck 
             size={22} 
@@ -91,14 +85,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
 
         {/* 회화 탭 */}
         <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
-          <input
-            type="checkbox"
-            // @ts-expect-error: React typings do not support the standard switch attribute for checkboxes
-            switch={true}
-            disabled={active === "dictionary"}
+          <div
+            className="absolute inset-0 z-10"
             onChange={() => handleNav("DictionaryActivity", "dictionary")}
-            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-default z-10"
-            style={{ WebkitTapHighlightColor: "transparent" }}
+            dangerouslySetInnerHTML={{
+              __html: `<input type="checkbox" switch ${active === "dictionary" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
+            }}
           />
           <MessageCircle 
             size={22} 

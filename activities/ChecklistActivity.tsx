@@ -250,17 +250,15 @@ const SwipeableItem = ({
       >
         <label className="flex items-center gap-3 flex-1 cursor-pointer py-1">
           <div className="flex-shrink-0 relative w-6 h-6">
-            <input
-              type="checkbox"
-              // @ts-expect-error: React typings do not support the standard switch attribute for checkboxes
-              switch={true}
-              checked={isChecked}
+            <div
+              className="absolute inset-0 z-10"
               onChange={() => {
                 triggerHapticFeedback();
                 onToggleCheck(item.id, !isChecked, targetUser);
               }}
-              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
-              style={{ WebkitTapHighlightColor: "transparent" }}
+              dangerouslySetInnerHTML={{
+                __html: `<input type="checkbox" switch ${isChecked ? "checked" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
+              }}
             />
             <motion.div
               animate={{
