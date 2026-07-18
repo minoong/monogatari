@@ -369,7 +369,6 @@ export const ChecklistActivity: React.FC = () => {
     return (
       <motion.div
         ref={ref}
-        layout
         initial={{ opacity: 0, height: 0, scale: 0.8 }}
         animate={{ 
           opacity: isVisible ? 1 : 0.3,
