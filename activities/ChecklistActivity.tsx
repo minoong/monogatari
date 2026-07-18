@@ -248,20 +248,13 @@ const SwipeableItem = ({
           isHighlighted ? "bg-yellow-50 dark:bg-yellow-900/20" : ""
         }`}
       >
-        {/* Full-row transparent switch for iOS haptic */}
-        <div
-          className="absolute inset-0 z-10"
+        <div 
           onClick={() => {
             triggerHapticFeedback();
             onToggleCheck(item.id, !isChecked, targetUser);
           }}
-          dangerouslySetInnerHTML={{
-            __html: `<input type="checkbox" switch ${isChecked ? "checked" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
-          }}
-        />
-
-        {/* Custom UI content (behind transparent switch, pointer-events-none) */}
-        <div className="flex items-center gap-3 flex-1 py-1 pointer-events-none select-none">
+          className="flex items-center gap-3 flex-1 cursor-pointer py-1 select-none"
+        >
           <div className="flex-shrink-0 relative w-6 h-6">
             <motion.div
               animate={{
@@ -304,7 +297,7 @@ const SwipeableItem = ({
           </div>
         </div>
 
-        {/* Nudge button (above the transparent switch, z-20) */}
+        {/* Nudge button */}
         {!isChecked && item.type === "personal" && (
           <button
             onClick={(e) => {
@@ -611,27 +604,36 @@ export const ChecklistActivity: React.FC = () => {
         </div>
 
         {/* Floating Action Button */}
-        <NeumorphButton
-          intent="primary"
-          className="fixed right-6 w-14 h-14 !rounded-full !p-0 z-50 flex items-center justify-center shadow-xl"
+        <div 
+          className="fixed right-6 w-14 h-14 z-50 shadow-xl"
           style={{ bottom: "calc(88px + env(safe-area-inset-bottom))" }}
-          onClick={() => {
-            triggerHapticFeedback();
-            if (drawerOpen) return;
-            setRotation((prev) => prev + 90);
-            setTimeout(() => {
-              setDrawerOpen(true);
-            }, 150);
-          }}
         >
-          <motion.div
-            animate={{ rotate: rotation }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="flex items-center justify-center"
+          <div
+            className="absolute inset-0 z-10"
+            onClick={() => {
+              if (drawerOpen) return;
+              setRotation((prev) => prev + 90);
+              setTimeout(() => {
+                setDrawerOpen(true);
+              }, 150);
+            }}
+            dangerouslySetInnerHTML={{
+              __html: `<input type="checkbox" switch class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
+            }}
+          />
+          <NeumorphButton
+            intent="primary"
+            className="w-full h-full !rounded-full !p-0 flex items-center justify-center pointer-events-none"
           >
-            <Plus size={24} />
-          </motion.div>
-        </NeumorphButton>
+            <motion.div
+              animate={{ rotate: rotation }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="flex items-center justify-center"
+            >
+              <Plus size={24} />
+            </motion.div>
+          </NeumorphButton>
+        </div>
 
         <ChecklistDrawer
           open={drawerOpen}
