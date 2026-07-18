@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Drawer,
@@ -35,6 +35,17 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
     minu: false,
   });
   const [success, setSuccess] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      // 드로워가 올라오는 애니메이션 시간을 고려하여 포커스
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
 
   // 대상자 체크 핸들러
   const handleTargetChange = (key: keyof typeof targets) => (checked: boolean) => {
@@ -142,6 +153,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
               </Label>
               <Input
                 id="title"
+                ref={inputRef}
                 placeholder="예) 보조배터리 챙기기"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
