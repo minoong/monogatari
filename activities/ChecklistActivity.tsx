@@ -163,6 +163,7 @@ export const ChecklistActivity: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data: items = [], isLoading: loading } = useQuery<PreparationItem[]>({
     queryKey: ["checklist"],
@@ -349,14 +350,14 @@ export const ChecklistActivity: React.FC = () => {
     deleteMutation.mutate({ id, assignees, targetUser });
   };
 
-  const SwipeableItem = ({ item, targetUser, isHighlighted }: { item: PreparationItem, targetUser: string, isHighlighted: boolean }) => {
+  const SwipeableItem = ({ item, targetUser, isHighlighted, rootRef }: { item: PreparationItem, targetUser: string, isHighlighted: boolean, rootRef: React.RefObject<HTMLDivElement | null> }) => {
     const isChecked = item.completed_by.includes(targetUser);
     const [willDelete, setWillDelete] = useState(false);
     const x = useMotionValue(0);
     const backgroundOpacity = useTransform(x, [0, -20], [0, 1]);
     
     const ref = useRef<HTMLDivElement>(null);
-    const inView = useInView(ref, { amount: 0.4, once: true });
+    const inView = useInView(ref, { root: rootRef, amount: 0.4, once: false });
 
     return (
       <motion.div
@@ -490,6 +491,7 @@ export const ChecklistActivity: React.FC = () => {
                 item={item}
                 targetUser={targetUser}
                 isHighlighted={isHighlighted}
+                rootRef={scrollRef}
               />
             );
           })}
@@ -523,7 +525,7 @@ export const ChecklistActivity: React.FC = () => {
           </DynamicIslandProvider>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 pb-24">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 pb-24">
           {loading ? (
             <div className="flex flex-col gap-4">
               <Skeleton className="h-6 w-32 mb-2" />
