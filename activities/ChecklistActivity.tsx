@@ -361,10 +361,10 @@ export const ChecklistActivity: React.FC = () => {
         exit={{ opacity: 0, height: 0 }}
         transition={{ duration: 0.3 }}
         style={{ overflow: "hidden" }}
-        className={`relative border-b border-gray-100 dark:border-gray-800 last:border-b-0`}
+        className="relative mb-3 last:mb-0"
       >
         {/* Background Trash Icon */}
-        <div className="absolute inset-0 bg-red-500 flex items-center justify-end px-6 text-white">
+        <div className="absolute inset-0 bg-red-500 rounded-2xl flex items-center justify-end px-6 text-white overflow-hidden">
           <motion.div animate={{ scale: willDelete ? 1.3 : 1 }} transition={{ type: "spring", stiffness: 400, damping: 20 }}>
             <Trash2 size={24} />
           </motion.div>
@@ -394,11 +394,11 @@ export const ChecklistActivity: React.FC = () => {
               setWillDelete(false);
             }
           }}
-          className={`relative z-10 flex items-center justify-between gap-3 p-4 bg-gray-50 dark:bg-gray-900 active:bg-gray-100 dark:active:bg-gray-800 transition-colors ${
-            isHighlighted ? "bg-yellow-100 dark:bg-yellow-900/50" : ""
+          className={`relative z-10 flex items-center justify-between gap-4 p-5 bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-[0_2px_12px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-white/5 active:scale-[0.98] transition-transform ${
+            isHighlighted ? "ring-2 ring-yellow-400 dark:ring-yellow-500/50" : ""
           }`}
         >
-          <label className="flex items-center gap-3 flex-1 cursor-pointer">
+          <label className="flex items-center gap-4 flex-1 cursor-pointer">
             <button
               type="button"
               onClick={(e) => {
@@ -414,7 +414,7 @@ export const ChecklistActivity: React.FC = () => {
                   borderColor: isChecked ? "#3b82f6" : "#d1d5db"
                 }}
                 transition={{ duration: 0.3 }}
-                className="w-6 h-6 rounded-md border-2 flex items-center justify-center dark:border-gray-600"
+                className="w-6 h-6 rounded-full border-2 flex items-center justify-center dark:border-gray-600"
               >
                 {isChecked && (
                   <motion.svg
@@ -434,24 +434,28 @@ export const ChecklistActivity: React.FC = () => {
                 )}
               </motion.div>
             </button>
-            <span
-              className={`text-[16px] transition-all ${
-                isChecked ? "text-gray-400 line-through" : "text-gray-800 dark:text-gray-200"
-              }`}
-            >
-              {item.title}
-              <Badge variant={item.importance as "high" | "normal" | "low"} className="ml-2">
-                {item.importance === "high" ? "높음" : item.importance === "low" ? "낮음" : "보통"}
-              </Badge>
-            </span>
+            <div className="flex flex-col flex-1 gap-1.5">
+              <span
+                className={`text-[16px] font-semibold tracking-tight transition-all ${
+                  isChecked ? "text-gray-400 dark:text-gray-500 line-through" : "text-gray-900 dark:text-gray-100"
+                }`}
+              >
+                {item.title}
+              </span>
+              <div className="flex items-center gap-2">
+                <Badge variant={item.importance as "high" | "normal" | "low"} className="px-2 py-0">
+                  {item.importance === "high" ? "🔥 높음" : item.importance === "low" ? "🌱 낮음" : "⭐ 보통"}
+                </Badge>
+              </div>
+            </div>
           </label>
           {!isChecked && item.type === "personal" && (
             <button
               onClick={() => handleNudge(targetUser)}
-              className="p-2 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950 rounded-full transition-colors"
+              className="p-2.5 text-orange-500 bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 rounded-full transition-colors flex-shrink-0"
               aria-label="재촉하기"
             >
-              <Bell size={20} />
+              <Bell size={18} />
             </button>
           )}
         </motion.div>
@@ -468,7 +472,7 @@ export const ChecklistActivity: React.FC = () => {
     }
 
     return (
-      <div className="bg-white dark:bg-black rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6">
+      <div className="flex flex-col mb-6 pt-2">
         <AnimatePresence initial={false}>
           {list.map((item) => {
             const isHighlighted = highlightedItemId === item.id;
