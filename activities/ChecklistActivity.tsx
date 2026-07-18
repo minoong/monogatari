@@ -149,6 +149,18 @@ const ProgressIslandContent = ({
   );
 };
 
+const triggerHapticFeedback = () => {
+  if (typeof navigator !== "undefined" && navigator.vibrate) {
+    navigator.vibrate(15);
+  } else {
+    // iOS Safari / PWA haptic workaround using <input type="checkbox" switch> (iOS 17.4+)
+    const label = document.getElementById("ios-haptic-label");
+    if (label) {
+      label.click();
+    }
+  }
+};
+
 interface PreparationItem {
   id: string;
   title: string;
@@ -220,8 +232,13 @@ const SwipeableItem = ({
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={{ left: 0.5, right: 0 }}
         onDrag={(e, info) => {
-          if (info.offset.x < -80 && !willDelete) setWillDelete(true);
-          else if (info.offset.x >= -80 && willDelete) setWillDelete(false);
+          if (info.offset.x < -80 && !willDelete) {
+            setWillDelete(true);
+            triggerHapticFeedback();
+          } else if (info.offset.x >= -80 && willDelete) {
+            setWillDelete(false);
+            triggerHapticFeedback();
+          }
         }}
         onDragEnd={(e, info) => {
           if (info.offset.x < -80) {
@@ -546,6 +563,20 @@ export const ChecklistActivity: React.FC = () => {
   return (
     <AppScreen appBar={{ title: "여행 준비물 체크리스트" }}>
       <div className="flex flex-col h-[calc(100dvh-64px)] bg-white dark:bg-black relative">
+        {/* iOS PWA Haptic Feedback Workaround Target */}
+        <label
+          id="ios-haptic-label"
+          htmlFor="ios-haptic-input"
+          style={{ position: "absolute", width: "1px", height: "1px", opacity: 0, pointerEvents: "none" }}
+        >
+          <input
+            type="checkbox"
+            // @ts-expect-error: React typings do not yet support the standard switch attribute for checkboxes
+            switch=""
+            id="ios-haptic-input"
+          />
+        </label>
+
         <div className="py-4 pb-2 shrink-0 flex justify-center w-full">
           <DynamicIslandProvider initialSize={SIZE_PRESETS.PROGRESS_COLLAPSED}>
             <ProgressIslandContent rings={rings} progress={progress} gahyunProgress={gahyunProgress} minuProgress={minuProgress} />
