@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { BottomNav } from "../components/BottomNav";
-import { Plus, Bell, ChevronDown } from "lucide-react";
+import { Plus, Bell, ChevronDown, Trash2 } from "lucide-react";
 import { ChecklistDrawer } from "../components/checklist/ChecklistDrawer";
 import { toast } from "sonner";
 import { supabase } from "../lib/supabase";
@@ -18,6 +18,7 @@ import {
   useDynamicIslandSize,
 } from "../components/ui/dynamic-island";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 
 const AnimatedNumber = ({ value }: { value: number }) => {
@@ -297,6 +298,21 @@ export const ChecklistActivity: React.FC = () => {
     nudgeMutation.mutate(target);
   };
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/checklist?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["checklist"] });
+      toast.success("항목이 삭제되었습니다.");
+    },
+  });
+
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
+  };
+
   const gahyunItems = items.filter((i) => i.assignees.includes("gahyun") || i.type === "master" || i.assignees.includes("all"));
   const minuItems = items.filter((i) => i.assignees.includes("minu") || i.type === "master" || i.assignees.includes("all"));
 
@@ -306,48 +322,102 @@ export const ChecklistActivity: React.FC = () => {
     }
 
     return (
-      <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6">
-        {list.map((item, idx) => {
-          const isChecked = item.completed_by.includes(targetUser);
-          const isHighlighted = highlightedItemId === item.id;
-          
-          return (
-            <div
-              key={item.id}
-              className={`flex items-center justify-between gap-3 p-4 active:bg-gray-100 dark:active:bg-gray-800 transition-colors duration-500 ${
-                idx !== list.length - 1 ? "border-b border-gray-100 dark:border-gray-800" : ""
-              } ${isHighlighted ? "bg-yellow-100 dark:bg-yellow-900/50" : ""}`}
-            >
-              <label className="flex items-center gap-3 flex-1 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isChecked}
-                  onChange={(e) => toggleCheck(item.id, e.target.checked, targetUser)}
-                  className="w-6 h-6 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span
-                  className={`text-[16px] transition-all ${
-                    isChecked ? "text-gray-400 line-through" : "text-gray-800 dark:text-gray-200"
+      <div className="bg-white dark:bg-black rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6">
+        <AnimatePresence initial={false}>
+          {list.map((item, idx) => {
+            const isChecked = item.completed_by.includes(targetUser);
+            const isHighlighted = highlightedItemId === item.id;
+            
+            return (
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className={`relative border-b border-gray-100 dark:border-gray-800 last:border-b-0`}
+              >
+                {/* Background Trash Icon */}
+                <div className="absolute inset-0 bg-red-500 flex items-center justify-end px-6 text-white">
+                  <Trash2 size={24} />
+                </div>
+                
+                {/* Foreground Swipeable Content */}
+                <motion.div
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={{ left: 0.5, right: 0 }}
+                  onDragEnd={(e, info) => {
+                    if (info.offset.x < -80) {
+                      handleDelete(item.id);
+                    }
+                  }}
+                  className={`relative z-10 flex items-center justify-between gap-3 p-4 bg-gray-50 dark:bg-gray-900 active:bg-gray-100 dark:active:bg-gray-800 transition-colors ${
+                    isHighlighted ? "bg-yellow-100 dark:bg-yellow-900/50" : ""
                   }`}
                 >
-                  {item.title}
-                  <Badge variant={item.importance as "high" | "normal" | "low"} className="ml-2">
-                    {item.importance === "high" ? "높음" : item.importance === "low" ? "낮음" : "보통"}
-                  </Badge>
-                </span>
-              </label>
-              {!isChecked && item.type === "personal" && (
-                <button
-                  onClick={() => handleNudge(targetUser)}
-                  className="p-2 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950 rounded-full transition-colors"
-                  aria-label="재촉하기"
-                >
-                  <Bell size={20} />
-                </button>
-              )}
-            </div>
-          );
-        })}
+                  <label className="flex items-center gap-3 flex-1 cursor-pointer">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleCheck(item.id, !isChecked, targetUser);
+                      }}
+                      className="flex-shrink-0 focus:outline-none"
+                    >
+                      <motion.div
+                        animate={{
+                          scale: isChecked ? [1, 0.8, 1.1, 1] : 1,
+                          backgroundColor: isChecked ? "#3b82f6" : "transparent",
+                          borderColor: isChecked ? "#3b82f6" : "#d1d5db"
+                        }}
+                        transition={{ duration: 0.3 }}
+                        className="w-6 h-6 rounded-md border-2 flex items-center justify-center dark:border-gray-600"
+                      >
+                        {isChecked && (
+                          <motion.svg
+                            initial={{ opacity: 0, pathLength: 0 }}
+                            animate={{ opacity: 1, pathLength: 1 }}
+                            transition={{ duration: 0.3 }}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-4 h-4"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </motion.svg>
+                        )}
+                      </motion.div>
+                    </button>
+                    <span
+                      className={`text-[16px] transition-all ${
+                        isChecked ? "text-gray-400 line-through" : "text-gray-800 dark:text-gray-200"
+                      }`}
+                    >
+                      {item.title}
+                      <Badge variant={item.importance as "high" | "normal" | "low"} className="ml-2">
+                        {item.importance === "high" ? "높음" : item.importance === "low" ? "낮음" : "보통"}
+                      </Badge>
+                    </span>
+                  </label>
+                  {!isChecked && item.type === "personal" && (
+                    <button
+                      onClick={() => handleNudge(targetUser)}
+                      className="p-2 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950 rounded-full transition-colors"
+                      aria-label="재촉하기"
+                    >
+                      <Bell size={20} />
+                    </button>
+                  )}
+                </motion.div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
     );
   };
