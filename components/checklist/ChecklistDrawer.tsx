@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, Radio } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "../ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface ChecklistDrawerProps {
   open: boolean;
@@ -136,6 +137,10 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                   checked={targets.gahyun}
                   onCheckedChange={handleTargetChange("gahyun")}
                 />
+                <Avatar className="w-5 h-5">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">G</AvatarFallback>
+                </Avatar>
                 가현쨩
               </Label>
               <Label className="flex items-center gap-2 cursor-pointer">
@@ -143,6 +148,10 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                   checked={targets.minu}
                   onCheckedChange={handleTargetChange("minu")}
                 />
+                <Avatar className="w-5 h-5">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">M</AvatarFallback>
+                </Avatar>
                 미누쿤
               </Label>
             </div>
