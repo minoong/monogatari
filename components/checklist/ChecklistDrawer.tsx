@@ -15,7 +15,7 @@ import {
   TextField,
 } from "@heroui/react";
 import StatusButton from "@/components/animata/button/status-button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ImportanceChip } from "@/components/ui/chip";
 import {
   Drawer,
@@ -43,8 +43,8 @@ const importanceOptions: Array<{
 ];
 
 const targetOptions = [
-  { value: "gahyun", label: "가현쨩", initials: "G", color: "accent" as const },
-  { value: "minu", label: "미누쿤", initials: "M", color: "success" as const },
+  { value: "gahyun", label: "가현쨩", initials: "G", image: "/avatars/gahyun.webp", color: "accent" as const },
+  { value: "minu", label: "미누쿤", initials: "M", image: "/avatars/minu.webp", color: "success" as const },
 ];
 
 export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
@@ -201,6 +201,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                         <Checkbox.Indicator />
                       </Checkbox.Control>
                       <Avatar color={target.color} size="sm">
+                        <AvatarImage alt={target.label} src={target.image} />
                         <AvatarFallback>{target.initials}</AvatarFallback>
                       </Avatar>
                       <span>{target.label}</span>

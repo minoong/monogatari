@@ -22,6 +22,11 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 
+const avatarSources = {
+  gahyun: "/avatars/gahyun.webp",
+  minu: "/avatars/minu.webp",
+} as const;
+
 const AnimatedNumber = ({ value }: { value: number }) => {
   const [displayValue, setDisplayValue] = useState(0);
   useEffect(() => {
@@ -103,8 +108,8 @@ const ProgressIslandContent = ({
               <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-3 w-full text-left">
                 {[
                   { label: "전체", progress, text: "text-blue-500", bg: "bg-blue-500", avatar: null },
-                  { label: "가현쨩", progress: gahyunProgress, text: "text-pink-500", bg: "bg-pink-500", avatar: "G" },
-                  { label: "미누쿤", progress: minuProgress, text: "text-emerald-500", bg: "bg-emerald-500", avatar: "M" },
+                  { label: "가현쨩", progress: gahyunProgress, text: "text-pink-500", bg: "bg-pink-500", avatar: "gahyun" as const },
+                  { label: "미누쿤", progress: minuProgress, text: "text-emerald-500", bg: "bg-emerald-500", avatar: "minu" as const },
                 ].map((item, i) => (
                   <motion.div
                     key={i}
@@ -120,8 +125,8 @@ const ProgressIslandContent = ({
                       <div className="flex items-center gap-1.5">
                         {item.avatar && (
                           <Avatar className="w-4 h-4">
-                            <AvatarImage src="" />
-                            <AvatarFallback className="text-[8px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">{item.avatar}</AvatarFallback>
+                            <AvatarImage alt={item.label} src={avatarSources[item.avatar]} />
+                            <AvatarFallback className="text-[8px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">{item.label[0]}</AvatarFallback>
                           </Avatar>
                         )}
                         <span className="font-bold text-gray-700 dark:text-gray-300">{item.label}</span>
@@ -620,7 +625,7 @@ export const ChecklistActivity: React.FC = () => {
             <>
               <div className="flex items-center gap-2 mb-3 mt-2">
                 <Avatar className="w-5 h-5">
-                  <AvatarImage src="" />
+                  <AvatarImage alt="가현쨩" src={avatarSources.gahyun} />
                   <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">G</AvatarFallback>
                 </Avatar>
                 <h3 className="font-bold text-gray-700 dark:text-gray-300 text-sm">가현쨩 짐싸기</h3>
@@ -629,7 +634,7 @@ export const ChecklistActivity: React.FC = () => {
 
               <div className="flex items-center gap-2 mb-3 mt-6">
                 <Avatar className="w-5 h-5">
-                  <AvatarImage src="" />
+                  <AvatarImage alt="미누쿤" src={avatarSources.minu} />
                   <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">M</AvatarFallback>
                 </Avatar>
                 <h3 className="font-bold text-gray-700 dark:text-gray-300 text-sm">미누쿤 짐싸기</h3>
