@@ -198,9 +198,9 @@ export const AccommodationActivity: React.FC = () => {
                   {stay.date} · {stay.city}
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 text-white">
-                  <div className="min-w-0">
-                    <p className="truncate text-lg font-bold">{stay.name}</p>
-                    <p className="truncate text-xs text-white/80">{stay.englishName}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-balance text-lg font-bold leading-tight">{stay.name}</p>
+                    <p className="mt-0.5 text-xs leading-4 text-white/80">{stay.englishName}</p>
                   </div>
                   <span className="flex shrink-0 items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-sm font-bold backdrop-blur-sm"><Star size={14} fill="currentColor" /> {stay.score}</span>
                 </div>
