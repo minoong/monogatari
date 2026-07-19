@@ -1,234 +1,270 @@
-import React, { useState, useRef, useEffect } from "react";
+"use client";
+
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  Button,
+  Checkbox,
+  CheckboxGroup,
+  Description,
+  FieldError,
+  Form,
+  Input,
+  Label,
+  Radio,
+  RadioGroup,
+  Spinner,
+  TextField,
+} from "@heroui/react";
+import { Check, Plus } from "lucide-react";
+import {
   Drawer,
-  DrawerPanel,
-  DrawerHeader,
-  DrawerTitle,
   DrawerDescription,
-  DrawerPopup,
-  DrawerClose,
   DrawerFooter,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle,
 } from "@/components/ui/drawer";
-import NeumorphButton from "../ui/neumorph-button";
-import StatusButton from "../animata/button/status-button";
-import { RadioGroup, Radio, CheckboxGroup, Checkbox, Input, Form, TextField, Label } from "@heroui/react";
-import { motion } from "framer-motion";
 
 interface ChecklistDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+type Importance = "high" | "normal" | "low";
+
+const importanceOptions: Array<{
+  value: Importance;
+  label: string;
+  description: string;
+}> = [
+  { value: "high", label: "높음", description: "꼭 챙겨야 해요" },
+  { value: "normal", label: "보통", description: "일반 준비물이에요" },
+  { value: "low", label: "낮음", description: "여유가 되면 챙겨요" },
+];
+
+const targetOptions = [
+  { value: "gahyun", label: "가현쨩", initial: "가" },
+  { value: "minu", label: "미누쿤", initial: "미" },
+];
+
 export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
-  const [importance, setImportance] = useState<"high" | "normal" | "low">("normal");
+  const [importance, setImportance] = useState<Importance>("normal");
   const [targets, setTargets] = useState<string[]>([]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetForm = () => {
+    setTitle("");
+    setImportance("normal");
+    setTargets([]);
+    setSubmitError(null);
+    setSuccess(false);
+  };
 
   useEffect(() => {
-    if (open) {
-      // 비동기적으로 초기화하여 cascading render 경고 우회
-      const resetTimer = setTimeout(() => {
-        setTitle("");
-        setImportance("normal");
-        setTargets([]);
-        setSuccess(false);
-      }, 0);
+    if (!open) return;
 
-      // 드로워가 올라오는 애니메이션 시간을 고려하여 포커스
-      const focusTimer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 500);
+    const resetTimer = setTimeout(resetForm, 0);
+    const focusTimer = setTimeout(() => inputRef.current?.focus(), 400);
 
-      return () => {
-        clearTimeout(resetTimer);
-        clearTimeout(focusTimer);
-      };
-    }
+    return () => {
+      clearTimeout(resetTimer);
+      clearTimeout(focusTimer);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
   }, [open]);
 
-  const isFormValid = title.trim() !== "" && targets.length > 0;
-
   const addMutation = useMutation({
-    mutationFn: async (payload: { title: string; type: string; assignees: string[]; importance: string }) => {
-      const res = await fetch("/api/checklist", {
+    mutationFn: async (payload: {
+      title: string;
+      type: string;
+      assignees: string[];
+      importance: Importance;
+    }) => {
+      const response = await fetch("/api/checklist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to register item");
-      return res.json();
+
+      if (!response.ok) throw new Error("준비물을 등록하지 못했습니다.");
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setSuccess(true);
-      queryClient.invalidateQueries({ queryKey: ["checklist"] });
-      
-      // 성공 메시지 표시 후 닫기 및 초기화
-      setTimeout(() => {
-        onOpenChange(false);
-        // Reset form
-        setTimeout(() => {
-          setTitle("");
-          setImportance("normal");
-          setTargets([]);
-          setSuccess(false);
-        }, 300); // 닫히는 애니메이션 시간 대기
-      }, 1000);
+      await queryClient.invalidateQueries({ queryKey: ["checklist"] });
+      closeTimerRef.current = setTimeout(() => onOpenChange(false), 800);
     },
-    onError: (err) => {
-      console.error(err);
-      alert("등록에 실패했습니다.");
+    onError: (error) => {
+      setSubmitError(
+        error instanceof Error ? error.message : "잠시 후 다시 시도해 주세요.",
+      );
     },
   });
 
-  const handleSubmit = () => {
-    if (!isFormValid) return;
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (addMutation.isPending) return;
 
-    const type = "personal";
-    const assignees = targets;
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || targets.length === 0) return;
 
-    addMutation.mutate({ title, type, assignees, importance });
+    setSubmitError(null);
+    addMutation.mutate({
+      title: trimmedTitle,
+      type: "personal",
+      assignees: targets,
+      importance,
+    });
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.15,
-      },
-    },
+  const handleCancel = () => {
+    if (!addMutation.isPending) onOpenChange(false);
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { type: "spring" as const, stiffness: 300, damping: 24 } 
-    },
-  };
+  const isFormValid = title.trim().length > 0 && targets.length > 0;
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerPopup variant="inset" showBar>
-        <DrawerHeader className="text-center">
-          <DrawerTitle>준비물 추가</DrawerTitle>
-          <DrawerDescription>새로운 여행 준비물을 등록하세요.</DrawerDescription>
-        </DrawerHeader>
+        <Form
+          aria-label="준비물 추가"
+          className="flex min-h-0 w-full flex-1 flex-col"
+          onSubmit={handleSubmit}
+          validationBehavior="native"
+        >
+          <DrawerHeader className="px-6 pb-4 text-left">
+            <div className="mb-3 flex size-11 items-center justify-center rounded-2xl bg-accent/10 text-accent">
+              <Plus aria-hidden="true" className="size-5" strokeWidth={2.5} />
+            </div>
+            <DrawerTitle>준비물 추가</DrawerTitle>
+            <DrawerDescription>
+              무엇을 누가 챙길지 정해 두면 여행 준비가 한결 가벼워져요.
+            </DrawerDescription>
+          </DrawerHeader>
 
-        <DrawerPanel className="px-6 py-6 flex flex-col gap-8">
-          <Form onSubmit={handleSubmit} className="w-full">
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate={open ? "visible" : "hidden"}
-              className="flex flex-col gap-8 w-full"
+          <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto px-6 py-5">
+            <TextField
+              fullWidth
+              isRequired
+              name="title"
+              value={title}
+              validate={(value) =>
+                value.trim() ? null : "준비물 이름을 입력해 주세요."
+              }
+              onChange={setTitle}
             >
-              {/* 제목 */}
-              <motion.div variants={itemVariants} className="w-full">
-                <TextField isRequired name="title" className="w-full flex flex-col gap-3">
-                  <Label className="text-base font-bold text-gray-700 dark:text-gray-300">제목</Label>
-                  <Input
-                    ref={inputRef}
-                    placeholder="예) 보조배터리 챙기기"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
-                </TextField>
-              </motion.div>
+              <Label>준비물 이름</Label>
+              <Input
+                ref={inputRef}
+                autoComplete="off"
+                placeholder="예: 보조배터리"
+              />
+              <Description>짧고 알아보기 쉬운 이름이 좋아요.</Description>
+              <FieldError />
+            </TextField>
 
-              {/* 중요도 */}
-              <motion.div variants={itemVariants} className="flex flex-col gap-3 w-full">
-                <Label className="text-base font-bold text-gray-700 dark:text-gray-300">중요도</Label>
-                <RadioGroup
-                  value={importance}
-                  onChange={(val: string) => setImportance(val as "high" | "normal" | "low")}
-                  orientation="horizontal"
-                  className="gap-5 mt-1"
-                >
-                  <div className="flex flex-row gap-5">
-                    <Radio value="high">
-                      <Radio.Content>
-                        <Radio.Control>
-                          <Radio.Indicator />
-                        </Radio.Control>
-                        높음
-                      </Radio.Content>
-                    </Radio>
-                    <Radio value="normal">
-                      <Radio.Content>
-                        <Radio.Control>
-                          <Radio.Indicator />
-                        </Radio.Control>
-                        보통
-                      </Radio.Content>
-                    </Radio>
-                    <Radio value="low">
-                      <Radio.Content>
-                        <Radio.Control>
-                          <Radio.Indicator />
-                        </Radio.Control>
-                        낮음
-                      </Radio.Content>
-                    </Radio>
-                  </div>
-                </RadioGroup>
-              </motion.div>
+            <RadioGroup
+              isRequired
+              name="importance"
+              value={importance}
+              onChange={(value) => setImportance(value as Importance)}
+            >
+              <Label>중요도</Label>
+              <Description>준비 순서를 정할 때 사용해요.</Description>
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                {importanceOptions.map((option) => (
+                  <Radio key={option.value} value={option.value}>
+                    <Radio.Content className="flex h-full min-h-20 w-full flex-col items-start justify-between gap-2 rounded-2xl border border-border bg-surface p-3 transition-colors data-[selected=true]:border-accent data-[selected=true]:bg-accent/10">
+                      <Radio.Control>
+                        <Radio.Indicator />
+                      </Radio.Control>
+                      <span className="flex flex-col text-left">
+                        <span className="text-sm font-semibold">{option.label}</span>
+                        <span className="text-xs leading-4 text-muted">
+                          {option.description}
+                        </span>
+                      </span>
+                    </Radio.Content>
+                  </Radio>
+                ))}
+              </div>
+            </RadioGroup>
 
-              {/* 대상자 */}
-              <motion.div variants={itemVariants} className="flex flex-col gap-3 w-full">
-                <Label className="text-base font-bold text-gray-700 dark:text-gray-300">대상자 (최소 1명 선택)</Label>
-                <CheckboxGroup
-                  value={targets}
-                  onChange={(val: string[]) => setTargets(val)}
-                  className="mt-1"
-                >
-                  <div className="flex flex-row gap-6">
-                    <Checkbox value="gahyun">
-                      <Checkbox.Content>
-                        <Checkbox.Control>
-                          <Checkbox.Indicator />
-                        </Checkbox.Control>
-                        가현쨩
-                      </Checkbox.Content>
-                    </Checkbox>
-                    <Checkbox value="minu">
-                      <Checkbox.Content>
-                        <Checkbox.Control>
-                          <Checkbox.Indicator />
-                        </Checkbox.Control>
-                        미누쿤
-                      </Checkbox.Content>
-                    </Checkbox>
-                  </div>
-                </CheckboxGroup>
-              </motion.div>
-            </motion.div>
-          </Form>
-        </DrawerPanel>
+            <CheckboxGroup
+              isRequired
+              name="targets"
+              value={targets}
+              onChange={setTargets}
+            >
+              <Label>담당자</Label>
+              <Description>한 명 이상 선택해 주세요.</Description>
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                {targetOptions.map((target) => (
+                  <Checkbox key={target.value} value={target.value}>
+                    <Checkbox.Content className="relative flex min-h-16 w-full items-center gap-3 rounded-2xl border border-border bg-surface p-3 transition-colors data-[selected=true]:border-accent data-[selected=true]:bg-accent/10">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent">
+                        {target.initial}
+                      </span>
+                      <span className="text-sm font-semibold">{target.label}</span>
+                      <Checkbox.Control className="absolute right-3 top-3">
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                    </Checkbox.Content>
+                  </Checkbox>
+                ))}
+              </div>
+              <FieldError>담당자를 한 명 이상 선택해 주세요.</FieldError>
+            </CheckboxGroup>
 
-        <DrawerFooter className="flex-row gap-4 justify-center mt-4 px-6 pb-8">
-          <motion.div 
-            initial={{ opacity: 0, y: 15 }}
-            animate={open ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
-            transition={{ type: "spring" as const, stiffness: 300, damping: 24, delay: 0.35 }}
-            className="flex w-full gap-4"
-          >
-            <DrawerClose render={<NeumorphButton intent="secondary" className="flex-1 h-14 text-lg rounded-xl">취소</NeumorphButton>} />
-            <StatusButton
-              intent="primary"
-              className="flex-1 h-14 text-lg rounded-xl"
-              disabled={!isFormValid}
-              onClick={handleSubmit}
-              status={addMutation.isPending ? "loading" : success ? "success" : "idle"}
-            />
-          </motion.div>
-        </DrawerFooter>
+            {submitError ? (
+              <p
+                role="alert"
+                className="rounded-2xl bg-danger/10 px-4 py-3 text-sm text-danger"
+              >
+                {submitError}
+              </p>
+            ) : null}
+          </DrawerPanel>
+
+          <DrawerFooter className="grid grid-cols-2 gap-3 border-t border-border px-6 pb-8 pt-4">
+            <Button
+              fullWidth
+              isDisabled={addMutation.isPending}
+              type="button"
+              variant="secondary"
+              onPress={handleCancel}
+            >
+              취소
+            </Button>
+            <Button
+              fullWidth
+              isDisabled={!isFormValid || success}
+              isPending={addMutation.isPending}
+              type="submit"
+            >
+              {addMutation.isPending ? (
+                <>
+                  <Spinner color="current" size="sm" />
+                  등록 중
+                </>
+              ) : success ? (
+                <>
+                  <Check aria-hidden="true" className="size-4" />
+                  등록 완료
+                </>
+              ) : (
+                "추가하기"
+              )}
+            </Button>
+          </DrawerFooter>
+        </Form>
       </DrawerPopup>
     </Drawer>
   );
