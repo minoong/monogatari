@@ -355,6 +355,7 @@ const SwipeableItem = ({
           // Left drag (delete)
           if (info.offset.x < -80 && !willDelete) {
             setWillDelete(true);
+            triggerHapticFeedback(18);
           } else if (info.offset.x >= -80 && willDelete) {
             setWillDelete(false);
           }
@@ -363,6 +364,7 @@ const SwipeableItem = ({
           if (isNudgeAllowed) {
             if (info.offset.x > 80 && !willNudge) {
               setWillNudge(true);
+              triggerHapticFeedback(12);
             } else if (info.offset.x <= 80 && willNudge) {
               setWillNudge(false);
             }
