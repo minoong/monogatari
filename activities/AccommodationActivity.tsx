@@ -70,6 +70,8 @@ const getFollowingDate = (dateLabel: string) => {
   return `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
 };
 
+const formatAccordionDateTime = (dateTime: string) => dateTime.replace(" · ", " ");
+
 const STAY_ACCORDION_ITEMS: StayAccordionItem[] = [
   {
     id: "all",
@@ -147,26 +149,20 @@ const StayAccordion: React.FC<StayAccordionProps> = ({ onFilterChange }) => {
                     className="relative flex h-full min-h-0 min-w-0 shrink items-end overflow-hidden bg-slate-950"
                     style={{ backgroundImage: `linear-gradient(180deg, transparent 32%, rgba(0,0,0,.7)), url(${item.imageUrl})`, backgroundPosition: "center", backgroundSize: "cover" }}
                   >
-                    <motion.div
-                      initial={{ opacity: 0, y: 18 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 18 }}
-                      transition={{ delay: 0.12, duration: 0.2 }}
-                      className="flex h-[70px] w-full flex-col bg-black/35 px-3 py-2.5 text-white backdrop-blur-sm"
-                    >
-                      <p className="text-sm font-bold">{item.title === "전체" ? "예약한 숙소" : item.title}</p>
-                      <div className="mt-1.5 flex items-end gap-2">
-                        <div>
-                          <p className="text-[9px] font-semibold tracking-[0.08em] text-white/55">체크인</p>
-                          <p className="mt-0.5 text-xs font-semibold tabular-nums text-white/95">{item.from}</p>
+                    <div className="absolute inset-x-0 bottom-0 grid h-[82px] grid-rows-[20px_1fr] bg-black/45 px-3 py-2.5 text-white backdrop-blur-sm">
+                      <p className="truncate text-sm font-bold leading-5">{item.title === "전체" ? "예약한 숙소" : item.title}</p>
+                      <div className="grid grid-cols-[minmax(0,1fr)_14px_minmax(0,1fr)] items-end gap-1.5">
+                        <div className="min-w-0">
+                          <p className="text-[9px] font-semibold leading-3 tracking-[0.08em] text-white/55">체크인</p>
+                          <p className="mt-0.5 whitespace-nowrap text-[11px] font-semibold leading-4 tabular-nums text-white/95">{formatAccordionDateTime(item.from)}</p>
                         </div>
-                        <span className="mb-1 h-px min-w-4 flex-1 bg-white/30" />
-                        <div className="text-right">
-                          <p className="text-[9px] font-semibold tracking-[0.08em] text-white/55">체크아웃</p>
-                          <p className="mt-0.5 text-xs font-semibold tabular-nums text-white/95">{item.to}</p>
+                        <span className="mb-2 h-px bg-white/30" />
+                        <div className="min-w-0 text-right">
+                          <p className="text-[9px] font-semibold leading-3 tracking-[0.08em] text-white/55">체크아웃</p>
+                          <p className="mt-0.5 whitespace-nowrap text-[11px] font-semibold leading-4 tabular-nums text-white/95">{formatAccordionDateTime(item.to)}</p>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   </motion.div>
                 ) : null}
               </AnimatePresence>
