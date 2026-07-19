@@ -194,19 +194,25 @@ export const AccommodationActivity: React.FC = () => {
                 </div>
 
                 <div className="mt-4 overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10">
+                  <div className="relative h-44 overflow-hidden">
                   <iframe
                     title={`${stay.name} Google 지도`}
                     src={`https://www.google.com/maps?q=${encodeURIComponent(stay.mapQuery)}&output=embed`}
                     loading="lazy"
-                    className="h-44 w-full border-0"
+                    className="h-full w-full border-0"
                     referrerPolicy="no-referrer-when-downgrade"
                   />
+                    <span aria-hidden="true" className="pointer-events-none absolute left-0 top-0 h-11 w-24 bg-white/95 dark:bg-[#202124]/95" />
+                  </div>
                   <div className="px-3 py-2.5">
                     <p className="truncate text-xs text-gray-500 dark:text-gray-400"><MapPin className="mr-1 inline text-indigo-500" size={13} />{stay.address}</p>
                   </div>
                 </div>
 
-                <div className="mt-3">
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stay.mapQuery)}`} target="_blank" rel="noreferrer" className="flex h-10 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700 transition-transform active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.05] dark:text-gray-100">
+                    Google 지도 <ExternalLink size={14} />
+                  </a>
                   <a href={stay.agodaUrl} target="_blank" rel="noreferrer" className="flex h-10 items-center justify-center gap-1.5 rounded-xl bg-[#5392f9] text-xs font-bold text-white transition-transform active:scale-[0.98]">
                     Agoda 예약 정보 <ExternalLink size={14} />
                   </a>
