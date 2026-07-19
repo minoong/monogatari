@@ -7,6 +7,7 @@ import NeumorphButton from "../components/ui/neumorph-button";
 import { ChevronRight, Hotel } from "lucide-react";
 import { MinimalCardExpand } from "../components/ui/minimal-card-expand";
 import { ACCOMMODATIONS } from "../lib/accommodations";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
   <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -14,11 +15,17 @@ const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
       <div className="flex items-center gap-2">
         <span className="flex size-8 items-center justify-center rounded-xl bg-gray-100 text-gray-600"><Hotel size={17} /></span>
         <div>
-          <p className="text-sm font-bold text-gray-900">예약한 숙소</p>
+          <p className="text-sm font-bold text-gray-900">HP!</p>
           <p className="text-[11px] text-gray-400">8/29–9/1 · 3곳</p>
         </div>
       </div>
-      <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-bold text-gray-600">예약 완료</span>
+      <DotLottieReact
+        src="/reservation-heart.lottie"
+        autoplay
+        loop
+        aria-hidden="true"
+        className="size-11 shrink-0"
+      />
     </div>
 
     <MinimalCardExpand
