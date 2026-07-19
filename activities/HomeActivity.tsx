@@ -2,12 +2,89 @@ import React, { useState } from "react";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { BottomNav } from "../components/BottomNav";
-import { motion } from "framer-motion";
+import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import NeumorphButton from "../components/ui/neumorph-button";
 import { ChevronRight, Hotel } from "lucide-react";
 import { MinimalCardExpand } from "../components/ui/minimal-card-expand";
 import { ACCOMMODATIONS } from "../lib/accommodations";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+
+const ROLL_STAGGER = 0.035;
+
+const AutoTextRoll: React.FC<{ children: string }> = ({ children }) => {
+  const controls = useAnimationControls();
+  const prefersReducedMotion = useReducedMotion();
+
+  React.useEffect(() => {
+    if (prefersReducedMotion) {
+      controls.set("initial");
+      return;
+    }
+
+    let cancelled = false;
+    let timer: number | null = null;
+    const wait = (duration: number) => new Promise<void>((resolve) => {
+      timer = window.setTimeout(resolve, duration);
+    });
+
+    const play = async () => {
+      await wait(2_000);
+      while (!cancelled) {
+        await controls.start("rolled");
+        if (cancelled) return;
+        await wait(3_800);
+        controls.set("initial");
+        await wait(80);
+      }
+    };
+
+    void play();
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [controls, prefersReducedMotion]);
+
+  return (
+    <motion.span
+      aria-hidden="true"
+      initial="initial"
+      animate={controls}
+      className="relative block overflow-hidden leading-none"
+    >
+      <span className="block">
+        {children.split("").map((letter, index) => {
+          const delay = ROLL_STAGGER * Math.abs(index - (children.length - 1) / 2);
+          return (
+            <motion.span
+              key={index}
+              variants={{ initial: { y: 0 }, rolled: { y: "100%" } }}
+              transition={{ ease: "easeInOut", duration: 0.38, delay }}
+              className="inline-block"
+            >
+              {letter}
+            </motion.span>
+          );
+        })}
+      </span>
+      <span className="absolute inset-0 block">
+        {children.split("").map((letter, index) => {
+          const delay = ROLL_STAGGER * Math.abs(index - (children.length - 1) / 2);
+          return (
+            <motion.span
+              key={index}
+              variants={{ initial: { y: "-100%" }, rolled: { y: 0 } }}
+              transition={{ ease: "easeInOut", duration: 0.38, delay }}
+              className="inline-block"
+            >
+              {letter}
+            </motion.span>
+          );
+        })}
+      </span>
+    </motion.span>
+  );
+};
 
 const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
   <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -82,9 +159,10 @@ const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
     <button
       type="button"
       onClick={onOpen}
+      aria-label="숙소 자세히 보기"
       className="mt-3 flex h-11 w-full items-center justify-center gap-1 rounded-xl bg-indigo-600 text-sm font-bold text-white transition-transform active:scale-[0.98]"
     >
-      숙소 자세히 보기 <ChevronRight size={17} />
+      <AutoTextRoll>숙소 자세히 보기</AutoTextRoll> <ChevronRight size={17} />
     </button>
   </section>
 );
