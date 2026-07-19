@@ -4,6 +4,7 @@ import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { BottomNav } from "../components/BottomNav";
 import { motion } from "framer-motion";
 import NeumorphButton from "../components/ui/neumorph-button";
+import { Button } from "@heroui/react";
 
 export const HomeActivity: React.FC = () => {
   const { push, replace } = useFlow();
@@ -20,6 +21,13 @@ export const HomeActivity: React.FC = () => {
         </div>
 
         <div className="p-4 flex flex-col gap-6">
+          {/* HeroUI Smoke Test Button */}
+          <div className="flex justify-center">
+            <Button variant="primary" className="w-full">
+              HeroUI Smoke Test
+            </Button>
+          </div>
+
           {tripState === "before" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
               <div className="bg-blue-100 dark:bg-blue-900 rounded-2xl p-6 text-center">
