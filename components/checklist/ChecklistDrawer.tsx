@@ -224,7 +224,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
             ) : null}
           </DrawerPanel>
 
-          <DrawerFooter className="grid grid-cols-2 gap-3 border-t border-border px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
+          <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
             <Button
               fullWidth
               className="h-12 rounded-2xl text-base"
