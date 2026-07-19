@@ -14,7 +14,7 @@ import NeumorphButton from "../ui/neumorph-button";
 import StatusButton from "../animata/button/status-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, Radio, CheckboxGroup, Checkbox } from "@heroui/react";
+import { RadioGroup, Radio, CheckboxGroup, Checkbox, Label as HeroLabel } from "@heroui/react";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { motion } from "framer-motion";
@@ -163,132 +163,110 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
 
             {/* 중요도 */}
             <motion.div variants={itemVariants} className="flex flex-col gap-3">
-              <Label className="text-base font-bold text-gray-700 dark:text-gray-300">
-                <TextEffect
-                  per="line"
-                  as="span"
-                  segmentWrapperClassName="overflow-hidden block"
-                  variants={{
-                    container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2 } } },
-                    item: {
-                      hidden: { opacity: 0, y: 40 },
-                      visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-                    },
-                  }}
-                >
-                  중요도
-                </TextEffect>
-              </Label>
               <RadioGroup
                 value={importance}
                 onChange={(val) => setImportance(val as "high" | "normal" | "low")}
                 orientation="horizontal"
                 className="gap-5 mt-1"
               >
-                <Radio value="high" className="group">
-                  <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
-                    <Radio.Control className="relative inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-input bg-background outline-none transition-colors group-data-[selected=true]:border-transparent group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-2 group-data-[focus-visible=true]:ring-ring">
-                      <Radio.Indicator className="scale-0 transition-transform duration-200 ease-out group-data-[selected=true]:scale-100 absolute -inset-px flex items-center justify-center rounded-full bg-primary after:content-[''] after:size-1.5 after:rounded-full after:bg-white" />
-                    </Radio.Control>
-                    <Badge variant="high" className="text-xs px-3 py-1 h-auto select-none">높음</Badge>
-                  </Radio.Content>
-                </Radio>
-                <Radio value="normal" className="group">
-                  <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
-                    <Radio.Control className="relative inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-input bg-background outline-none transition-colors group-data-[selected=true]:border-transparent group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-2 group-data-[focus-visible=true]:ring-ring">
-                      <Radio.Indicator className="scale-0 transition-transform duration-200 ease-out group-data-[selected=true]:scale-100 absolute -inset-px flex items-center justify-center rounded-full bg-primary after:content-[''] after:size-1.5 after:rounded-full after:bg-white" />
-                    </Radio.Control>
-                    <Badge variant="normal" className="text-xs px-3 py-1 h-auto select-none">보통</Badge>
-                  </Radio.Content>
-                </Radio>
-                <Radio value="low" className="group">
-                  <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
-                    <Radio.Control className="relative inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-input bg-background outline-none transition-colors group-data-[selected=true]:border-transparent group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-2 group-data-[focus-visible=true]:ring-ring">
-                      <Radio.Indicator className="scale-0 transition-transform duration-200 ease-out group-data-[selected=true]:scale-100 absolute -inset-px flex items-center justify-center rounded-full bg-primary after:content-[''] after:size-1.5 after:rounded-full after:bg-white" />
-                    </Radio.Control>
-                    <Badge variant="low" className="text-xs px-3 py-1 h-auto select-none">낮음</Badge>
-                  </Radio.Content>
-                </Radio>
+                <HeroLabel className="text-base font-bold text-gray-700 dark:text-gray-300">
+                  <TextEffect
+                    per="line"
+                    as="span"
+                    segmentWrapperClassName="overflow-hidden block"
+                    variants={{
+                      container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2 } } },
+                      item: {
+                        hidden: { opacity: 0, y: 40 },
+                        visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+                      },
+                    }}
+                  >
+                    중요도
+                  </TextEffect>
+                </HeroLabel>
+                <div className="flex flex-row gap-5 mt-1">
+                  <Radio value="high">
+                    <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
+                      <Radio.Control>
+                        <Radio.Indicator />
+                      </Radio.Control>
+                      <Badge variant="high" className="text-xs px-3 py-1 h-auto select-none">높음</Badge>
+                    </Radio.Content>
+                  </Radio>
+                  <Radio value="normal">
+                    <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
+                      <Radio.Control>
+                        <Radio.Indicator />
+                      </Radio.Control>
+                      <Badge variant="normal" className="text-xs px-3 py-1 h-auto select-none">보통</Badge>
+                    </Radio.Content>
+                  </Radio>
+                  <Radio value="low">
+                    <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
+                      <Radio.Control>
+                        <Radio.Indicator />
+                      </Radio.Control>
+                      <Badge variant="low" className="text-xs px-3 py-1 h-auto select-none">낮음</Badge>
+                    </Radio.Content>
+                  </Radio>
+                </div>
               </RadioGroup>
             </motion.div>
 
             {/* 대상자 */}
             <motion.div variants={itemVariants} className="flex flex-col gap-3">
-              <Label className="text-base font-bold text-gray-700 dark:text-gray-300">
-                <TextEffect
-                  per="line"
-                  as="span"
-                  segmentWrapperClassName="overflow-hidden block"
-                  variants={{
-                    container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2 } } },
-                    item: {
-                      hidden: { opacity: 0, y: 40 },
-                      visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-                    },
-                  }}
-                >
-                  대상자 (최소 1명 선택)
-                </TextEffect>
-              </Label>
               <CheckboxGroup
                 value={targets}
                 onChange={setTargets}
-                className="flex flex-row gap-6 mt-1"
+                className="mt-1"
               >
-                <Checkbox value="gahyun" className="group">
-                  <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
-                    <Checkbox.Control className="relative inline-flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-[4px] border border-input bg-background outline-none transition-colors group-data-[selected=true]:bg-primary group-data-[selected=true]:border-transparent group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-2 group-data-[focus-visible=true]:ring-ring">
-                      <Checkbox.Indicator className="scale-0 transition-transform duration-200 ease-out group-data-[selected=true]:scale-100 absolute -inset-px flex items-center justify-center bg-primary text-white">
-                        <svg
-                          aria-hidden="true"
-                          className="size-3"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="3.5"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
-                        </svg>
-                      </Checkbox.Indicator>
-                    </Checkbox.Control>
-                    <div className="flex items-center gap-3 font-medium text-base select-none">
-                      <Avatar className="w-8 h-8 ring-2 ring-gray-100 dark:ring-gray-800">
-                        <AvatarImage src="" />
-                        <AvatarFallback className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">G</AvatarFallback>
-                      </Avatar>
-                      가현쨩
-                    </div>
-                  </Checkbox.Content>
-                </Checkbox>
-                <Checkbox value="minu" className="group">
-                  <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
-                    <Checkbox.Control className="relative inline-flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-[4px] border border-input bg-background outline-none transition-colors group-data-[selected=true]:bg-primary group-data-[selected=true]:border-transparent group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-2 group-data-[focus-visible=true]:ring-ring">
-                      <Checkbox.Indicator className="scale-0 transition-transform duration-200 ease-out group-data-[selected=true]:scale-100 absolute -inset-px flex items-center justify-center bg-primary text-white">
-                        <svg
-                          aria-hidden="true"
-                          className="size-3"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="3.5"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
-                        </svg>
-                      </Checkbox.Indicator>
-                    </Checkbox.Control>
-                    <div className="flex items-center gap-3 font-medium text-base select-none">
-                      <Avatar className="w-8 h-8 ring-2 ring-gray-100 dark:ring-gray-800">
-                        <AvatarImage src="" />
-                        <AvatarFallback className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">M</AvatarFallback>
-                      </Avatar>
-                      미누쿤
-                    </div>
-                  </Checkbox.Content>
-                </Checkbox>
+                <HeroLabel className="text-base font-bold text-gray-700 dark:text-gray-300">
+                  <TextEffect
+                    per="line"
+                    as="span"
+                    segmentWrapperClassName="overflow-hidden block"
+                    variants={{
+                      container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2 } } },
+                      item: {
+                        hidden: { opacity: 0, y: 40 },
+                        visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+                      },
+                    }}
+                  >
+                    대상자 (최소 1명 선택)
+                  </TextEffect>
+                </HeroLabel>
+                <div className="flex flex-row gap-6 mt-1">
+                  <Checkbox value="gahyun">
+                    <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                      <div className="flex items-center gap-3 font-medium text-base select-none">
+                        <Avatar className="w-8 h-8 ring-2 ring-gray-100 dark:ring-gray-800">
+                          <AvatarImage src="" />
+                          <AvatarFallback className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">G</AvatarFallback>
+                        </Avatar>
+                        가현쨩
+                      </div>
+                    </Checkbox.Content>
+                  </Checkbox>
+                  <Checkbox value="minu">
+                    <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                      <div className="flex items-center gap-3 font-medium text-base select-none">
+                        <Avatar className="w-8 h-8 ring-2 ring-gray-100 dark:ring-gray-800">
+                          <AvatarImage src="" />
+                          <AvatarFallback className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">M</AvatarFallback>
+                        </Avatar>
+                        미누쿤
+                      </div>
+                    </Checkbox.Content>
+                  </Checkbox>
+                </div>
               </CheckboxGroup>
             </motion.div>
           </motion.div>

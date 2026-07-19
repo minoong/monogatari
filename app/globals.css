@@ -327,3 +327,15 @@ body {
   opacity: 1;
   transform: scale(1);
 }
+
+/* HeroUI Checkbox/Radio size & border-radius adjustments to match Base UI */
+@layer components {
+  .radio__control,
+  .checkbox__control {
+    width: 1.25rem !important; /* size-5 / 20px */
+    height: 1.25rem !important;
+  }
+  .checkbox__control {
+    border-radius: 4px !important;
+  }
+}
