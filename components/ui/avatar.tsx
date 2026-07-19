@@ -2,20 +2,17 @@
 
 import { Avatar as HeroAvatar } from "@heroui/react";
 import type React from "react";
+import { cn } from "@/lib/utils";
 
 function AvatarRoot(props: React.ComponentProps<typeof HeroAvatar>) {
   return <HeroAvatar {...props} />;
 }
 
-export const Avatar = Object.assign(AvatarRoot, {
-  Image: HeroAvatar.Image,
-  Fallback: HeroAvatar.Fallback,
-});
-
 export function AvatarImage(
   props: React.ComponentProps<typeof HeroAvatar.Image>,
 ) {
-  return <HeroAvatar.Image {...props} />;
+  const { className, ...rest } = props;
+  return <HeroAvatar.Image className={cn("size-full object-cover", className)} {...rest} />;
 }
 
 export function AvatarFallback(
@@ -23,5 +20,10 @@ export function AvatarFallback(
 ) {
   return <HeroAvatar.Fallback {...props} />;
 }
+
+export const Avatar = Object.assign(AvatarRoot, {
+  Image: AvatarImage,
+  Fallback: AvatarFallback,
+});
 
 export { HeroAvatar as AvatarPrimitive };
