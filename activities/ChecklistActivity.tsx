@@ -174,12 +174,21 @@ interface PreparationItem {
   importance: "high" | "normal" | "low";
 }
 
+interface ToggleEntry {
+  id: string;
+  targetUser: string;
+  desired: boolean;
+  baseItems?: PreparationItem[];
+  timer?: ReturnType<typeof setTimeout>;
+  inFlight: boolean;
+}
+
 interface SwipeableItemProps {
   item: PreparationItem;
   targetUser: string;
   isHighlighted: boolean;
   onDelete: (id: string, assignees: string[], targetUser: string) => void;
-  onToggleCheck: (id: string, checked: boolean, targetUser: string) => void;
+  onToggleCheck: (id: string, targetUser: string, checked?: boolean) => void;
   onNudge: (target: string) => void;
 }
 
@@ -196,6 +205,7 @@ const SwipeableItem = ({
   const prefersReducedMotion = useReducedMotion();
   const [willDelete, setWillDelete] = useState(false);
   const [willNudge, setWillNudge] = useState(false);
+  const didDragRef = useRef(false);
   const x = useMotionValue(0);
   const rightBackgroundOpacity = useTransform(x, [0, -20], [0, 1]);
   const leftBackgroundOpacity = useTransform(x, [0, 20], [0, 1]);
@@ -267,6 +277,7 @@ const SwipeableItem = ({
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={dragElastic}
         onDrag={(e, info) => {
+          didDragRef.current = true;
           // Left drag (delete)
           if (info.offset.x < -80 && !willDelete) {
             setWillDelete(true);
@@ -307,6 +318,15 @@ const SwipeableItem = ({
             setWillNudge(false);
             animate(x, 0, { type: "spring", stiffness: 300, damping: 20 });
           }
+          window.setTimeout(() => {
+            didDragRef.current = false;
+          }, prefersReducedMotion ? 0 : 120);
+        }}
+        onClick={(event) => {
+          if (didDragRef.current) return;
+          const target = event.target as HTMLElement;
+          if (target.closest("button, label, a")) return;
+          onToggleCheck(item.id, targetUser);
         }}
         className={`relative z-10 flex min-h-16 select-none items-center justify-between gap-3 px-4 py-3 touch-pan-y bg-white dark:bg-[#1C1C1E] transition-colors hover:bg-gray-50 dark:hover:bg-white/5 ${
           isHighlighted ? "bg-yellow-50 dark:bg-yellow-900/20" : ""
@@ -317,7 +337,7 @@ const SwipeableItem = ({
             variant="default"
             checked={isChecked}
             onCheckedChange={(val) => {
-              onToggleCheck(item.id, val === true, targetUser);
+              onToggleCheck(item.id, targetUser, val === true);
             }}
             id={checkboxId}
             className="flex-shrink-0 cursor-pointer"
@@ -338,7 +358,9 @@ const SwipeableItem = ({
                 transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: "easeOut" }}
               />
             </label>
-            <ImportanceChip importance={item.importance} />
+            <div className="shrink-0">
+              <ImportanceChip importance={item.importance} />
+            </div>
           </div>
         </div>
       </motion.div>
@@ -414,63 +436,125 @@ export const ChecklistActivity: React.FC = () => {
     };
   }, [queryClient]);
 
-  const toggleMutation = useMutation({
-    mutationFn: async ({ id, isChecked, targetUser }: { id: string; isChecked: boolean; targetUser: string }) => {
-      const item = queryClient.getQueryData<PreparationItem[]>(["checklist"])?.find((i) => i.id === id);
-      if (!item) throw new Error("Item not found");
+  const toggleEntriesRef = useRef(new Map<string, ToggleEntry>());
 
-      let newCompletedBy = [...item.completed_by];
-      if (isChecked) {
-        if (!newCompletedBy.includes(targetUser)) newCompletedBy.push(targetUser);
-      } else {
-        newCompletedBy = newCompletedBy.filter((u) => u !== targetUser);
-      }
+  const updateOptimisticToggle = (id: string, targetUser: string, isChecked: boolean) => {
+    queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
+      old.map((item) => {
+        if (item.id !== id) return item;
+        const completedBy = isChecked
+          ? Array.from(new Set([...item.completed_by, targetUser]))
+          : item.completed_by.filter((user) => user !== targetUser);
+        return { ...item, completed_by: completedBy };
+      }),
+    );
+  };
 
-      const res = await fetch("/api/checklist", {
+  const flushToggle = async (key: string) => {
+    const entry = toggleEntriesRef.current.get(key);
+    if (!entry || entry.inFlight) return;
+
+    const item = queryClient
+      .getQueryData<PreparationItem[]>(["checklist"])
+      ?.find((candidate) => candidate.id === entry.id);
+    if (!item) {
+      toggleEntriesRef.current.delete(key);
+      return;
+    }
+
+    entry.inFlight = true;
+    locallyUpdatingIds.current.add(entry.id);
+    const requestState = entry.desired;
+    const completedBy = requestState
+      ? Array.from(new Set([...item.completed_by, entry.targetUser]))
+      : item.completed_by.filter((user) => user !== entry.targetUser);
+
+    try {
+      const response = await fetch("/api/checklist", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, completed_by: newCompletedBy }),
+        body: JSON.stringify({ id: entry.id, completed_by: completedBy }),
       });
-      if (!res.ok) throw new Error("Update failed");
-      return { id, newCompletedBy };
-    },
-    onMutate: async ({ id, isChecked, targetUser }) => {
-      await queryClient.cancelQueries({ queryKey: ["checklist"] });
-      locallyUpdatingIds.current.add(id);
-      const previousItems = queryClient.getQueryData<PreparationItem[]>(["checklist"]);
+      if (!response.ok) throw new Error("Update failed");
 
-      queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) => {
-        return old.map((i) => {
-          if (i.id === id) {
-            let newCompletedBy = [...i.completed_by];
-            if (isChecked) {
-              if (!newCompletedBy.includes(targetUser)) newCompletedBy.push(targetUser);
-            } else {
-              newCompletedBy = newCompletedBy.filter((u) => u !== targetUser);
-            }
-            return { ...i, completed_by: newCompletedBy };
-          }
-          return i;
-        });
-      });
-
-      return { previousItems };
-    },
-    onError: (err, variables, context) => {
-      locallyUpdatingIds.current.delete(variables.id);
-      if (context?.previousItems) {
-        queryClient.setQueryData(["checklist"], context.previousItems);
+      const payload = (await response.json()) as { data?: PreparationItem };
+      const currentEntry = toggleEntriesRef.current.get(key);
+      if (currentEntry && currentEntry.desired !== requestState) {
+        const serverItems = queryClient.getQueryData<PreparationItem[]>(["checklist"])?.map((candidate) =>
+          candidate.id === payload.data?.id && payload.data ? payload.data : candidate,
+        );
+        currentEntry.baseItems = serverItems;
+        currentEntry.inFlight = false;
+        updateOptimisticToggle(currentEntry.id, currentEntry.targetUser, currentEntry.desired);
+        locallyUpdatingIds.current.delete(entry.id);
+        scheduleToggle(key);
+        return;
       }
-      toast.error("업데이트 실패");
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["checklist"] });
-    },
-  });
 
-  const toggleCheck = (id: string, isChecked: boolean, targetUser: string) => {
-    toggleMutation.mutate({ id, isChecked, targetUser });
+      if (payload.data) {
+        queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
+          old.map((candidate) => (candidate.id === payload.data?.id ? payload.data : candidate)),
+        );
+      }
+      toggleEntriesRef.current.delete(key);
+      locallyUpdatingIds.current.delete(entry.id);
+      await queryClient.invalidateQueries({ queryKey: ["checklist"] });
+    } catch {
+      const currentEntry = toggleEntriesRef.current.get(key);
+      if (currentEntry && currentEntry.desired !== requestState) {
+        currentEntry.inFlight = false;
+        locallyUpdatingIds.current.delete(entry.id);
+        scheduleToggle(key);
+        return;
+      }
+      if (currentEntry?.baseItems) {
+        queryClient.setQueryData(["checklist"], currentEntry.baseItems);
+      }
+      toggleEntriesRef.current.delete(key);
+      locallyUpdatingIds.current.delete(entry.id);
+      toast.error("업데이트 실패");
+    }
   };
+
+  const scheduleToggle = (key: string) => {
+    const entry = toggleEntriesRef.current.get(key);
+    if (!entry) return;
+    if (entry.timer) clearTimeout(entry.timer);
+    entry.timer = setTimeout(() => {
+      entry.timer = undefined;
+      void flushToggle(key);
+    }, 300);
+  };
+
+  const toggleCheck = (id: string, targetUser: string, requestedState?: boolean) => {
+    const key = `${targetUser}:${id}`;
+    const currentItems = queryClient.getQueryData<PreparationItem[]>(["checklist"]) ?? [];
+    const currentItem = currentItems.find((item) => item.id === id);
+    if (!currentItem) return;
+
+    const entry = toggleEntriesRef.current.get(key) ?? {
+      id,
+      targetUser,
+      desired: currentItem.completed_by.includes(targetUser),
+      baseItems: currentItems,
+      inFlight: false,
+    };
+    entry.desired = requestedState ?? !currentItem.completed_by.includes(targetUser);
+    if (!entry.baseItems) entry.baseItems = currentItems;
+    toggleEntriesRef.current.set(key, entry);
+    updateOptimisticToggle(id, targetUser, entry.desired);
+    scheduleToggle(key);
+  };
+
+  useEffect(() => {
+    const entries = toggleEntriesRef.current;
+    return () => {
+      for (const entry of entries.values()) {
+        if (entry.timer) clearTimeout(entry.timer);
+      }
+      entries.clear();
+    };
+  }, []);
 
   const nudgeMutation = useMutation({
     mutationFn: async (target: string) => {
