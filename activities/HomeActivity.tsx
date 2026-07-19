@@ -50,8 +50,9 @@ const useAutomaticRoll = (itemCount: number) => {
   return { controls, currentIndex };
 };
 
-const AutoTextRoll: React.FC<{ labels: readonly string[] }> = ({ labels }) => {
-  const { controls, currentIndex } = useAutomaticRoll(labels.length);
+type AutomaticRoll = ReturnType<typeof useAutomaticRoll>;
+
+const AutoTextRoll: React.FC<{ labels: readonly string[] } & AutomaticRoll> = ({ labels, controls, currentIndex }) => {
   const currentLabel = labels[currentIndex] ?? "숙소 자세히 보기";
   const nextLabel = labels[(currentIndex + 1) % labels.length] ?? currentLabel;
 
@@ -96,8 +97,7 @@ const AutoTextRoll: React.FC<{ labels: readonly string[] }> = ({ labels }) => {
   );
 };
 
-const AutoImageRoll: React.FC<{ imageUrls: readonly (string | null)[] }> = ({ imageUrls }) => {
-  const { controls, currentIndex } = useAutomaticRoll(imageUrls.length);
+const AutoImageRoll: React.FC<{ imageUrls: readonly (string | null)[] } & AutomaticRoll> = ({ imageUrls, controls, currentIndex }) => {
   const currentImageUrl = imageUrls[currentIndex] ?? null;
   const nextImageUrl = imageUrls[(currentIndex + 1) % imageUrls.length] ?? currentImageUrl;
   const imageStyle = (imageUrl: string | null) => imageUrl
@@ -113,13 +113,13 @@ const AutoImageRoll: React.FC<{ imageUrls: readonly (string | null)[] }> = ({ im
     >
       <motion.span
         variants={{ initial: { y: 0 }, rolled: { y: "-100%" } }}
-        transition={{ ease: "easeInOut", duration: 0.5 }}
+        transition={{ ease: "easeInOut", duration: 0.72 }}
         className="absolute inset-0 bg-cover bg-center"
         style={imageStyle(currentImageUrl)}
       />
       <motion.span
         variants={{ initial: { y: "100%" }, rolled: { y: 0 } }}
-        transition={{ ease: "easeInOut", duration: 0.5 }}
+        transition={{ ease: "easeInOut", duration: 0.72 }}
         className="absolute inset-0 bg-cover bg-center"
         style={imageStyle(nextImageUrl)}
       />
@@ -127,7 +127,10 @@ const AutoImageRoll: React.FC<{ imageUrls: readonly (string | null)[] }> = ({ im
   );
 };
 
-const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
+const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => {
+  const automaticRoll = useAutomaticRoll(ACCOMMODATIONS.length + 1);
+
+  return (
   <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white p-4 shadow-sm">
     <div className="mb-3 flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
@@ -203,14 +206,15 @@ const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
       aria-label="숙소 자세히 보기"
       className="relative mt-3 flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-sm font-bold text-white transition-transform active:scale-[0.98]"
     >
-      <AutoImageRoll imageUrls={[null, ...ACCOMMODATIONS.map((stay) => stay.imageUrl)]} />
+      <AutoImageRoll imageUrls={[null, ...ACCOMMODATIONS.map((stay) => stay.imageUrl)]} {...automaticRoll} />
       <span className="relative z-10 flex w-64 max-w-[calc(100%-1rem)] items-center gap-1 drop-shadow-sm">
-        <AutoTextRoll labels={["숙소 자세히 보기", ...ACCOMMODATIONS.map((stay) => stay.name)]} />
+        <AutoTextRoll labels={["숙소 자세히 보기", ...ACCOMMODATIONS.map((stay) => stay.name)]} {...automaticRoll} />
         <ChevronRight size={17} className="shrink-0" />
       </span>
     </button>
   </section>
-);
+  );
+};
 
 export const HomeActivity: React.FC = () => {
   const { push, replace } = useFlow();
