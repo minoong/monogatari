@@ -29,51 +29,56 @@ interface StayAccordionProps {
   onFilterChange: (filter: StayFilter) => void;
 }
 
+interface StayAccordionItem {
+  id: StayFilter;
+  title: string;
+  label: string;
+  imageUrl: string;
+  description: string;
+}
+
+const STAY_ACCORDION_ITEMS: StayAccordionItem[] = [
+  {
+    id: "all",
+    title: "전체",
+    label: "ALL",
+    imageUrl: ACCOMMODATIONS[0].imageUrl,
+    description: "방콕 · 팟타야 · 코시창 · 예약한 숙소 3곳",
+  },
+  ...ACCOMMODATIONS.map((stay) => ({
+    id: stay.id,
+    title: stay.city,
+    label: stay.date,
+    imageUrl: stay.imageUrl,
+    description: `${stay.name} · 체크인 ${stay.checkIn} · 체크아웃 ${stay.checkOut}`,
+  })),
+];
+
 const StayAccordion: React.FC<StayAccordionProps> = ({ activeFilter, onFilterChange }) => {
-  const [openId, setOpenId] = React.useState<Accommodation["id"]>(ACCOMMODATIONS[0].id);
+  const [openId, setOpenId] = React.useState<StayFilter>("all");
   const { width } = useWindowSize();
   const accordionHeight = width && width >= 1024 ? 260 : 216;
-  const openStay = ACCOMMODATIONS.find((stay) => stay.id === openId) ?? ACCOMMODATIONS[0];
 
-  const selectStay = (stay: Accommodation) => {
-    setOpenId(stay.id);
-    onFilterChange(stay.id);
+  const selectStay = (item: StayAccordionItem) => {
+    setOpenId(item.id);
+    onFilterChange(item.id);
   };
 
   return (
     <section className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-[#1C1C1E] dark:ring-white/10">
-      <div className="flex items-center justify-between gap-3 px-5 pb-3 pt-5">
-        <div>
-          <p className="text-xs font-bold tracking-[0.18em] text-indigo-500">BOOKED STAYS</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-950 dark:text-white">이번 여행의 숙소 3곳</h1>
-        </div>
-        <button
-          type="button"
-          onClick={() => onFilterChange("all")}
-          aria-pressed={activeFilter === "all"}
-          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
-            activeFilter === "all"
-              ? "bg-indigo-600 text-white"
-              : "bg-indigo-50 text-indigo-700 dark:bg-indigo-400/15 dark:text-indigo-200"
-          }`}
-        >
-          전체 보기
-        </button>
-      </div>
-
       <div
-        className="flex flex-row overflow-hidden border-t border-gray-100 dark:border-white/10"
+        className="flex flex-row overflow-hidden"
         style={{ height: accordionHeight }}
       >
-        {ACCOMMODATIONS.map((stay) => {
-          const isOpen = stay.id === openId;
-          const isFiltered = stay.id === activeFilter;
+        {STAY_ACCORDION_ITEMS.map((item) => {
+          const isOpen = item.id === openId;
+          const isFiltered = item.id === activeFilter;
 
           return (
-            <React.Fragment key={stay.id}>
+            <React.Fragment key={item.id}>
               <button
                 type="button"
-                onClick={() => selectStay(stay)}
+                onClick={() => selectStay(item)}
                 aria-pressed={isFiltered}
                 className={`group relative z-10 flex w-14 shrink-0 flex-col justify-end gap-3 border-r border-gray-100 p-3 text-left transition-colors dark:border-white/10 lg:w-16 ${
                   isOpen
@@ -81,21 +86,21 @@ const StayAccordion: React.FC<StayAccordionProps> = ({ activeFilter, onFilterCha
                     : "bg-white text-gray-800 hover:bg-gray-50 dark:bg-[#1C1C1E] dark:text-gray-100 dark:hover:bg-white/5"
                 }`}
               >
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-xs font-bold text-white">{stay.date}</span>
-                <span className="text-sm font-semibold [writing-mode:vertical-lr] rotate-180">{stay.city}</span>
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-[10px] font-bold text-white">{item.label}</span>
+                <span className="text-sm font-semibold [writing-mode:vertical-rl]">{item.title}</span>
                 <span className="pointer-events-none absolute bottom-1/2 right-0 size-3 translate-x-1/2 translate-y-1/2 rotate-45 border-r border-t border-gray-100 bg-inherit dark:border-white/10" />
               </button>
 
               <AnimatePresence initial={false}>
                 {isOpen ? (
                   <motion.div
-                    key={stay.id}
+                    key={item.id}
                     initial={{ width: "0%" }}
                     animate={{ width: "100%" }}
                     exit={{ width: "0%" }}
                     transition={{ type: "spring", stiffness: 280, damping: 28, mass: 0.75 }}
                     className="relative flex h-full min-h-0 min-w-0 shrink items-end overflow-hidden bg-slate-950"
-                    style={{ backgroundImage: `linear-gradient(180deg, transparent 32%, rgba(0,0,0,.7)), url(${stay.imageUrl})`, backgroundPosition: "center", backgroundSize: "cover" }}
+                    style={{ backgroundImage: `linear-gradient(180deg, transparent 32%, rgba(0,0,0,.7)), url(${item.imageUrl})`, backgroundPosition: "center", backgroundSize: "cover" }}
                   >
                     <motion.div
                       initial={{ opacity: 0, y: 18 }}
@@ -104,8 +109,8 @@ const StayAccordion: React.FC<StayAccordionProps> = ({ activeFilter, onFilterCha
                       transition={{ delay: 0.12, duration: 0.2 }}
                       className="w-full bg-black/35 px-4 py-3 text-white backdrop-blur-sm"
                     >
-                      <p className="text-sm font-bold">{stay.name}</p>
-                      <p className="mt-0.5 text-xs text-white/80">{stay.dateLabel} · 체크인 {stay.checkIn} · 체크아웃 {stay.checkOut}</p>
+                      <p className="text-sm font-bold">{item.title === "전체" ? "예약한 숙소" : item.title}</p>
+                      <p className="mt-0.5 text-xs text-white/80">{item.description}</p>
                     </motion.div>
                   </motion.div>
                 ) : null}
@@ -114,10 +119,6 @@ const StayAccordion: React.FC<StayAccordionProps> = ({ activeFilter, onFilterCha
           );
         })}
       </div>
-
-      <p className="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">
-        {activeFilter === "all" ? "숙소를 탭하면 해당 숙소 정보만 볼 수 있어요." : `${openStay.city} 숙소 정보만 보고 있어요.`}
-      </p>
     </section>
   );
 };
