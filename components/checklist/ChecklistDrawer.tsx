@@ -202,16 +202,18 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
             >
               <Label>담당자</Label>
               <Description>한 명 이상 선택해 주세요.</Description>
-              {targetOptions.map((target) => (
-                <Checkbox key={target.value} value={target.value}>
-                  <Checkbox.Content>
-                    <Checkbox.Control>
-                      <Checkbox.Indicator />
-                    </Checkbox.Control>
-                    {target.label}
-                  </Checkbox.Content>
-                </Checkbox>
-              ))}
+              <div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">
+                {targetOptions.map((target) => (
+                  <Checkbox key={target.value} value={target.value}>
+                    <Checkbox.Content>
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                      {target.label}
+                    </Checkbox.Content>
+                  </Checkbox>
+                ))}
+              </div>
               <FieldError>담당자를 한 명 이상 선택해 주세요.</FieldError>
             </CheckboxGroup>
 
