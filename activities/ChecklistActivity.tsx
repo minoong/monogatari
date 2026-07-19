@@ -49,7 +49,6 @@ const ProgressIslandContent = ({
 }) => {
   const { setSize, state } = useDynamicIslandSize();
   const isExpanded = state.size === SIZE_PRESETS.PROGRESS_EXPANDED;
-  const prefersReducedMotion = useReducedMotion();
 
   const toggleExpand = () => {
     if (isExpanded) {
@@ -80,7 +79,7 @@ const ProgressIslandContent = ({
             </div>
           </div>
           
-          <motion.div animate={{ rotate: prefersReducedMotion ? 0 : isExpanded ? 180 : 0 }}>
+          <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
             <ChevronDown aria-hidden="true" size={20} className="text-neutral-500" />
           </motion.div>
         </div>
@@ -97,11 +96,15 @@ const ProgressIslandContent = ({
                 hidden: { opacity: 0 },
                 visible: {
                   opacity: 1,
-                  transition: prefersReducedMotion ? undefined : { staggerChildren: 0.1 },
+                  transition: {
+                    staggerChildren: 0.1,
+                  },
                 },
                 exit: {
                   opacity: 0,
-                  transition: { duration: prefersReducedMotion ? 0 : 0.1 }
+                  transition: {
+                    duration: 0.1,
+                  },
                 },
               }}
               className="w-full flex flex-col mt-4 overflow-hidden"
@@ -117,9 +120,9 @@ const ProgressIslandContent = ({
                     variants={{
                       hidden: { opacity: 0, y: 20 },
                       visible: { opacity: 1, y: 0 },
-                      exit: { opacity: 0, y: prefersReducedMotion ? 0 : 10, transition: { duration: prefersReducedMotion ? 0 : 0.1 } },
+                      exit: { opacity: 0, y: 10, transition: { duration: 0.1 } },
                     }}
-                    transition={{ duration: prefersReducedMotion ? 0 : 0.4, ease: "easeOut" }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
                     className="space-y-1"
                   >
                     <div className="flex justify-between items-center text-[11px]">
@@ -148,7 +151,7 @@ const ProgressIslandContent = ({
                         className={`h-full ${item.bg} rounded-full`}
                         initial={{ width: 0 }}
                         animate={{ width: `${item.progress}%` }}
-                        transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.2 + i * 0.1, ease: "easeOut" }}
+                        transition={{ duration: 0.6, delay: 0.2 + i * 0.1, ease: "easeOut" }}
                       />
                     </div>
                   </motion.div>
