@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -47,6 +48,25 @@ const targetOptions = [
   { value: "minu", label: "미누쿤", initials: "M", image: "/avatars/minu.webp", color: "success" as const },
 ];
 
+const drawerContentVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { delayChildren: 0.08, staggerChildren: 0.08 },
+  },
+  reduced: { opacity: 1 },
+};
+
+const drawerItemVariants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.32, ease: "easeOut" as const },
+  },
+  reduced: { opacity: 1, y: 0, transition: { duration: 0 } },
+};
+
 export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
@@ -56,6 +76,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
   const [success, setSuccess] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   const resetForm = () => {
     setTitle("");
@@ -136,120 +157,136 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
           onSubmit={handleSubmit}
           validationBehavior="native"
         >
-          <DrawerHeader className="px-6 pb-4 text-left">
-            <DrawerTitle>준비물 추가</DrawerTitle>
-            <DrawerDescription className="text-pretty">
-              무엇을 누가 챙길지 정해 두면 여행 준비가 한결 가벼워져요.
-            </DrawerDescription>
-          </DrawerHeader>
+          <motion.div
+            initial="hidden"
+            animate={prefersReducedMotion ? "reduced" : "visible"}
+            variants={drawerContentVariants}
+            className="flex min-h-0 w-full flex-1 flex-col"
+          >
+            <motion.div variants={drawerItemVariants}>
+              <DrawerHeader className="px-6 pb-4 text-left">
+                <DrawerTitle>준비물 추가</DrawerTitle>
+                <DrawerDescription className="text-pretty">
+                  무엇을 누가 챙길지 정해 두면 여행 준비가 한결 가벼워져요.
+                </DrawerDescription>
+              </DrawerHeader>
+            </motion.div>
 
-          <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto overscroll-contain px-6 py-5">
-            <TextField
-              fullWidth
-              isRequired
-              name="title"
-              value={title}
-              onChange={setTitle}
-            >
-              <Label>준비물 이름</Label>
-              <Input
-                ref={inputRef}
-                autoComplete="off"
-                placeholder="예: 보조배터리…"
-              />
-              <Description>짧고 알아보기 쉬운 이름이 좋아요.</Description>
-            </TextField>
+            <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto overscroll-contain px-6 py-5">
+              <motion.div variants={drawerItemVariants}>
+                <TextField
+                  fullWidth
+                  isRequired
+                  name="title"
+                  value={title}
+                  onChange={setTitle}
+                >
+                  <Label>준비물 이름</Label>
+                  <Input
+                    ref={inputRef}
+                    autoComplete="off"
+                    placeholder="예: 보조배터리…"
+                  />
+                  <Description>짧고 알아보기 쉬운 이름이 좋아요.</Description>
+                </TextField>
+              </motion.div>
 
-            <div className="flex flex-col gap-3">
-              <Label>중요도</Label>
-              <Description>준비 순서를 정할 때 사용해요.</Description>
-              <RadioGroup
-                className="pt-1"
-                isRequired
-                name="importance"
-                orientation="horizontal"
-                value={importance}
-                onChange={(value) => setImportance(value as Importance)}
-              >
-                {importanceOptions.map((option) => (
-                  <Radio key={option.value} value={option.value}>
-                    <Radio.Content className="flex items-center gap-2">
-                      <Radio.Control>
-                        <Radio.Indicator />
-                      </Radio.Control>
-                      <ImportanceChip importance={option.value} />
-                    </Radio.Content>
-                  </Radio>
-                ))}
-              </RadioGroup>
-            </div>
+              <motion.div variants={drawerItemVariants} className="flex flex-col gap-3">
+                <Label>중요도</Label>
+                <Description>준비 순서를 정할 때 사용해요.</Description>
+                <RadioGroup
+                  className="pt-1"
+                  isRequired
+                  name="importance"
+                  orientation="horizontal"
+                  value={importance}
+                  onChange={(value) => setImportance(value as Importance)}
+                >
+                  {importanceOptions.map((option) => (
+                    <Radio key={option.value} value={option.value}>
+                      <Radio.Content className="flex items-center gap-2">
+                        <Radio.Control>
+                          <Radio.Indicator />
+                        </Radio.Control>
+                        <ImportanceChip importance={option.value} />
+                      </Radio.Content>
+                    </Radio>
+                  ))}
+                </RadioGroup>
+              </motion.div>
 
-            <CheckboxGroup
-              className="gap-3"
-              isRequired
-              name="targets"
-              value={targets}
-              onChange={setTargets}
-            >
-              <Label>담당자</Label>
-              <Description>한 명 이상 선택해 주세요.</Description>
-              <div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">
-                {targetOptions.map((target) => (
-                  <Checkbox key={target.value} value={target.value}>
-                    <Checkbox.Content>
-                      <Checkbox.Control>
-                        <Checkbox.Indicator />
-                      </Checkbox.Control>
-                      <Avatar color={target.color} size="sm">
-                        <AvatarImage alt="" src={target.image} />
-                        <AvatarFallback>{target.initials}</AvatarFallback>
-                      </Avatar>
-                      <span>{target.label}</span>
-                    </Checkbox.Content>
-                  </Checkbox>
-                ))}
-              </div>
-            </CheckboxGroup>
+              <motion.div variants={drawerItemVariants}>
+                <CheckboxGroup
+                  className="gap-3"
+                  isRequired
+                  name="targets"
+                  value={targets}
+                  onChange={setTargets}
+                >
+                  <Label>담당자</Label>
+                  <Description>한 명 이상 선택해 주세요.</Description>
+                  <div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">
+                    {targetOptions.map((target) => (
+                      <Checkbox key={target.value} value={target.value}>
+                        <Checkbox.Content>
+                          <Checkbox.Control>
+                            <Checkbox.Indicator />
+                          </Checkbox.Control>
+                          <Avatar color={target.color} size="sm">
+                            <AvatarImage alt="" src={target.image} />
+                            <AvatarFallback>{target.initials}</AvatarFallback>
+                          </Avatar>
+                          <span>{target.label}</span>
+                        </Checkbox.Content>
+                      </Checkbox>
+                    ))}
+                  </div>
+                </CheckboxGroup>
+              </motion.div>
 
-            {submitError ? (
-              <p
-                role="alert"
-                className="rounded-2xl bg-danger/10 px-4 py-3 text-sm text-danger"
-              >
-                {submitError}
-              </p>
-            ) : null}
-          </DrawerPanel>
+              {submitError ? (
+                <motion.p
+                  variants={drawerItemVariants}
+                  role="alert"
+                  className="rounded-2xl bg-danger/10 px-4 py-3 text-sm text-danger"
+                >
+                  {submitError}
+                </motion.p>
+              ) : null}
+            </DrawerPanel>
 
-          <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
-            <Button
-              fullWidth
-              className="h-12 rounded-2xl text-base"
-              isDisabled={addMutation.isPending}
-              size="lg"
-              type="button"
-              variant="secondary"
-              onPress={handleCancel}
-            >
-              취소
-            </Button>
-            <StatusButton
-              className="h-12 rounded-2xl text-base"
-              fullWidth
-              isDisabled={!canSubmit || success}
-              idleText="추가하기"
-              size="lg"
-              loadingText="등록 중…"
-              status={
-                addMutation.isPending
-                  ? "loading"
-                  : success
-                    ? "success"
-                    : "idle"
-              }
-              type="submit"
-            />
-          </DrawerFooter>
+            <motion.div variants={drawerItemVariants}>
+              <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
+                <Button
+                  fullWidth
+                  className="h-12 rounded-2xl text-base"
+                  isDisabled={addMutation.isPending}
+                  size="lg"
+                  type="button"
+                  variant="secondary"
+                  onPress={handleCancel}
+                >
+                  취소
+                </Button>
+                <StatusButton
+                  className="h-12 rounded-2xl text-base"
+                  fullWidth
+                  isDisabled={!canSubmit || success}
+                  idleText="추가하기"
+                  size="lg"
+                  loadingText="등록 중…"
+                  status={
+                    addMutation.isPending
+                      ? "loading"
+                      : success
+                        ? "success"
+                        : "idle"
+                  }
+                  type="submit"
+                />
+              </DrawerFooter>
+            </motion.div>
+          </motion.div>
         </Form>
       </DrawerPopup>
     </Drawer>
