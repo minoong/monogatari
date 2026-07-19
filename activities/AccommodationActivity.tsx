@@ -2,6 +2,8 @@ import React from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Ban, BellRing, Check, ExternalLink, MapPin, CalendarDays, Clock3, Star, Wifi, Waves, Dumbbell, Luggage, Coffee, CircleParking, Flame, KeyRound, Snowflake, Sparkles, TreePine, Utensils, Plane, Shirt, Umbrella, Wine, type LucideIcon } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { triggerHapticFeedback } from "../components/BottomNav";
+import { NativeHapticSwitch } from "../components/ui/native-haptic-switch";
 import { ACCOMMODATIONS, type Accommodation } from "../lib/accommodations";
 
 const amenityIconMap: Record<string, LucideIcon> = {
@@ -50,7 +52,6 @@ const useWindowSize = () => {
 };
 
 interface StayAccordionProps {
-  activeFilter: StayFilter;
   onFilterChange: (filter: StayFilter) => void;
 }
 
@@ -88,7 +89,7 @@ const STAY_ACCORDION_ITEMS: StayAccordionItem[] = [
   })),
 ];
 
-const StayAccordion: React.FC<StayAccordionProps> = ({ activeFilter, onFilterChange }) => {
+const StayAccordion: React.FC<StayAccordionProps> = ({ onFilterChange }) => {
   const [openId, setOpenId] = React.useState<StayFilter>("all");
   const { width } = useWindowSize();
   const accordionHeight = width && width >= 1024 ? 220 : 184;
@@ -106,15 +107,15 @@ const StayAccordion: React.FC<StayAccordionProps> = ({ activeFilter, onFilterCha
       >
         {STAY_ACCORDION_ITEMS.map((item) => {
           const isOpen = item.id === openId;
-          const isFiltered = item.id === activeFilter;
 
           return (
             <React.Fragment key={item.id}>
-              <button
-                type="button"
-                onClick={() => selectStay(item)}
-                aria-pressed={isFiltered}
-                className={`group relative z-10 flex w-11 shrink-0 flex-col justify-end gap-1 border-r border-gray-100 px-2 py-2 text-left transition-colors dark:border-white/10 lg:w-12 ${
+              <div className="relative z-10 w-11 shrink-0 lg:w-12">
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  className={`group relative flex h-full w-full flex-col justify-end gap-1 border-r border-gray-100 px-2 py-2 text-left transition-colors dark:border-white/10 lg:w-12 ${
                   isOpen
                     ? "bg-gray-50 text-gray-950 dark:bg-white/10 dark:text-white"
                     : "bg-white text-gray-800 hover:bg-gray-50 dark:bg-[#1C1C1E] dark:text-gray-100 dark:hover:bg-white/5"
@@ -124,6 +125,15 @@ const StayAccordion: React.FC<StayAccordionProps> = ({ activeFilter, onFilterCha
                 <span className="text-[13px] font-semibold [writing-mode:vertical-rl]">{item.title}</span>
                 <span className="pointer-events-none absolute bottom-1/2 right-0 size-3 translate-x-1/2 translate-y-1/2 rotate-45 border-r border-t border-gray-100 bg-inherit dark:border-white/10" />
               </button>
+                <NativeHapticSwitch
+                  ariaLabel={`${item.title} 숙소 보기`}
+                  checked={isOpen}
+                  onChange={() => {
+                    triggerHapticFeedback(10);
+                    selectStay(item);
+                  }}
+                />
+              </div>
 
               <AnimatePresence initial={false}>
                 {isOpen ? (
@@ -180,7 +190,7 @@ export const AccommodationActivity: React.FC = () => {
   return (
     <AppScreen appBar={{ title: "숙소 자세히 보기" }}>
       <div className="min-h-full bg-gray-50 px-4 pb-8 pt-4 dark:bg-black">
-        <StayAccordion activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+        <StayAccordion onFilterChange={setActiveFilter} />
 
         <div className="mt-5 flex flex-col gap-5">
           {visibleStays.map((stay) => (
