@@ -40,6 +40,7 @@ export function NativeHapticSwitch({
       id={id}
       onClick={onClick}
       onChange={onChange}
+      style={{ touchAction: "pan-y" }}
       type="checkbox"
     />
   );
