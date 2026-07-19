@@ -13,7 +13,15 @@ export interface Accommodation {
   agodaUrl: string;
   score: string;
   highlights: string[];
-  amenities: string[];
+  facilityGroups: Array<{
+    title: string;
+    items: string[];
+  }>;
+  dining: {
+    primary: string;
+    details: string[];
+  };
+  notice?: string;
 }
 
 export const ACCOMMODATIONS: Accommodation[] = [
@@ -32,7 +40,14 @@ export const ACCOMMODATIONS: Accommodation[] = [
     agodaUrl: "https://www.agoda.com/ko-kr/shade-house-bangkok-oldtown/hotel/bangkok-th.html?adults=2&rooms=1&checkIn=2026-08-29&checkOut=2026-08-30",
     score: "9.2",
     highlights: ["카오산 로드 650m", "2025년 신축", "올드타운 산책"],
-    amenities: ["무료 Wi‑Fi", "익스프레스 체크인", "짐 보관", "에어컨"],
+    facilityGroups: [
+      { title: "핵심", items: ["무료 Wi‑Fi", "익스프레스 체크인", "짐 보관", "에어컨"] },
+      { title: "서비스", items: ["룸서비스", "일일 청소", "금연 객실"] },
+    ],
+    dining: {
+      primary: "객실 내 룸서비스",
+      details: ["매일 하우스키핑", "공용 구역 Wi‑Fi"],
+    },
   },
   {
     id: "pattaya",
@@ -49,7 +64,15 @@ export const ACCOMMODATIONS: Accommodation[] = [
     agodaUrl: "https://www.agoda.com/ko-kr/the-grass-serviced-suites-by-at-mind/hotel/pattaya-th.html?adults=2&rooms=1&checkIn=2026-08-30&checkOut=2026-08-31",
     score: "8.8",
     highlights: ["루프탑 수영장", "파타야 비치 1.9km", "스위트·간이 주방"],
-    amenities: ["무료 Wi‑Fi", "야외 수영장", "피트니스", "사우나", "무료 주차"],
+    facilityGroups: [
+      { title: "핵심", items: ["무료 Wi‑Fi", "야외 수영장", "피트니스", "사우나"] },
+      { title: "식사", items: ["레스토랑", "조식 뷔페", "룸서비스"] },
+      { title: "서비스", items: ["무료 주차", "24시간 프런트", "공항 셔틀"] },
+    ],
+    dining: {
+      primary: "호텔 레스토랑",
+      details: ["조식 뷔페", "룸서비스 이용 가능"],
+    },
   },
   {
     id: "koh-sichang",
@@ -66,19 +89,16 @@ export const ACCOMMODATIONS: Accommodation[] = [
     agodaUrl: "https://www.agoda.com/ko-kr/somewhere-koh-sichang/hotel/chonburi-th.html?adults=2&rooms=1&checkIn=2026-08-31&checkOut=2026-09-01",
     score: "9.2",
     highlights: ["코시창 선착장 600m", "바다 전망 수영장", "섬 휴양"],
-    amenities: [
-      "해변",
-      "무료 Wi‑Fi",
-      "전망 수영장",
-      "무료 주차",
-      "24시간 프런트",
-      "레스토랑",
-      "바",
-      "공항 셔틀",
-      "조식",
-      "세탁 서비스",
-      "룸서비스",
-      "에어컨",
+    facilityGroups: [
+      { title: "핵심", items: ["해변", "무료 Wi‑Fi", "전망 수영장", "무료 주차"] },
+      { title: "레저", items: ["야외 수영장", "스노클링", "등산로", "정원"] },
+      { title: "식사", items: ["레스토랑", "바", "조식", "룸서비스"] },
+      { title: "서비스", items: ["24시간 프런트", "공항 셔틀", "셔틀 서비스", "세탁 서비스", "일일 청소", "컨시어지", "에어컨"] },
     ],
+    dining: {
+      primary: "The Verandah Restaurant",
+      details: ["유럽식 조식", "인터내셔널 · 태국식", "뷔페 · 알라카르트"],
+    },
+    notice: "공항 이동 교통편은 요청 시 제공되며 추가 요금이 부과될 수 있어요.",
   },
 ];

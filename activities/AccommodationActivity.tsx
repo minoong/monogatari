@@ -1,6 +1,6 @@
 import React from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { BellRing, ExternalLink, MapPin, CalendarDays, Clock3, Star, Wifi, Waves, Dumbbell, Luggage, Coffee, CircleParking, Flame, KeyRound, Snowflake, Utensils, Plane, Shirt, Umbrella, Wine, type LucideIcon } from "lucide-react";
+import { Ban, BellRing, ExternalLink, MapPin, CalendarDays, Clock3, Star, Wifi, Waves, Dumbbell, Luggage, Coffee, CircleParking, Flame, KeyRound, Snowflake, Sparkles, TreePine, Utensils, Plane, Shirt, Umbrella, Wine, type LucideIcon } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BottomNav } from "../components/BottomNav";
 import { ACCOMMODATIONS, type Accommodation } from "../lib/accommodations";
@@ -23,6 +23,14 @@ const amenityIconMap: Record<string, LucideIcon> = {
   "조식": Coffee,
   "세탁 서비스": Shirt,
   "룸서비스": BellRing,
+  "일일 청소": Sparkles,
+  "금연 객실": Ban,
+  "조식 뷔페": Coffee,
+  "스노클링": Waves,
+  "등산로": MapPin,
+  "정원": TreePine,
+  "셔틀 서비스": Plane,
+  "컨시어지": BellRing,
 };
 type StayFilter = "all" | Accommodation["id"];
 
@@ -185,23 +193,42 @@ export const AccommodationActivity: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mt-4">
+                <section className="mt-5">
                   <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">편의시설 · 서비스</h2>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {stay.amenities.map((amenity) => {
-                      const Icon = amenityIconMap[amenity] ?? Wifi;
-                      return (
-                        <span
-                          key={amenity}
-                          className="flex h-8 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-medium text-gray-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-gray-300"
-                        >
-                          <Icon size={14} strokeWidth={1.8} className="text-gray-500 dark:text-gray-400" />
-                          {amenity}
-                        </span>
-                      );
-                    })}
+                  <div className="mt-2 space-y-2">
+                    {stay.facilityGroups.map((group) => (
+                      <div key={group.title} className="rounded-2xl border border-gray-100 bg-gray-50/70 p-3 dark:border-white/10 dark:bg-white/[0.035]">
+                        <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">{group.title}</p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {group.items.map((item) => {
+                            const Icon = amenityIconMap[item] ?? Wifi;
+                            return (
+                              <span key={item} className="flex h-7 items-center gap-1 rounded-md bg-white px-2 text-[11px] font-medium text-gray-600 shadow-sm ring-1 ring-black/[0.03] dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/[0.04]">
+                                <Icon size={13} strokeWidth={1.8} className="text-gray-400 dark:text-gray-500" />
+                                {item}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                </section>
+
+                <section className="mt-3 rounded-2xl border border-gray-100 p-3 dark:border-white/10">
+                  <div className="flex items-start gap-2.5">
+                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400"><Coffee size={14} /></span>
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">식사 · 레스토랑</p>
+                      <p className="mt-0.5 text-sm font-semibold text-gray-800 dark:text-gray-100">{stay.dining.primary}</p>
+                      <div className="mt-1.5 flex flex-wrap gap-x-2 gap-y-1">
+                        {stay.dining.details.map((detail) => <span key={detail} className="text-xs text-gray-500 dark:text-gray-400">{detail}</span>)}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {stay.notice ? <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800 dark:bg-amber-400/10 dark:text-amber-200">{stay.notice}</p> : null}
 
                 <div className="mt-4 overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10">
                   <iframe
