@@ -229,6 +229,19 @@ export const AccommodationActivity: React.FC = () => {
                   </section>
                 ) : null}
 
+                <section className="mt-3 rounded-2xl border border-gray-100 p-3 dark:border-white/10">
+                  <div className="flex items-start gap-2.5">
+                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400"><Coffee size={14} /></span>
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">식사 · 레스토랑</p>
+                      <p className="mt-0.5 text-sm font-semibold text-gray-800 dark:text-gray-100">{stay.dining.primary}</p>
+                      <div className="mt-1.5 flex flex-wrap gap-x-2 gap-y-1">
+                        {stay.dining.details.map((detail) => <span key={detail} className="text-xs text-gray-500 dark:text-gray-400">{detail}</span>)}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stay.mapQuery)}`} target="_blank" rel="noreferrer" className="flex h-10 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700 transition-transform active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.05] dark:text-gray-100">
                     Google 지도 <ExternalLink size={14} />
@@ -257,19 +270,6 @@ export const AccommodationActivity: React.FC = () => {
                         </ul>
                       </section>
                     ))}
-                  </div>
-                </section>
-
-                <section className="mt-3 rounded-2xl border border-gray-100 p-3 dark:border-white/10">
-                  <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400"><Coffee size={14} /></span>
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">식사 · 레스토랑</p>
-                      <p className="mt-0.5 text-sm font-semibold text-gray-800 dark:text-gray-100">{stay.dining.primary}</p>
-                      <div className="mt-1.5 flex flex-wrap gap-x-2 gap-y-1">
-                        {stay.dining.details.map((detail) => <span key={detail} className="text-xs text-gray-500 dark:text-gray-400">{detail}</span>)}
-                      </div>
-                    </div>
                   </div>
                 </section>
 
