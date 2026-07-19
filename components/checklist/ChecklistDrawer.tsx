@@ -7,7 +7,6 @@ import {
   Checkbox,
   CheckboxGroup,
   Description,
-  FieldError,
   Form,
   Input,
   Label,
@@ -16,6 +15,8 @@ import {
   TextField,
 } from "@heroui/react";
 import StatusButton from "@/components/animata/button/status-button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   Drawer,
   DrawerDescription,
@@ -44,8 +45,8 @@ const importanceOptions: Array<{
 ];
 
 const targetOptions = [
-  { value: "gahyun", label: "가현쨩" },
-  { value: "minu", label: "미누쿤" },
+  { value: "gahyun", label: "가현쨩", initials: "G", color: "accent" as const },
+  { value: "minu", label: "미누쿤", initials: "M", color: "success" as const },
 ];
 
 export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
@@ -125,6 +126,8 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
     if (!addMutation.isPending) onOpenChange(false);
   };
 
+  const canSubmit = title.trim().length > 0 && targets.length > 0;
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerPopup variant="inset" showBar>
@@ -148,9 +151,6 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
               isRequired
               name="title"
               value={title}
-              validate={(value) =>
-                value.trim() ? null : "준비물 이름을 입력해 주세요."
-              }
               onChange={setTitle}
             >
               <Label>준비물 이름</Label>
@@ -160,7 +160,6 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                 placeholder="예: 보조배터리…"
               />
               <Description>짧고 알아보기 쉬운 이름이 좋아요.</Description>
-              <FieldError />
             </TextField>
 
             <RadioGroup
@@ -179,7 +178,12 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                         <Radio.Indicator />
                       </Radio.Control>
                       <span className="flex flex-col text-left">
-                        <span className="text-sm font-semibold">{option.label}</span>
+                        <span className="flex items-center gap-2 text-sm font-semibold">
+                          {option.label}
+                          <Badge color={option.value === "high" ? "danger" : option.value === "normal" ? "accent" : "success"} size="sm" variant="soft">
+                            {option.value === "high" ? "필수" : option.value === "normal" ? "기본" : "선택"}
+                          </Badge>
+                        </span>
                         <span className="text-xs leading-4 text-muted">
                           {option.description}
                         </span>
@@ -206,12 +210,14 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                       <Checkbox.Control>
                         <Checkbox.Indicator />
                       </Checkbox.Control>
-                      {target.label}
+                      <Avatar color={target.color} size="sm">
+                        <AvatarFallback>{target.initials}</AvatarFallback>
+                      </Avatar>
+                      <span>{target.label}</span>
                     </Checkbox.Content>
                   </Checkbox>
                 ))}
               </div>
-              <FieldError>담당자를 한 명 이상 선택해 주세요.</FieldError>
             </CheckboxGroup>
 
             {submitError ? (
@@ -239,7 +245,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
             <StatusButton
               className="h-12 rounded-2xl text-base"
               fullWidth
-              isDisabled={success}
+              isDisabled={!canSubmit || success}
               idleText="추가하기"
               size="lg"
               loadingText="등록 중…"

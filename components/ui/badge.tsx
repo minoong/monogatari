@@ -1,55 +1,38 @@
-import { mergeProps } from "@base-ui/react/merge-props"
-import { useRender } from "@base-ui/react/use-render"
-import { cva, type VariantProps } from "class-variance-authority"
+"use client";
 
-import { cn } from "@/lib/utils"
+import {
+  Badge as HeroBadge,
+  type BadgeProps as HeroBadgeProps,
+} from "@heroui/react";
 
-const badgeVariants = cva(
-  "group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border px-2 py-0.5 text-[10px] font-bold whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3!",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground border-transparent [a]:hover:bg-primary/80",
-        secondary:
-          "bg-secondary text-secondary-foreground border-transparent [a]:hover:bg-secondary/80",
-        destructive:
-          "bg-destructive/10 text-destructive border-transparent focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
-        outline:
-          "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
-        ghost:
-          "border-transparent hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
-        link: "border-transparent text-primary underline-offset-4 hover:underline",
-        high: "border-transparent bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700",
-        normal: "border-transparent bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700",
-        low: "border-transparent bg-emerald-500 text-white hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+type LegacyImportance = "high" | "normal" | "low";
 
-function Badge({
-  className,
-  variant = "default",
-  render,
-  ...props
-}: useRender.ComponentProps<"span"> & VariantProps<typeof badgeVariants>) {
-  return useRender({
-    defaultTagName: "span",
-    props: mergeProps<"span">(
-      {
-        className: cn(badgeVariants({ variant }), className),
-      },
-      props
-    ),
-    render,
-    state: {
-      slot: "badge",
-      variant,
-    },
-  })
+export type BadgeProps = Omit<HeroBadgeProps, "color" | "variant"> & {
+  color?: HeroBadgeProps["color"];
+  variant?: HeroBadgeProps["variant"] | LegacyImportance;
+};
+
+/** Shared HeroUI badge with legacy importance aliases kept for existing screens. */
+function BadgeRoot({ variant = "primary", color, ...props }: BadgeProps) {
+  const legacyColors: Record<LegacyImportance, NonNullable<HeroBadgeProps["color"]>> = {
+    high: "danger",
+    normal: "accent",
+    low: "success",
+  };
+  const isLegacyVariant = variant === "high" || variant === "normal" || variant === "low";
+
+  return (
+    <HeroBadge
+      color={color ?? (isLegacyVariant ? legacyColors[variant] : "default")}
+      variant={isLegacyVariant ? "soft" : variant}
+      {...props}
+    />
+  );
 }
 
-export { Badge, badgeVariants }
+export const Badge = Object.assign(BadgeRoot, {
+  Anchor: HeroBadge.Anchor,
+  Label: HeroBadge.Label,
+});
+
+export { HeroBadge };
