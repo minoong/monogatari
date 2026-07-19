@@ -483,7 +483,19 @@ export const ChecklistActivity: React.FC = () => {
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
   const prefersReducedMotion = useReducedMotion();
-  const locallyUpdatingIds = useRef(new Set<string>());
+  const locallyUpdatingKeys = useRef(new Set<string>());
+  const toggleEntriesRef = useRef(new Map<string, ToggleEntry>());
+
+  const mergePendingUpdates = (item: PreparationItem) => {
+    return Array.from(toggleEntriesRef.current.values())
+      .filter((entry) => entry.id === item.id)
+      .reduce((current, entry) => {
+        const completedBy = entry.desired
+          ? Array.from(new Set([...current.completed_by, entry.targetUser]))
+          : current.completed_by.filter((user) => user !== entry.targetUser);
+        return { ...current, completed_by: completedBy };
+      }, item);
+  };
 
 
   const { data: items = [], isLoading: loading } = useQuery<PreparationItem[]>({
@@ -504,7 +516,10 @@ export const ChecklistActivity: React.FC = () => {
         { event: '*', schema: 'public', table: 'preparation_items' },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            queryClient.invalidateQueries({ queryKey: ["checklist"] });
+            const insertedItem = payload.new as PreparationItem;
+            queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
+              old.some((item) => item.id === insertedItem.id) ? old : [...old, insertedItem],
+            );
             toast("새로운 준비물이 등록되었습니다.", {
               action: {
                 label: "새로고침",
@@ -514,9 +529,14 @@ export const ChecklistActivity: React.FC = () => {
             });
           } else if (payload.eventType === 'UPDATE') {
             const updatedItem = payload.new as PreparationItem;
-            const isLocalUpdate = locallyUpdatingIds.current.delete(updatedItem.id);
+            const isLocalUpdate = Array.from(toggleEntriesRef.current.values()).some((entry) =>
+              entry.id === updatedItem.id &&
+              locallyUpdatingKeys.current.has(`${entry.targetUser}:${entry.id}`),
+            );
+            const mergedItem = mergePendingUpdates(updatedItem);
+
             queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
-              old.map((i) => (i.id === updatedItem.id ? updatedItem : i))
+              old.map((i) => (i.id === updatedItem.id ? mergedItem : i))
             );
             
             // Trigger highlight
@@ -532,6 +552,13 @@ export const ChecklistActivity: React.FC = () => {
             }
           } else if (payload.eventType === 'DELETE') {
             const deletedItem = payload.old as { id: string };
+            for (const [key, entry] of toggleEntriesRef.current) {
+              if (entry.id === deletedItem.id) {
+                if (entry.timer) clearTimeout(entry.timer);
+                toggleEntriesRef.current.delete(key);
+                locallyUpdatingKeys.current.delete(key);
+              }
+            }
             queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
               old.filter((i) => i.id !== deletedItem.id)
             );
@@ -544,8 +571,6 @@ export const ChecklistActivity: React.FC = () => {
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
-
-  const toggleEntriesRef = useRef(new Map<string, ToggleEntry>());
 
   const updateOptimisticToggle = (id: string, targetUser: string, isChecked: boolean) => {
     queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
@@ -572,47 +597,52 @@ export const ChecklistActivity: React.FC = () => {
     }
 
     entry.inFlight = true;
-    locallyUpdatingIds.current.add(entry.id);
+    locallyUpdatingKeys.current.add(key);
     const requestState = entry.desired;
-    const completedBy = requestState
-      ? Array.from(new Set([...item.completed_by, entry.targetUser]))
-      : item.completed_by.filter((user) => user !== entry.targetUser);
-
     try {
       const response = await fetch("/api/checklist", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: entry.id, completed_by: completedBy }),
+        body: JSON.stringify({
+          id: entry.id,
+          completed_by_user: entry.targetUser,
+          completed: requestState,
+        }),
       });
       if (!response.ok) throw new Error("Update failed");
 
       const payload = (await response.json()) as { data?: PreparationItem };
       const currentEntry = toggleEntriesRef.current.get(key);
       if (currentEntry && currentEntry.desired !== requestState) {
-        const serverItems = queryClient.getQueryData<PreparationItem[]>(["checklist"])?.map((candidate) =>
-          candidate.id === payload.data?.id && payload.data ? payload.data : candidate,
-        );
-        currentEntry.baseItems = serverItems;
+        if (payload.data) {
+          queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
+            old.map((candidate) => (
+              candidate.id === payload.data?.id ? mergePendingUpdates(payload.data) : candidate
+            )),
+          );
+        }
+        currentEntry.baseItems = queryClient.getQueryData<PreparationItem[]>(["checklist"]);
         currentEntry.inFlight = false;
         updateOptimisticToggle(currentEntry.id, currentEntry.targetUser, currentEntry.desired);
-        locallyUpdatingIds.current.delete(entry.id);
+        locallyUpdatingKeys.current.delete(key);
         scheduleToggle(key);
         return;
       }
 
       if (payload.data) {
         queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
-          old.map((candidate) => (candidate.id === payload.data?.id ? payload.data : candidate)),
+          old.map((candidate) => (
+            candidate.id === payload.data?.id ? mergePendingUpdates(payload.data) : candidate
+          )),
         );
       }
       toggleEntriesRef.current.delete(key);
-      locallyUpdatingIds.current.delete(entry.id);
-      await queryClient.invalidateQueries({ queryKey: ["checklist"] });
+      locallyUpdatingKeys.current.delete(key);
     } catch {
       const currentEntry = toggleEntriesRef.current.get(key);
       if (currentEntry && currentEntry.desired !== requestState) {
         currentEntry.inFlight = false;
-        locallyUpdatingIds.current.delete(entry.id);
+        locallyUpdatingKeys.current.delete(key);
         scheduleToggle(key);
         return;
       }
@@ -620,7 +650,7 @@ export const ChecklistActivity: React.FC = () => {
         queryClient.setQueryData(["checklist"], currentEntry.baseItems);
       }
       toggleEntriesRef.current.delete(key);
-      locallyUpdatingIds.current.delete(entry.id);
+      locallyUpdatingKeys.current.delete(key);
       toast.error("업데이트 실패");
     }
   };
