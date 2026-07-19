@@ -325,11 +325,11 @@ const SwipeableItem = ({
           if (target.closest("button, label, a")) return;
           onToggleCheck(item.id, targetUser);
         }}
-        className={`relative z-10 flex min-h-16 select-none items-center justify-between gap-3 px-4 py-3 touch-pan-y bg-white dark:bg-[#1C1C1E] transition-colors hover:bg-gray-50 dark:hover:bg-white/5 ${
+        className={`relative z-10 flex min-h-16 select-none items-start justify-between gap-3 px-4 py-3 touch-pan-y bg-white dark:bg-[#1C1C1E] transition-colors hover:bg-gray-50 active:bg-gray-100 dark:hover:bg-white/5 dark:active:bg-white/10 ${
           isHighlighted ? "bg-yellow-50 dark:bg-yellow-900/20" : ""
         }`}
       >
-        <div className="flex items-center gap-3 flex-1 py-1">
+        <div className="flex min-w-0 flex-1 items-start gap-3 py-1">
           <Checkbox
             variant="default"
             checked={isChecked}
@@ -339,10 +339,10 @@ const SwipeableItem = ({
             id={checkboxId}
             className="flex-shrink-0 cursor-pointer"
           />
-          <div className="flex min-w-0 items-center flex-1 gap-2 flex-wrap">
+          <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
             <label
               htmlFor={checkboxId}
-              className={`relative min-w-0 break-words text-[16px] font-medium tracking-tight transition-colors cursor-pointer select-none ${
+              className={`relative min-w-0 flex-1 break-words text-[16px] font-medium leading-6 tracking-tight transition-colors cursor-pointer select-none ${
                 isChecked ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-100"
               }`}
             >
@@ -355,7 +355,7 @@ const SwipeableItem = ({
                 transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: "easeOut" }}
               />
             </label>
-            <div className="shrink-0">
+            <div className="shrink-0 pt-0.5">
               <ImportanceChip importance={item.importance} />
             </div>
           </div>
