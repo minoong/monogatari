@@ -207,25 +207,25 @@ export const AccommodationActivity: React.FC = () => {
                 </div>
 
                 {stay.importantInfo ? (
-                  <section className="mt-3 overflow-hidden rounded-2xl border border-indigo-100 bg-indigo-50/70 dark:border-indigo-400/20 dark:bg-indigo-400/10">
-                    <div className="flex items-center gap-2 border-b border-indigo-100 px-3.5 py-2.5 dark:border-indigo-400/15">
-                      <span className="flex size-6 items-center justify-center rounded-lg bg-indigo-600 text-white"><Sparkles size={13} /></span>
-                      <p className="text-xs font-bold text-indigo-950 dark:text-indigo-100">여행 전 확인</p>
-                      <span className="text-[11px] text-indigo-600/70 dark:text-indigo-200/70">조식 · 이동 안내</span>
+                  <section className="mt-3 overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-white/10 dark:bg-transparent">
+                    <div className="flex items-center gap-2 border-b border-gray-100 px-3.5 py-2.5 dark:border-white/10">
+                      <span className="flex size-6 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400"><Sparkles size={13} /></span>
+                      <p className="text-xs font-bold text-gray-800 dark:text-gray-100">여행 전 확인</p>
+                      <span className="text-[11px] text-gray-400 dark:text-gray-500">조식 · 이동 안내</span>
                     </div>
-                    <div className="divide-y divide-indigo-100 dark:divide-indigo-400/15">
+                    <div className="divide-y divide-gray-100 dark:divide-white/10">
                       <div className="flex gap-3 px-3.5 py-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-amber-600 shadow-sm dark:bg-white/10 dark:text-amber-300"><Coffee size={17} /></span>
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-500 dark:bg-white/5 dark:text-gray-400"><Coffee size={17} /></span>
                         <div className="min-w-0">
-                          <p className="text-[11px] font-bold tracking-wide text-indigo-500 dark:text-indigo-200">조식</p>
+                          <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">조식</p>
                           <p className="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{stay.importantInfo.breakfast.title}</p>
                           <p className="mt-0.5 text-xs leading-5 text-gray-600 dark:text-gray-300">{stay.importantInfo.breakfast.details}</p>
                         </div>
                       </div>
                       <div className="flex gap-3 px-3.5 py-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-indigo-600 shadow-sm dark:bg-white/10 dark:text-indigo-300"><Plane size={17} /></span>
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-500 dark:bg-white/5 dark:text-gray-400"><Plane size={17} /></span>
                         <div className="min-w-0">
-                          <p className="text-[11px] font-bold tracking-wide text-indigo-500 dark:text-indigo-200">셔틀</p>
+                          <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">셔틀</p>
                           <p className="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{stay.importantInfo.shuttle.title}</p>
                           <p className="mt-0.5 text-xs leading-5 text-gray-600 dark:text-gray-300">{stay.importantInfo.shuttle.details}</p>
                         </div>
