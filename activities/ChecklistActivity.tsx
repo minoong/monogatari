@@ -347,13 +347,27 @@ const SwipeableItem = ({
               }`}
             >
               {item.title}
-              <motion.span
+              <motion.svg
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 top-1/2 h-0.5 origin-left rounded-full bg-gray-400 dark:bg-gray-500"
+                className="pointer-events-none absolute inset-x-0 top-1/2 h-4 w-full -translate-y-1/2 overflow-visible text-gray-400 dark:text-gray-500"
+                viewBox="0 0 100 20"
+                preserveAspectRatio="none"
                 initial={false}
-                animate={{ scaleX: isChecked ? 1 : 0, opacity: isChecked ? 1 : 0 }}
+                animate={{ opacity: isChecked ? 1 : 0 }}
                 transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: "easeOut" }}
-              />
+              >
+                <motion.path
+                  d="M 0 10 C 12 2, 22 18, 35 10 S 58 2, 70 10 S 88 18, 100 10"
+                  fill="none"
+                  pathLength={1}
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="2.5"
+                  initial={false}
+                  animate={{ pathLength: isChecked ? 1 : 0 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.45, ease: "easeInOut" }}
+                />
+              </motion.svg>
             </label>
             <div className="shrink-0 pt-0.5">
               <ImportanceChip importance={item.importance} />
