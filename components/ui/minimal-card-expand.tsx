@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { MoreHorizontal, X } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { MoreHorizontal } from "lucide-react";
+import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 
 export interface MinimalCardExpandItem {
   id: string;
@@ -10,22 +10,95 @@ export interface MinimalCardExpandItem {
   value: string;
   icon?: React.ReactNode;
   colorClassName: string;
-  content?: React.ReactNode;
+  expandedActions?: {
+    primary?: React.ReactNode;
+    secondary?: React.ReactNode;
+  };
 }
 
 interface MinimalCardExpandProps {
-  items: MinimalCardExpandItem[];
+  items: readonly [
+    MinimalCardExpandItem,
+    MinimalCardExpandItem,
+    MinimalCardExpandItem,
+    MinimalCardExpandItem,
+  ];
   className?: string;
   initialExpandedId?: string | null;
   onExpandedChange?: (id: string | null) => void;
 }
 
+interface CardProps {
+  item: MinimalCardExpandItem;
+  expanded: boolean;
+  compact: "default" | "reduced";
+  activeCardRef: React.RefObject<HTMLElement | null>;
+  onExpand: (id: string) => void;
+  prefersReducedMotion: boolean | null;
+}
+
+const SkiperCard = ({
+  item,
+  expanded,
+  compact,
+  activeCardRef,
+  onExpand,
+  prefersReducedMotion,
+}: CardProps) => (
+  <motion.article
+    ref={expanded ? activeCardRef : undefined}
+    layout
+    layoutId={`minimal-card-expand-${item.id}`}
+    transition={{
+      layout: prefersReducedMotion
+        ? { duration: 0 }
+        : { type: "spring", stiffness: 280, damping: 28, mass: 0.75 },
+    }}
+    className={`relative flex shrink-0 flex-col items-start justify-between overflow-hidden rounded-[24px] p-3 text-white ${item.colorClassName} ${
+      expanded
+        ? "h-[180px] w-full"
+        : compact === "reduced"
+          ? "h-[100px] w-[100px] sm:w-[120px]"
+          : "h-[125px] w-[140px] sm:w-[160px]"
+    }`}
+  >
+    <div className="flex w-full items-start justify-between gap-3">
+      <div className="flex size-8 items-center justify-center text-white">{item.icon}</div>
+      {expanded ? (
+        <div className="flex items-center justify-end gap-2">{item.expandedActions?.primary}</div>
+      ) : (
+        <button
+          type="button"
+          aria-label={`${item.title} 펼치기`}
+          aria-expanded={false}
+          onClick={() => onExpand(item.id)}
+          className="flex size-6 items-center justify-center rounded-full bg-white/20 p-0.5 text-white transition-colors duration-150 ease-out hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+        >
+          <MoreHorizontal size={16} aria-hidden="true" />
+        </button>
+      )}
+    </div>
+
+    <div className={expanded ? "flex w-full items-end justify-between gap-3" : "flex flex-col items-start justify-center"}>
+      <div className="min-w-0">
+        <motion.h3 layout="position" className={`truncate font-semibold ${expanded ? "text-2xl" : "text-base"}`}>
+          {item.title}
+        </motion.h3>
+        <motion.p layout="position" className={`font-semibold text-white/55 ${expanded ? "text-xl" : "text-sm"}`}>
+          {item.value}
+        </motion.p>
+      </div>
+      {expanded && item.expandedActions?.secondary ? (
+        <div className="shrink-0">{item.expandedActions.secondary}</div>
+      ) : null}
+    </div>
+  </motion.article>
+);
+
 /**
- * Skiper23-inspired expandable card stack.
- *
- * The menu button is the only expansion trigger, while a pointer outside the
- * component collapses the active card. Consumers provide the card body so the
- * interaction can be reused for wallets, checklists, stats, and dashboards.
+ * A faithful, reusable implementation of Skiper UI's "Minimal Card Expand".
+ * It intentionally takes four cards: the active card moves to the full-width
+ * top row and the remaining three cards form the compact bottom row.
  */
 export function MinimalCardExpand({
   items,
@@ -34,7 +107,7 @@ export function MinimalCardExpand({
   onExpandedChange,
 }: MinimalCardExpandProps) {
   const [expandedId, setExpandedId] = React.useState<string | null>(initialExpandedId);
-  const rootRef = React.useRef<HTMLDivElement>(null);
+  const activeCardRef = React.useRef<HTMLElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
   const setExpanded = React.useCallback((id: string | null) => {
@@ -43,76 +116,86 @@ export function MinimalCardExpand({
   }, [onExpandedChange]);
 
   React.useEffect(() => {
+    if (!expandedId) return;
+
     const handleOutsidePointerDown = (event: PointerEvent) => {
-      if (expandedId && rootRef.current && !rootRef.current.contains(event.target as Node)) {
+      if (activeCardRef.current && !activeCardRef.current.contains(event.target as Node)) {
         setExpanded(null);
       }
     };
+
     document.addEventListener("pointerdown", handleOutsidePointerDown);
     return () => document.removeEventListener("pointerdown", handleOutsidePointerDown);
   }, [expandedId, setExpanded]);
 
+  const activeItem = expandedId ? items.find((item) => item.id === expandedId) : null;
+  const inactiveItems = activeItem ? items.filter((item) => item.id !== activeItem.id) : [];
+
   return (
-    <div
-      ref={rootRef}
-      className={`grid w-full max-w-[360px] grid-cols-2 gap-4 font-sans ${className ?? ""}`}
-    >
-      {items.map((item) => {
-        const isExpanded = expandedId === item.id;
-        const hasExpandedCard = expandedId !== null;
-
-        return (
-          <motion.article
-            key={item.id}
-            layout
-            initial={false}
-            animate={{ opacity: hasExpandedCard && !isExpanded ? 0.86 : 1 }}
-            transition={{
-              layout: { duration: prefersReducedMotion ? 0 : 0.45, ease: [0.22, 1, 0.36, 1] },
-              opacity: { duration: prefersReducedMotion ? 0 : 0.2 },
-            }}
-            className={`relative flex min-h-[125px] cursor-default flex-col justify-between overflow-hidden rounded-[24px] p-3 text-white ${item.colorClassName} ${isExpanded ? "col-span-2" : ""}`}
-          >
-            <div className="flex w-full items-start justify-between gap-3">
-              <div className="flex items-center justify-center text-white">{item.icon}</div>
-              <button
-                type="button"
-                aria-label={`${item.title} ${isExpanded ? "접기" : "펼치기"}`}
-                aria-expanded={isExpanded}
-                onClick={() => setExpanded(isExpanded ? null : item.id)}
-                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white/20 p-0.5 text-white transition-colors hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-              >
-                <motion.span
-                  animate={{ rotate: isExpanded ? 45 : 0 }}
-                  transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
-                >
-                  {isExpanded ? <X size={16} aria-hidden="true" /> : <MoreHorizontal size={16} aria-hidden="true" />}
-                </motion.span>
-              </button>
+    <LayoutGroup>
+      <div
+        className={`flex h-[300px] w-full max-w-[360px] flex-col justify-end gap-4 ${className ?? ""}`}
+        aria-label="확장 카드 데모"
+      >
+        {activeItem ? (
+          <>
+            <div className="flex gap-4">
+              <SkiperCard
+                item={activeItem}
+                expanded
+                compact="default"
+                activeCardRef={activeCardRef}
+                onExpand={setExpanded}
+                prefersReducedMotion={prefersReducedMotion}
+              />
             </div>
-
-            <div className="min-w-0">
-              <motion.h3 layout="position" className="truncate text-base font-semibold">{item.title}</motion.h3>
-              <motion.p layout="position" className="text-sm font-semibold text-white/55">{item.value}</motion.p>
+            <div className="flex gap-4">
+              {inactiveItems.map((item) => (
+                <SkiperCard
+                  key={item.id}
+                  item={item}
+                  expanded={false}
+                  compact="reduced"
+                  activeCardRef={activeCardRef}
+                  onExpand={setExpanded}
+                  prefersReducedMotion={prefersReducedMotion}
+                />
+              ))}
             </div>
-
-            <AnimatePresence initial={false}>
-              {isExpanded && item.content && (
-                <motion.div
-                  key="content"
-                  initial={{ opacity: 0, height: 0, y: prefersReducedMotion ? 0 : 8 }}
-                  animate={{ opacity: 1, height: "auto", y: 0 }}
-                  exit={{ opacity: 0, height: 0, y: prefersReducedMotion ? 0 : 8 }}
-                  transition={{ duration: prefersReducedMotion ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  className="mt-4 overflow-hidden"
-                >
-                  {item.content}
+          </>
+        ) : (
+          <>
+            <div className="flex gap-4">
+              {items.slice(0, 2).map((item) => (
+                <motion.div key={item.id} layout className="h-[125px] w-[140px] sm:w-[160px]">
+                  <SkiperCard
+                  item={item}
+                  expanded={false}
+                  compact="default"
+                    activeCardRef={activeCardRef}
+                    onExpand={setExpanded}
+                    prefersReducedMotion={prefersReducedMotion}
+                  />
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.article>
-        );
-      })}
-    </div>
+              ))}
+            </div>
+            <div className="flex gap-4">
+              {items.slice(2).map((item) => (
+                <motion.div key={item.id} layout className="h-[125px] w-[140px] sm:w-[160px]">
+                  <SkiperCard
+                  item={item}
+                  expanded={false}
+                  compact="default"
+                    activeCardRef={activeCardRef}
+                    onExpand={setExpanded}
+                    prefersReducedMotion={prefersReducedMotion}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </LayoutGroup>
   );
 }
