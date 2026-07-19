@@ -186,25 +186,25 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                 className="gap-5 mt-1"
               >
                 <Radio value="high">
-                  <Radio.Content>
-                    <Radio.Control>
-                      <Radio.Indicator />
+                  <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
+                    <Radio.Control className="relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-full border border-input bg-background shadow-xs/5 outline-none transition-shadow data-[selected=true]:border-transparent">
+                      <Radio.Indicator className="absolute -inset-px flex items-center justify-center rounded-full bg-neutral-900 dark:bg-neutral-100 before:content-[''] before:size-1.5 before:rounded-full before:bg-white dark:before:bg-neutral-900" />
                     </Radio.Control>
                     <Badge variant="high" className="text-xs px-3 py-1 h-auto select-none">높음</Badge>
                   </Radio.Content>
                 </Radio>
                 <Radio value="normal">
-                  <Radio.Content>
-                    <Radio.Control>
-                      <Radio.Indicator />
+                  <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
+                    <Radio.Control className="relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-full border border-input bg-background shadow-xs/5 outline-none transition-shadow data-[selected=true]:border-transparent">
+                      <Radio.Indicator className="absolute -inset-px flex items-center justify-center rounded-full bg-neutral-900 dark:bg-neutral-100 before:content-[''] before:size-1.5 before:rounded-full before:bg-white dark:before:bg-neutral-900" />
                     </Radio.Control>
                     <Badge variant="normal" className="text-xs px-3 py-1 h-auto select-none">보통</Badge>
                   </Radio.Content>
                 </Radio>
                 <Radio value="low">
-                  <Radio.Content>
-                    <Radio.Control>
-                      <Radio.Indicator />
+                  <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
+                    <Radio.Control className="relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-full border border-input bg-background shadow-xs/5 outline-none transition-shadow data-[selected=true]:border-transparent">
+                      <Radio.Indicator className="absolute -inset-px flex items-center justify-center rounded-full bg-neutral-900 dark:bg-neutral-100 before:content-[''] before:size-1.5 before:rounded-full before:bg-white dark:before:bg-neutral-900" />
                     </Radio.Control>
                     <Badge variant="low" className="text-xs px-3 py-1 h-auto select-none">낮음</Badge>
                   </Radio.Content>
@@ -236,9 +236,22 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                 className="flex flex-row gap-6 mt-1"
               >
                 <Checkbox value="gahyun">
-                  <Checkbox.Content>
-                    <Checkbox.Control>
-                      <Checkbox.Indicator />
+                  <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
+                    <Checkbox.Control className="relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-[0.25rem] border border-input bg-background outline-none transition-shadow data-[selected=true]:border-transparent">
+                      <Checkbox.Indicator className="absolute -inset-px flex items-center justify-center rounded-[0.25rem] bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900">
+                        <svg
+                          aria-hidden="true"
+                          className="size-3"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="3"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
+                        </svg>
+                      </Checkbox.Indicator>
                     </Checkbox.Control>
                     <div className="flex items-center gap-3 font-medium text-base select-none">
                       <Avatar className="w-8 h-8 ring-2 ring-gray-100 dark:ring-gray-800">
@@ -250,9 +263,22 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                   </Checkbox.Content>
                 </Checkbox>
                 <Checkbox value="minu">
-                  <Checkbox.Content>
-                    <Checkbox.Control>
-                      <Checkbox.Indicator />
+                  <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
+                    <Checkbox.Control className="relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-[0.25rem] border border-input bg-background outline-none transition-shadow data-[selected=true]:border-transparent">
+                      <Checkbox.Indicator className="absolute -inset-px flex items-center justify-center rounded-[0.25rem] bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900">
+                        <svg
+                          aria-hidden="true"
+                          className="size-3"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="3"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
+                        </svg>
+                      </Checkbox.Indicator>
                     </Checkbox.Control>
                     <div className="flex items-center gap-3 font-medium text-base select-none">
                       <Avatar className="w-8 h-8 ring-2 ring-gray-100 dark:ring-gray-800">
