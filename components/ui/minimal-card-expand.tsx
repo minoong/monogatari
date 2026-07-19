@@ -27,6 +27,7 @@ interface MinimalCardExpandProps {
   className?: string;
   initialExpandedId?: string | null;
   onExpandedChange?: (id: string | null) => void;
+  autoCycle?: boolean;
 }
 
 interface CardProps {
@@ -34,7 +35,7 @@ interface CardProps {
   expanded: boolean;
   condensed: boolean;
   activeCardRef: React.RefObject<HTMLElement | null>;
-  onExpand: (id: string) => void;
+  onUserExpand: (id: string) => void;
   prefersReducedMotion: boolean | null;
 }
 
@@ -43,7 +44,7 @@ const SkiperCard = ({
   expanded,
   condensed,
   activeCardRef,
-  onExpand,
+  onUserExpand,
   prefersReducedMotion,
 }: CardProps) => (
   <motion.article
@@ -77,7 +78,7 @@ const SkiperCard = ({
           data-minimal-card-expand-menu
           aria-label={`${item.title} 펼치기`}
           aria-expanded={false}
-          onClick={() => onExpand(item.id)}
+          onClick={() => onUserExpand(item.id)}
           className="flex size-6 items-center justify-center rounded-full bg-white/20 p-0.5 text-white transition-colors duration-150 ease-out hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
         >
           <MoreHorizontal size={16} aria-hidden="true" />
@@ -123,15 +124,85 @@ export function MinimalCardExpand({
   className,
   initialExpandedId = null,
   onExpandedChange,
+  autoCycle = false,
 }: MinimalCardExpandProps) {
   const [expandedId, setExpandedId] = React.useState<string | null>(initialExpandedId);
+  const [isInView, setIsInView] = React.useState(false);
+  const [isAutoCyclePaused, setIsAutoCyclePaused] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const activeCardRef = React.useRef<HTMLElement | null>(null);
+  const cycleIndexRef = React.useRef(0);
+  const resumeTimerRef = React.useRef<number | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
   const setExpanded = React.useCallback((id: string | null) => {
     setExpandedId(id);
     onExpandedChange?.(id);
   }, [onExpandedChange]);
+
+  const handleUserExpand = React.useCallback((id: string) => {
+    setExpanded(id);
+    if (!autoCycle) return;
+
+    const selectedIndex = items.findIndex((item) => item.id === id);
+    cycleIndexRef.current = selectedIndex >= 0 ? (selectedIndex + 1) % items.length : 0;
+    setIsAutoCyclePaused(true);
+
+    if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = window.setTimeout(() => {
+      setIsAutoCyclePaused(false);
+      resumeTimerRef.current = null;
+    }, 5_000);
+  }, [autoCycle, items, setExpanded]);
+
+  React.useEffect(() => {
+    if (!autoCycle || !containerRef.current) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsInView(entry.isIntersecting);
+    }, { threshold: 0.45 });
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [autoCycle]);
+
+  React.useEffect(() => {
+    if (!autoCycle || !isInView || isAutoCyclePaused || prefersReducedMotion) return;
+
+    let timer: number | null = null;
+    let isCancelled = false;
+    const schedule = (callback: () => void, delay: number) => {
+      timer = window.setTimeout(() => {
+        if (!isCancelled) callback();
+      }, delay);
+    };
+
+    const playNext = () => {
+      const nextIndex = cycleIndexRef.current;
+      const isLastItem = nextIndex === items.length - 1;
+      setExpanded(items[nextIndex].id);
+      cycleIndexRef.current = (nextIndex + 1) % items.length;
+
+      schedule(() => {
+        if (isLastItem) {
+          setExpanded(null);
+          schedule(playNext, 2_400);
+          return;
+        }
+        playNext();
+      }, 2_200);
+    };
+
+    schedule(playNext, 900);
+    return () => {
+      isCancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [autoCycle, isAutoCyclePaused, isInView, items, prefersReducedMotion, setExpanded]);
+
+  React.useEffect(() => () => {
+    if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+  }, []);
 
   React.useEffect(() => {
     if (!expandedId) return;
@@ -152,6 +223,7 @@ export function MinimalCardExpand({
 
   return (
     <div
+      ref={containerRef}
       className={`grid h-[300px] w-full min-w-0 max-w-none gap-4 ${
         expandedId
           ? "grid-cols-3 grid-rows-[180px_100px]"
@@ -168,7 +240,7 @@ export function MinimalCardExpand({
             expanded={expanded}
             condensed={expandedId !== null && !expanded}
             activeCardRef={activeCardRef}
-            onExpand={setExpanded}
+            onUserExpand={handleUserExpand}
             prefersReducedMotion={prefersReducedMotion}
           />
         );
