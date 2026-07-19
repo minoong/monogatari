@@ -32,7 +32,7 @@ export const ACCOMMODATIONS: Accommodation[] = [
     agodaUrl: "https://www.agoda.com/ko-kr/shade-house-bangkok-oldtown/hotel/bangkok-th.html?adults=2&rooms=1&checkIn=2026-08-29&checkOut=2026-08-30",
     score: "9.2",
     highlights: ["카오산 로드 650m", "2025년 신축", "올드타운 산책"],
-    amenities: ["무료 Wi‑Fi", "익스프레스 체크인", "짐 보관", "데일리 하우스키핑"],
+    amenities: ["무료 Wi‑Fi", "익스프레스 체크인", "짐 보관", "에어컨"],
   },
   {
     id: "pattaya",
@@ -49,7 +49,7 @@ export const ACCOMMODATIONS: Accommodation[] = [
     agodaUrl: "https://www.agoda.com/ko-kr/the-grass-serviced-suites-by-at-mind/hotel/pattaya-th.html?adults=2&rooms=1&checkIn=2026-08-30&checkOut=2026-08-31",
     score: "8.8",
     highlights: ["루프탑 수영장", "파타야 비치 1.9km", "스위트·간이 주방"],
-    amenities: ["수영장", "피트니스", "사우나", "무료 주차"],
+    amenities: ["무료 Wi‑Fi", "야외 수영장", "피트니스", "사우나", "무료 주차"],
   },
   {
     id: "koh-sichang",
@@ -66,6 +66,6 @@ export const ACCOMMODATIONS: Accommodation[] = [
     agodaUrl: "https://www.agoda.com/ko-kr/somewhere-koh-sichang/hotel/chonburi-th.html?adults=2&rooms=1&checkIn=2026-08-31&checkOut=2026-09-01",
     score: "9.2",
     highlights: ["코시창 선착장 600m", "바다 전망 수영장", "섬 휴양"],
-    amenities: ["해변", "수영장", "조식", "공항·셔틀"],
+    amenities: ["무료 Wi‑Fi", "야외 수영장", "레스토랑", "무료 조식", "무료 주차"],
   },
 ];

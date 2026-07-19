@@ -1,11 +1,22 @@
 import React from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { ExternalLink, MapPin, CalendarDays, Clock3, Star, Wifi, Waves, Dumbbell, Luggage, Coffee, Car } from "lucide-react";
+import { ExternalLink, MapPin, CalendarDays, Clock3, Star, Wifi, Waves, Dumbbell, Luggage, Coffee, CircleParking, Flame, KeyRound, Snowflake, Utensils, type LucideIcon } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BottomNav } from "../components/BottomNav";
 import { ACCOMMODATIONS, type Accommodation } from "../lib/accommodations";
 
-const amenityIcons = [Wifi, Waves, Dumbbell, Luggage, Coffee, Car];
+const amenityIconMap: Record<string, LucideIcon> = {
+  "무료 Wi‑Fi": Wifi,
+  "익스프레스 체크인": KeyRound,
+  "짐 보관": Luggage,
+  "에어컨": Snowflake,
+  "야외 수영장": Waves,
+  "피트니스": Dumbbell,
+  "사우나": Flame,
+  "무료 주차": CircleParking,
+  "레스토랑": Utensils,
+  "무료 조식": Coffee,
+};
 type StayFilter = "all" | Accommodation["id"];
 
 const useWindowSize = () => {
@@ -170,9 +181,17 @@ export const AccommodationActivity: React.FC = () => {
                 <div className="mt-4">
                   <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">주요 편의시설</h2>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {stay.amenities.map((amenity, amenityIndex) => {
-                      const Icon = amenityIcons[amenityIndex % amenityIcons.length];
-                      return <span key={amenity} className="flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-400/15 dark:text-indigo-200"><Icon size={13} />{amenity}</span>;
+                    {stay.amenities.map((amenity) => {
+                      const Icon = amenityIconMap[amenity] ?? Wifi;
+                      return (
+                        <span
+                          key={amenity}
+                          className="flex h-8 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-medium text-gray-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-gray-300"
+                        >
+                          <Icon size={14} strokeWidth={1.8} className="text-gray-500 dark:text-gray-400" />
+                          {amenity}
+                        </span>
+                      );
                     })}
                   </div>
                 </div>
