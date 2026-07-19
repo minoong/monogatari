@@ -16,7 +16,7 @@ import {
 } from "@heroui/react";
 import StatusButton from "@/components/animata/button/status-button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Chip } from "@/components/ui/chip";
 import {
   Drawer,
   DrawerDescription,
@@ -181,9 +181,10 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                       </Radio.Control>
                       <span className="flex items-center gap-2 text-left text-sm font-semibold">
                         {option.label}
-                        <Badge color={option.value === "high" ? "danger" : option.value === "normal" ? "accent" : "success"} size="sm" variant="soft">
-                          {option.value === "high" ? "필수" : option.value === "normal" ? "기본" : "선택"}
-                        </Badge>
+                        <Chip color={option.value === "high" ? "danger" : option.value === "normal" ? "warning" : "success"} size="sm" variant="primary">
+                          <span aria-hidden className="size-1.5 rounded-full bg-current" />
+                          <Chip.Label>{option.value === "high" ? "필수" : option.value === "normal" ? "기본" : "선택"}</Chip.Label>
+                        </Chip>
                       </span>
                     </Radio.Content>
                   </Radio>
