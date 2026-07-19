@@ -191,6 +191,7 @@ const SwipeableItem = ({
   onNudge,
 }: SwipeableItemProps) => {
   const isChecked = item.completed_by.includes(targetUser);
+  const checkboxId = `checkbox-${targetUser}-${item.id}`;
   const [willDelete, setWillDelete] = useState(false);
   const [willNudge, setWillNudge] = useState(false);
   const x = useMotionValue(0);
@@ -310,13 +311,13 @@ const SwipeableItem = ({
             onCheckedChange={(val) => {
               onToggleCheck(item.id, val === true, targetUser);
             }}
-            id={`checkbox-${item.id}`}
+            id={checkboxId}
             className="flex-shrink-0 cursor-pointer"
           />
           <div className="flex items-center flex-1 gap-2 flex-wrap">
             <div className="relative inline-block cursor-pointer">
               <label
-                htmlFor={`checkbox-${item.id}`}
+                htmlFor={checkboxId}
                 className={`text-[16px] font-medium tracking-tight transition-all cursor-pointer select-none ${
                   isChecked ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-100"
                 }`}
