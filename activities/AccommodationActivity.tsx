@@ -75,7 +75,7 @@ const STAY_ACCORDION_ITEMS: StayAccordionItem[] = [
     id: "all",
     title: "전체",
     label: "ALL",
-    imageUrl: ACCOMMODATIONS[0].imageUrl,
+    imageUrl: "/accommodation-overview.jpg",
     description: "방콕 · 팟타야 · 코시창 · 예약한 숙소 3곳",
   },
   ...ACCOMMODATIONS.map((stay) => ({
