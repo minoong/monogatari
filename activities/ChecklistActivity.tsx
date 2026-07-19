@@ -342,7 +342,7 @@ const SwipeableItem = ({
           <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
             <label
               htmlFor={checkboxId}
-              className={`relative min-w-0 flex-1 break-words text-[16px] font-medium leading-6 tracking-tight transition-colors cursor-pointer select-none ${
+              className={`relative block min-w-0 flex-1 break-words text-[16px] font-medium leading-6 tracking-tight transition-colors cursor-pointer select-none ${
                 isChecked ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-100"
               }`}
             >
