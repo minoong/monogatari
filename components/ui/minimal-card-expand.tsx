@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { MoreHorizontal } from "lucide-react";
-import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 export interface MinimalCardExpandItem {
   id: string;
@@ -31,7 +31,7 @@ interface MinimalCardExpandProps {
 interface CardProps {
   item: MinimalCardExpandItem;
   expanded: boolean;
-  compact: "default" | "reduced";
+  condensed: boolean;
   activeCardRef: React.RefObject<HTMLElement | null>;
   onExpand: (id: string) => void;
   prefersReducedMotion: boolean | null;
@@ -40,7 +40,7 @@ interface CardProps {
 const SkiperCard = ({
   item,
   expanded,
-  compact,
+  condensed,
   activeCardRef,
   onExpand,
   prefersReducedMotion,
@@ -48,7 +48,6 @@ const SkiperCard = ({
   <motion.article
     ref={expanded ? activeCardRef : undefined}
     layout
-    layoutId={`minimal-card-expand-${item.id}`}
     transition={{
       layout: prefersReducedMotion
         ? { duration: 0 }
@@ -56,9 +55,9 @@ const SkiperCard = ({
     }}
     className={`relative flex shrink-0 flex-col items-start justify-between overflow-hidden rounded-[24px] p-3 text-white ${item.colorClassName} ${
       expanded
-        ? "h-[180px] w-full"
-        : compact === "reduced"
-          ? "h-[100px] w-[100px] sm:w-[120px]"
+        ? "order-0 h-[180px] w-full"
+        : condensed
+          ? "order-1 h-[100px] w-[100px] sm:w-[120px]"
           : "h-[125px] w-[140px] sm:w-[160px]"
     }`}
   >
@@ -133,74 +132,25 @@ export function MinimalCardExpand({
     return () => document.removeEventListener("pointerdown", handleOutsidePointerDown);
   }, [expandedId, setExpanded]);
 
-  const activeItem = expandedId ? items.find((item) => item.id === expandedId) : null;
-  const inactiveItems = activeItem ? items.filter((item) => item.id !== activeItem.id) : [];
-
   return (
-    <LayoutGroup>
-      <div
-        className={`flex h-[300px] w-full max-w-[360px] flex-col justify-end gap-4 ${className ?? ""}`}
-        aria-label="확장 카드 데모"
-      >
-        {activeItem ? (
-          <>
-            <div className="flex gap-4">
-              <SkiperCard
-                item={activeItem}
-                expanded
-                compact="default"
-                activeCardRef={activeCardRef}
-                onExpand={setExpanded}
-                prefersReducedMotion={prefersReducedMotion}
-              />
-            </div>
-            <div className="flex gap-4">
-              {inactiveItems.map((item) => (
-                <SkiperCard
-                  key={item.id}
-                  item={item}
-                  expanded={false}
-                  compact="reduced"
-                  activeCardRef={activeCardRef}
-                  onExpand={setExpanded}
-                  prefersReducedMotion={prefersReducedMotion}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="flex gap-4">
-              {items.slice(0, 2).map((item) => (
-                <motion.div key={item.id} layout className="h-[125px] w-[140px] sm:w-[160px]">
-                  <SkiperCard
-                  item={item}
-                  expanded={false}
-                  compact="default"
-                    activeCardRef={activeCardRef}
-                    onExpand={setExpanded}
-                    prefersReducedMotion={prefersReducedMotion}
-                  />
-                </motion.div>
-              ))}
-            </div>
-            <div className="flex gap-4">
-              {items.slice(2).map((item) => (
-                <motion.div key={item.id} layout className="h-[125px] w-[140px] sm:w-[160px]">
-                  <SkiperCard
-                  item={item}
-                  expanded={false}
-                  compact="default"
-                    activeCardRef={activeCardRef}
-                    onExpand={setExpanded}
-                    prefersReducedMotion={prefersReducedMotion}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    </LayoutGroup>
+    <div
+      className={`flex h-[300px] w-full max-w-[360px] flex-wrap content-end gap-4 ${className ?? ""}`}
+      aria-label="확장 카드 데모"
+    >
+      {items.map((item) => {
+        const expanded = expandedId === item.id;
+        return (
+          <SkiperCard
+            key={item.id}
+            item={item}
+            expanded={expanded}
+            condensed={expandedId !== null && !expanded}
+            activeCardRef={activeCardRef}
+            onExpand={setExpanded}
+            prefersReducedMotion={prefersReducedMotion}
+          />
+        );
+      })}
+    </div>
   );
 }

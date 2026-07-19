@@ -40,7 +40,7 @@ export const HomeActivity: React.FC = () => {
                 </button>
               </div>
 
-              <section className="rounded-3xl bg-[#111] p-4 text-white">
+              <section className="mx-auto w-full max-w-[392px] rounded-3xl bg-[#111] p-4 text-white">
                 <div className="mb-1 flex items-end justify-between gap-3">
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">INTERACTIVE PREVIEW</p>
                   <span className="text-xs font-medium text-white/45">카드 메뉴를 눌러 펼치기</span>
