@@ -3,7 +3,7 @@
 import type React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Loader2 } from "lucide-react"
-import { motion, type HTMLMotionProps } from "motion/react"
+import { motion, type HTMLMotionProps, useReducedMotion } from "motion/react"
 
 const buttonVariants = cva(
   // Base styles
@@ -98,12 +98,14 @@ const NeumorphButton: React.FC<NeumorphButtonProps> = ({
   disabled,
   ...props
 }) => {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <motion.button
       className={buttonVariants({ intent, size, fullWidth, className })}
       disabled={disabled || loading}
-      whileTap={{ scale: 0.98 }}
-      whileHover={{ scale: 1.02 }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+      whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
       transition={{ type: "spring", stiffness: 400, damping: 10 }}
       {...props}
     >

@@ -10,7 +10,7 @@ import { Skeleton } from "../components/ui/skeleton";
 import { ImportanceChip } from "../components/ui/chip";
 import NeumorphButton from "../components/ui/neumorph-button";
 import { Checkbox } from "../components/animate-ui/components/radix/checkbox";
-import { motion, AnimatePresence, useMotionValue, animate, useTransform, type Transition } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, animate, useTransform, useReducedMotion, type Transition } from "framer-motion";
 import { RingChart } from "../components/ui/ring-chart";
 import { useRef } from "react";
 import {
@@ -49,6 +49,7 @@ const ProgressIslandContent = ({
 }) => {
   const { setSize, state } = useDynamicIslandSize();
   const isExpanded = state.size === SIZE_PRESETS.PROGRESS_EXPANDED;
+  const prefersReducedMotion = useReducedMotion();
 
   const toggleExpand = () => {
     if (isExpanded) {
@@ -60,9 +61,12 @@ const ProgressIslandContent = ({
 
   return (
     <DynamicIsland id="progress-island">
-      <div 
-        onClick={toggleExpand} 
-        className="w-full h-full flex flex-col p-4 cursor-pointer relative"
+      <button
+        type="button"
+        aria-controls="progress-island-content"
+        aria-expanded={isExpanded}
+        onClick={toggleExpand}
+        className="w-full h-full flex flex-col p-4 cursor-pointer relative text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
       >
         {/* Header */}
         <div className="flex items-center justify-between w-full h-[52px]">
@@ -76,8 +80,8 @@ const ProgressIslandContent = ({
             </div>
           </div>
           
-          <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
-            <ChevronDown size={20} className="text-neutral-500" />
+          <motion.div animate={{ rotate: prefersReducedMotion ? 0 : isExpanded ? 180 : 0 }}>
+            <ChevronDown aria-hidden="true" size={20} className="text-neutral-500" />
           </motion.div>
         </div>
 
@@ -85,6 +89,7 @@ const ProgressIslandContent = ({
         <AnimatePresence>
           {isExpanded && (
             <motion.div
+              id="progress-island-content"
               initial="hidden"
               animate="visible"
               exit="exit"
@@ -92,40 +97,36 @@ const ProgressIslandContent = ({
                 hidden: { opacity: 0 },
                 visible: {
                   opacity: 1,
-                  transition: {
-                    staggerChildren: 0.1,
-                  },
+                  transition: prefersReducedMotion ? undefined : { staggerChildren: 0.1 },
                 },
                 exit: {
                   opacity: 0,
-                  transition: {
-                    duration: 0.1
-                  }
+                  transition: { duration: prefersReducedMotion ? 0 : 0.1 }
                 },
               }}
               className="w-full flex flex-col mt-4 overflow-hidden"
             >
               <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-3 w-full text-left">
                 {[
-                  { label: "전체", progress, text: "text-blue-500", bg: "bg-blue-500", avatar: null },
-                  { label: "가현쨩", progress: gahyunProgress, text: "text-pink-500", bg: "bg-pink-500", avatar: "gahyun" as const },
-                  { label: "미누쿤", progress: minuProgress, text: "text-emerald-500", bg: "bg-emerald-500", avatar: "minu" as const },
+                  { id: "all", label: "전체", progress, text: "text-blue-500", bg: "bg-blue-500", avatar: null },
+                  { id: "gahyun", label: "가현쨩", progress: gahyunProgress, text: "text-pink-500", bg: "bg-pink-500", avatar: "gahyun" as const },
+                  { id: "minu", label: "미누쿤", progress: minuProgress, text: "text-emerald-500", bg: "bg-emerald-500", avatar: "minu" as const },
                 ].map((item, i) => (
                   <motion.div
-                    key={i}
+                    key={item.id}
                     variants={{
                       hidden: { opacity: 0, y: 20 },
                       visible: { opacity: 1, y: 0 },
-                      exit: { opacity: 0, y: 10, transition: { duration: 0.1 } },
+                      exit: { opacity: 0, y: prefersReducedMotion ? 0 : 10, transition: { duration: prefersReducedMotion ? 0 : 0.1 } },
                     }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    transition={{ duration: prefersReducedMotion ? 0 : 0.4, ease: "easeOut" }}
                     className="space-y-1"
                   >
                     <div className="flex justify-between items-center text-[11px]">
                       <div className="flex items-center gap-1.5">
                         {item.avatar && (
                           <Avatar className="w-4 h-4">
-                            <AvatarImage alt={item.label} src={avatarSources[item.avatar]} />
+                            <AvatarImage alt="" src={avatarSources[item.avatar]} />
                             <AvatarFallback className="text-[8px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">{item.label[0]}</AvatarFallback>
                           </Avatar>
                         )}
@@ -135,12 +136,19 @@ const ProgressIslandContent = ({
                         <AnimatedNumber value={item.progress} />%
                       </span>
                     </div>
-                    <div className="w-full h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                    <div
+                      aria-label={`${item.label} 진행률`}
+                      aria-valuemax={100}
+                      aria-valuemin={0}
+                      aria-valuenow={item.progress}
+                      className="w-full h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden"
+                      role="progressbar"
+                    >
                       <motion.div
                         className={`h-full ${item.bg} rounded-full`}
                         initial={{ width: 0 }}
                         animate={{ width: `${item.progress}%` }}
-                        transition={{ duration: 0.6, delay: 0.2 + i * 0.1, ease: "easeOut" }}
+                        transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.2 + i * 0.1, ease: "easeOut" }}
                       />
                     </div>
                   </motion.div>
@@ -149,7 +157,7 @@ const ProgressIslandContent = ({
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </button>
     </DynamicIsland>
   );
 };
@@ -159,11 +167,11 @@ const getPathAnimate = (isChecked: boolean) => ({
   opacity: isChecked ? 1 : 0,
 });
 
-const getPathTransition = (isChecked: boolean): Transition => ({
-  pathLength: { duration: 1, ease: 'easeInOut' },
+const getPathTransition = (isChecked: boolean, prefersReducedMotion = false): Transition => ({
+  pathLength: { duration: prefersReducedMotion ? 0 : 1, ease: 'easeInOut' },
   opacity: {
-    duration: 0.01,
-    delay: isChecked ? 0 : 1,
+    duration: prefersReducedMotion ? 0 : 0.01,
+    delay: prefersReducedMotion ? 0 : isChecked ? 0 : 1,
   },
 });
 
@@ -197,6 +205,7 @@ const SwipeableItem = ({
 }: SwipeableItemProps) => {
   const isChecked = item.completed_by.includes(targetUser);
   const checkboxId = `checkbox-${targetUser}-${item.id}`;
+  const prefersReducedMotion = useReducedMotion();
   const [willDelete, setWillDelete] = useState(false);
   const [willNudge, setWillNudge] = useState(false);
   const x = useMotionValue(0);
@@ -228,7 +237,7 @@ const SwipeableItem = ({
     <motion.div
       ref={itemRef}
       exit={{ opacity: 0, height: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: "easeOut" }}
       style={{ overflow: "hidden" }}
       className="checklist-item relative border-b border-gray-200 dark:border-white/10 last:border-b-0"
     >
@@ -259,7 +268,7 @@ const SwipeableItem = ({
       
       {/* Foreground Swipeable Content */}
       <motion.div
-        drag="x"
+        drag={prefersReducedMotion ? false : "x"}
         style={{ x }}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={dragElastic}
@@ -283,7 +292,7 @@ const SwipeableItem = ({
         onDragEnd={(e, info) => {
           if (info.offset.x < -80) {
             animate(x, -500, {
-              duration: 0.25,
+              duration: prefersReducedMotion ? 0 : 0.25,
               ease: "easeOut",
               onComplete: () => {
                 onDelete(item.id, item.assignees, targetUser);
@@ -291,7 +300,7 @@ const SwipeableItem = ({
             });
           } else if (isNudgeAllowed && info.offset.x > 80) {
             animate(x, 200, {
-              duration: 0.2,
+              duration: prefersReducedMotion ? 0 : 0.2,
               ease: "easeOut",
               onComplete: () => {
                 onNudge(targetUser);
@@ -305,7 +314,7 @@ const SwipeableItem = ({
             animate(x, 0, { type: "spring", stiffness: 300, damping: 20 });
           }
         }}
-        className={`relative z-10 flex items-center justify-between gap-3 p-4 bg-white dark:bg-[#1C1C1E] transition-colors ${
+        className={`relative z-10 flex select-none items-center justify-between gap-3 p-4 touch-manipulation bg-white dark:bg-[#1C1C1E] transition-colors ${
           isHighlighted ? "bg-yellow-50 dark:bg-yellow-900/20" : ""
         }`}
       >
@@ -319,11 +328,11 @@ const SwipeableItem = ({
             id={checkboxId}
             className="flex-shrink-0 cursor-pointer"
           />
-          <div className="flex items-center flex-1 gap-2 flex-wrap">
-            <div className="relative inline-block cursor-pointer">
+          <div className="flex min-w-0 items-center flex-1 gap-2 flex-wrap">
+            <div className="relative inline-block min-w-0 cursor-pointer">
               <label
                 htmlFor={checkboxId}
-                className={`text-[16px] font-medium tracking-tight transition-all cursor-pointer select-none ${
+                className={`break-words text-[16px] font-medium tracking-tight transition-colors cursor-pointer select-none ${
                   isChecked ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-100"
                 }`}
               >
@@ -344,7 +353,7 @@ const SwipeableItem = ({
                   fill="none"
                   initial={false}
                   animate={getPathAnimate(isChecked)}
-                  transition={getPathTransition(isChecked)}
+                  transition={getPathTransition(isChecked, prefersReducedMotion ?? false)}
                   className="stroke-neutral-400 dark:stroke-neutral-600"
                 />
               </motion.svg>
@@ -362,6 +371,8 @@ export const ChecklistActivity: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
+  const prefersReducedMotion = useReducedMotion();
+  const locallyUpdatingIds = useRef(new Set<string>());
 
 
   const { data: items = [], isLoading: loading } = useQuery<PreparationItem[]>({
@@ -392,6 +403,7 @@ export const ChecklistActivity: React.FC = () => {
             });
           } else if (payload.eventType === 'UPDATE') {
             const updatedItem = payload.new as PreparationItem;
+            const isLocalUpdate = locallyUpdatingIds.current.delete(updatedItem.id);
             queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
               old.map((i) => (i.id === updatedItem.id ? updatedItem : i))
             );
@@ -402,9 +414,11 @@ export const ChecklistActivity: React.FC = () => {
               setHighlightedItemId(null);
             }, 2000);
             
-            toast("준비물 항목이 업데이트되었습니다.", {
-              duration: 3000,
-            });
+            if (!isLocalUpdate) {
+              toast("준비물 항목이 업데이트되었습니다.", {
+                duration: 3000,
+              });
+            }
           } else if (payload.eventType === 'DELETE') {
             const deletedItem = payload.old as { id: string };
             queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
@@ -422,7 +436,7 @@ export const ChecklistActivity: React.FC = () => {
 
   const toggleMutation = useMutation({
     mutationFn: async ({ id, isChecked, targetUser }: { id: string; isChecked: boolean; targetUser: string }) => {
-      const item = items.find((i) => i.id === id);
+      const item = queryClient.getQueryData<PreparationItem[]>(["checklist"])?.find((i) => i.id === id);
       if (!item) throw new Error("Item not found");
 
       let newCompletedBy = [...item.completed_by];
@@ -442,6 +456,7 @@ export const ChecklistActivity: React.FC = () => {
     },
     onMutate: async ({ id, isChecked, targetUser }) => {
       await queryClient.cancelQueries({ queryKey: ["checklist"] });
+      locallyUpdatingIds.current.add(id);
       const previousItems = queryClient.getQueryData<PreparationItem[]>(["checklist"]);
 
       queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) => {
@@ -462,6 +477,7 @@ export const ChecklistActivity: React.FC = () => {
       return { previousItems };
     },
     onError: (err, variables, context) => {
+      locallyUpdatingIds.current.delete(variables.id);
       if (context?.previousItems) {
         queryClient.setQueryData(["checklist"], context.previousItems);
       }
@@ -584,12 +600,9 @@ export const ChecklistActivity: React.FC = () => {
   const gahyunCheckedCount = gahyunItems.filter((i) => i.completed_by.includes("gahyun") || i.completed_by.includes("all")).length;
   const minuCheckedCount = minuItems.filter((i) => i.completed_by.includes("minu") || i.completed_by.includes("all")).length;
 
-  const totalItemsCount = gahyunItems.length + minuItems.length;
-  const totalCheckedCount = gahyunCheckedCount + minuCheckedCount;
-  
-  const progress = totalItemsCount === 0 ? 0 : Math.round((totalCheckedCount / totalItemsCount) * 100);
   const gahyunProgress = gahyunItems.length === 0 ? 0 : Math.round((gahyunCheckedCount / gahyunItems.length) * 100);
   const minuProgress = minuItems.length === 0 ? 0 : Math.round((minuCheckedCount / minuItems.length) * 100);
+  const progress = Math.round((gahyunProgress + minuProgress) / 2);
 
   const rings = [
     { progress: progress, color: "#3b82f6" }, // blue-500
@@ -625,7 +638,7 @@ export const ChecklistActivity: React.FC = () => {
             <>
               <div className="flex items-center gap-2 mb-3 mt-2">
                 <Avatar className="w-5 h-5">
-                  <AvatarImage alt="가현쨩" src={avatarSources.gahyun} />
+                  <AvatarImage alt="" src={avatarSources.gahyun} />
                   <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">G</AvatarFallback>
                 </Avatar>
                 <h3 className="font-bold text-gray-700 dark:text-gray-300 text-sm">가현쨩 짐싸기</h3>
@@ -634,7 +647,7 @@ export const ChecklistActivity: React.FC = () => {
 
               <div className="flex items-center gap-2 mb-3 mt-6">
                 <Avatar className="w-5 h-5">
-                  <AvatarImage alt="미누쿤" src={avatarSources.minu} />
+                  <AvatarImage alt="" src={avatarSources.minu} />
                   <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">M</AvatarFallback>
                 </Avatar>
                 <h3 className="font-bold text-gray-700 dark:text-gray-300 text-sm">미누쿤 짐싸기</h3>
@@ -646,34 +659,29 @@ export const ChecklistActivity: React.FC = () => {
 
         {/* Floating Action Button */}
         <NeumorphButton
+          aria-label="준비물 추가"
+          aria-expanded={drawerOpen}
+          aria-controls="checklist-drawer"
+          type="button"
           intent="primary"
-          className="fixed right-6 w-14 h-14 !rounded-full !p-0 z-50 flex items-center justify-center shadow-xl overflow-hidden"
+          className="fixed right-6 w-14 h-14 !rounded-full !p-0 z-50 flex items-center justify-center shadow-xl overflow-hidden touch-manipulation"
           style={{ bottom: "calc(88px + env(safe-area-inset-bottom))" }}
           onClick={() => {
             if (drawerOpen) return;
             setRotation((prev) => prev + 90);
-            setTimeout(() => {
-              setDrawerOpen(true);
-            }, 150);
+            setDrawerOpen(true);
           }}
         >
-          {/* iOS Haptic Trigger Switch Overlay */}
-          <div
-            className="absolute inset-0 z-10 rounded-full overflow-hidden"
-            dangerouslySetInnerHTML={{
-              __html: `<input type="checkbox" switch class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
-            }}
-          />
           <motion.div
             animate={{ rotate: rotation }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.3, ease: "easeInOut" }}
             className="flex items-center justify-center pointer-events-none"
           >
             <Plus size={24} />
           </motion.div>
         </NeumorphButton>
 
-        <ChecklistDrawer
+          <ChecklistDrawer
           open={drawerOpen}
           onOpenChange={(open) => {
             if (!open && drawerOpen) {

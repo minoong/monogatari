@@ -128,7 +128,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerPopup variant="inset" showBar>
+      <DrawerPopup id="checklist-drawer" variant="inset" showBar>
         <Form
           aria-label="준비물 추가"
           className="flex min-h-0 w-full flex-1 flex-col"
@@ -201,7 +201,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                         <Checkbox.Indicator />
                       </Checkbox.Control>
                       <Avatar color={target.color} size="sm">
-                        <AvatarImage alt={target.label} src={target.image} />
+                        <AvatarImage alt="" src={target.image} />
                         <AvatarFallback>{target.initials}</AvatarFallback>
                       </Avatar>
                       <span>{target.label}</span>
