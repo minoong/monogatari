@@ -4,7 +4,7 @@ import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { BottomNav } from "../components/BottomNav";
 import { motion } from "framer-motion";
 import NeumorphButton from "../components/ui/neumorph-button";
-import { Anchor, Bookmark, ChevronRight, Cloud, Copy, Hotel, MapPin, SlidersHorizontal, Sparkles } from "lucide-react";
+import { Anchor, Bookmark, ChevronRight, Cloud, Copy, Hotel, SlidersHorizontal, Sparkles } from "lucide-react";
 import { MinimalCardExpand } from "../components/ui/minimal-card-expand";
 import { ACCOMMODATIONS } from "../lib/accommodations";
 
@@ -153,36 +153,33 @@ export const HomeActivity: React.FC = () => {
                     {
                       id: ACCOMMODATIONS[0].id,
                       title: ACCOMMODATIONS[0].city,
-                      value: `${ACCOMMODATIONS[0].date} · 체크인 ${ACCOMMODATIONS[0].checkIn}`,
-                      icon: <MapPin size={24} aria-hidden="true" />,
+                      value: `${ACCOMMODATIONS[0].date} · ${ACCOMMODATIONS[0].checkIn}`,
                       colorClassName: "bg-slate-800",
                       imageUrl: ACCOMMODATIONS[0].imageUrl,
                       expandedActions: {
-                        primary: <span className="text-sm font-semibold">{ACCOMMODATIONS[0].name}</span>,
+                        primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[0].name}</span>,
                         secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[0].checkOut}</span>,
                       },
                     },
                     {
                       id: ACCOMMODATIONS[1].id,
                       title: ACCOMMODATIONS[1].city,
-                      value: `${ACCOMMODATIONS[1].date} · 체크인 ${ACCOMMODATIONS[1].checkIn}`,
-                      icon: <MapPin size={24} aria-hidden="true" />,
+                      value: `${ACCOMMODATIONS[1].date} · ${ACCOMMODATIONS[1].checkIn}`,
                       colorClassName: "bg-slate-800",
                       imageUrl: ACCOMMODATIONS[1].imageUrl,
                       expandedActions: {
-                        primary: <span className="text-sm font-semibold">{ACCOMMODATIONS[1].name}</span>,
+                        primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[1].name}</span>,
                         secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[1].checkOut}</span>,
                       },
                     },
                     {
                       id: ACCOMMODATIONS[2].id,
                       title: ACCOMMODATIONS[2].city,
-                      value: `${ACCOMMODATIONS[2].date} · 체크인 ${ACCOMMODATIONS[2].checkIn}`,
-                      icon: <MapPin size={24} aria-hidden="true" />,
+                      value: `${ACCOMMODATIONS[2].date} · ${ACCOMMODATIONS[2].checkIn}`,
                       colorClassName: "bg-slate-800",
                       imageUrl: ACCOMMODATIONS[2].imageUrl,
                       expandedActions: {
-                        primary: <span className="text-sm font-semibold">{ACCOMMODATIONS[2].name}</span>,
+                        primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[2].name}</span>,
                         secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[2].checkOut}</span>,
                       },
                     },

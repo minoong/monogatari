@@ -68,7 +68,7 @@ const SkiperCard = ({
     }`}
   >
     <div className="flex w-full items-start justify-between gap-3">
-      <div className="flex size-8 items-center justify-center text-white">{item.icon}</div>
+      {item.icon ? <div className="flex size-8 shrink-0 items-center justify-center text-white">{item.icon}</div> : <span />}
       {expanded ? (
         <div className="flex items-center justify-end gap-2">{item.expandedActions?.primary}</div>
       ) : (
@@ -85,12 +85,24 @@ const SkiperCard = ({
       )}
     </div>
 
-    <div className={expanded ? "flex w-full items-end justify-between gap-3" : "flex flex-col items-start justify-center"}>
+    <div className={expanded ? "flex w-full min-w-0 items-end justify-between gap-3" : "flex min-w-0 flex-col items-start justify-center"}>
       <div className="min-w-0">
-        <motion.h3 layout="position" className={`truncate font-semibold ${expanded ? "text-2xl" : "text-base"}`}>
+        <motion.h3
+          layout="position"
+          className={`font-semibold leading-tight ${
+            expanded
+              ? "truncate text-[clamp(1.25rem,6vw,1.5rem)]"
+              : "line-clamp-2 break-words text-[clamp(0.8125rem,3.8vw,1rem)]"
+          }`}
+        >
           {item.title}
         </motion.h3>
-        <motion.p layout="position" className={`font-semibold text-white/55 ${expanded ? "text-xl" : "text-sm"}`}>
+        <motion.p
+          layout="position"
+          className={`mt-1 max-w-full truncate font-semibold text-white/55 ${
+            expanded ? "text-[clamp(1rem,5vw,1.25rem)]" : "text-[clamp(0.6875rem,3vw,0.875rem)]"
+          }`}
+        >
           {item.value}
         </motion.p>
       </div>
