@@ -185,26 +185,26 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                 orientation="horizontal"
                 className="gap-5 mt-1"
               >
-                <Radio value="high">
+                <Radio value="high" className="group">
                   <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
-                    <Radio.Control className="relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-full border border-input bg-background shadow-xs/5 outline-none transition-shadow data-[selected=true]:border-transparent">
-                      <Radio.Indicator className="absolute -inset-px flex items-center justify-center rounded-full bg-neutral-900 dark:bg-neutral-100 before:content-[''] before:size-1.5 before:rounded-full before:bg-white dark:before:bg-neutral-900" />
+                    <Radio.Control className="relative inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-input bg-background outline-none transition-colors group-data-[selected=true]:border-transparent group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-2 group-data-[focus-visible=true]:ring-ring">
+                      <Radio.Indicator className="scale-0 transition-transform duration-200 ease-out group-data-[selected=true]:scale-100 absolute -inset-px flex items-center justify-center rounded-full bg-primary after:content-[''] after:size-1.5 after:rounded-full after:bg-white" />
                     </Radio.Control>
                     <Badge variant="high" className="text-xs px-3 py-1 h-auto select-none">높음</Badge>
                   </Radio.Content>
                 </Radio>
-                <Radio value="normal">
+                <Radio value="normal" className="group">
                   <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
-                    <Radio.Control className="relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-full border border-input bg-background shadow-xs/5 outline-none transition-shadow data-[selected=true]:border-transparent">
-                      <Radio.Indicator className="absolute -inset-px flex items-center justify-center rounded-full bg-neutral-900 dark:bg-neutral-100 before:content-[''] before:size-1.5 before:rounded-full before:bg-white dark:before:bg-neutral-900" />
+                    <Radio.Control className="relative inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-input bg-background outline-none transition-colors group-data-[selected=true]:border-transparent group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-2 group-data-[focus-visible=true]:ring-ring">
+                      <Radio.Indicator className="scale-0 transition-transform duration-200 ease-out group-data-[selected=true]:scale-100 absolute -inset-px flex items-center justify-center rounded-full bg-primary after:content-[''] after:size-1.5 after:rounded-full after:bg-white" />
                     </Radio.Control>
                     <Badge variant="normal" className="text-xs px-3 py-1 h-auto select-none">보통</Badge>
                   </Radio.Content>
                 </Radio>
-                <Radio value="low">
+                <Radio value="low" className="group">
                   <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
-                    <Radio.Control className="relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-full border border-input bg-background shadow-xs/5 outline-none transition-shadow data-[selected=true]:border-transparent">
-                      <Radio.Indicator className="absolute -inset-px flex items-center justify-center rounded-full bg-neutral-900 dark:bg-neutral-100 before:content-[''] before:size-1.5 before:rounded-full before:bg-white dark:before:bg-neutral-900" />
+                    <Radio.Control className="relative inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-input bg-background outline-none transition-colors group-data-[selected=true]:border-transparent group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-2 group-data-[focus-visible=true]:ring-ring">
+                      <Radio.Indicator className="scale-0 transition-transform duration-200 ease-out group-data-[selected=true]:scale-100 absolute -inset-px flex items-center justify-center rounded-full bg-primary after:content-[''] after:size-1.5 after:rounded-full after:bg-white" />
                     </Radio.Control>
                     <Badge variant="low" className="text-xs px-3 py-1 h-auto select-none">낮음</Badge>
                   </Radio.Content>
@@ -235,10 +235,10 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                 onChange={setTargets}
                 className="flex flex-row gap-6 mt-1"
               >
-                <Checkbox value="gahyun">
+                <Checkbox value="gahyun" className="group">
                   <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
-                    <Checkbox.Control className="relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-[0.25rem] border border-input bg-background outline-none transition-shadow data-[selected=true]:border-transparent">
-                      <Checkbox.Indicator className="absolute -inset-px flex items-center justify-center rounded-[0.25rem] bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900">
+                    <Checkbox.Control className="relative inline-flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-[4px] border border-input bg-background outline-none transition-colors group-data-[selected=true]:bg-primary group-data-[selected=true]:border-transparent group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-2 group-data-[focus-visible=true]:ring-ring">
+                      <Checkbox.Indicator className="scale-0 transition-transform duration-200 ease-out group-data-[selected=true]:scale-100 absolute -inset-px flex items-center justify-center bg-primary text-white">
                         <svg
                           aria-hidden="true"
                           className="size-3"
@@ -246,7 +246,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                           stroke="currentColor"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth="3"
+                          strokeWidth="3.5"
                           viewBox="0 0 24 24"
                         >
                           <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
@@ -262,10 +262,10 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                     </div>
                   </Checkbox.Content>
                 </Checkbox>
-                <Checkbox value="minu">
+                <Checkbox value="minu" className="group">
                   <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
-                    <Checkbox.Control className="relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-[0.25rem] border border-input bg-background outline-none transition-shadow data-[selected=true]:border-transparent">
-                      <Checkbox.Indicator className="absolute -inset-px flex items-center justify-center rounded-[0.25rem] bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900">
+                    <Checkbox.Control className="relative inline-flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-[4px] border border-input bg-background outline-none transition-colors group-data-[selected=true]:bg-primary group-data-[selected=true]:border-transparent group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-2 group-data-[focus-visible=true]:ring-ring">
+                      <Checkbox.Indicator className="scale-0 transition-transform duration-200 ease-out group-data-[selected=true]:scale-100 absolute -inset-px flex items-center justify-center bg-primary text-white">
                         <svg
                           aria-hidden="true"
                           className="size-3"
@@ -273,7 +273,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                           stroke="currentColor"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth="3"
+                          strokeWidth="3.5"
                           viewBox="0 0 24 24"
                         >
                           <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
