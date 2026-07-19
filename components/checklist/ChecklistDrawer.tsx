@@ -12,9 +12,18 @@ import {
 } from "@/components/ui/drawer";
 import NeumorphButton from "../ui/neumorph-button";
 import StatusButton from "../animata/button/status-button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, Radio, CheckboxGroup, Checkbox, Label as HeroLabel } from "@heroui/react";
+import {
+  Form,
+  Fieldset,
+  FieldGroup,
+  TextField,
+  Input,
+  Label,
+  RadioGroup,
+  Radio,
+  CheckboxGroup,
+  Checkbox,
+} from "@heroui/react";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { motion } from "framer-motion";
@@ -127,149 +136,156 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
         </DrawerHeader>
 
         <DrawerPanel className="px-6 py-6 flex flex-col gap-8">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate={open ? "visible" : "hidden"}
-            className="flex flex-col gap-8"
-          >
-            {/* 제목 */}
-            <motion.div variants={itemVariants} className="flex flex-col gap-3">
-              <Label htmlFor="title" className="text-base font-bold text-gray-700 dark:text-gray-300">
-                <TextEffect
-                  per="line"
-                  as="span"
-                  segmentWrapperClassName="overflow-hidden block"
-                  variants={{
-                    container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2 } } },
-                    item: {
-                      hidden: { opacity: 0, y: 40 },
-                      visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-                    },
-                  }}
-                >
-                  제목
-                </TextEffect>
-              </Label>
-              <Input
-                id="title"
-                ref={inputRef}
-                placeholder="예) 보조배터리 챙기기"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="h-14 rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 [&>[data-slot=input]]:h-full [&>[data-slot=input]]:text-lg [&>[data-slot=input]]:px-4 [&>[data-slot=input]]:leading-normal"
-              />
-            </motion.div>
+          <Form onSubmit={handleSubmit} className="w-full">
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate={open ? "visible" : "hidden"}
+              className="w-full"
+            >
+              <Fieldset className="w-full flex flex-col gap-8 border-none p-0 m-0">
+                <FieldGroup className="w-full flex flex-col gap-8">
+                  {/* 제목 */}
+                  <motion.div variants={itemVariants} className="w-full">
+                    <TextField name="title" isRequired className="w-full flex flex-col gap-3">
+                      <Label className="text-base font-bold text-gray-700 dark:text-gray-300">
+                        <TextEffect
+                          per="line"
+                          as="span"
+                          segmentWrapperClassName="overflow-hidden block"
+                          variants={{
+                            container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2 } } },
+                            item: {
+                              hidden: { opacity: 0, y: 40 },
+                              visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+                            },
+                          }}
+                        >
+                          제목
+                        </TextEffect>
+                      </Label>
+                      <Input
+                        ref={inputRef}
+                        placeholder="예) 보조배터리 챙기기"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="h-14 rounded-xl text-lg px-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
+                      />
+                    </TextField>
+                  </motion.div>
 
-            {/* 중요도 */}
-            <motion.div variants={itemVariants} className="flex flex-col gap-3">
-              <RadioGroup
-                value={importance}
-                onChange={(val) => setImportance(val as "high" | "normal" | "low")}
-                orientation="horizontal"
-                className="gap-5 mt-1"
-              >
-                <HeroLabel className="text-base font-bold text-gray-700 dark:text-gray-300">
-                  <TextEffect
-                    per="line"
-                    as="span"
-                    segmentWrapperClassName="overflow-hidden block"
-                    variants={{
-                      container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2 } } },
-                      item: {
-                        hidden: { opacity: 0, y: 40 },
-                        visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-                      },
-                    }}
-                  >
-                    중요도
-                  </TextEffect>
-                </HeroLabel>
-                <div className="flex flex-row gap-5 mt-1">
-                  <Radio value="high">
-                    <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
-                      <Radio.Control>
-                        <Radio.Indicator />
-                      </Radio.Control>
-                      <Badge variant="high" className="text-xs px-3 py-1 h-auto select-none">높음</Badge>
-                    </Radio.Content>
-                  </Radio>
-                  <Radio value="normal">
-                    <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
-                      <Radio.Control>
-                        <Radio.Indicator />
-                      </Radio.Control>
-                      <Badge variant="normal" className="text-xs px-3 py-1 h-auto select-none">보통</Badge>
-                    </Radio.Content>
-                  </Radio>
-                  <Radio value="low">
-                    <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
-                      <Radio.Control>
-                        <Radio.Indicator />
-                      </Radio.Control>
-                      <Badge variant="low" className="text-xs px-3 py-1 h-auto select-none">낮음</Badge>
-                    </Radio.Content>
-                  </Radio>
-                </div>
-              </RadioGroup>
-            </motion.div>
+                  {/* 중요도 */}
+                  <motion.div variants={itemVariants} className="w-full">
+                    <RadioGroup
+                      value={importance}
+                      onChange={(val) => setImportance(val as "high" | "normal" | "low")}
+                      orientation="horizontal"
+                      className="gap-5"
+                    >
+                      <Label className="text-base font-bold text-gray-700 dark:text-gray-300">
+                        <TextEffect
+                          per="line"
+                          as="span"
+                          segmentWrapperClassName="overflow-hidden block"
+                          variants={{
+                            container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2 } } },
+                            item: {
+                              hidden: { opacity: 0, y: 40 },
+                              visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+                            },
+                          }}
+                        >
+                          중요도
+                        </TextEffect>
+                      </Label>
+                      <div className="flex flex-row gap-5 mt-1">
+                        <Radio value="high">
+                          <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
+                            <Radio.Control>
+                              <Radio.Indicator />
+                            </Radio.Control>
+                            <Badge variant="high" className="text-xs px-3 py-1 h-auto select-none">높음</Badge>
+                          </Radio.Content>
+                        </Radio>
+                        <Radio value="normal">
+                          <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
+                            <Radio.Control>
+                              <Radio.Indicator />
+                            </Radio.Control>
+                            <Badge variant="normal" className="text-xs px-3 py-1 h-auto select-none">보통</Badge>
+                          </Radio.Content>
+                        </Radio>
+                        <Radio value="low">
+                          <Radio.Content className="flex items-center gap-2.5 cursor-pointer text-base select-none">
+                            <Radio.Control>
+                              <Radio.Indicator />
+                            </Radio.Control>
+                            <Badge variant="low" className="text-xs px-3 py-1 h-auto select-none">낮음</Badge>
+                          </Radio.Content>
+                        </Radio>
+                      </div>
+                    </RadioGroup>
+                  </motion.div>
 
-            {/* 대상자 */}
-            <motion.div variants={itemVariants} className="flex flex-col gap-3">
-              <CheckboxGroup
-                value={targets}
-                onChange={setTargets}
-                className="mt-1"
-              >
-                <HeroLabel className="text-base font-bold text-gray-700 dark:text-gray-300">
-                  <TextEffect
-                    per="line"
-                    as="span"
-                    segmentWrapperClassName="overflow-hidden block"
-                    variants={{
-                      container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2 } } },
-                      item: {
-                        hidden: { opacity: 0, y: 40 },
-                        visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-                      },
-                    }}
-                  >
-                    대상자 (최소 1명 선택)
-                  </TextEffect>
-                </HeroLabel>
-                <div className="flex flex-row gap-6 mt-1">
-                  <Checkbox value="gahyun">
-                    <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
-                      <Checkbox.Control>
-                        <Checkbox.Indicator />
-                      </Checkbox.Control>
-                      <div className="flex items-center gap-3 font-medium text-base select-none">
-                        <Avatar className="w-8 h-8 ring-2 ring-gray-100 dark:ring-gray-800">
-                          <AvatarImage src="" />
-                          <AvatarFallback className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">G</AvatarFallback>
-                        </Avatar>
-                        가현쨩
+                  {/* 대상자 */}
+                  <motion.div variants={itemVariants} className="w-full">
+                    <CheckboxGroup
+                      value={targets}
+                      onChange={setTargets}
+                      className="gap-5"
+                    >
+                      <Label className="text-base font-bold text-gray-700 dark:text-gray-300">
+                        <TextEffect
+                          per="line"
+                          as="span"
+                          segmentWrapperClassName="overflow-hidden block"
+                          variants={{
+                            container: { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2 } } },
+                            item: {
+                              hidden: { opacity: 0, y: 40 },
+                              visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+                            },
+                          }}
+                        >
+                          대상자 (최소 1명 선택)
+                        </TextEffect>
+                      </Label>
+                      <div className="flex flex-row gap-6 mt-1">
+                        <Checkbox value="gahyun">
+                          <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
+                            <Checkbox.Control>
+                              <Checkbox.Indicator />
+                            </Checkbox.Control>
+                            <div className="flex items-center gap-3 font-medium text-base select-none">
+                              <Avatar className="w-8 h-8 ring-2 ring-gray-100 dark:ring-gray-800">
+                                <AvatarImage src="" />
+                                <AvatarFallback className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">G</AvatarFallback>
+                              </Avatar>
+                              가현쨩
+                            </div>
+                          </Checkbox.Content>
+                        </Checkbox>
+                        <Checkbox value="minu">
+                          <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
+                            <Checkbox.Control>
+                              <Checkbox.Indicator />
+                            </Checkbox.Control>
+                            <div className="flex items-center gap-3 font-medium text-base select-none">
+                              <Avatar className="w-8 h-8 ring-2 ring-gray-100 dark:ring-gray-800">
+                                <AvatarImage src="" />
+                                <AvatarFallback className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">M</AvatarFallback>
+                              </Avatar>
+                              미누쿤
+                            </div>
+                          </Checkbox.Content>
+                        </Checkbox>
                       </div>
-                    </Checkbox.Content>
-                  </Checkbox>
-                  <Checkbox value="minu">
-                    <Checkbox.Content className="flex items-center gap-3 cursor-pointer text-base font-medium select-none">
-                      <Checkbox.Control>
-                        <Checkbox.Indicator />
-                      </Checkbox.Control>
-                      <div className="flex items-center gap-3 font-medium text-base select-none">
-                        <Avatar className="w-8 h-8 ring-2 ring-gray-100 dark:ring-gray-800">
-                          <AvatarImage src="" />
-                          <AvatarFallback className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">M</AvatarFallback>
-                        </Avatar>
-                        미누쿤
-                      </div>
-                    </Checkbox.Content>
-                  </Checkbox>
-                </div>
-              </CheckboxGroup>
+                    </CheckboxGroup>
+                  </motion.div>
+                </FieldGroup>
+              </Fieldset>
             </motion.div>
-          </motion.div>
+          </Form>
         </DrawerPanel>
 
         <DrawerFooter className="flex-row gap-4 justify-center mt-4 px-6 pb-8">
