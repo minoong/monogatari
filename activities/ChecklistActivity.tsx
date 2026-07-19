@@ -408,24 +408,31 @@ const SwipeableItem = ({
           isHighlighted ? "bg-yellow-50 dark:bg-yellow-900/20" : ""
         }`}
       >
-        <div className="flex min-w-0 flex-1 items-start gap-3 py-1">
-          <div className="relative size-5 shrink-0">
-            <Checkbox
-              variant="default"
-              checked={isChecked}
-              id={`${checkboxId}-visual`}
-              className="pointer-events-none absolute inset-0 size-5"
-            />
-            <NativeHapticSwitch
-              ariaLabel={`${item.title} 완료 여부`}
-              checked={isChecked}
-              id={checkboxId}
-              onChange={(event) => {
-                triggerHapticFeedback(10);
-                onToggleCheck(item.id, targetUser, event.currentTarget.checked);
-              }}
-            />
-          </div>
+        <NativeHapticSwitch
+          ariaLabel={`${item.title} 완료 여부`}
+          checked={isChecked}
+          className="touch-pan-y"
+          id={checkboxId}
+          onClick={(event) => {
+            if (didDragRef.current) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          }}
+          onChange={(event) => {
+            if (!didDragRef.current) {
+              triggerHapticFeedback(10);
+              onToggleCheck(item.id, targetUser, event.currentTarget.checked);
+            }
+          }}
+        />
+        <div className="relative z-10 flex min-w-0 flex-1 pointer-events-none items-start gap-3 py-1">
+          <Checkbox
+            variant="default"
+            checked={isChecked}
+            id={`${checkboxId}-visual`}
+            className="pointer-events-none size-5 shrink-0"
+          />
           <div className="flex min-w-0 flex-1 items-start gap-3">
             <div className="min-w-0 flex-1">
               <label

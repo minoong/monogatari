@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, MouseEventHandler } from "react";
 import { cn } from "@/lib/utils";
 
 interface NativeHapticSwitchProps {
@@ -9,6 +9,7 @@ interface NativeHapticSwitchProps {
   className?: string;
   disabled?: boolean;
   id?: string;
+  onClick?: MouseEventHandler<HTMLInputElement>;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -22,6 +23,7 @@ export function NativeHapticSwitch({
   className,
   disabled = false,
   id,
+  onClick,
   onChange,
 }: NativeHapticSwitchProps) {
   return (
@@ -36,6 +38,7 @@ export function NativeHapticSwitch({
       )}
       disabled={disabled}
       id={id}
+      onClick={onClick}
       onChange={onChange}
       type="checkbox"
     />
