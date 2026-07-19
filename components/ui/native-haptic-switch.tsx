@@ -40,6 +40,14 @@ export function NativeHapticSwitch({
       id={id}
       onClick={onClick}
       onChange={onChange}
+      onPointerDown={(event) => {
+        const input = event.currentTarget;
+        window.requestAnimationFrame(() => {
+          if (input.hasPointerCapture(event.pointerId)) {
+            input.releasePointerCapture(event.pointerId);
+          }
+        });
+      }}
       style={{ touchAction: "pan-y" }}
       type="checkbox"
     />
