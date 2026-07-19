@@ -143,15 +143,15 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
               </motion.div>
 
               {/* 중요도 */}
-              <motion.div variants={itemVariants} className="w-full">
+              <motion.div variants={itemVariants} className="flex flex-col gap-3 w-full">
+                <Label className="text-base font-bold text-gray-700 dark:text-gray-300">중요도</Label>
                 <RadioGroup
                   value={importance}
                   onChange={(val: string) => setImportance(val as "high" | "normal" | "low")}
                   orientation="horizontal"
                   className="gap-5 mt-1"
                 >
-                  <Label className="text-base font-bold text-gray-700 dark:text-gray-300">중요도</Label>
-                  <div className="flex flex-row gap-5 mt-1">
+                  <div className="flex flex-row gap-5">
                     <Radio value="high">
                       <Radio.Content>
                         <Radio.Control>
@@ -181,14 +181,14 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
               </motion.div>
 
               {/* 대상자 */}
-              <motion.div variants={itemVariants} className="w-full">
+              <motion.div variants={itemVariants} className="flex flex-col gap-3 w-full">
+                <Label className="text-base font-bold text-gray-700 dark:text-gray-300">대상자 (최소 1명 선택)</Label>
                 <CheckboxGroup
                   value={targets}
                   onChange={(val: string[]) => setTargets(val)}
                   className="mt-1"
                 >
-                  <Label className="text-base font-bold text-gray-700 dark:text-gray-300">대상자 (최소 1명 선택)</Label>
-                  <div className="flex flex-row gap-6 mt-1">
+                  <div className="flex flex-row gap-6">
                     <Checkbox value="gahyun">
                       <Checkbox.Content>
                         <Checkbox.Control>
