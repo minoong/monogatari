@@ -189,6 +189,53 @@ interface SwipeableItemProps {
   onNudge: (target: string) => void;
 }
 
+const SwipeHint = () => {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <section
+      aria-label="할 일 스와이프 사용 안내"
+      className="mb-5 overflow-hidden rounded-2xl border border-gray-200 bg-gray-50/80 p-3 dark:border-white/10 dark:bg-white/[0.04]"
+    >
+      <div className="flex items-center justify-between gap-3 px-1 text-xs">
+        <div className="flex min-w-0 items-center gap-2 font-semibold text-gray-700 dark:text-gray-200">
+          <span aria-hidden="true" className="text-base">↔</span>
+          <span className="truncate">할 일을 좌우로 밀어보세요</span>
+        </div>
+        <span className="shrink-0 text-[11px] text-gray-500 dark:text-gray-400">삭제 · 알림</span>
+      </div>
+
+      <div className="relative mt-2 h-14 overflow-hidden rounded-xl bg-gray-200/70 dark:bg-white/10">
+        <div className="absolute inset-0 flex items-center justify-between text-white" aria-hidden="true">
+          <div className="flex h-full w-1/2 items-center gap-1.5 bg-amber-500 px-3 text-xs font-semibold">
+            <Bell size={14} />
+            <span>알림</span>
+          </div>
+          <div className="flex h-full w-1/2 items-center justify-end gap-1.5 bg-red-500 px-3 text-xs font-semibold">
+            <span>삭제</span>
+            <Trash2 size={14} />
+          </div>
+        </div>
+
+        <motion.div
+          aria-hidden="true"
+          animate={prefersReducedMotion ? { x: 0 } : { x: [0, -64, 0, 64, 0] }}
+          transition={
+            prefersReducedMotion
+              ? { duration: 0 }
+              : { duration: 5.2, delay: 0.4, repeat: Infinity, repeatDelay: 1.4, ease: "easeInOut" }
+          }
+          className="absolute inset-y-0 left-0 flex w-full items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 shadow-sm dark:border-white/10 dark:bg-[#1C1C1E]"
+        >
+          <span className="flex size-5 shrink-0 items-center justify-center rounded-md border-2 border-gray-300 dark:border-gray-600" />
+          <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-800 dark:text-gray-100">여행용 충전기</span>
+          <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">보통</span>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
 const SwipeableItem = ({
   item,
   targetUser,
@@ -713,6 +760,7 @@ export const ChecklistActivity: React.FC = () => {
             </div>
           ) : (
             <>
+              <SwipeHint />
               <div className="flex items-center gap-2 mb-3 mt-2">
                 <Avatar className="w-5 h-5">
                   <AvatarImage alt="" src={avatarSources.gahyun} />
