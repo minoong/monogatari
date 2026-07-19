@@ -44,8 +44,8 @@ const importanceOptions: Array<{
 ];
 
 const targetOptions = [
-  { value: "gahyun", label: "가현쨩", initial: "가" },
-  { value: "minu", label: "미누쿤", initial: "미" },
+  { value: "gahyun", label: "가현쨩" },
+  { value: "minu", label: "미누쿤" },
 ];
 
 export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
@@ -194,6 +194,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
             </RadioGroup>
 
             <CheckboxGroup
+              className="gap-3"
               isRequired
               name="targets"
               value={targets}
@@ -201,21 +202,16 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
             >
               <Label>담당자</Label>
               <Description>한 명 이상 선택해 주세요.</Description>
-              <div className="grid grid-cols-2 gap-3 pt-1">
-                {targetOptions.map((target) => (
-                  <Checkbox key={target.value} value={target.value}>
-                    <Checkbox.Content className="relative flex min-h-16 w-full items-center gap-3 rounded-2xl border border-border bg-surface p-3 transition-colors data-[selected=true]:border-accent data-[selected=true]:bg-accent/10">
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent">
-                        {target.initial}
-                      </span>
-                      <span className="text-sm font-semibold">{target.label}</span>
-                      <Checkbox.Control className="absolute right-3 top-3">
-                        <Checkbox.Indicator />
-                      </Checkbox.Control>
-                    </Checkbox.Content>
-                  </Checkbox>
-                ))}
-              </div>
+              {targetOptions.map((target) => (
+                <Checkbox key={target.value} value={target.value}>
+                  <Checkbox.Content>
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                    {target.label}
+                  </Checkbox.Content>
+                </Checkbox>
+              ))}
               <FieldError>담당자를 한 명 이상 선택해 주세요.</FieldError>
             </CheckboxGroup>
 
