@@ -213,10 +213,11 @@ const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => {
       <NativeHapticSwitch
         ariaLabel="HP! 위치 찾기"
         checked={false}
-        onChange={() => {
+        onClick={() => {
           triggerHapticFeedback(15);
           onOpen();
         }}
+        onChange={() => undefined}
       />
     </div>
   </section>

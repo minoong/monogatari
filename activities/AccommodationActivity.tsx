@@ -128,10 +128,11 @@ const StayAccordion: React.FC<StayAccordionProps> = ({ onFilterChange }) => {
                 <NativeHapticSwitch
                   ariaLabel={`${item.title} 숙소 보기`}
                   checked={isOpen}
-                  onChange={() => {
+                  onClick={() => {
                     triggerHapticFeedback(10);
                     selectStay(item);
                   }}
+                  onChange={() => undefined}
                 />
               </div>
 
@@ -217,7 +218,7 @@ export const AccommodationActivity: React.FC = () => {
                   </div>
                   <div className="rounded-xl bg-white px-3 py-2.5 dark:bg-white/[0.06]">
                     <span className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><Clock3 size={13} /> 체크아웃</span>
-                    <p className="mt-1 text-sm font-bold text-gray-900 dark:text-gray-100">다음 날 · {stay.checkOut}</p>
+                    <p className="mt-1 text-sm font-bold text-gray-900 dark:text-gray-100">{getFollowingDate(stay.date)} · {stay.checkOut}</p>
                   </div>
                 </div>
 
