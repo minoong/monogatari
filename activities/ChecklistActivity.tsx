@@ -404,11 +404,11 @@ const SwipeableItem = ({
           if (target.closest("button, label, a, input")) return;
           onToggleCheck(item.id, targetUser);
         }}
-        className={`relative z-10 flex min-h-16 select-none items-start justify-between gap-3 px-4 py-3 touch-pan-y bg-white dark:bg-[#1C1C1E] transition-colors hover:bg-gray-50 active:bg-gray-100 dark:hover:bg-white/5 dark:active:bg-white/10 ${
+        className={`relative z-10 flex min-h-16 select-none items-center justify-between gap-3 px-4 py-3 touch-pan-y bg-white dark:bg-[#1C1C1E] transition-colors hover:bg-gray-50 active:bg-gray-100 dark:hover:bg-white/5 dark:active:bg-white/10 ${
           isHighlighted ? "bg-yellow-50 dark:bg-yellow-900/20" : ""
         }`}
       >
-        <div className="relative mt-0.5 size-5 shrink-0">
+        <div className="relative size-5 shrink-0">
           <Checkbox
             variant="default"
             checked={isChecked}
@@ -434,8 +434,8 @@ const SwipeableItem = ({
             }}
           />
         </div>
-        <div className="flex min-w-0 flex-1 items-start gap-3 py-1">
-          <div className="flex min-w-0 flex-1 items-start gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-3 py-1">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             <div className="min-w-0 flex-1">
               <label
                 htmlFor={checkboxId}
@@ -467,7 +467,7 @@ const SwipeableItem = ({
                 </motion.svg>
               </label>
             </div>
-            <div className="shrink-0 pt-0.5">
+            <div className="shrink-0">
               <ImportanceChip importance={item.importance} />
             </div>
           </div>
