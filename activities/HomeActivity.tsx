@@ -202,8 +202,8 @@ const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => {
       ]}
     />
 
-    <div className="relative mt-3">
-      <div aria-hidden="true" className="relative flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-sm font-bold text-white transition-transform active:scale-[0.98]">
+    <div className="group relative mt-3">
+      <div aria-hidden="true" className="relative flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-sm font-bold text-white transition-transform duration-150 ease-out group-active:scale-[0.98]">
         <AutoImageRoll imageUrls={["/accommodation-overview.jpg", ...ACCOMMODATIONS.map((stay) => stay.imageUrl)]} {...automaticRoll} />
         <span className="relative z-10 flex w-64 max-w-[calc(100%-1rem)] items-center gap-1 drop-shadow-sm">
           <AutoTextRoll labels={["HP! 위치 찾기!", ...ACCOMMODATIONS.map((stay) => stay.name)]} {...automaticRoll} />
