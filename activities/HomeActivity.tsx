@@ -13,7 +13,7 @@ import { SlidingNumber } from "../components/core/sliding-number";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { KR, TH } from "country-flag-icons/react/3x2";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -23,10 +23,10 @@ const ROLL_STAGGER = 0.035;
 type TravelClockProps = {
   city: string;
   zone: string;
-  flag: React.ReactNode;
+  flagCode: string;
 };
 
-const TravelClock: React.FC<TravelClockProps> = ({ city, zone, flag }) => {
+const TravelClock: React.FC<TravelClockProps> = ({ city, zone, flagCode }) => {
   const [now, setNow] = useState(() => dayjs().tz(zone));
 
   React.useEffect(() => {
@@ -36,9 +36,10 @@ const TravelClock: React.FC<TravelClockProps> = ({ city, zone, flag }) => {
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-1.5">
-      <span className="w-4 shrink-0 overflow-hidden rounded-[2px] shadow-[0_0_0_1px_rgba(15,23,42,0.08)]" aria-hidden="true">
-        {flag}
-      </span>
+      <Avatar className="size-4 shrink-0 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+        <AvatarImage src={`https://flagcdn.com/w80/${flagCode.toLowerCase()}.png`} alt={`${city} 국기`} />
+        <AvatarFallback>{flagCode}</AvatarFallback>
+      </Avatar>
       <span className="flex shrink-0 flex-col leading-none">
         <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">{city}</span>
         <span className="mt-0.5 text-[10px] font-semibold tracking-[-0.01em] text-slate-500 dark:text-slate-400">
@@ -65,9 +66,9 @@ const TravelClock: React.FC<TravelClockProps> = ({ city, zone, flag }) => {
 const WorldClockCard: React.FC = () => (
   <section className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 px-2 py-1 shadow-[0_6px_18px_-18px_rgba(15,23,42,0.55)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90" aria-label="한국과 태국의 현재 시각">
     <div className="flex gap-2 rounded-lg bg-slate-50 px-2 py-1.5 dark:bg-slate-900">
-      <TravelClock city="서울" zone="Asia/Seoul" flag={<KR className="block h-auto w-full" />} />
+      <TravelClock city="서울" zone="Asia/Seoul" flagCode="KR" />
       <div className="w-px self-stretch bg-slate-200 dark:bg-slate-800" aria-hidden="true" />
-      <TravelClock city="방콕" zone="Asia/Bangkok" flag={<TH className="block h-auto w-full" />} />
+      <TravelClock city="방콕" zone="Asia/Bangkok" flagCode="TH" />
     </div>
   </section>
 );
