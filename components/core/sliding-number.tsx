@@ -34,7 +34,7 @@ export const SlidingNumber = React.forwardRef<HTMLSpanElement, SlidingNumberProp
     return (
       <span ref={ref} className={`inline-flex items-center gap-0.5 leading-none ${className ?? ""}`} {...props}>
         {displayValue.split("").map((character, index) => (
-          <SlidingDigit key={`${character}-${index}`} value={Number(character)} />
+          <SlidingDigit key={index} value={Number(character)} />
         ))}
         <span className="sr-only">{displayValue}</span>
       </span>
