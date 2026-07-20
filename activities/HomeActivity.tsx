@@ -39,7 +39,12 @@ const TravelClock: React.FC<TravelClockProps> = ({ city, zone, flag }) => {
       <span className="w-4 shrink-0 overflow-hidden rounded-[2px] shadow-[0_0_0_1px_rgba(15,23,42,0.08)]" aria-hidden="true">
         {flag}
       </span>
-      <span className="shrink-0 text-[11px] font-semibold text-slate-700 dark:text-slate-200">{city}</span>
+      <span className="flex shrink-0 flex-col leading-none">
+        <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">{city}</span>
+        <span className="mt-1 text-[9px] font-medium tracking-tight text-slate-400 dark:text-slate-500">
+          {now.format("YYYY.MM.DD")}
+        </span>
+      </span>
       <div
         className="ml-auto shrink-0 text-right text-sm font-semibold tracking-[-0.05em] text-slate-950 dark:text-white"
         style={{ fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums slashed-zero" }}
