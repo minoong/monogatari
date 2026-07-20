@@ -41,7 +41,7 @@ const TravelClock: React.FC<TravelClockProps> = ({ city, zone, flag }) => {
       </span>
       <span className="flex shrink-0 flex-col leading-none">
         <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">{city}</span>
-        <span className="mt-1 text-[9px] font-medium tracking-tight text-slate-400 dark:text-slate-500">
+        <span className="mt-0.5 text-[10px] font-semibold tracking-[-0.01em] text-slate-500 dark:text-slate-400">
           {now.format("YYYY.MM.DD")}
         </span>
       </span>
