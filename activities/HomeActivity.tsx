@@ -63,15 +63,6 @@ const TravelClock: React.FC<TravelClockProps> = ({ city, country, zone, accentCl
 
 const WorldClockCard: React.FC = () => (
   <section className="sticky top-0 z-30 -mx-0 border-b border-slate-200/80 bg-white/90 px-4 pb-3 pt-3 shadow-[0_6px_18px_-18px_rgba(15,23,42,0.55)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90" aria-label="한국과 태국의 현재 시각">
-    <div className="mb-2 flex items-center justify-between px-0.5">
-      <div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-500">World clock</p>
-        <h2 className="mt-0.5 text-base font-extrabold tracking-tight text-slate-900 dark:text-white">한국 · 태국 현재 시간</h2>
-      </div>
-      <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-        <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" /> LIVE
-      </span>
-    </div>
     <div className="flex gap-2 rounded-2xl bg-slate-50 p-3 dark:bg-slate-900">
       <TravelClock city="서울" country="KST" zone="Asia/Seoul" accentClassName="bg-rose-100 dark:bg-rose-950/60" />
       <div className="w-px self-stretch bg-slate-200 dark:bg-slate-800" aria-hidden="true" />
