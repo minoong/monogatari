@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import NumberFlow from "@number-flow/react";
 import {
   Button,
-  Description,
   FieldError,
   Form,
   Input,
@@ -30,6 +30,17 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
+import {
+  DEFAULT_THB_TO_KRW_RATE,
+  EXCHANGE_RATE_QUERY_KEY,
+  fetchThbToKrwRate,
+} from "@/lib/exchange-rates";
 import {
   isGoogleMapsUrl,
   normalizeExternalUrl,
@@ -63,6 +74,12 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
   const [submitError, setSubmitError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imagePreviewUrl = useMemo(() => image ? URL.createObjectURL(image) : null, [image]);
+  const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
+    queryKey: EXCHANGE_RATE_QUERY_KEY,
+    queryFn: fetchThbToKrwRate,
+  });
+  const targetPriceValue = Number(targetPrice) || 0;
+  const targetPriceKrw = Math.round(targetPriceValue * thbToKrwRate);
 
   useEffect(() => {
     return () => {
@@ -308,11 +325,41 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
             </div>
 
             {type !== "restaurant" && (
-              <TextField name="targetPrice" type="number" value={targetPrice} onChange={setTargetPrice}>
-                <Label>현지 적정 가격 (THB)</Label>
-                <Input inputMode="decimal" min={0} placeholder="예: 120" type="number" />
-                <Description>가격을 모르면 비워 두어도 됩니다.</Description>
-              </TextField>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="wish-target-price">현지 적정 가격</Label>
+                  <InputGroup className="h-12 rounded-2xl">
+                    <InputGroupAddon>
+                      <InputGroupText className="text-base font-bold text-slate-500">฿</InputGroupText>
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      id="wish-target-price"
+                      inputMode="decimal"
+                      min={0}
+                      name="targetPrice"
+                      onChange={(event) => setTargetPrice(event.target.value)}
+                      placeholder="0"
+                      type="number"
+                      value={targetPrice}
+                    />
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupText className="font-semibold">THB</InputGroupText>
+                    </InputGroupAddon>
+                  </InputGroup>
+                  <p className="px-1 text-xs text-slate-400">가격을 모르면 비워 두어도 됩니다.</p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-white/5">
+                  <PricePreview
+                    currency="KRW"
+                    label="대한민국 원"
+                    symbol="₩"
+                    value={targetPriceKrw}
+                  />
+                </div>
+                <p className="text-right text-[11px] text-slate-400">
+                  1 THB = {thbToKrwRate.toLocaleString("ko-KR")} KRW
+                </p>
+              </div>
             )}
 
             <TextField name="vendor" value={vendor} onChange={setVendor}>
@@ -444,6 +491,46 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
       </DrawerPopup>
     </Drawer>
   );
+}
+
+function PricePreview({
+  currency,
+  label,
+  symbol,
+  value,
+}: {
+  currency: string;
+  label: string;
+  symbol: string;
+  value: number;
+}) {
+  const valueTextSize = getPriceTextSize(value);
+
+  return (
+    <div className="flex min-w-0 flex-col" data-price-preview={currency}>
+      <span className="text-[11px] font-medium text-slate-400">{label} ({currency})</span>
+      <span
+        className={`mt-1 flex min-w-0 items-center justify-end gap-1 overflow-hidden font-bold tabular-nums text-slate-800 dark:text-slate-100 ${valueTextSize}`}
+        data-price-value
+      >
+        <span className="text-slate-400">{symbol}</span>
+        <NumberFlow
+          className="min-w-0"
+          format={{ maximumFractionDigits: 0 }}
+          value={value}
+        />
+      </span>
+    </div>
+  );
+}
+
+function getPriceTextSize(value: number) {
+  const digitCount = Math.trunc(Math.abs(value)).toString().length;
+  if (digitCount > 15) return "text-xs";
+  if (digitCount > 12) return "text-sm";
+  if (digitCount > 9) return "text-base";
+  if (digitCount > 6) return "text-lg";
+  return "text-2xl";
 }
 
 interface MultiValueFieldProps {
