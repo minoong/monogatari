@@ -157,7 +157,7 @@ export const ExchangeActivity: React.FC = () => {
                     </div>
 
                     {/* The Input Row */}
-                    <div className={`thb-flip-target flex items-center ${isFocused ? '' : 'justify-center w-full'} ${getFontSize(thb)}`}>
+                    <div className={`thb-flip-target flex items-center ${getFontSize(thb)}`}>
                       <span className="font-bold text-slate-400 dark:text-slate-600 mr-2">฿</span>
                       <NumberFlowInput
                         key={`input-reset-${inputKey}`}
