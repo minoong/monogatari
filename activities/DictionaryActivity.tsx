@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { BottomNav } from "../components/BottomNav";
 
 const PHRASES = [
   { ko: "안녕하세요", th: "사와디캅 (สวัสดีครับ/ค่ะ)", pron: "Sawatdee krap/kha" },
@@ -74,7 +73,7 @@ export const DictionaryActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "회화 사전" }}>
-      <div className="flex flex-col h-[calc(100dvh-64px)] bg-gray-50 dark:bg-gray-900 pb-16">
+      <div className="flex flex-col h-[calc(100dvh-64px)] bg-gray-50 dark:bg-gray-900">
         
         {/* Top Half (Opposite person - Rotated) */}
         <div className="flex-1 flex flex-col justify-center items-center p-8 bg-blue-500 text-white rotate-180 relative transition-all">
@@ -149,7 +148,6 @@ export const DictionaryActivity: React.FC = () => {
           </div>
         </div>
       </div>
-      <BottomNav active="utils" />
     </AppScreen>
   );
 };
