@@ -1,96 +1,36 @@
-import React, { useState } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerPanel,
-  DrawerPopup,
-  DrawerTitle,
-  DrawerTrigger,
-} from "../components/ui/drawer";
-import NeumorphButton from "../components/ui/neumorph-button";
-import { BottomNav } from "../components/BottomNav";
+import { ArrowRight, Plus, RefreshCw } from "lucide-react";
+import { Button } from "@heroui/react";
+import { BottomNav, triggerHapticFeedback } from "@/components/BottomNav";
+import { WISH_TYPES, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
 
-const FOOD_ITEMS = [
-  { id: 1, title: "세븐일레븐 필수 간식", desc: "토스트 샌드위치, 벤또 쥐포, 마일로 초코우유", emoji: "🥪" },
-  { id: 2, title: "길거리 과일 추천", desc: "망고, 망고스틴, 파파야! 시장에서 꼭 사먹기", emoji: "🥭" },
-  { id: 3, title: "로컬 맛집: 팁싸마이", desc: "방콕 최고의 팟타이 맛집, 오렌지 주스 꼭 시킬 것!", emoji: "🍜" },
-];
-
-const SHOPPING_ITEMS = [
-  { id: 4, title: "짜뚜짝 시장 리스트", desc: "코끼리 바지, 야돔(코 뻥 뚫리는 약), 우드 식기", emoji: "🐘" },
-  { id: 5, title: "고메마켓 필수템", desc: "쿤나 건망고, 옥수수 젤리, 김과자(타오캐노이)", emoji: "🛒" },
-  { id: 6, title: "약국 쇼핑", desc: "타이레놀(매우 저렴), 모기 기피제, 소화제", emoji: "💊" },
-];
+const fetchWishes = async (): Promise<WishItem[]> => {
+  const response = await fetch("/api/wishes");
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error ?? "위시를 불러오지 못했습니다.");
+  return payload.data;
+};
 
 export const DiscoverActivity: React.FC = () => {
-  const [tab, setTab] = useState<"food" | "shopping">("food");
-
-  const items = tab === "food" ? FOOD_ITEMS : SHOPPING_ITEMS;
+  const { push } = useFlow();
+  const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes"], queryFn: fetchWishes });
+  const openList = (type: WishType) => { triggerHapticFeedback(); push("WishListActivity", { type }); };
 
   return (
-    <AppScreen appBar={{ title: "태국 탐색 (맛집 & 쇼핑)" }}>
-      <div className="flex flex-col h-full bg-gray-50 pb-16 dark:bg-gray-900">
-        
-        {/* Top Tabs */}
-        <div className="flex p-4 gap-2 bg-white dark:bg-black border-b sticky top-0 z-10">
-          <button 
-            onClick={() => setTab("food")}
-            className={`flex-1 py-3 rounded-xl font-bold transition-all ${tab === "food" ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300" : "bg-gray-100 text-gray-500"}`}
-          >
-            맛집 / 간식 🍜
-          </button>
-          <button 
-            onClick={() => setTab("shopping")}
-            className={`flex-1 py-3 rounded-xl font-bold transition-all ${tab === "shopping" ? "bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300" : "bg-gray-100 text-gray-500"}`}
-          >
-            쇼핑 리스트 🛍️
-          </button>
-        </div>
-
-        {/* Content List */}
-        <div className="flex flex-col gap-4 p-4 overflow-y-auto pb-20">
-          {items.map(item => (
-            <Drawer key={item.id}>
-              <DrawerTrigger render={<button className="w-full text-left" />}>
-                <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4 items-center active:scale-[0.98] transition-transform">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-3xl shrink-0">
-                    {item.emoji}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg leading-tight">{item.title}</h3>
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-1">{item.desc}</p>
-                  </div>
-                </div>
-              </DrawerTrigger>
-              <DrawerPopup showBar>
-                <DrawerHeader className="text-center">
-                  <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center text-5xl mx-auto mb-4">
-                    {item.emoji}
-                  </div>
-                  <DrawerTitle>{item.title}</DrawerTitle>
-                  <DrawerDescription>상세 정보</DrawerDescription>
-                </DrawerHeader>
-                <DrawerPanel className="px-6 py-4">
-                  <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed text-center">
-                    {item.desc}
-                  </p>
-                  <div className="mt-6 bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl text-sm text-blue-700 dark:text-blue-300">
-                    💡 이곳에 사진이나 더 긴 상세 설명, 가격 정보 등을 추가할 수 있습니다.
-                  </div>
-                </DrawerPanel>
-                <DrawerFooter className="justify-center mt-6">
-                  <DrawerClose render={<NeumorphButton fullWidth size="large">닫기</NeumorphButton>} />
-                </DrawerFooter>
-              </DrawerPopup>
-            </Drawer>
-          ))}
-        </div>
-        
-      </div>
+    <AppScreen appBar={{ title: "위시" }}>
+      <main className="min-h-[calc(100dvh-64px)] bg-slate-50 pb-[calc(6rem+env(safe-area-inset-bottom))] dark:bg-slate-950">
+        <section className="mx-auto w-full max-w-lg px-5 pt-6">
+          <header className="mb-5"><p className="text-sm font-semibold text-blue-600">TRIP WISH</p><h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">이번 여행의 작은 위시들</h1><p className="mt-2 text-sm leading-6 text-slate-500">사고 싶은 것, 먹고 싶은 것, 가 보고 싶은 곳을 한곳에 모아 보세요.</p></header>
+          {isError ? <div className="rounded-3xl border border-red-100 bg-white px-5 py-8 text-center shadow-sm dark:border-red-900/60 dark:bg-slate-900"><p className="font-semibold text-slate-800 dark:text-slate-100">위시를 불러오지 못했어요.</p><p className="mt-1 text-sm text-slate-500">데이터베이스 설정을 확인한 뒤 다시 시도해 주세요.</p><Button className="mt-4" variant="secondary" onPress={() => refetch()}><RefreshCw className="size-4" /> 다시 시도</Button></div> : <div className="flex flex-col gap-4">{WISH_TYPES.map((type) => {
+            const meta = WISH_TYPE_META[type];
+            const items = wishes.filter((wish) => wish.type === type);
+            return <button key={type} className="group w-full rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-100 transition-transform active:scale-[0.985] dark:bg-slate-900 dark:ring-slate-800" onClick={() => openList(type)} type="button"><div className="flex items-start gap-4"><span className={`flex size-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.accent} text-2xl shadow-md`}>{meta.icon}</span><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-3"><div><h2 className="font-bold text-slate-900 dark:text-white">{meta.title}</h2><p className="mt-0.5 text-xs text-slate-500">{items.length}개 등록됨</p></div><ArrowRight aria-hidden="true" className="size-5 text-slate-400 transition-transform group-hover:translate-x-0.5" /></div>{isLoading ? <div className="mt-3 h-4 w-2/3 animate-pulse rounded bg-slate-100 dark:bg-slate-800" /> : items.length > 0 ? <p className="mt-3 truncate text-sm text-slate-600 dark:text-slate-300"><span className="font-medium">최근</span> · {items.slice(0, 2).map((item) => item.title).join(" · ")}</p> : <p className="mt-3 text-sm text-slate-500">{meta.emptyMessage}</p>}</div></div>{!isLoading && items.length === 0 && <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-blue-600"><Plus className="size-4" /> 등록하기</span>}</button>;
+          })}</div>}
+        </section>
+      </main>
       <BottomNav active="wish" />
     </AppScreen>
   );
