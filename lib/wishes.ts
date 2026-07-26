@@ -6,7 +6,7 @@ export interface WishItem {
   id: string;
   type: WishType;
   title: string;
-  category: string | null;
+  categories: string[];
   target_price_thb: number | null;
   memo: string | null;
   vendor: string | null;
@@ -49,6 +49,12 @@ export const WISH_TYPE_META: Record<WishType, {
 
 export const isWishType = (value: unknown): value is WishType =>
   typeof value === "string" && WISH_TYPES.includes(value as WishType);
+
+export const WISH_CATEGORY_SUGGESTIONS: Record<WishType, string[]> = {
+  shopping: ["기념품", "약국", "패션", "생활용품", "뷰티"],
+  snack: ["과일", "디저트", "음료", "편의점", "식재료"],
+  restaurant: ["태국 음식", "국수", "길거리 음식", "카페", "해산물"],
+};
 
 export const formatThaiBaht = (value: number | null) =>
   value === null ? null : new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 }).format(value);

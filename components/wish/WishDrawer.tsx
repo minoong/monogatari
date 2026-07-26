@@ -11,10 +11,13 @@ import {
   Label,
   Radio,
   RadioGroup,
+  Tag,
+  TagGroup,
   TextArea,
   TextField,
+  type Key,
 } from "@heroui/react";
-import { ImagePlus, MapPin, Upload } from "lucide-react";
+import { ImagePlus, MapPin, Plus, Upload } from "lucide-react";
 import { toast } from "sonner";
 import {
   Drawer,
@@ -25,7 +28,7 @@ import {
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
+import { WISH_CATEGORY_SUGGESTIONS, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
 
 interface WishDrawerProps {
   open: boolean;
@@ -37,7 +40,8 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
   const queryClient = useQueryClient();
   const [type, setType] = useState<WishType>(initialType);
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categoryDraft, setCategoryDraft] = useState("");
   const [targetPrice, setTargetPrice] = useState("");
   const [vendor, setVendor] = useState("");
   const [memo, setMemo] = useState("");
@@ -48,7 +52,8 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
   const resetForm = () => {
     setType(initialType);
     setTitle("");
-    setCategory("");
+    setCategories([]);
+    setCategoryDraft("");
     setTargetPrice("");
     setVendor("");
     setMemo("");
@@ -62,8 +67,21 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
     onOpenChange(nextOpen);
   };
 
+  const addCategory = (value = categoryDraft) => {
+    const nextCategory = value.trim();
+    if (!nextCategory || categories.includes(nextCategory) || categories.length >= 3) return categories;
+    const nextCategories = [...categories, nextCategory];
+    setCategories(nextCategories);
+    setCategoryDraft("");
+    return nextCategories;
+  };
+
+  const removeCategories = (keys: Set<Key>) => {
+    setCategories((current) => current.filter((category) => !keys.has(category)));
+  };
+
   const createMutation = useMutation({
-    mutationFn: async (): Promise<WishItem> => {
+    mutationFn: async (submittedCategories: string[]): Promise<WishItem> => {
       let imagePath: string | null = null;
 
       if (image) {
@@ -81,7 +99,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
         body: JSON.stringify({
           type,
           title,
-          category,
+          categories: submittedCategories,
           target_price_thb: type === "restaurant" ? null : targetPrice,
           vendor,
           memo,
@@ -105,7 +123,8 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
     event.preventDefault();
     if (!title.trim() || createMutation.isPending) return;
     setSubmitError(null);
-    createMutation.mutate();
+    const submittedCategories = categoryDraft.trim() ? addCategory() : categories;
+    createMutation.mutate(submittedCategories);
   };
 
   return (
@@ -118,7 +137,16 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
           </DrawerHeader>
 
           <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-4">
-            <RadioGroup name="type" orientation="horizontal" value={type} onChange={(value) => setType(value as WishType)}>
+            <RadioGroup
+              name="type"
+              orientation="horizontal"
+              value={type}
+              onChange={(value) => {
+                setType(value as WishType);
+                setCategories([]);
+                setCategoryDraft("");
+              }}
+            >
               <Label>종류</Label>
               <div className="grid grid-cols-3 gap-2 pt-2">
                 {(Object.keys(WISH_TYPE_META) as WishType[]).map((itemType) => (
@@ -139,10 +167,68 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
               <FieldError />
             </TextField>
 
-            <TextField name="category" value={category} onChange={setCategory}>
-              <Label>카테고리</Label>
-              <Input autoComplete="off" placeholder={type === "shopping" ? "예: 기념품, 약국" : "예: 태국 음식, 디저트"} />
-            </TextField>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-end gap-2">
+                <TextField className="min-w-0 flex-1" name="categoryDraft" value={categoryDraft} onChange={setCategoryDraft}>
+                  <Label>카테고리 태그</Label>
+                  <Input
+                    autoComplete="off"
+                    maxLength={14}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === ",") {
+                        event.preventDefault();
+                        addCategory();
+                      }
+                    }}
+                    placeholder="입력 후 Enter"
+                  />
+                </TextField>
+                <Button
+                  aria-label="카테고리 태그 추가"
+                  isDisabled={!categoryDraft.trim() || categories.length >= 3}
+                  onPress={() => addCategory()}
+                  type="button"
+                  variant="secondary"
+                >
+                  <Plus className="size-4" />
+                </Button>
+              </div>
+
+              {categories.length > 0 && (
+                <TagGroup aria-label="선택한 카테고리" onRemove={removeCategories} size="sm" variant="surface">
+                  <TagGroup.List>
+                    {categories.map((category) => (
+                      <Tag key={category} id={category} textValue={category}>{category}</Tag>
+                    ))}
+                  </TagGroup.List>
+                </TagGroup>
+              )}
+
+              <div>
+                <p className="mb-2 text-xs font-medium text-gray-500">추천 태그</p>
+                <div className="flex flex-wrap gap-2">
+                  {WISH_CATEGORY_SUGGESTIONS[type].map((suggestion) => {
+                    const isSelected = categories.includes(suggestion);
+                    return (
+                      <button
+                        key={suggestion}
+                        className={`min-h-8 rounded-full border px-3 text-xs font-semibold transition-colors ${
+                          isSelected
+                            ? "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300"
+                            : "border-gray-200 bg-white text-gray-500 hover:border-blue-300 dark:border-gray-700 dark:bg-white/5"
+                        }`}
+                        disabled={isSelected || categories.length >= 3}
+                        onClick={() => addCategory(suggestion)}
+                        type="button"
+                      >
+                        {isSelected ? "✓ " : "+ "}{suggestion}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="mt-2 text-xs text-gray-400">{categories.length}/3 · 태그당 최대 14자</p>
+              </div>
+            </div>
 
             {type !== "restaurant" && (
               <TextField name="targetPrice" type="number" value={targetPrice} onChange={setTargetPrice}>

@@ -16,6 +16,16 @@ const optionalText = (value: unknown, maxLength: number) => {
   return trimmed.length <= maxLength ? trimmed || null : undefined;
 };
 
+const categoriesValue = (value: unknown) => {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value) || value.length > 3) return undefined;
+
+  const categories = value.map((item) => typeof item === "string" ? item.trim() : null);
+  if (categories.some((item) => !item || item.length > 14)) return undefined;
+  if (new Set(categories).size !== categories.length) return undefined;
+  return categories as string[];
+};
+
 export async function GET(request: Request) {
   const type = new URL(request.url).searchParams.get("type");
 
@@ -37,7 +47,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const type = body.type;
     const title = optionalText(body.title, 100);
-    const category = optionalText(body.category, 50);
+    const categories = categoriesValue(body.categories);
     const memo = optionalText(body.memo, 500);
     const vendor = optionalText(body.vendor, 100);
     const mapQuery = optionalText(body.map_query, 200);
@@ -50,7 +60,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "type and title are required" }, { status: 400 });
     }
 
-    if ([category, memo, vendor, mapQuery, imagePath].some((value) => value === undefined)) {
+    if (categories === undefined || [memo, vendor, mapQuery, imagePath].some((value) => value === undefined)) {
       return NextResponse.json({ error: "Invalid text field" }, { status: 400 });
     }
 
@@ -71,7 +81,7 @@ export async function POST(request: Request) {
       .insert({
         type,
         title,
-        category,
+        categories,
         target_price_thb: targetPrice,
         memo,
         vendor,
