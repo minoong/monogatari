@@ -29,7 +29,7 @@ export const DiscoverActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "위시" }}>
-      <main className="flex-1 h-full bg-slate-50 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
+      <main className="min-h-full w-full bg-slate-50 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
         <section className="mx-auto w-full max-w-lg px-5 pt-6">
           <header className="mb-5"><p className="text-sm font-semibold text-blue-600">TRIP WISH</p><h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">이번 여행의 작은 위시들</h1><p className="mt-2 text-sm leading-6 text-slate-500">사고 싶은 것, 먹고 싶은 것, 가 보고 싶은 곳을 한곳에 모아 보세요.</p></header>
           {isError ? <div className="rounded-3xl border border-red-100 bg-white px-5 py-8 text-center shadow-sm dark:border-red-900/60 dark:bg-slate-900"><p className="font-semibold text-slate-800 dark:text-slate-100">위시를 불러오지 못했어요.</p><p className="mt-1 text-sm text-slate-500">데이터베이스 설정을 확인한 뒤 다시 시도해 주세요.</p><Button className="mt-4" variant="secondary" onPress={() => refetch()}><RefreshCw className="size-4" /> 다시 시도</Button></div> : <div className="flex flex-col gap-4">{WISH_TYPES.map((type) => {

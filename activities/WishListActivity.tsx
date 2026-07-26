@@ -95,7 +95,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
 
   return (
     <AppScreen appBar={{ title: meta.title }}>
-      <main className="flex-1 h-full min-h-full bg-slate-50 pb-6 dark:bg-slate-950">
+      <main className="min-h-full w-full bg-slate-50 pb-12 dark:bg-slate-950">
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
           <div
             aria-label={`${meta.title} 검색 및 필터`}

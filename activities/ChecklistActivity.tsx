@@ -857,7 +857,7 @@ export const ChecklistActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "여행 준비물 체크리스트" }}>
-      <div className="flex flex-col flex-1 h-full bg-white dark:bg-black relative">
+      <div className="flex flex-col min-h-full w-full bg-white dark:bg-black relative">
 
         <div className="py-4 pb-2 shrink-0 flex justify-center w-full">
           <DynamicIslandProvider initialSize={SIZE_PRESETS.PROGRESS_COLLAPSED}>
