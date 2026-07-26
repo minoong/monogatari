@@ -259,7 +259,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
               <Label>종류</Label>
               <ListBox
                 aria-label="위시 종류"
-                className="w-full rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-white/5"
+                className="w-full rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-white/5"
                 disallowEmptySelection
                 selectedKeys={new Set([type])}
                 selectionMode="single"
@@ -277,16 +277,16 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                     key={itemType}
                     id={itemType}
                     textValue={WISH_TYPE_META[itemType].title}
-                    className="group min-h-14 cursor-pointer rounded-xl px-3 py-2.5 outline-none transition-colors data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-blue-500 data-[selected=true]:bg-blue-50 dark:data-[selected=true]:bg-blue-500/10"
+                    className="group min-h-12 cursor-pointer rounded-lg px-2.5 py-2 outline-none transition-colors! data-[pressed=true]:scale-100! data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-blue-500 data-[selected=true]:bg-blue-50 dark:data-[selected=true]:bg-blue-500/10"
                   >
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl group-data-[selected=true]:bg-white dark:bg-white/10 dark:group-data-[selected=true]:bg-blue-500/15">
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-lg group-data-[selected=true]:bg-white dark:bg-white/10 dark:group-data-[selected=true]:bg-blue-500/15">
                       {WISH_TYPE_META[itemType].icon}
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col">
-                      <Label className="font-semibold text-slate-800 group-data-[selected=true]:text-blue-700 dark:text-slate-100 dark:group-data-[selected=true]:text-blue-300">
+                      <Label className="text-sm font-semibold text-slate-800 group-data-[selected=true]:text-blue-700 dark:text-slate-100 dark:group-data-[selected=true]:text-blue-300">
                         {WISH_TYPE_META[itemType].title}
                       </Label>
-                      <Description className="truncate text-xs text-slate-500">
+                      <Description className="truncate text-[11px] leading-4 text-slate-500">
                         {WISH_TYPE_DESCRIPTIONS[itemType]}
                       </Description>
                     </span>
@@ -413,7 +413,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
               <Input autoComplete="off" placeholder={type === "restaurant" ? "예: 팁싸마이 프라투피" : "예: 세븐일레븐, 짜뚜짝 시장"} />
             </TextField>
 
-            <div className="flex flex-col gap-5 rounded-2xl bg-slate-50 p-4 dark:bg-white/5">
+            <div className="flex flex-col gap-6">
               <MultiValueField
                 description="Google Maps에서 장소의 공유 링크를 복사해 추가해 주세요."
                 draft={locationDraft}
@@ -430,7 +430,6 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                 onRemove={(keys) => setLocations((current) => current.filter((item) => !keys.has(item)))}
                 placeholder="Google Maps 링크 붙여넣기"
               />
-              <div className="h-px bg-slate-200 dark:bg-slate-700" />
               <MultiValueField
                 description="공식 홈페이지, 메뉴, SNS 등 관련 링크를 따로 모아 둘 수 있어요."
                 draft={linkDraft}
