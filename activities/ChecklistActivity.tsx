@@ -281,6 +281,14 @@ const SwipeableItem = ({
   onNudge,
 }: SwipeableItemProps) => {
   const isChecked = item.completed_by.includes(targetUser);
+  const otherUser = targetUser === "gahyun" ? "minu" : "gahyun";
+  const otherUserLabel = otherUser === "gahyun" ? "가현" : "미누";
+  const isShared =
+    item.type === "master" ||
+    item.assignees.includes("all") ||
+    (item.assignees.includes(targetUser) && item.assignees.includes(otherUser));
+  const isOtherUserChecked =
+    item.completed_by.includes(otherUser) || item.completed_by.includes("all");
   const checkboxId = `checkbox-${targetUser}-${item.id}`;
   const prefersReducedMotion = useReducedMotion();
   const [willDelete, setWillDelete] = useState(false);
@@ -442,7 +450,7 @@ const SwipeableItem = ({
         </div>
         <div className="flex min-w-0 flex-1 items-center gap-3 py-1">
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col items-start">
               <label
                 htmlFor={checkboxId}
                 className={`relative inline-block max-w-full break-words text-[16px] font-medium leading-6 tracking-tight transition-colors cursor-pointer select-none ${
@@ -472,6 +480,24 @@ const SwipeableItem = ({
                   />
                 </motion.svg>
               </label>
+              {isShared && (
+                <div
+                  aria-label={`${otherUserLabel} ${isOtherUserChecked ? "완료" : "미완료"}`}
+                  className={`mt-1 inline-flex items-center gap-1.5 rounded-full py-0.5 pl-0.5 pr-2 text-[11px] font-semibold ${
+                    isOtherUserChecked
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300"
+                      : "bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400"
+                  }`}
+                >
+                  <Avatar className="size-4">
+                    <AvatarImage alt="" src={avatarSources[otherUser]} />
+                    <AvatarFallback className="text-[8px]">
+                      {otherUser === "gahyun" ? "G" : "M"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span>{otherUserLabel} · {isOtherUserChecked ? "완료" : "대기"}</span>
+                </div>
+              )}
             </div>
             <div className="shrink-0">
               <ImportanceChip importance={item.importance} />
@@ -863,23 +889,39 @@ export const ChecklistActivity: React.FC = () => {
                 <HeroTabs.ListContainer>
                   <HeroTabs.List
                     aria-label="짐싸기 담당자"
-                    className="grid h-13 w-full grid-cols-2 *:h-11 *:w-full *:px-3 *:text-sm"
+                    className="grid h-16 w-full grid-cols-2 rounded-2xl bg-slate-100 p-1 dark:bg-slate-900 *:h-14 *:w-full"
                   >
-                    <HeroTabs.Tab id="gahyun">
+                    <HeroTabs.Tab
+                      id="gahyun"
+                      className="relative z-0 gap-2 rounded-xl px-3 text-slate-500 data-[selected=true]:text-slate-950 dark:text-slate-400 dark:data-[selected=true]:text-white"
+                    >
                       <Avatar className="size-6">
                         <AvatarImage alt="" src={avatarSources.gahyun} />
                         <AvatarFallback className="bg-gray-200 text-[10px] text-gray-700 dark:bg-gray-700 dark:text-gray-300">G</AvatarFallback>
                       </Avatar>
-                      가현쨩 짐싸기
-                      <HeroTabs.Indicator />
+                      <span className="flex min-w-0 flex-col items-start leading-none">
+                        <span className="truncate text-[13px] font-bold">가현쨩 짐싸기</span>
+                        <span className="mt-1 text-[11px] font-medium opacity-70">
+                          {gahyunCheckedCount}/{gahyunItems.length} 완료
+                        </span>
+                      </span>
+                      <HeroTabs.Indicator className="-z-10 rounded-xl bg-white shadow-sm dark:bg-slate-700" />
                     </HeroTabs.Tab>
-                    <HeroTabs.Tab id="minu">
+                    <HeroTabs.Tab
+                      id="minu"
+                      className="relative z-0 gap-2 rounded-xl px-3 text-slate-500 data-[selected=true]:text-slate-950 dark:text-slate-400 dark:data-[selected=true]:text-white"
+                    >
                       <Avatar className="size-6">
                         <AvatarImage alt="" src={avatarSources.minu} />
                         <AvatarFallback className="bg-gray-200 text-[10px] text-gray-700 dark:bg-gray-700 dark:text-gray-300">M</AvatarFallback>
                       </Avatar>
-                      미누쿤 짐싸기
-                      <HeroTabs.Indicator />
+                      <span className="flex min-w-0 flex-col items-start leading-none">
+                        <span className="truncate text-[13px] font-bold">미누쿤 짐싸기</span>
+                        <span className="mt-1 text-[11px] font-medium opacity-70">
+                          {minuCheckedCount}/{minuItems.length} 완료
+                        </span>
+                      </span>
+                      <HeroTabs.Indicator className="-z-10 rounded-xl bg-white shadow-sm dark:bg-slate-700" />
                     </HeroTabs.Tab>
                   </HeroTabs.List>
                 </HeroTabs.ListContainer>
