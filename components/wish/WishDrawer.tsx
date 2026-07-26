@@ -284,7 +284,9 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                     </Avatar>
                     <div className="flex min-w-0 flex-col">
                       <Label>{WISH_TYPE_META[itemType].title}</Label>
-                      <Description>{WISH_TYPE_DESCRIPTIONS[itemType]}</Description>
+                      <Description className="text-xs text-slate-500! dark:text-slate-400!">
+                        {WISH_TYPE_DESCRIPTIONS[itemType]}
+                      </Description>
                     </div>
                     <ListBox.ItemIndicator />
                   </ListBox.Item>
