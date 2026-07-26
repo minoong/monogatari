@@ -954,7 +954,7 @@ export const ChecklistActivity: React.FC = () => {
         </div>
 
         {/* Floating Action Button */}
-        <div className="absolute right-6 z-50 h-14 w-14 bottom-16">
+        <div className="fixed right-6 z-50 h-14 w-14 bottom-16">
           <NeumorphButton
             aria-hidden="true"
             type="button"

@@ -34,6 +34,12 @@ export const triggerHapticFeedback = (duration = 15) => {
   if (typeof navigator !== "undefined" && navigator.vibrate) {
     navigator.vibrate(duration);
   }
+  if (typeof document !== "undefined") {
+    const label = document.getElementById("ios-haptic-label");
+    if (label) {
+      label.click();
+    }
+  }
 };
 
 export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
@@ -48,8 +54,23 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
   return (
     <nav
       aria-label="하단 내비게이션"
-      className="absolute inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90"
     >
+      {/* iOS PWA Haptic Feedback Workaround Target */}
+      <label
+        id="ios-haptic-label"
+        htmlFor="ios-haptic-input"
+        style={{ position: "absolute", left: "-9999px", top: "-9999px", opacity: 0 }}
+      >
+        <input
+          type="checkbox"
+          // @ts-expect-error iOS switch attribute hack for haptic feedback
+          switch={true}
+          id="ios-haptic-input"
+          name="ios-haptic-input"
+        />
+      </label>
+
       <div className="mx-auto flex h-[50px] max-w-lg items-center justify-around px-1 pt-1">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
