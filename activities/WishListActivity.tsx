@@ -91,15 +91,9 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
     <AppScreen appBar={{ title: meta.title }}>
       <main className="min-h-[calc(100dvh-64px)] bg-slate-50 pb-[calc(6rem+env(safe-area-inset-bottom))] dark:bg-slate-950">
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
-          <header className={`rounded-3xl bg-gradient-to-br ${meta.accent} px-5 py-5 text-white shadow-lg shadow-slate-200/70 dark:shadow-none`}>
-            <p className="text-2xl" aria-hidden="true">{meta.icon}</p>
-            <h1 className="mt-2 text-xl font-extrabold">{meta.title}</h1>
-            <p className="mt-1 text-sm text-white/80">{meta.description}</p>
-          </header>
-
           <div
             aria-label={`${meta.title} 검색 및 필터`}
-            className="flex min-h-16 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            className="flex min-h-10 items-center justify-center"
             data-slot="wish-filter-toolbar"
             role="search"
           >
@@ -112,6 +106,12 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
               value={searchQuery}
             />
           </div>
+
+          <header className={`rounded-3xl bg-gradient-to-br ${meta.accent} px-5 py-5 text-white shadow-lg shadow-slate-200/70 dark:shadow-none`}>
+            <p className="text-2xl" aria-hidden="true">{meta.icon}</p>
+            <h1 className="mt-2 text-xl font-extrabold">{meta.title}</h1>
+            <p className="mt-1 text-sm text-white/80">{meta.description}</p>
+          </header>
 
           {isLoading && Array.from({ length: 3 }).map((_, index) => <div key={index} className="h-36 animate-pulse rounded-3xl bg-white dark:bg-white/5" />)}
           {isError && <div className="rounded-3xl border border-red-100 bg-white px-5 py-8 text-center shadow-sm dark:border-red-900/60 dark:bg-slate-900"><p className="font-semibold text-slate-800 dark:text-slate-100">위시를 불러오지 못했어요.</p><p className="mt-1 text-sm text-slate-500">데이터베이스 설정과 네트워크를 확인해 주세요.</p><Button className="mt-4" variant="secondary" onPress={() => refetch()}><RefreshCw className="size-4" /> 다시 시도</Button></div>}
