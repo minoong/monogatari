@@ -528,7 +528,15 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="wish-memo">메모</Label>
-              <TextArea id="wish-memo" maxLength={500} onChange={(event) => setMemo(event.target.value)} placeholder="기억해 둘 팁이나 이유를 남겨 보세요." value={memo} />
+              <TextArea
+                id="wish-memo"
+                className="min-h-24"
+                maxLength={500}
+                onChange={(event) => setMemo(event.target.value)}
+                placeholder="기억해 둘 팁이나 이유를 남겨 보세요."
+                rows={4}
+                value={memo}
+              />
             </div>
 
             {submitError && <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{submitError}</p>}
