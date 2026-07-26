@@ -2,20 +2,24 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Stackflow PWA App',
-    short_name: 'StackApp',
-    description: 'A mobile-first web app using Stackflow and Next.js',
+    name: '가현쨩과 미누쿤의 모노가타리 🇹🇭',
+    short_name: '현쨩❤️미누쿤',
+    description: '가현쨩과 미누쿤의 모노가타리 🇹🇭',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#000000',
+    background_color: '#f8fafc',
+    theme_color: '#3b82f6',
     icons: [
       {
         src: '/favicon.ico',
         sizes: 'any',
         type: 'image/x-icon',
       },
-      // In a real app, you would add 192x192 and 512x512 PNG icons here
+      {
+        src: '/icon.ico',
+        sizes: 'any',
+        type: 'image/x-icon',
+      },
     ],
   };
 }
