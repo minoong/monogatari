@@ -49,6 +49,7 @@ import {
   isGoogleMapsUrl,
   normalizeExternalUrl,
   WISH_CATEGORY_SUGGESTIONS,
+  WISH_TYPES,
   WISH_TYPE_META,
   type WishItem,
   type WishType,
@@ -63,9 +64,12 @@ interface WishDrawerProps {
 
 const WISH_TYPE_DESCRIPTIONS: Record<WishType, string> = {
   shopping: "굿즈 살 돈으로 모조리 담아버려!!!",
-  snack: "멍멍이 간식 달라능 🐶",
   restaurant: "와따시는 고무줄 바지만 챙겨왔다!!!",
+  menu: "가현짱은 먹고싶어!!!",
+  snack: "멍멍이 간식 달라능 🐶",
 };
+
+const isDiningType = (type: WishType) => type === "restaurant" || type === "menu";
 
 export function WishDrawer({ open, initialType, onOpenChange, wish = null }: WishDrawerProps) {
   const queryClient = useQueryClient();
@@ -208,7 +212,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
           type,
           title,
           categories: submittedCategories,
-          target_price_thb: type === "restaurant" ? null : targetPrice,
+          target_price_thb: isDiningType(type) ? null : targetPrice,
           vendor,
           memo,
           locations: submittedLocations,
@@ -273,7 +277,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                   setCategoryDraft("");
                 }}
               >
-                {(Object.keys(WISH_TYPE_META) as WishType[]).map((itemType) => (
+                {WISH_TYPES.map((itemType) => (
                   <ListBox.Item
                     key={itemType}
                     id={itemType}
@@ -295,8 +299,8 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             </div>
 
             <TextField isRequired name="title" value={title} onChange={setTitle}>
-              <Label>{type === "restaurant" ? "식당 이름" : "이름"}</Label>
-              <Input autoComplete="off" placeholder={type === "shopping" ? "예: 야돔" : type === "snack" ? "예: 망고 쥬스" : "예: 팁싸마이"} />
+              <Label>{type === "restaurant" ? "식당 이름" : type === "menu" ? "메뉴 이름" : "이름"}</Label>
+              <Input autoComplete="off" placeholder={type === "shopping" ? "예: 야돔" : type === "snack" ? "예: 망고 쥬스" : type === "menu" ? "예: 팟타이" : "예: 팁싸마이"} />
               <FieldError />
             </TextField>
 
@@ -364,7 +368,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
               </div>
             </div>
 
-            {type !== "restaurant" && (
+            {!isDiningType(type) && (
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="wish-target-price">현지 적정 가격</Label>
@@ -407,8 +411,8 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             )}
 
             <TextField name="vendor" value={vendor} onChange={setVendor}>
-              <Label>{type === "restaurant" ? "식당 또는 지점" : "판매점"}</Label>
-              <Input autoComplete="off" placeholder={type === "restaurant" ? "예: 팁싸마이 프라투피" : "예: 세븐일레븐, 짜뚜짝 시장"} />
+              <Label>{isDiningType(type) ? "식당 또는 지점" : "판매점"}</Label>
+              <Input autoComplete="off" placeholder={isDiningType(type) ? "예: 팁싸마이 프라투피" : "예: 세븐일레븐, 짜뚜짝 시장"} />
             </TextField>
 
             <div className="flex flex-col gap-6">

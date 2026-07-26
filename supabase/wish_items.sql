@@ -66,7 +66,7 @@ $$;
 
 create table if not exists public.wish_items (
   id uuid primary key default gen_random_uuid(),
-  type text not null check (type in ('shopping', 'snack', 'restaurant')),
+  type text not null check (type in ('shopping', 'restaurant', 'menu', 'snack')),
   title text not null check (char_length(title) between 1 and 100),
   categories text[] not null default '{}' check (public.wish_categories_valid(categories)),
   target_price_thb numeric check (target_price_thb is null or target_price_thb >= 0),
@@ -91,7 +91,7 @@ drop policy if exists "wish items are insertable by anonymous users" on public.w
 create policy "wish items are insertable by anonymous users"
   on public.wish_items for insert to anon
   with check (
-    type in ('shopping', 'snack', 'restaurant')
+    type in ('shopping', 'restaurant', 'menu', 'snack')
     and char_length(btrim(title)) between 1 and 100
     and public.wish_categories_valid(categories)
     and (memo is null or char_length(memo) <= 500)
@@ -107,7 +107,7 @@ create policy "wish items are updatable by anonymous users"
   on public.wish_items for update to anon
   using (true)
   with check (
-    type in ('shopping', 'snack', 'restaurant')
+    type in ('shopping', 'restaurant', 'menu', 'snack')
     and char_length(btrim(title)) between 1 and 100
     and public.wish_categories_valid(categories)
     and (memo is null or char_length(memo) <= 500)

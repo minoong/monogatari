@@ -119,7 +119,19 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
             <p className="mt-1 text-sm text-white/80">{meta.description}</p>
           </header>
 
-          {isLoading && Array.from({ length: 3 }).map((_, index) => <div key={index} className="h-36 animate-pulse rounded-3xl bg-white dark:bg-white/5" />)}
+          {isLoading && (
+            <div className="-mx-5 divide-y divide-slate-200 dark:divide-slate-800">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="flex h-24 animate-pulse items-center gap-3 px-5">
+                  <div className="size-16 rounded-xl bg-slate-100 dark:bg-slate-800" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-2/3 rounded bg-slate-100 dark:bg-slate-800" />
+                    <div className="h-3 w-1/2 rounded bg-slate-100 dark:bg-slate-800" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           {isError && <div className="rounded-3xl border border-red-100 bg-white px-5 py-8 text-center shadow-sm dark:border-red-900/60 dark:bg-slate-900"><p className="font-semibold text-slate-800 dark:text-slate-100">위시를 불러오지 못했어요.</p><p className="mt-1 text-sm text-slate-500">데이터베이스 설정과 네트워크를 확인해 주세요.</p><Button className="mt-4" variant="secondary" onPress={() => refetch()}><RefreshCw className="size-4" /> 다시 시도</Button></div>}
           {!isLoading && !isError && wishes.length === 0 && <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white px-6 text-center dark:border-slate-700 dark:bg-slate-900"><span className="text-4xl" aria-hidden="true">{meta.icon}</span><h2 className="mt-3 font-bold text-slate-800 dark:text-slate-100">아직 담긴 항목이 없어요</h2><p className="mt-1 text-sm leading-6 text-slate-500">{meta.emptyMessage}</p><Button className="mt-5" onPress={openCreateDrawer}><Plus className="size-4" /> 등록하기</Button></div>}
           {!isLoading && !isError && wishes.length > 0 && filteredWishes.length === 0 && (
@@ -130,20 +142,27 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
               <Button className="mt-4" variant="secondary" onPress={resetSearch}>검색 초기화</Button>
             </div>
           )}
-          {!isLoading && !isError && filteredWishes.map((wish) => (
-            <WishCard
-              key={wish.id}
-              onDelete={() => setDeletingWish(wish)}
-              onEdit={() => {
-                setEditingWish(wish);
-                setDrawerSession((current) => current + 1);
-                setDrawerOpen(true);
-              }}
-              thbToKrwRate={thbToKrwRate}
-              type={type}
-              wish={wish}
-            />
-          ))}
+          {!isLoading && !isError && filteredWishes.length > 0 && (
+            <div
+              className="-mx-5 divide-y divide-slate-200 dark:divide-slate-800"
+              role="list"
+            >
+              {filteredWishes.map((wish) => (
+                <WishListItem
+                  key={wish.id}
+                  onDelete={() => setDeletingWish(wish)}
+                  onEdit={() => {
+                    setEditingWish(wish);
+                    setDrawerSession((current) => current + 1);
+                    setDrawerOpen(true);
+                  }}
+                  thbToKrwRate={thbToKrwRate}
+                  type={type}
+                  wish={wish}
+                />
+              ))}
+            </div>
+          )}
         </section>
         <Button aria-label={`${meta.title} 등록`} className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-5 z-40 h-14 min-w-14 rounded-full px-5 shadow-xl" onPress={openCreateDrawer}><Plus className="size-5" /><span className="font-bold">등록</span></Button>
       </main>
@@ -204,7 +223,7 @@ function wishMatchesSearch(wish: WishItem, query: string) {
   ].some((value) => value?.toLocaleLowerCase("ko-KR").includes(normalizedQuery));
 }
 
-function WishCard({
+function WishListItem({
   wish,
   type,
   thbToKrwRate,
@@ -226,33 +245,35 @@ function WishCard({
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
       <MorphingDialogTrigger
         ariaLabel={`${wish.title} 자세히 보기`}
-        className="block w-full rounded-3xl text-left outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="group block w-full text-left outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
       >
-        <article className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex gap-4 p-4">
-            <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+        <article className="flex min-h-24 items-center gap-3 px-5 py-3 transition-colors group-hover:bg-slate-100/70 group-active:bg-slate-200/70 dark:group-hover:bg-white/5 dark:group-active:bg-white/10" role="listitem">
+            <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-slate-400 dark:bg-slate-800">
               {wish.image_url ? (
                 <MorphingDialogImage alt="" className="size-full object-cover" src={wish.image_url} />
               ) : (
-                <ImageIcon aria-hidden="true" className="size-6" />
+                <ImageIcon aria-hidden="true" className="size-5" />
               )}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-2">
                 <MorphingDialogTitle className="min-w-0">
-                  <h2 className="truncate font-bold text-slate-900 dark:text-white">{wish.title}</h2>
+                  <h2 className="truncate text-sm font-bold text-slate-900 dark:text-white">{wish.title}</h2>
                 </MorphingDialogTitle>
-                {price && <span className="shrink-0 rounded-full bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700 dark:bg-amber-400/10 dark:text-amber-300">฿ {price}</span>}
+                {price && <span className="shrink-0 text-sm font-extrabold tabular-nums text-amber-700 dark:text-amber-300">฿ {price}</span>}
               </div>
               {wish.categories.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {wish.categories.map((category) => <Chip key={category} color="accent" size="sm" variant="soft">{category}</Chip>)}
+                <div className="mt-1.5 flex min-w-0 items-center gap-1 overflow-hidden">
+                  {wish.categories.slice(0, 2).map((category) => <Chip key={category} color="accent" size="sm" variant="soft">{category}</Chip>)}
+                  {wish.categories.length > 2 && <span className="shrink-0 text-[11px] font-semibold text-slate-400">+{wish.categories.length - 2}</span>}
                 </div>
               )}
-              {wish.vendor && <p className="mt-2 flex items-center gap-1 text-xs text-slate-500"><Store className="size-3" />{wish.vendor}</p>}
-              {wish.memo && <p className="mt-2 line-clamp-2 text-sm leading-5 text-slate-600 dark:text-slate-300">{wish.memo}</p>}
+              <div className="mt-1.5 flex min-w-0 items-center gap-2 text-xs text-slate-500">
+                {wish.vendor && <span className="flex min-w-0 items-center gap-1"><Store className="size-3 shrink-0" /><span className="truncate">{wish.vendor}</span></span>}
+                {wish.vendor && wish.memo && <span aria-hidden="true" className="shrink-0 text-slate-300 dark:text-slate-700">·</span>}
+                {wish.memo && <span className="min-w-0 truncate">{wish.memo}</span>}
+              </div>
             </div>
-          </div>
         </article>
       </MorphingDialogTrigger>
 
@@ -284,7 +305,7 @@ function WishCard({
                   <AnimatedPrice label="대한민국 원 (KRW)" symbol="₩" value={priceKrw} />
                 </div>
               )}
-              {wish.vendor && <DetailRow label={type === "restaurant" ? "식당 또는 지점" : "판매점"} value={wish.vendor} />}
+              {wish.vendor && <DetailRow label={type === "restaurant" || type === "menu" ? "식당 또는 지점" : "판매점"} value={wish.vendor} />}
               {wish.locations.length > 0 && (
                 <DetailLinkGroup
                   icon={<MapPin className="size-4" />}

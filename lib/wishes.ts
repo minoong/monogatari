@@ -1,4 +1,4 @@
-export const WISH_TYPES = ["shopping", "snack", "restaurant"] as const;
+export const WISH_TYPES = ["shopping", "restaurant", "menu", "snack"] as const;
 
 export type WishType = (typeof WISH_TYPES)[number];
 
@@ -32,19 +32,26 @@ export const WISH_TYPE_META: Record<WishType, {
     accent: "from-violet-500 to-purple-600",
     emptyMessage: "사고 싶은 물건을 첫 번째로 담아 보세요.",
   },
-  snack: {
-    title: "간식 정보",
-    description: "여행 중 먹어 볼 간식과 디저트",
-    icon: "🥭",
-    accent: "from-amber-400 to-orange-500",
-    emptyMessage: "먹어 보고 싶은 간식을 담아 보세요.",
-  },
   restaurant: {
     title: "맛집",
     description: "이번 여행에서 들르고 싶은 식당",
     icon: "🍜",
     accent: "from-rose-500 to-orange-500",
     emptyMessage: "가 보고 싶은 맛집을 첫 번째로 담아 보세요.",
+  },
+  menu: {
+    title: "메뉴",
+    description: "여행 중 꼭 먹어 보고 싶은 메뉴",
+    icon: "🍽️",
+    accent: "from-orange-500 to-amber-500",
+    emptyMessage: "먹어 보고 싶은 메뉴를 첫 번째로 담아 보세요.",
+  },
+  snack: {
+    title: "간식/디저트",
+    description: "여행 중 먹어 볼 간식과 디저트",
+    icon: "🥭",
+    accent: "from-amber-400 to-orange-500",
+    emptyMessage: "먹어 보고 싶은 간식이나 디저트를 담아 보세요.",
   },
 };
 
@@ -53,8 +60,9 @@ export const isWishType = (value: unknown): value is WishType =>
 
 export const WISH_CATEGORY_SUGGESTIONS: Record<WishType, string[]> = {
   shopping: ["기념품", "약국", "패션", "생활용품", "뷰티"],
-  snack: ["과일", "디저트", "음료", "편의점", "식재료"],
   restaurant: ["태국 음식", "국수", "길거리 음식", "카페", "해산물"],
+  menu: ["태국 음식", "국수", "길거리 음식", "해산물", "음료"],
+  snack: ["과일", "디저트", "음료", "편의점", "식재료"],
 };
 
 export const formatThaiBaht = (value: number | null) =>
