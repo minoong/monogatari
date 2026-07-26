@@ -123,6 +123,7 @@ const useWindowSize = () => {
 };
 
 interface StayAccordionProps {
+  initialOpenId: StayFilter;
   onFilterChange: (filter: StayFilter) => void;
 }
 
@@ -162,8 +163,8 @@ const STAY_ACCORDION_ITEMS: StayAccordionItem[] = [
   })),
 ];
 
-const StayAccordion: React.FC<StayAccordionProps> = ({ onFilterChange }) => {
-  const [openId, setOpenId] = React.useState<StayFilter>("all");
+const StayAccordion: React.FC<StayAccordionProps> = ({ initialOpenId, onFilterChange }) => {
+  const [openId, setOpenId] = React.useState<StayFilter>(initialOpenId);
   const { width } = useWindowSize();
   const accordionHeight = width && width >= 1024 ? 220 : 184;
 
@@ -245,8 +246,18 @@ const StayAccordion: React.FC<StayAccordionProps> = ({ onFilterChange }) => {
   );
 };
 
-export const AccommodationActivity: React.FC = () => {
-  const [activeFilter, setActiveFilter] = React.useState<StayFilter>("all");
+interface AccommodationActivityProps {
+  params: { stayId?: string };
+}
+
+const getInitialStayFilter = (stayId?: string): StayFilter =>
+  stayId === "all" || ACCOMMODATIONS.some((stay) => stay.id === stayId)
+    ? stayId as StayFilter
+    : "all";
+
+export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ params }) => {
+  const initialFilter = getInitialStayFilter(params.stayId);
+  const [activeFilter, setActiveFilter] = React.useState<StayFilter>(initialFilter);
   const amenitiesRef = React.useRef<HTMLDivElement>(null);
   const visibleStays = activeFilter === "all"
     ? ACCOMMODATIONS
@@ -295,7 +306,7 @@ export const AccommodationActivity: React.FC = () => {
   return (
     <AppScreen appBar={{ title: "숙소 자세히 보기" }}>
       <div ref={amenitiesRef} className="min-h-full bg-gray-50 px-4 pb-8 pt-4 dark:bg-black">
-        <StayAccordion onFilterChange={setActiveFilter} />
+        <StayAccordion initialOpenId={initialFilter} onFilterChange={setActiveFilter} />
 
         <div className="mt-5 flex flex-col gap-5">
           {visibleStays.map((stay) => (

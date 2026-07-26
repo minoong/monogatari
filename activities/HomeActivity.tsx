@@ -6,7 +6,7 @@ import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import NeumorphButton from "../components/ui/neumorph-button";
 import { ChevronRight, Hotel } from "lucide-react";
 import { MinimalCardExpand } from "../components/ui/minimal-card-expand";
-import { ACCOMMODATIONS } from "../lib/accommodations";
+import { ACCOMMODATIONS, type Accommodation } from "../lib/accommodations";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { NativeHapticSwitch } from "../components/ui/native-haptic-switch";
 import { SlidingNumber } from "../components/core/sliding-number";
@@ -189,7 +189,9 @@ const AutoImageRoll: React.FC<{ imageUrls: readonly (string | null)[] } & Automa
   );
 };
 
-const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => {
+type StaySelection = "all" | Accommodation["id"];
+
+const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }> = ({ onOpen }) => {
   const automaticRoll = useAutomaticRoll(ACCOMMODATIONS.length + 1);
 
   return (
@@ -213,6 +215,7 @@ const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => {
 
     <MinimalCardExpand
       className="h-[300px]"
+      onExpandedClick={(id) => onOpen(id === "stay-summary" ? "all" : id as Accommodation["id"])}
       items={[
         {
           id: ACCOMMODATIONS[0].id,
@@ -275,7 +278,7 @@ const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => {
         checked={false}
         onClick={() => {
           triggerHapticFeedback(15);
-          onOpen();
+          onOpen("all");
         }}
         onChange={() => undefined}
       />
@@ -318,7 +321,7 @@ export const HomeActivity: React.FC = () => {
                 </button>
               </div>
 
-              <ReservationStayCard onOpen={() => push("AccommodationActivity", {})} />
+              <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
 
               <button onClick={() => push("DiscoverActivity", {})} className="p-4 bg-orange-50 dark:bg-orange-900/30 rounded-2xl border border-orange-200 dark:border-orange-800 text-left active:scale-95 transition-transform">
                 <h3 className="font-bold text-lg">태국 맛집 & 쇼핑 추천 🇹🇭</h3>
@@ -359,7 +362,7 @@ export const HomeActivity: React.FC = () => {
                 <span className="text-2xl">👉</span>
               </button>
 
-              <ReservationStayCard onOpen={() => push("AccommodationActivity", {})} />
+              <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
             </motion.div>
           )}
 

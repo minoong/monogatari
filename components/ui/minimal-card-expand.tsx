@@ -31,6 +31,7 @@ interface MinimalCardExpandProps {
   className?: string;
   initialExpandedId?: string | null;
   onExpandedChange?: (id: string | null) => void;
+  onExpandedClick?: (id: string) => void;
   autoCycle?: boolean;
 }
 
@@ -120,6 +121,7 @@ export function MinimalCardExpand({
   className,
   initialExpandedId = null,
   onExpandedChange,
+  onExpandedClick,
   autoCycle = false,
 }: MinimalCardExpandProps) {
   const [expandedId, setExpandedId] = React.useState<string | null>(initialExpandedId);
@@ -137,6 +139,11 @@ export function MinimalCardExpand({
   }, [onExpandedChange]);
 
   const handleUserExpand = React.useCallback((id: string) => {
+    if (expandedId === id && onExpandedClick) {
+      onExpandedClick(id);
+      return;
+    }
+
     setExpanded(id);
     if (!autoCycle) return;
 
@@ -149,7 +156,7 @@ export function MinimalCardExpand({
       setIsAutoCyclePaused(false);
       resumeTimerRef.current = null;
     }, USER_INTERACTION_PAUSE_MS);
-  }, [autoCycle, items, setExpanded]);
+  }, [autoCycle, expandedId, items, onExpandedClick, setExpanded]);
 
   React.useEffect(() => {
     if (!autoCycle || !containerRef.current) return;
