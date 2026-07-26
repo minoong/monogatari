@@ -35,9 +35,27 @@ export const triggerHapticFeedback = (duration = 15) => {
     navigator.vibrate(duration);
   }
   if (typeof document !== "undefined") {
-    const label = document.getElementById("ios-haptic-label");
-    if (label) {
+    try {
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.setAttribute("switch", "");
+
+      const label = document.createElement("label");
+      label.style.position = "absolute";
+      label.style.left = "-9999px";
+      label.style.top = "-9999px";
+      label.style.opacity = "0";
+      label.style.width = "1px";
+      label.style.height = "1px";
+
+      label.appendChild(input);
+      document.body.appendChild(label);
+
       label.click();
+
+      document.body.removeChild(label);
+    } catch (e) {
+      console.warn("Haptic feedback failed", e);
     }
   }
 };
@@ -54,22 +72,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
   return (
     <nav
       aria-label="하단 내비게이션"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/90 pb-[max(env(safe-area-inset-bottom,0px),12px)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90"
     >
-      {/* iOS PWA Haptic Feedback Workaround Target */}
-      <label
-        id="ios-haptic-label"
-        htmlFor="ios-haptic-input"
-        style={{ position: "absolute", left: "-9999px", top: "-9999px", opacity: 0 }}
-      >
-        <input
-          type="checkbox"
-          // @ts-expect-error iOS switch attribute hack for haptic feedback
-          switch={true}
-          id="ios-haptic-input"
-          name="ios-haptic-input"
-        />
-      </label>
 
       <div className="mx-auto flex h-[50px] max-w-lg items-center justify-around px-1 pt-1">
         {NAV_ITEMS.map((item) => {
