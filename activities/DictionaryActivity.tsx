@@ -73,7 +73,7 @@ export const DictionaryActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "회화 사전" }}>
-      <div className="flex flex-col h-[calc(100dvh-64px)] bg-gray-50 dark:bg-gray-900">
+      <div className="flex flex-col flex-1 h-full bg-gray-50 dark:bg-gray-900">
         
         {/* Top Half (Opposite person - Rotated) */}
         <div className="flex-1 flex flex-col justify-center items-center p-8 bg-blue-500 text-white rotate-180 relative transition-all">
@@ -88,7 +88,7 @@ export const DictionaryActivity: React.FC = () => {
         <div className="h-2 bg-gray-200 dark:bg-gray-800 shrink-0 shadow-inner z-10" />
 
         {/* Bottom Half (My view) */}
-        <div className="flex-1 flex flex-col bg-white dark:bg-black p-6 overflow-y-auto">
+        <div className="flex-1 flex flex-col bg-white dark:bg-black p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,16px))] overflow-y-auto">
           <div className="mb-6 flex justify-between items-start gap-4">
             <div>
               <h3 className="text-3xl font-extrabold text-blue-600 dark:text-blue-400">

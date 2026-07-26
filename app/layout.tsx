@@ -51,9 +51,9 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={cn("w-full h-full min-h-screen overflow-hidden overscroll-none", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable, interHeading.variable)}
+      className={cn("fixed inset-0 w-full overflow-hidden overscroll-none", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable, interHeading.variable)}
     >
-      <body className="w-full h-full min-h-screen overflow-hidden overscroll-none isolate flex flex-col">
+      <body className="fixed inset-0 w-full overflow-hidden overscroll-none isolate flex flex-col">
         <QueryProvider>
           {children}
           <Toaster position="top-center" />

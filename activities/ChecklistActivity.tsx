@@ -857,7 +857,7 @@ export const ChecklistActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "여행 준비물 체크리스트" }}>
-      <div className="flex flex-col h-[calc(100dvh-64px)] bg-white dark:bg-black relative">
+      <div className="flex flex-col flex-1 h-full bg-white dark:bg-black relative">
 
         <div className="py-4 pb-2 shrink-0 flex justify-center w-full">
           <DynamicIslandProvider initialSize={SIZE_PRESETS.PROGRESS_COLLAPSED}>
@@ -865,7 +865,7 @@ export const ChecklistActivity: React.FC = () => {
           </DynamicIslandProvider>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))]">
+        <div className="flex-1 overflow-y-auto p-4 pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
           {loading ? (
             <div className="flex flex-col gap-4">
               <Skeleton className="h-6 w-32 mb-2" />
@@ -956,7 +956,7 @@ export const ChecklistActivity: React.FC = () => {
         {/* Floating Action Button */}
         <div
           className="fixed right-6 z-50 h-14 w-14"
-          style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom, 0px))" }}
+          style={{ bottom: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}
         >
           <NeumorphButton
             aria-hidden="true"
