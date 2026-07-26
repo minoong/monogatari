@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import NumberFlow from "@number-flow/react";
 import {
+  Avatar,
   Button,
   Description,
   FieldError,
@@ -259,7 +260,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
               <Label>종류</Label>
               <ListBox
                 aria-label="위시 종류"
-                className="w-full rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-white/5"
+                className="w-full"
                 disallowEmptySelection
                 selectedKeys={new Set([type])}
                 selectionMode="single"
@@ -277,20 +278,15 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                     key={itemType}
                     id={itemType}
                     textValue={WISH_TYPE_META[itemType].title}
-                    className="group min-h-12 cursor-pointer rounded-lg px-2.5 py-2 outline-none transition-colors! data-[pressed=true]:scale-100! data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-blue-500 data-[selected=true]:bg-blue-50 dark:data-[selected=true]:bg-blue-500/10"
                   >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-lg group-data-[selected=true]:bg-white dark:bg-white/10 dark:group-data-[selected=true]:bg-blue-500/15">
-                      {WISH_TYPE_META[itemType].icon}
-                    </span>
-                    <span className="flex min-w-0 flex-1 flex-col">
-                      <Label className="text-sm font-semibold text-slate-800 group-data-[selected=true]:text-blue-700 dark:text-slate-100 dark:group-data-[selected=true]:text-blue-300">
-                        {WISH_TYPE_META[itemType].title}
-                      </Label>
-                      <Description className="truncate text-[11px] leading-4 text-slate-500">
-                        {WISH_TYPE_DESCRIPTIONS[itemType]}
-                      </Description>
-                    </span>
-                    <ListBox.ItemIndicator className="ms-auto text-blue-600 dark:text-blue-300" />
+                    <Avatar size="sm">
+                      <Avatar.Fallback>{WISH_TYPE_META[itemType].icon}</Avatar.Fallback>
+                    </Avatar>
+                    <div className="flex min-w-0 flex-col">
+                      <Label>{WISH_TYPE_META[itemType].title}</Label>
+                      <Description>{WISH_TYPE_DESCRIPTIONS[itemType]}</Description>
+                    </div>
+                    <ListBox.ItemIndicator />
                   </ListBox.Item>
                 ))}
               </ListBox>
@@ -650,7 +646,6 @@ function MultiValueField({
               }
             }}
             placeholder={placeholder}
-            variant="secondary"
           />
         </TextField>
         <Button
