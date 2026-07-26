@@ -138,11 +138,13 @@ export function GooeyInput({
   const inputLayoutId = `gooey-input-field-${safeId}`;
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const placeholderMeasureRef = useRef<HTMLSpanElement>(null);
   const prevExpandedRef = useRef(false);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
   const [measuredCollapsedWidth, setMeasuredCollapsedWidth] = useState(115);
+  const [availableWidth, setAvailableWidth] = useState(0);
 
   const isControlled = valueProp !== undefined;
   const isOpenControlled = openProp !== undefined;
@@ -185,19 +187,34 @@ export function GooeyInput({
     setMeasuredCollapsedWidth(Math.ceil(textWidth + 56));
   }, [collapsedWidth, placeholder]);
 
+  useLayoutEffect(() => {
+    if (!fullWidthOnExpand || !rootRef.current) return;
+
+    const updateWidth = () => {
+      setAvailableWidth(rootRef.current?.getBoundingClientRect().width ?? 0);
+    };
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(rootRef.current);
+    updateWidth();
+
+    return () => observer.disconnect();
+  }, [fullWidthOnExpand]);
+
   const resolvedCollapsedWidth = collapsedWidth ?? measuredCollapsedWidth;
+  const resolvedExpandedWidth =
+    fullWidthOnExpand && availableWidth
+      ? Math.max(resolvedCollapsedWidth, availableWidth - expandedOffset)
+      : expandedWidth;
 
   const buttonVariants = useMemo(
     () => ({
       collapsed: { width: resolvedCollapsedWidth, marginLeft: 0 },
       expanded: {
-        width: fullWidthOnExpand
-          ? `calc(100% - ${expandedOffset}px)`
-          : expandedWidth,
+        width: resolvedExpandedWidth,
         marginLeft: expandedOffset,
       },
     }),
-    [resolvedCollapsedWidth, expandedWidth, expandedOffset, fullWidthOnExpand],
+    [expandedOffset, resolvedCollapsedWidth, resolvedExpandedWidth],
   );
 
   const handleExpand = useCallback(() => {
@@ -225,6 +242,7 @@ export function GooeyInput({
 
   return (
     <div
+      ref={rootRef}
       className={cn(
         "relative flex items-center justify-center",
         className,
@@ -243,7 +261,6 @@ export function GooeyInput({
       <div
         className={cn(
           "relative flex h-10 items-center justify-center",
-          fullWidthOnExpand && "w-full",
           classNames?.filterWrap,
         )}
         style={{ filter: `url(#${filterId})` }}
