@@ -27,9 +27,7 @@ export const ExchangeActivity: React.FC = () => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [rates, setRates] = useState<{ THB: number; USD: number }>({ THB: 38.5, USD: 1380 });
-  // 한화 1000원을 기준으로 한 바트 값을 기본값으로 설정 (약 25.97 밧)
-  const [thb, setThb] = useState<number | undefined>(Number((1000 / 38.5).toFixed(2)));
-  const isPristine = useRef(true);
+  const [thb, setThb] = useState<number | undefined>(0);
   const isClearing = useRef(false);
   const [loading, setLoading] = useState(true);
   const [inputKey, setInputKey] = useState(0);
@@ -71,11 +69,6 @@ export const ExchangeActivity: React.FC = () => {
           if (rate.currency === 'USD') newRates.USD = rate.rate_to_krw;
         });
         setRates(newRates);
-        
-        // 사용자가 아직 값을 입력하지 않았다면(초기 상태), DB에서 가져온 최신 환율 기준으로 한화 1000원에 맞게 바트 업데이트
-        if (isPristine.current) {
-          setThb(Number((1000 / newRates.THB).toFixed(2)));
-        }
       }
     } catch (err) {
       console.error("Failed to load rates:", err);
@@ -141,8 +134,14 @@ export const ExchangeActivity: React.FC = () => {
                   
                   <div 
                     className={`thb-flip-container flex ${isFocused ? 'flex-row justify-between items-center min-h-[40px] pr-9' : 'flex-col justify-center items-center min-h-[72px]'} w-full max-w-full cursor-text relative`} 
+                    onPointerDown={(event) => {
+                      if (isFocused && event.target !== inputRef.current) {
+                        event.preventDefault();
+                      }
+                    }}
                     onClick={() => {
-                      if (!isFocused) handleFocusToggle(true);
+                      if (isFocused) return;
+                      handleFocusToggle(true);
                       inputRef.current?.focus();
                     }}
                   >
@@ -165,10 +164,7 @@ export const ExchangeActivity: React.FC = () => {
                         key={`input-reset-${inputKey}`}
                         ref={inputRef}
                         value={thb}
-                        onChange={(val) => {
-                          isPristine.current = false;
-                          setThb(val);
-                        }}
+                        onChange={setThb}
                         onFocus={() => {
                           if (!isFocused) handleFocusToggle(true);
                           setTimeout(() => {
@@ -211,7 +207,6 @@ export const ExchangeActivity: React.FC = () => {
                         onPointerDown={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          isPristine.current = false;
                           isClearing.current = true;
                           setThb(undefined);
                           setInputKey(prev => prev + 1);
