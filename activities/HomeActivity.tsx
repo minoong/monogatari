@@ -213,7 +213,6 @@ const ReservationStayCard: React.FC<{ onOpen: () => void }> = ({ onOpen }) => {
 
     <MinimalCardExpand
       className="h-[300px]"
-      autoCycle
       items={[
         {
           id: ACCOMMODATIONS[0].id,

@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { MoreHorizontal } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 
 const AUTO_CARD_DURATION_MS = 4_000;
@@ -39,7 +38,7 @@ interface CardProps {
   item: MinimalCardExpandItem;
   expanded: boolean;
   condensed: boolean;
-  activeCardRef: React.RefObject<HTMLElement | null>;
+  activeCardRef: React.RefObject<HTMLButtonElement | null>;
   onUserExpand: (id: string) => void;
   prefersReducedMotion: boolean | null;
 }
@@ -52,8 +51,12 @@ const SkiperCard = ({
   onUserExpand,
   prefersReducedMotion,
 }: CardProps) => (
-  <motion.article
+  <motion.button
+    type="button"
     ref={expanded ? activeCardRef : undefined}
+    aria-pressed={expanded}
+    aria-label={`${item.title} 카드 선택`}
+    onClick={() => onUserExpand(item.id)}
     layout
     transition={{
       layout: prefersReducedMotion
@@ -65,7 +68,7 @@ const SkiperCard = ({
       backgroundPosition: "center",
       backgroundSize: "cover",
     } : undefined}
-    className={`relative flex min-w-0 flex-col items-start justify-between overflow-hidden rounded-[24px] p-3 text-white ${item.colorClassName} ${
+    className={`relative flex min-w-0 cursor-pointer flex-col items-start justify-between overflow-hidden rounded-[24px] p-3 text-left text-white outline-none transition-transform duration-150 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${item.colorClassName} ${
       expanded
         ? "col-span-3 row-start-1 h-[180px] w-full"
         : condensed
@@ -75,20 +78,7 @@ const SkiperCard = ({
   >
     <div className="flex w-full items-start justify-between gap-3">
       {item.icon ? <div className="flex size-8 shrink-0 items-center justify-center text-white">{item.icon}</div> : <span />}
-      {expanded ? (
-        <div className="flex items-center justify-end gap-2">{item.expandedActions?.primary}</div>
-      ) : (
-        <button
-          type="button"
-          data-minimal-card-expand-menu
-          aria-label={`${item.title} 펼치기`}
-          aria-expanded={false}
-          onClick={() => onUserExpand(item.id)}
-          className="flex size-6 items-center justify-center rounded-full bg-white/20 p-0.5 text-white transition-colors duration-150 ease-out hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-        >
-          <MoreHorizontal size={16} aria-hidden="true" />
-        </button>
-      )}
+      {expanded ? <div className="flex items-center justify-end gap-2">{item.expandedActions?.primary}</div> : null}
     </div>
 
     <div className={expanded ? "flex w-full min-w-0 items-end justify-between gap-3" : "flex min-w-0 flex-col items-start justify-center"}>
@@ -116,7 +106,7 @@ const SkiperCard = ({
         <div className="shrink-0">{item.expandedActions.secondary}</div>
       ) : null}
     </div>
-  </motion.article>
+  </motion.button>
 );
 
 /**
@@ -135,7 +125,7 @@ export function MinimalCardExpand({
   const [isInView, setIsInView] = React.useState(false);
   const [isAutoCyclePaused, setIsAutoCyclePaused] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const activeCardRef = React.useRef<HTMLElement | null>(null);
+  const activeCardRef = React.useRef<HTMLButtonElement | null>(null);
   const cycleIndexRef = React.useRef(0);
   const resumeTimerRef = React.useRef<number | null>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -213,10 +203,6 @@ export function MinimalCardExpand({
     if (!expandedId) return;
 
     const handleOutsidePointerDown = (event: PointerEvent) => {
-      const target = event.target;
-      if (target instanceof Element && target.closest("[data-minimal-card-expand-menu]")) {
-        return;
-      }
       if (activeCardRef.current && !activeCardRef.current.contains(event.target as Node)) {
         setExpanded(null);
       }
