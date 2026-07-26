@@ -48,7 +48,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
   return (
     <nav
       aria-label="하단 내비게이션"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/90 pb-[clamp(0px,env(safe-area-inset-bottom),34px)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90"
     >
       <div className="mx-auto flex h-[50px] max-w-lg items-center justify-around px-1 pt-1">
         {NAV_ITEMS.map((item) => {

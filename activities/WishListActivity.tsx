@@ -95,7 +95,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
 
   return (
     <AppScreen appBar={{ title: meta.title }}>
-      <main className="flex-1 h-full min-h-full bg-slate-50 pb-[calc(1.5rem+clamp(16px,env(safe-area-inset-bottom),34px))] dark:bg-slate-950">
+      <main className="flex-1 h-full min-h-full bg-slate-50 pb-6 dark:bg-slate-950">
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
           <div
             aria-label={`${meta.title} 검색 및 필터`}
@@ -165,7 +165,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
             </div>
           )}
         </section>
-        <Button aria-label={`${meta.title} 등록`} className="fixed bottom-[calc(1.5rem+clamp(16px,env(safe-area-inset-bottom),34px))] right-5 z-40 h-14 min-w-14 rounded-full px-5 shadow-xl" onPress={openCreateDrawer}><Plus className="size-5" /><span className="font-bold">등록</span></Button>
+        <Button aria-label={`${meta.title} 등록`} className="fixed bottom-6 right-5 z-40 h-14 min-w-14 rounded-full px-5 shadow-xl" onPress={openCreateDrawer}><Plus className="size-5" /><span className="font-bold">등록</span></Button>
       </main>
       <WishDrawer key={drawerSession} initialType={type} open={drawerOpen} wish={editingWish} onOpenChange={(open) => {
         setDrawerOpen(open);
