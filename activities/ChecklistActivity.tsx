@@ -512,6 +512,7 @@ const SwipeableItem = ({
 export const ChecklistActivity: React.FC = () => {
   const queryClient = useQueryClient();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isOpeningDrawer, setIsOpeningDrawer] = useState(false);
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
   const [packingTab, setPackingTab] = useState("gahyun");
@@ -967,6 +968,11 @@ export const ChecklistActivity: React.FC = () => {
             <motion.div
               animate={{ rotate: rotation }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.3, ease: "easeInOut" }}
+              onUpdate={(latest) => {
+                if (!isOpeningDrawer || Number(latest.rotate) < 45) return;
+                setIsOpeningDrawer(false);
+                setDrawerOpen(true);
+              }}
               className="flex items-center justify-center pointer-events-none"
             >
               <Plus size={24} />
@@ -974,13 +980,13 @@ export const ChecklistActivity: React.FC = () => {
           </NeumorphButton>
           <NativeHapticSwitch
             ariaLabel="준비물 추가"
-            checked={drawerOpen}
-            disabled={drawerOpen}
+            checked={drawerOpen || isOpeningDrawer}
+            disabled={drawerOpen || isOpeningDrawer}
             onChange={() => {
-              if (drawerOpen) return;
+              if (drawerOpen || isOpeningDrawer) return;
               triggerHapticFeedback(15);
+              setIsOpeningDrawer(true);
               setRotation((prev) => prev + 90);
-              setDrawerOpen(true);
             }}
           />
         </div>
