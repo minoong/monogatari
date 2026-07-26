@@ -28,7 +28,7 @@ export const UtilsActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "유틸" }}>
-      <div className="flex flex-1 h-full flex-col overflow-y-auto bg-slate-50 px-4 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] pt-5 dark:bg-slate-950">
+      <div className="flex flex-1 h-full flex-col overflow-y-auto bg-slate-50 px-4 pb-[calc(3.5rem+max(env(safe-area-inset-bottom,0px),8px))] pt-5 dark:bg-slate-950">
         <div className="mx-auto flex w-full max-w-lg flex-col gap-5">
           <header>
             <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">여행 중 바로 꺼내 쓰는 도구</p>
