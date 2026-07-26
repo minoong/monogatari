@@ -10,6 +10,12 @@ import { Skeleton } from "../components/ui/skeleton";
 import { ImportanceChip } from "../components/ui/chip";
 import NeumorphButton from "../components/ui/neumorph-button";
 import { Checkbox } from "../components/animate-ui/components/radix/checkbox";
+import {
+  Tabs as AnimateTabs,
+  TabsContent as AnimateTabsContent,
+  TabsContents as AnimateTabsContents,
+} from "../components/animate-ui/components/animate/tabs";
+import { Tabs as HeroTabs } from "@heroui/react";
 import { motion, AnimatePresence, useMotionValue, animate, useTransform, useReducedMotion } from "framer-motion";
 import { RingChart } from "../components/ui/ring-chart";
 import { useRef } from "react";
@@ -482,6 +488,7 @@ export const ChecklistActivity: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
+  const [packingTab, setPackingTab] = useState("gahyun");
   const prefersReducedMotion = useReducedMotion();
   const locallyUpdatingKeys = useRef(new Set<string>());
   const toggleEntriesRef = useRef(new Map<string, ToggleEntry>());
@@ -848,23 +855,45 @@ export const ChecklistActivity: React.FC = () => {
           ) : (
             <>
               <SwipeHint />
-              <div className="flex items-center gap-2 mb-3 mt-2">
-                <Avatar className="w-5 h-5">
-                  <AvatarImage alt="" src={avatarSources.gahyun} />
-                  <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">G</AvatarFallback>
-                </Avatar>
-                <h3 className="font-bold text-gray-700 dark:text-gray-300 text-sm">가현쨩 짐싸기</h3>
-              </div>
-              {renderList(gahyunItems, "gahyun")}
-
-              <div className="flex items-center gap-2 mb-3 mt-6">
-                <Avatar className="w-5 h-5">
-                  <AvatarImage alt="" src={avatarSources.minu} />
-                  <AvatarFallback className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">M</AvatarFallback>
-                </Avatar>
-                <h3 className="font-bold text-gray-700 dark:text-gray-300 text-sm">미누쿤 짐싸기</h3>
-              </div>
-              {renderList(minuItems, "minu")}
+              <HeroTabs
+                selectedKey={packingTab}
+                onSelectionChange={(key) => setPackingTab(String(key))}
+                className="mt-2 w-full"
+              >
+                <HeroTabs.ListContainer>
+                  <HeroTabs.List
+                    aria-label="짐싸기 담당자"
+                    className="grid h-13 w-full grid-cols-2 *:h-11 *:w-full *:px-3 *:text-sm"
+                  >
+                    <HeroTabs.Tab id="gahyun">
+                      <Avatar className="size-6">
+                        <AvatarImage alt="" src={avatarSources.gahyun} />
+                        <AvatarFallback className="bg-gray-200 text-[10px] text-gray-700 dark:bg-gray-700 dark:text-gray-300">G</AvatarFallback>
+                      </Avatar>
+                      가현쨩 짐싸기
+                      <HeroTabs.Indicator />
+                    </HeroTabs.Tab>
+                    <HeroTabs.Tab id="minu">
+                      <Avatar className="size-6">
+                        <AvatarImage alt="" src={avatarSources.minu} />
+                        <AvatarFallback className="bg-gray-200 text-[10px] text-gray-700 dark:bg-gray-700 dark:text-gray-300">M</AvatarFallback>
+                      </Avatar>
+                      미누쿤 짐싸기
+                      <HeroTabs.Indicator />
+                    </HeroTabs.Tab>
+                  </HeroTabs.List>
+                </HeroTabs.ListContainer>
+              </HeroTabs>
+              <AnimateTabs value={packingTab}>
+                <AnimateTabsContents>
+                  <AnimateTabsContent value="gahyun">
+                    {renderList(gahyunItems, "gahyun")}
+                  </AnimateTabsContent>
+                  <AnimateTabsContent value="minu">
+                    {renderList(minuItems, "minu")}
+                  </AnimateTabsContent>
+                </AnimateTabsContents>
+              </AnimateTabs>
             </>
           )}
         </div>
