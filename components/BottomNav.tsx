@@ -48,9 +48,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
   return (
     <nav
       aria-label="하단 내비게이션"
-      className="fixed inset-x-0 bottom-0 z-50 h-16 border-t border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/90 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90"
     >
-      <div className="mx-auto flex h-full max-w-lg items-center justify-around px-2">
+      <div className="mx-auto flex h-14 max-w-lg items-center justify-around px-2">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = active === item.name;
