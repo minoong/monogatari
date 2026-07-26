@@ -293,7 +293,7 @@ export const HomeActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "태국 여행 2026" }}>
-      <div className="flex min-h-full flex-col flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto">
+      <div className="flex flex-col flex-1 pb-20 overflow-y-auto">
         <WorldClockCard />
         {/* State Toggle for Mockup */}
         <div className="flex justify-center gap-2 p-4 bg-muted/30 border-b">

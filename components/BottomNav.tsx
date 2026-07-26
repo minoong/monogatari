@@ -48,9 +48,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
   return (
     <nav
       aria-label="하단 내비게이션"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/90 pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-4px_16px_rgba(0,0,0,0.04)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90"
+      className="fixed inset-x-0 bottom-0 z-50 h-16 border-t border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90"
     >
-      <div className="mx-auto flex h-14 max-w-lg items-center justify-around px-2">
+      <div className="mx-auto flex h-full max-w-lg items-center justify-around px-2">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = active === item.name;
@@ -62,14 +62,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
               aria-current={isActive ? "page" : undefined}
               aria-label={`${item.label}${isActive ? ", 현재 화면" : ""}`}
               onClick={() => handleNav(item)}
-              className={`flex h-11 flex-1 select-none flex-col items-center justify-center gap-0.5 rounded-xl outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset ${
+              className={`flex h-11 min-w-11 flex-1 select-none flex-col items-center justify-center gap-1 rounded-xl outline-none transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 ${
                 isActive
                   ? "text-blue-500 font-bold"
-                  : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
               }`}
             >
-              <Icon size={20} fill={isActive ? "currentColor" : "none"} aria-hidden="true" />
-              <span className="text-[10px] tracking-tight">{item.label}</span>
+              <Icon size={21} fill={isActive ? "currentColor" : "none"} strokeWidth={isActive ? 2.3 : 1.8} aria-hidden="true" />
+              <span className="text-[10px] leading-none tracking-tight">{item.label}</span>
             </button>
           );
         })}

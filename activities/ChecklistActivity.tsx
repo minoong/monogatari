@@ -865,7 +865,7 @@ export const ChecklistActivity: React.FC = () => {
           </DynamicIslandProvider>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 pb-24">
+        <div className="flex-1 overflow-y-auto p-4 pb-20">
           {loading ? (
             <div className="flex flex-col gap-4">
               <Skeleton className="h-6 w-32 mb-2" />
@@ -955,8 +955,7 @@ export const ChecklistActivity: React.FC = () => {
 
         {/* Floating Action Button */}
         <div
-          className="fixed right-6 z-50 h-14 w-14"
-          style={{ bottom: "calc(88px + env(safe-area-inset-bottom))" }}
+          className="fixed bottom-20 right-6 z-50 h-14 w-14"
         >
           <NeumorphButton
             aria-hidden="true"
