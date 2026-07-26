@@ -56,6 +56,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
   const [editingWish, setEditingWish] = useState<WishItem | null>(null);
   const [deletingWish, setDeletingWish] = useState<WishItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchSession, setSearchSession] = useState(0);
   const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes", type], queryFn: () => fetchWishes(type) });
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const filteredWishes = useMemo(
@@ -86,6 +87,10 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
     setDrawerSession((current) => current + 1);
     setDrawerOpen(true);
   };
+  const resetSearch = () => {
+    setSearchQuery("");
+    setSearchSession((current) => current + 1);
+  };
 
   return (
     <AppScreen appBar={{ title: meta.title }}>
@@ -93,11 +98,12 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
           <div
             aria-label={`${meta.title} 검색 및 필터`}
-            className="flex min-h-10 items-center justify-center"
+            className="sticky top-0 z-30 -mx-2 flex min-h-14 items-center justify-center bg-slate-50/90 px-2 py-2 backdrop-blur-xl dark:bg-slate-950/90"
             data-slot="wish-filter-toolbar"
             role="search"
           >
             <GooeyInput
+              key={searchSession}
               className="w-full"
               collapsedWidth={128}
               fullWidthOnExpand
@@ -121,7 +127,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
               <span className="text-3xl" aria-hidden="true">🔎</span>
               <h2 className="mt-3 font-bold text-slate-800 dark:text-slate-100">검색 결과가 없어요</h2>
               <p className="mt-1 text-sm text-slate-500">다른 이름이나 카테고리로 찾아보세요.</p>
-              <Button className="mt-4" variant="secondary" onPress={() => setSearchQuery("")}>검색 초기화</Button>
+              <Button className="mt-4" variant="secondary" onPress={resetSearch}>검색 초기화</Button>
             </div>
           )}
           {!isLoading && !isError && filteredWishes.map((wish) => (

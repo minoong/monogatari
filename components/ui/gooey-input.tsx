@@ -60,7 +60,7 @@ function ClearIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="size-3.5"
+      className="size-3"
       fill="none"
       stroke="currentColor"
       strokeLinecap="round"
