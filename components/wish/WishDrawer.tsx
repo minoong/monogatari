@@ -417,10 +417,26 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
             {submitError && <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{submitError}</p>}
           </DrawerPanel>
 
-          <DrawerFooter className="grid grid-cols-2 gap-3 border-t border-border px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
-            <Button isDisabled={createMutation.isPending} onPress={() => handleOpenChange(false)} type="button" variant="secondary">취소</Button>
-            <Button isPending={createMutation.isPending} type="submit">
-              {({ isPending }) => <><Upload className="size-4" />{isPending ? "등록 중" : "등록"}</>}
+          <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
+            <Button
+              fullWidth
+              className="h-12 rounded-2xl text-base"
+              isDisabled={createMutation.isPending}
+              onPress={() => handleOpenChange(false)}
+              size="lg"
+              type="button"
+              variant="secondary"
+            >
+              취소
+            </Button>
+            <Button
+              fullWidth
+              className="h-12 rounded-2xl text-base"
+              isPending={createMutation.isPending}
+              size="lg"
+              type="submit"
+            >
+              {({ isPending }) => isPending ? "등록 중…" : "등록하기"}
             </Button>
           </DrawerFooter>
         </Form>
