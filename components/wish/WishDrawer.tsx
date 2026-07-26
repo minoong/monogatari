@@ -251,6 +251,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
                     autoComplete="off"
                     maxLength={14}
                     onKeyDown={(event) => {
+                      if (event.nativeEvent.isComposing || event.keyCode === 229) return;
                       if (event.key === "Enter" || event.key === ",") {
                         event.preventDefault();
                         addCategory();
@@ -493,6 +494,7 @@ function MultiValueField({
             autoComplete="off"
             maxLength={maxLength}
             onKeyDown={(event) => {
+              if (event.nativeEvent.isComposing || event.keyCode === 229) return;
               if (event.key === "Enter") {
                 event.preventDefault();
                 onAdd();
