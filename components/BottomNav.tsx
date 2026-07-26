@@ -33,29 +33,10 @@ const NAV_ITEMS: readonly NavItem[] = [
 export const triggerHapticFeedback = (duration = 15) => {
   if (typeof navigator !== "undefined" && navigator.vibrate) {
     navigator.vibrate(duration);
-  }
-  if (typeof document !== "undefined") {
-    try {
-      const input = document.createElement("input");
-      input.type = "checkbox";
-      input.setAttribute("switch", "");
-
-      const label = document.createElement("label");
-      label.style.position = "absolute";
-      label.style.left = "-9999px";
-      label.style.top = "-9999px";
-      label.style.opacity = "0";
-      label.style.width = "1px";
-      label.style.height = "1px";
-
-      label.appendChild(input);
-      document.body.appendChild(label);
-
+  } else if (typeof document !== "undefined") {
+    const label = document.getElementById("ios-haptic-label");
+    if (label) {
       label.click();
-
-      document.body.removeChild(label);
-    } catch (e) {
-      console.warn("Haptic feedback failed", e);
     }
   }
 };
@@ -74,6 +55,20 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
       aria-label="하단 내비게이션"
       className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/90 pb-[max(env(safe-area-inset-bottom,0px),12px)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90"
     >
+      {/* iOS PWA Haptic Feedback Workaround Target */}
+      <label
+        id="ios-haptic-label"
+        htmlFor="ios-haptic-input"
+        style={{ position: "absolute", left: "-9999px", top: "-9999px", opacity: 0, width: "1px", height: "1px" }}
+      >
+        <input
+          type="checkbox"
+          // @ts-expect-error: React typings do not support the standard switch attribute for checkboxes
+          switch={true}
+          id="ios-haptic-input"
+          name="ios-haptic-input"
+        />
+      </label>
 
       <div className="mx-auto flex h-[50px] max-w-lg items-center justify-around px-1 pt-1">
         {NAV_ITEMS.map((item) => {
@@ -86,7 +81,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
               type="button"
               aria-current={isActive ? "page" : undefined}
               aria-label={`${item.label}${isActive ? ", 현재 화면" : ""}`}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                handleNav(item);
+              }}
               onClick={() => handleNav(item)}
+              style={{ touchAction: "manipulation" }}
               className={`flex flex-1 min-w-12 select-none flex-col items-center justify-center gap-0.5 rounded-xl outline-none transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 ${
                 isActive
                   ? "text-blue-500 font-bold"
