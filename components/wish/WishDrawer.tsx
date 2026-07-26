@@ -144,6 +144,13 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
     if (imageInputRef.current) imageInputRef.current.value = "";
   };
 
+  const handleInputFocus = (event: React.FocusEvent<HTMLElement>) => {
+    const target = event.currentTarget;
+    setTimeout(() => {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+  };
+
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) resetForm();
     onOpenChange(nextOpen);
@@ -401,6 +408,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                       min={0}
                       name="targetPrice"
                       onChange={(event) => setTargetPrice(event.target.value)}
+                      onFocus={handleInputFocus}
                       placeholder="0"
                       style={{
                         fontVariantNumeric: "tabular-nums",
@@ -431,7 +439,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
 
             <TextField name="vendor" value={vendor} onChange={setVendor}>
               <Label>{isDiningType(type) ? "식당 또는 지점" : "판매점"}</Label>
-              <Input autoComplete="off" placeholder={isDiningType(type) ? "예: 팁싸마이 프라투피" : "예: 세븐일레븐, 짜뚜짝 시장"} />
+              <Input onFocus={handleInputFocus} autoComplete="off" placeholder={isDiningType(type) ? "예: 팁싸마이 프라투피" : "예: 세븐일레븐, 짜뚜짝 시장"} />
             </TextField>
 
             <div className="flex flex-col gap-6">
@@ -520,6 +528,9 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                 onChange={(event) => {
                   setImage(event.target.files?.[0] ?? null);
                   setImageRemoved(false);
+                  setTimeout(() => {
+                    window.scrollTo(0, 0);
+                  }, 100);
                 }}
                 ref={imageInputRef}
                 type="file"
@@ -533,6 +544,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                 className="min-h-24"
                 maxLength={500}
                 onChange={(event) => setMemo(event.target.value)}
+                onFocus={handleInputFocus}
                 placeholder="기억해 둘 팁이나 이유를 남겨 보세요."
                 rows={4}
                 value={memo}
