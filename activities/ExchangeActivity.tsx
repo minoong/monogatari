@@ -141,7 +141,6 @@ export const ExchangeActivity: React.FC = () => {
                     }}
                     onClick={() => {
                       if (isFocused) return;
-                      handleFocusToggle(true);
                       inputRef.current?.focus();
                     }}
                   >
