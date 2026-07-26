@@ -2,10 +2,11 @@ import React, { useDeferredValue, useMemo, useState, type ReactNode } from "reac
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import NumberFlow from "@number-flow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { ArrowUpRight, Image as ImageIcon, Link2, MapPin, Pencil, Plus, RefreshCw, Store, Trash2 } from "lucide-react";
+import { ArrowUpRight, Image as ImageIcon, Link2, MapPin, Pencil, Plus, RefreshCw, Store, Trash2, ZoomIn } from "lucide-react";
 import { Button, Chip } from "@heroui/react";
 import { toast } from "sonner";
 import { WishDrawer } from "@/components/wish/WishDrawer";
+import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { GooeyInput } from "@/components/ui/gooey-input";
 import {
   AlertDialog,
@@ -236,6 +237,7 @@ function WishListItem({
   onDelete: () => void;
   onEdit: () => void;
 }) {
+  const [zoomModalOpen, setZoomModalOpen] = useState(false);
   const price = formatThaiBaht(wish.target_price_thb);
   const priceKrw = wish.target_price_thb === null
     ? null
@@ -281,7 +283,22 @@ function WishListItem({
         <MorphingDialogContent className="relative mx-4 max-h-[85dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
           <MorphingDialogClose className="right-4 top-4 z-10 flex size-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur" />
           {wish.image_url ? (
-            <MorphingDialogImage alt={`${wish.title} 이미지`} className="h-56 w-full object-cover" src={wish.image_url} />
+            <div className="relative">
+              <MorphingDialogImage
+                alt={`${wish.title} 이미지`}
+                className="h-56 w-full cursor-pointer object-cover"
+                onClick={() => setZoomModalOpen(true)}
+                src={wish.image_url}
+              />
+              <button
+                type="button"
+                onClick={() => setZoomModalOpen(true)}
+                className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/65 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md shadow-md transition hover:bg-black/85"
+              >
+                <ZoomIn className="size-3.5" />
+                <span>탭하여 확대</span>
+              </button>
+            </div>
           ) : (
             <div className="flex h-40 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400 dark:from-slate-800 dark:to-slate-900">
               <ImageIcon aria-hidden="true" className="size-10" />
@@ -351,6 +368,15 @@ function WishListItem({
           </div>
         </MorphingDialogContent>
       </MorphingDialogContainer>
+
+      {wish.image_url && (
+        <ImageZoomModal
+          isOpen={zoomModalOpen}
+          onClose={() => setZoomModalOpen(false)}
+          src={wish.image_url}
+          title={wish.title}
+        />
+      )}
     </MorphingDialog>
   );
 }
