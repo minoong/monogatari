@@ -773,16 +773,23 @@ export const ChecklistActivity: React.FC = () => {
 
   const gahyunItems = items.filter((i) => i.assignees.includes("gahyun") || i.type === "master" || i.assignees.includes("all"));
   const minuItems = items.filter((i) => i.assignees.includes("minu") || i.type === "master" || i.assignees.includes("all"));
+  const isCompletedFor = (item: PreparationItem, targetUser: string) =>
+    item.completed_by.includes(targetUser) || item.completed_by.includes("all");
 
   const renderList = (list: PreparationItem[], targetUser: string) => {
     if (list.length === 0) {
       return <div className="text-sm text-gray-400 py-4 text-center">등록된 항목이 없습니다.</div>;
     }
 
+    const sortedList = [
+      ...list.filter((item) => !isCompletedFor(item, targetUser)),
+      ...list.filter((item) => isCompletedFor(item, targetUser)),
+    ];
+
     return (
       <div className="bg-white dark:bg-[#1C1C1E] rounded-3xl overflow-hidden mb-6">
         <AnimatePresence initial={false}>
-          {list.map((item) => {
+          {sortedList.map((item) => {
             const isHighlighted = highlightedItemId === item.id;
             return (
               <SwipeableItem
@@ -801,8 +808,8 @@ export const ChecklistActivity: React.FC = () => {
     );
   };
 
-  const gahyunCheckedCount = gahyunItems.filter((i) => i.completed_by.includes("gahyun") || i.completed_by.includes("all")).length;
-  const minuCheckedCount = minuItems.filter((i) => i.completed_by.includes("minu") || i.completed_by.includes("all")).length;
+  const gahyunCheckedCount = gahyunItems.filter((item) => isCompletedFor(item, "gahyun")).length;
+  const minuCheckedCount = minuItems.filter((item) => isCompletedFor(item, "minu")).length;
 
   const gahyunProgress = gahyunItems.length === 0 ? 0 : Math.round((gahyunCheckedCount / gahyunItems.length) * 100);
   const minuProgress = minuItems.length === 0 ? 0 : Math.round((minuCheckedCount / minuItems.length) * 100);
