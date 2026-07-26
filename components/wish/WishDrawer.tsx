@@ -29,6 +29,7 @@ import {
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   isGoogleMapsUrl,
   normalizeExternalUrl,
@@ -345,28 +346,42 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="wish-image">이미지</Label>
-              <label htmlFor="wish-image" className="relative flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 text-sm text-gray-500 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-white/5 dark:hover:bg-white/10">
-                {imagePreviewUrl ? (
-                  <>
+              <div className="flex items-stretch gap-3">
+                <AspectRatio
+                  className="w-28 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                  ratio={1}
+                >
+                  {imagePreviewUrl ? (
                     <Image
                       alt="선택한 위시 이미지 미리보기"
                       className="object-cover"
                       fill
-                      sizes="(max-width: 512px) 100vw, 464px"
+                      sizes="112px"
                       src={imagePreviewUrl}
                       unoptimized
                     />
-                    <span className="absolute inset-x-3 bottom-3 truncate rounded-xl bg-black/60 px-3 py-2 text-center text-xs font-medium text-white backdrop-blur-sm">
-                      {image?.name} · 눌러서 변경
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <ImagePlus className="size-5" />
-                    <span>JPG, PNG, WEBP · 최대 5MB</span>
-                  </>
-                )}
-              </label>
+                  ) : (
+                    <div className="flex size-full flex-col items-center justify-center gap-2 text-slate-400">
+                      <ImagePlus className="size-6" />
+                      <span className="text-[11px] font-medium">미리보기</span>
+                    </div>
+                  )}
+                </AspectRatio>
+
+                <label
+                  htmlFor="wish-image"
+                  className="flex min-w-0 flex-1 cursor-pointer flex-col justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 transition-colors hover:border-blue-400 hover:bg-blue-50/60 dark:border-slate-700 dark:bg-white/5 dark:hover:border-blue-500 dark:hover:bg-blue-500/10"
+                >
+                  <span className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    <Upload className="size-4 text-blue-500" />
+                    {image ? "이미지 변경" : "이미지 선택"}
+                  </span>
+                  <span className="mt-1 truncate text-xs text-slate-500">
+                    {image?.name ?? "JPG, PNG, WEBP"}
+                  </span>
+                  <span className="mt-0.5 text-[11px] text-slate-400">최대 5MB</span>
+                </label>
+              </div>
               <input
                 accept="image/jpeg,image/png,image/webp"
                 className="sr-only"
