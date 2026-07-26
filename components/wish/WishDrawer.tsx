@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import NumberFlow from "@number-flow/react";
 import {
   Button,
+  Description,
   FieldError,
   Form,
   Input,
@@ -17,7 +18,7 @@ import {
   TextField,
   type Key,
 } from "@heroui/react";
-import { Check, ImagePlus, Link2, MapPin, Plus, Upload, X } from "lucide-react";
+import { ImagePlus, Link2, MapPin, Plus, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import StatusButton from "@/components/animata/button/status-button";
 import { triggerHapticFeedback } from "@/components/BottomNav";
@@ -58,6 +59,12 @@ interface WishDrawerProps {
   onOpenChange: (open: boolean) => void;
   wish?: WishItem | null;
 }
+
+const WISH_TYPE_DESCRIPTIONS: Record<WishType, string> = {
+  shopping: "사고 싶은 물건과 적정 가격을 기록해요.",
+  snack: "먹어 보고 싶은 간식과 디저트를 모아요.",
+  restaurant: "가 보고 싶은 식당과 위치를 저장해요.",
+};
 
 export function WishDrawer({ open, initialType, onOpenChange, wish = null }: WishDrawerProps) {
   const queryClient = useQueryClient();
@@ -252,7 +259,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
               <Label>종류</Label>
               <ListBox
                 aria-label="위시 종류"
-                className="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-2 rounded-2xl bg-slate-100 p-1.5 dark:bg-white/5"
+                className="w-full rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-white/5"
                 disallowEmptySelection
                 selectedKeys={new Set([type])}
                 selectionMode="single"
@@ -270,21 +277,20 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                     key={itemType}
                     id={itemType}
                     textValue={WISH_TYPE_META[itemType].title}
-                    className="group relative flex min-w-0 w-auto! cursor-pointer flex-col items-center gap-1.5 rounded-xl border border-transparent px-2 py-3 text-center outline-none transition-all data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-blue-500 data-[selected=true]:border-blue-200 data-[selected=true]:bg-white data-[selected=true]:shadow-sm dark:data-[selected=true]:border-blue-500/30 dark:data-[selected=true]:bg-blue-500/10"
+                    className="group min-h-14 cursor-pointer rounded-xl px-3 py-2.5 outline-none transition-colors data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-blue-500 data-[selected=true]:bg-blue-50 dark:data-[selected=true]:bg-blue-500/10"
                   >
-                    <span className="flex size-9 items-center justify-center rounded-xl bg-white text-xl shadow-sm ring-1 ring-slate-200/70 transition-transform group-data-[selected=true]:scale-105 dark:bg-white/10 dark:ring-white/10">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl group-data-[selected=true]:bg-white dark:bg-white/10 dark:group-data-[selected=true]:bg-blue-500/15">
                       {WISH_TYPE_META[itemType].icon}
                     </span>
-                    <span className="truncate text-xs font-semibold text-slate-500 group-data-[selected=true]:text-blue-600 dark:text-slate-400 dark:group-data-[selected=true]:text-blue-300">
-                      {WISH_TYPE_META[itemType].title.replace(" 정보", "")}
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <Label className="font-semibold text-slate-800 group-data-[selected=true]:text-blue-700 dark:text-slate-100 dark:group-data-[selected=true]:text-blue-300">
+                        {WISH_TYPE_META[itemType].title}
+                      </Label>
+                      <Description className="truncate text-xs text-slate-500">
+                        {WISH_TYPE_DESCRIPTIONS[itemType]}
+                      </Description>
                     </span>
-                    <ListBox.ItemIndicator className="absolute right-1.5 top-1.5">
-                      {({ isSelected }) => isSelected ? (
-                        <span className="flex size-4 items-center justify-center rounded-full bg-blue-500 text-white">
-                          <Check className="size-3" strokeWidth={3} />
-                        </span>
-                      ) : null}
-                    </ListBox.ItemIndicator>
+                    <ListBox.ItemIndicator className="ms-auto text-blue-600 dark:text-blue-300" />
                   </ListBox.Item>
                 ))}
               </ListBox>
