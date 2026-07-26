@@ -12,6 +12,7 @@ import {
   DrawerTrigger,
 } from "../components/ui/drawer";
 import NeumorphButton from "../components/ui/neumorph-button";
+import { BottomNav } from "../components/BottomNav";
 
 const FOOD_ITEMS = [
   { id: 1, title: "세븐일레븐 필수 간식", desc: "토스트 샌드위치, 벤또 쥐포, 마일로 초코우유", emoji: "🥪" },
@@ -32,7 +33,7 @@ export const DiscoverActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "태국 탐색 (맛집 & 쇼핑)" }}>
-      <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
+      <div className="flex flex-col h-full bg-gray-50 pb-16 dark:bg-gray-900">
         
         {/* Top Tabs */}
         <div className="flex p-4 gap-2 bg-white dark:bg-black border-b sticky top-0 z-10">
@@ -90,6 +91,7 @@ export const DiscoverActivity: React.FC = () => {
         </div>
         
       </div>
+      <BottomNav active="wish" />
     </AppScreen>
   );
 };

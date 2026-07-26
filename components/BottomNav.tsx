@@ -1,10 +1,34 @@
 import React from "react";
 import { useFlow } from "@stackflow/react";
-import { Home, Calendar, ClipboardCheck, MessageCircle } from "lucide-react";
+import {
+  Calendar,
+  ClipboardCheck,
+  Heart,
+  Home,
+  LayoutGrid,
+  type LucideIcon,
+} from "lucide-react";
+
+export type BottomNavItem = "home" | "schedule" | "wish" | "checklist" | "utils";
 
 interface BottomNavProps {
-  active: "home" | "schedule" | "checklist" | "dictionary";
+  active: BottomNavItem;
 }
+
+type NavItem = {
+  name: BottomNavItem;
+  label: string;
+  activity: "HomeActivity" | "ScheduleActivity" | "DiscoverActivity" | "ChecklistActivity" | "UtilsActivity";
+  icon: LucideIcon;
+};
+
+const NAV_ITEMS: readonly NavItem[] = [
+  { name: "home", label: "홈", activity: "HomeActivity", icon: Home },
+  { name: "schedule", label: "일정", activity: "ScheduleActivity", icon: Calendar },
+  { name: "wish", label: "위시", activity: "DiscoverActivity", icon: Heart },
+  { name: "checklist", label: "준비", activity: "ChecklistActivity", icon: ClipboardCheck },
+  { name: "utils", label: "유틸", activity: "UtilsActivity", icon: LayoutGrid },
+];
 
 export const triggerHapticFeedback = (duration = 15) => {
   if (typeof navigator !== "undefined" && navigator.vibrate) {
@@ -15,89 +39,42 @@ export const triggerHapticFeedback = (duration = 15) => {
 export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
   const { replace } = useFlow();
 
-  const handleNav = (
-    target: "HomeActivity" | "ScheduleActivity" | "ChecklistActivity" | "DictionaryActivity",
-    name: "home" | "schedule" | "checklist" | "dictionary"
-  ) => {
-    if (active === name) return; // 중복 탭 방지
+  const handleNav = (item: NavItem) => {
+    if (active === item.name) return;
     triggerHapticFeedback();
-    replace(target, {}, { animate: false });
+    replace(item.activity, {}, { animate: false });
   };
 
   return (
-    <div 
-      className="fixed bottom-0 left-0 right-0 bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800 z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    <nav
+      aria-label="하단 내비게이션"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-gray-800 dark:bg-black/95"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="flex justify-around items-center px-4 h-16">
-        {/* 홈 탭 */}
-        <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
-          <div
-            className="absolute inset-0 z-10"
-            onClick={() => handleNav("HomeActivity", "home")}
-            dangerouslySetInnerHTML={{
-              __html: `<input type="checkbox" switch ${active === "home" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
-            }}
-          />
-          <Home 
-            size={22} 
-            fill={active === "home" ? "currentColor" : "none"} 
-            className={`transition-all duration-200 ${active === "home" ? "text-blue-500" : "text-gray-400"}`} 
-          />
-          <span className={`text-[10px] mt-1 font-medium ${active === "home" ? "text-blue-500" : "text-gray-400"}`}>홈</span>
-        </div>
-        
-        {/* 일정표 탭 */}
-        <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
-          <div
-            className="absolute inset-0 z-10"
-            onClick={() => handleNav("ScheduleActivity", "schedule")}
-            dangerouslySetInnerHTML={{
-              __html: `<input type="checkbox" switch ${active === "schedule" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
-            }}
-          />
-          <Calendar 
-            size={22} 
-            fill={active === "schedule" ? "currentColor" : "none"} 
-            className={`transition-all duration-200 ${active === "schedule" ? "text-blue-500" : "text-gray-400"}`} 
-          />
-          <span className={`text-[10px] mt-1 font-medium ${active === "schedule" ? "text-blue-500" : "text-gray-400"}`}>일정표</span>
-        </div>
+      <div className="mx-auto flex h-16 max-w-lg items-stretch justify-around px-2">
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const isActive = active === item.name;
 
-        {/* 준비물 탭 */}
-        <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
-          <div
-            className="absolute inset-0 z-10"
-            onClick={() => handleNav("ChecklistActivity", "checklist")}
-            dangerouslySetInnerHTML={{
-              __html: `<input type="checkbox" switch ${active === "checklist" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
-            }}
-          />
-          <ClipboardCheck 
-            size={22} 
-            fill={active === "checklist" ? "currentColor" : "none"} 
-            className={`transition-all duration-200 ${active === "checklist" ? "text-blue-500" : "text-gray-400"}`} 
-          />
-          <span className={`text-[10px] mt-1 font-medium ${active === "checklist" ? "text-blue-500" : "text-gray-400"}`}>준비물</span>
-        </div>
-
-        {/* 회화 탭 */}
-        <div className="relative flex flex-col items-center justify-center w-16 h-full select-none">
-          <div
-            className="absolute inset-0 z-10"
-            onClick={() => handleNav("DictionaryActivity", "dictionary")}
-            dangerouslySetInnerHTML={{
-              __html: `<input type="checkbox" switch ${active === "dictionary" ? "disabled" : ""} class="absolute inset-0 opacity-[0.01] cursor-pointer w-full h-full" style="-webkit-tap-highlight-color: transparent;" />`
-            }}
-          />
-          <MessageCircle 
-            size={22} 
-            fill={active === "dictionary" ? "currentColor" : "none"} 
-            className={`transition-all duration-200 ${active === "dictionary" ? "text-blue-500" : "text-gray-400"}`} 
-          />
-          <span className={`text-[10px] mt-1 font-medium ${active === "dictionary" ? "text-blue-500" : "text-gray-400"}`}>회화</span>
-        </div>
+          return (
+            <button
+              key={item.name}
+              type="button"
+              aria-current={isActive ? "page" : undefined}
+              aria-label={`${item.label}${isActive ? ", 현재 화면" : ""}`}
+              onClick={() => handleNav(item)}
+              className={`flex min-h-11 min-w-11 flex-1 select-none flex-col items-center justify-center gap-1 rounded-xl outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset ${
+                isActive
+                  ? "text-blue-500"
+                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              }`}
+            >
+              <Icon size={22} fill={isActive ? "currentColor" : "none"} aria-hidden="true" />
+              <span className="text-[10px] font-semibold">{item.label}</span>
+            </button>
+          );
+        })}
       </div>
-    </div>
+    </nav>
   );
 };

@@ -149,7 +149,7 @@ export const DictionaryActivity: React.FC = () => {
           </div>
         </div>
       </div>
-      <BottomNav active="dictionary" />
+      <BottomNav active="utils" />
     </AppScreen>
   );
 };

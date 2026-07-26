@@ -11,6 +11,7 @@ import NeumorphButton from "../components/ui/neumorph-button";
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
 import { useGSAP } from "@gsap/react";
+import { BottomNav } from "../components/BottomNav";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(Flip, useGSAP);
@@ -129,7 +130,7 @@ export const ExchangeActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "환율 계산기" }}>
-      <div className="flex flex-col min-h-[calc(100vh-64px)] bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 dark:from-slate-950 dark:via-gray-950 dark:to-indigo-950/30 text-gray-900 dark:text-white pb-20 overflow-x-hidden">
+      <div className="flex flex-col min-h-[calc(100vh-64px)] bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 dark:from-slate-950 dark:via-gray-950 dark:to-indigo-950/30 text-gray-900 dark:text-white pb-24 overflow-x-hidden">
         
         <motion.div layout className={`flex flex-col px-4 pb-4 gap-3 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-6'}`}>
           
@@ -315,6 +316,7 @@ export const ExchangeActivity: React.FC = () => {
         </motion.div>
 
       </div>
+      <BottomNav active="utils" />
     </AppScreen>
   );
 };
