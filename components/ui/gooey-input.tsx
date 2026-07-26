@@ -4,6 +4,7 @@ import {
   useState,
   useRef,
   useEffect,
+  useLayoutEffect,
   useId,
   useMemo,
   useCallback,
@@ -118,7 +119,7 @@ export function GooeyInput({
   placeholder = "Type to search...",
   className,
   classNames,
-  collapsedWidth = 115,
+  collapsedWidth,
   expandedWidth = 200,
   expandedOffset = 50,
   gooeyBlur = 5,
@@ -137,9 +138,11 @@ export function GooeyInput({
   const inputLayoutId = `gooey-input-field-${safeId}`;
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const placeholderMeasureRef = useRef<HTMLSpanElement>(null);
   const prevExpandedRef = useRef(false);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
+  const [measuredCollapsedWidth, setMeasuredCollapsedWidth] = useState(115);
 
   const isControlled = valueProp !== undefined;
   const isOpenControlled = openProp !== undefined;
@@ -175,9 +178,18 @@ export function GooeyInput({
     prevExpandedRef.current = isExpanded;
   }, [isExpanded, setSearchText]);
 
+  useLayoutEffect(() => {
+    if (collapsedWidth !== undefined) return;
+
+    const textWidth = placeholderMeasureRef.current?.getBoundingClientRect().width ?? 0;
+    setMeasuredCollapsedWidth(Math.ceil(textWidth + 56));
+  }, [collapsedWidth, placeholder]);
+
+  const resolvedCollapsedWidth = collapsedWidth ?? measuredCollapsedWidth;
+
   const buttonVariants = useMemo(
     () => ({
-      collapsed: { width: collapsedWidth, marginLeft: 0 },
+      collapsed: { width: resolvedCollapsedWidth, marginLeft: 0 },
       expanded: {
         width: fullWidthOnExpand
           ? `calc(100% - ${expandedOffset}px)`
@@ -185,7 +197,7 @@ export function GooeyInput({
         marginLeft: expandedOffset,
       },
     }),
-    [collapsedWidth, expandedWidth, expandedOffset, fullWidthOnExpand],
+    [resolvedCollapsedWidth, expandedWidth, expandedOffset, fullWidthOnExpand],
   );
 
   const handleExpand = useCallback(() => {
@@ -220,6 +232,13 @@ export function GooeyInput({
       )}
     >
       <GooeyFilter filterId={filterId} blur={gooeyBlur} />
+      <span
+        ref={placeholderMeasureRef}
+        aria-hidden="true"
+        className="pointer-events-none invisible absolute whitespace-nowrap text-sm font-medium"
+      >
+        {placeholder}
+      </span>
 
       <div
         className={cn(

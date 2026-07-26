@@ -104,7 +104,6 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
           >
             <GooeyInput
               className="w-full"
-              collapsedWidth={128}
               fullWidthOnExpand
               onOpenChange={setSearchOpen}
               onValueChange={setSearchQuery}
