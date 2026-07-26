@@ -6,6 +6,7 @@ import { ArrowUpRight, Image as ImageIcon, Link2, MapPin, Pencil, Plus, RefreshC
 import { Button, Chip } from "@heroui/react";
 import { toast } from "sonner";
 import { WishDrawer } from "@/components/wish/WishDrawer";
+import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { GooeyInput } from "@/components/ui/gooey-input";
 import {
@@ -165,7 +166,14 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
             </div>
           )}
         </section>
-        <Button aria-label={`${meta.title} 등록`} className="fixed bottom-6 right-5 z-40 h-14 min-w-14 rounded-full px-5 shadow-xl" onPress={openCreateDrawer}><Plus className="size-5" /><span className="font-bold">등록</span></Button>
+        <div className="fixed bottom-6 right-5 z-40 h-14 min-w-14">
+          <Button aria-label={`${meta.title} 등록`} className="h-full w-full rounded-full px-5 shadow-xl" onPress={openCreateDrawer}><Plus className="size-5" /><span className="font-bold">등록</span></Button>
+          <NativeHapticSwitch
+            ariaLabel={`${meta.title} 등록`}
+            checked={drawerOpen}
+            onChange={openCreateDrawer}
+          />
+        </div>
       </main>
       <WishDrawer key={drawerSession} initialType={type} open={drawerOpen} wish={editingWish} onOpenChange={(open) => {
         setDrawerOpen(open);
