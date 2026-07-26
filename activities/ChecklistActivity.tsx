@@ -222,7 +222,7 @@ const SwipeHint = () => {
         </div>
       </button>
 
-      <AnimatePresence initial={false}>
+      <AnimatePresence>
         {isOpen && (
           <motion.div
             id="checklist-swipe-hint-content"
