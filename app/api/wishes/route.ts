@@ -18,7 +18,7 @@ const optionalText = (value: unknown, maxLength: number) => {
 
 const categoriesValue = (value: unknown) => {
   if (value === undefined || value === null) return [];
-  if (!Array.isArray(value) || value.length > 3) return undefined;
+  if (!Array.isArray(value)) return undefined;
 
   const categories = value.map((item) => typeof item === "string" ? item.trim() : null);
   if (categories.some((item) => !item || item.length > 14)) return undefined;

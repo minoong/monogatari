@@ -1,14 +1,25 @@
 create extension if not exists pgcrypto;
 
+create or replace function public.wish_categories_valid(value text[])
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$
+  select
+    array_position(value, null) is null
+    and not exists (
+      select 1
+      from unnest(value) as category
+      where btrim(category) = '' or char_length(category) > 14
+    );
+$$;
+
 create table if not exists public.wish_items (
   id uuid primary key default gen_random_uuid(),
   type text not null check (type in ('shopping', 'snack', 'restaurant')),
   title text not null check (char_length(title) between 1 and 100),
-  categories text[] not null default '{}' check (
-    cardinality(categories) <= 3
-    and array_position(categories, null) is null
-    and char_length(array_to_string(categories, ', ')) <= 50
-  ),
+  categories text[] not null default '{}' check (public.wish_categories_valid(categories)),
   target_price_thb numeric check (target_price_thb is null or target_price_thb >= 0),
   memo text check (memo is null or char_length(memo) <= 500),
   vendor text check (vendor is null or char_length(vendor) <= 100),
@@ -32,9 +43,7 @@ create policy "wish items are insertable by anonymous users"
   with check (
     type in ('shopping', 'snack', 'restaurant')
     and char_length(btrim(title)) between 1 and 100
-    and cardinality(categories) <= 3
-    and array_position(categories, null) is null
-    and char_length(array_to_string(categories, ', ')) <= 50
+    and public.wish_categories_valid(categories)
     and (memo is null or char_length(memo) <= 500)
     and (vendor is null or char_length(vendor) <= 100)
     and (map_query is null or char_length(map_query) <= 200)

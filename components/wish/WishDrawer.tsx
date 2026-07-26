@@ -69,7 +69,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
 
   const addCategory = (value = categoryDraft) => {
     const nextCategory = value.trim();
-    if (!nextCategory || categories.includes(nextCategory) || categories.length >= 3) return categories;
+    if (!nextCategory || categories.includes(nextCategory)) return categories;
     const nextCategories = [...categories, nextCategory];
     setCategories(nextCategories);
     setCategoryDraft("");
@@ -185,7 +185,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
                 </TextField>
                 <Button
                   aria-label="카테고리 태그 추가"
-                  isDisabled={!categoryDraft.trim() || categories.length >= 3}
+                  isDisabled={!categoryDraft.trim()}
                   onPress={() => addCategory()}
                   type="button"
                   variant="secondary"
@@ -217,7 +217,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
                             ? "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300"
                             : "border-gray-200 bg-white text-gray-500 hover:border-blue-300 dark:border-gray-700 dark:bg-white/5"
                         }`}
-                        disabled={isSelected || categories.length >= 3}
+                        disabled={isSelected}
                         onClick={() => addCategory(suggestion)}
                         type="button"
                       >
@@ -226,7 +226,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
                     );
                   })}
                 </div>
-                <p className="mt-2 text-xs text-gray-400">{categories.length}/3 · 태그당 최대 14자</p>
+                <p className="mt-2 text-xs text-gray-400">여러 개 선택 가능 · 태그당 최대 14자</p>
               </div>
             </div>
 

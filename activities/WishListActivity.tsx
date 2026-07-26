@@ -1,10 +1,19 @@
-/* eslint-disable @next/next/no-img-element */
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { ArrowUpRight, Image as ImageIcon, MapPin, Plus, RefreshCw, Store } from "lucide-react";
 import { Button, Chip } from "@heroui/react";
 import { WishDrawer } from "@/components/wish/WishDrawer";
+import {
+  MorphingDialog,
+  MorphingDialogClose,
+  MorphingDialogContainer,
+  MorphingDialogContent,
+  MorphingDialogDescription,
+  MorphingDialogImage,
+  MorphingDialogTitle,
+  MorphingDialogTrigger,
+} from "@/components/motion-primitives/morphing-dialog";
 import { buildGoogleMapsDirectionsUrl, formatThaiBaht, isWishType, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
 
 interface WishListActivityProps { params: { type?: string } }
@@ -47,5 +56,94 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
 function WishCard({ wish, type }: { wish: WishItem; type: WishType }) {
   const price = formatThaiBaht(wish.target_price_thb);
   const hasMap = type === "restaurant" && Boolean(wish.map_query);
-  return <article className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="flex gap-4 p-4"><div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">{wish.image_url ? <img alt="" className="size-full object-cover" src={wish.image_url} /> : <ImageIcon aria-hidden="true" className="size-6" />}</div><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-2"><h2 className="truncate font-bold text-slate-900 dark:text-white">{wish.title}</h2>{price && <span className="shrink-0 rounded-full bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700 dark:bg-amber-400/10 dark:text-amber-300">฿ {price}</span>}</div>{wish.categories.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{wish.categories.map((category) => <Chip key={category} color="accent" size="sm" variant="soft">{category}</Chip>)}</div>}{wish.vendor && <p className="mt-2 flex items-center gap-1 text-xs text-slate-500"><Store className="size-3" />{wish.vendor}</p>}{wish.memo && <p className="mt-2 line-clamp-2 text-sm leading-5 text-slate-600 dark:text-slate-300">{wish.memo}</p>}</div></div>{hasMap && <a className="flex min-h-12 items-center justify-center gap-1 border-t border-slate-100 text-sm font-bold text-blue-600 transition-colors hover:bg-blue-50 dark:border-slate-800 dark:text-blue-400 dark:hover:bg-blue-400/10" href={buildGoogleMapsDirectionsUrl(wish.map_query!)} rel="noreferrer" target="_blank"><MapPin className="size-4" /> 경로 찾기 <ArrowUpRight className="size-3.5" /></a>}</article>;
+
+  return (
+    <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
+      <MorphingDialogTrigger
+        ariaLabel={`${wish.title} 자세히 보기`}
+        className="block w-full rounded-3xl text-left outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      >
+        <article className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex gap-4 p-4">
+            <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+              {wish.image_url ? (
+                <MorphingDialogImage alt="" className="size-full object-cover" src={wish.image_url} />
+              ) : (
+                <ImageIcon aria-hidden="true" className="size-6" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-2">
+                <MorphingDialogTitle className="min-w-0">
+                  <h2 className="truncate font-bold text-slate-900 dark:text-white">{wish.title}</h2>
+                </MorphingDialogTitle>
+                {price && <span className="shrink-0 rounded-full bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700 dark:bg-amber-400/10 dark:text-amber-300">฿ {price}</span>}
+              </div>
+              {wish.categories.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {wish.categories.map((category) => <Chip key={category} color="accent" size="sm" variant="soft">{category}</Chip>)}
+                </div>
+              )}
+              {wish.vendor && <p className="mt-2 flex items-center gap-1 text-xs text-slate-500"><Store className="size-3" />{wish.vendor}</p>}
+              {wish.memo && <p className="mt-2 line-clamp-2 text-sm leading-5 text-slate-600 dark:text-slate-300">{wish.memo}</p>}
+            </div>
+          </div>
+        </article>
+      </MorphingDialogTrigger>
+
+      <MorphingDialogContainer>
+        <MorphingDialogContent className="relative mx-4 max-h-[85dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
+          <MorphingDialogClose className="right-4 top-4 z-10 flex size-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur" />
+          {wish.image_url ? (
+            <MorphingDialogImage alt={`${wish.title} 이미지`} className="h-56 w-full object-cover" src={wish.image_url} />
+          ) : (
+            <div className="flex h-40 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400 dark:from-slate-800 dark:to-slate-900">
+              <ImageIcon aria-hidden="true" className="size-10" />
+            </div>
+          )}
+
+          <div className="p-6">
+            <MorphingDialogTitle>
+              <h2 className="pr-10 text-2xl font-extrabold text-slate-900 dark:text-white">{wish.title}</h2>
+            </MorphingDialogTitle>
+            {wish.categories.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {wish.categories.map((category) => <Chip key={category} color="accent" size="sm" variant="soft">{category}</Chip>)}
+              </div>
+            )}
+
+            <MorphingDialogDescription disableLayoutAnimation className="mt-6 flex flex-col gap-4">
+              {price && <DetailRow label="현지 적정 가격" value={`฿ ${price}`} />}
+              {wish.vendor && <DetailRow label={type === "restaurant" ? "식당 또는 지점" : "판매점"} value={wish.vendor} />}
+              {wish.memo && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-400">메모</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-200">{wish.memo}</p>
+                </div>
+              )}
+              {hasMap && (
+                <a
+                  className="mt-2 flex min-h-12 items-center justify-center gap-1 rounded-2xl bg-blue-600 text-sm font-bold text-white shadow-sm transition-colors hover:bg-blue-700"
+                  href={buildGoogleMapsDirectionsUrl(wish.map_query!)}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <MapPin className="size-4" /> Google Maps로 경로 찾기 <ArrowUpRight className="size-3.5" />
+                </a>
+              )}
+            </MorphingDialogDescription>
+          </div>
+        </MorphingDialogContent>
+      </MorphingDialogContainer>
+    </MorphingDialog>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-white/5">
+      <p className="text-xs font-semibold text-slate-400">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{value}</p>
+    </div>
+  );
 }
