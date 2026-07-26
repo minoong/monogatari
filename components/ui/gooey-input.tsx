@@ -109,6 +109,7 @@ export interface GooeyInputProps {
   defaultValue?: string;
   onValueChange?: (value: string) => void;
   onOpenChange?: (open: boolean) => void;
+  open?: boolean;
   disabled?: boolean;
   fullWidthOnExpand?: boolean;
 }
@@ -125,6 +126,7 @@ export function GooeyInput({
   defaultValue = "",
   onValueChange,
   onOpenChange,
+  open: openProp,
   disabled = false,
   fullWidthOnExpand = false,
 }: GooeyInputProps) {
@@ -136,10 +138,12 @@ export function GooeyInput({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const prevExpandedRef = useRef(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
 
   const isControlled = valueProp !== undefined;
+  const isOpenControlled = openProp !== undefined;
+  const isExpanded = isOpenControlled ? openProp : uncontrolledOpen;
   const searchText = isControlled ? valueProp : uncontrolledValue;
 
   const setSearchText = useCallback(
@@ -154,10 +158,12 @@ export function GooeyInput({
 
   const setExpanded = useCallback(
     (next: boolean) => {
-      setIsExpanded(next);
+      if (!isOpenControlled) {
+        setUncontrolledOpen(next);
+      }
       onOpenChange?.(next);
     },
-    [onOpenChange],
+    [isOpenControlled, onOpenChange],
   );
 
   useEffect(() => {

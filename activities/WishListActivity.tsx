@@ -56,7 +56,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
   const [editingWish, setEditingWish] = useState<WishItem | null>(null);
   const [deletingWish, setDeletingWish] = useState<WishItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchSession, setSearchSession] = useState(0);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes", type], queryFn: () => fetchWishes(type) });
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const filteredWishes = useMemo(
@@ -89,7 +89,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
   };
   const resetSearch = () => {
     setSearchQuery("");
-    setSearchSession((current) => current + 1);
+    setSearchOpen(false);
   };
 
   return (
@@ -98,16 +98,17 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
           <div
             aria-label={`${meta.title} 검색 및 필터`}
-            className="sticky top-0 z-30 -mx-2 flex min-h-14 items-center justify-center bg-slate-50/90 px-2 py-2 backdrop-blur-xl dark:bg-slate-950/90"
+            className="sticky top-0 z-30 -mx-2 flex min-h-14 items-center justify-center px-2 py-2"
             data-slot="wish-filter-toolbar"
             role="search"
           >
             <GooeyInput
-              key={searchSession}
               className="w-full"
               collapsedWidth={128}
               fullWidthOnExpand
+              onOpenChange={setSearchOpen}
               onValueChange={setSearchQuery}
+              open={searchOpen}
               placeholder={`${meta.title.replace(" 정보", "")} 검색`}
               value={searchQuery}
             />
