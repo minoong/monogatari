@@ -413,7 +413,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
 
             <div className="flex flex-col gap-6">
               <MultiValueField
-                description="지도 링크가 없으면 길치는 주인공이 아니라 그냥 미아다."
+                description="코노 바쇼와… 성지다! 좌표를 확보하라구, 오이!"
                 draft={locationDraft}
                 error={locationError}
                 icon={<MapPin className="size-4" />}
@@ -429,7 +429,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                 placeholder="Google Maps 링크 붙여넣기"
               />
               <MultiValueField
-                description="링크를 안 남긴 과거의 나는 미래의 나에게 얻어맞아야 한다."
+                description="공식 링크를 놓치다니, 소레와 오타쿠 실격이라구!"
                 draft={linkDraft}
                 icon={<Link2 className="size-4" />}
                 items={links}
