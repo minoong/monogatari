@@ -165,7 +165,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
             </div>
           )}
         </section>
-        <Button aria-label={`${meta.title} 등록`} className="fixed bottom-6 right-5 z-40 h-14 min-w-14 rounded-full px-5 shadow-xl" onPress={openCreateDrawer}><Plus className="size-5" /><span className="font-bold">등록</span></Button>
+        <Button aria-label={`${meta.title} 등록`} className="absolute bottom-6 right-5 z-40 h-14 min-w-14 rounded-full px-5 shadow-xl" onPress={openCreateDrawer}><Plus className="size-5" /><span className="font-bold">등록</span></Button>
       </main>
       <WishDrawer key={drawerSession} initialType={type} open={drawerOpen} wish={editingWish} onOpenChange={(open) => {
         setDrawerOpen(open);

@@ -40,7 +40,7 @@ export const DiscoverActivity: React.FC = () => {
         </section>
         <Button
           aria-label="위시 등록"
-          className="fixed bottom-16 right-5 z-40 h-14 min-w-14 rounded-full px-5 shadow-xl"
+          className="absolute bottom-16 right-5 z-40 h-14 min-w-14 rounded-full px-5 shadow-xl"
           onPress={openCreateDrawer}
         >
           <Plus className="size-5" />
