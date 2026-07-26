@@ -62,9 +62,9 @@ interface WishDrawerProps {
 }
 
 const WISH_TYPE_DESCRIPTIONS: Record<WishType, string> = {
-  shopping: "취향은 다섯이어도 장바구니는 하나야. 설레는 건 후보로.",
-  snack: "데이트의 승부처는 디저트야. 다섯 명 몫까지 골라 둬.",
-  restaurant: "누구와 가든 헤매면 감점이야. 약속 장소부터 저장해.",
+  shopping: "굿즈 살 돈으로 모조리 담아버려!!!",
+  snack: "멍멍이 간식 달라능 🐶",
+  restaurant: "와따시는 고무줄 바지만 챙겨왔다!!!",
 };
 
 export function WishDrawer({ open, initialType, onOpenChange, wish = null }: WishDrawerProps) {
@@ -413,7 +413,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
 
             <div className="flex flex-col gap-6">
               <MultiValueField
-                description="데이트 날 길을 잃으면 호감도도 길을 잃어. 지도 링크를 남겨."
+                description="지도 링크가 없으면 길치는 주인공이 아니라 그냥 미아다."
                 draft={locationDraft}
                 error={locationError}
                 icon={<MapPin className="size-4" />}
@@ -429,7 +429,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                 placeholder="Google Maps 링크 붙여넣기"
               />
               <MultiValueField
-                description="말로만 기억한다는 건 플래그야. 관련 링크는 확실히 저장해."
+                description="링크를 안 남긴 과거의 나는 미래의 나에게 얻어맞아야 한다."
                 draft={linkDraft}
                 icon={<Link2 className="size-4" />}
                 items={links}
