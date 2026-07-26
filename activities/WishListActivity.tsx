@@ -120,12 +120,6 @@ function WishCard({ wish, type }: { wish: WishItem; type: WishType }) {
             <MorphingDialogDescription disableLayoutAnimation className="mt-6 flex flex-col gap-4">
               {price && <DetailRow label="현지 적정 가격" value={`฿ ${price}`} />}
               {wish.vendor && <DetailRow label={type === "restaurant" ? "식당 또는 지점" : "판매점"} value={wish.vendor} />}
-              {wish.memo && (
-                <div>
-                  <p className="text-xs font-semibold text-slate-400">메모</p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-200">{wish.memo}</p>
-                </div>
-              )}
               {wish.locations.length > 0 && (
                 <DetailLinkGroup
                   icon={<MapPin className="size-4" />}
@@ -142,6 +136,12 @@ function WishCard({ wish, type }: { wish: WishItem; type: WishType }) {
                   items={wish.links.map((link) => ({ href: link, label: link }))}
                   title="관련 링크"
                 />
+              )}
+              {wish.memo && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-400">메모</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-200">{wish.memo}</p>
+                </div>
               )}
             </MorphingDialogDescription>
           </div>
