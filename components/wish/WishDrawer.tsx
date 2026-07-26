@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -18,7 +18,7 @@ import {
   TextField,
   type Key,
 } from "@heroui/react";
-import { ImagePlus, Link2, MapPin, Plus, Upload } from "lucide-react";
+import { ImagePlus, Link2, MapPin, Plus, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   Drawer,
@@ -61,6 +61,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
   const [linkDraft, setLinkDraft] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const imagePreviewUrl = useMemo(() => image ? URL.createObjectURL(image) : null, [image]);
 
   useEffect(() => {
@@ -83,7 +84,13 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
     setLinks([]);
     setLinkDraft("");
     setImage(null);
+    if (imageInputRef.current) imageInputRef.current.value = "";
     setSubmitError(null);
+  };
+
+  const clearImage = () => {
+    setImage(null);
+    if (imageInputRef.current) imageInputRef.current.value = "";
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -352,14 +359,24 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
                   ratio={1}
                 >
                   {imagePreviewUrl ? (
-                    <Image
-                      alt="선택한 위시 이미지 미리보기"
-                      className="object-cover"
-                      fill
-                      sizes="112px"
-                      src={imagePreviewUrl}
-                      unoptimized
-                    />
+                    <>
+                      <Image
+                        alt="선택한 위시 이미지 미리보기"
+                        className="object-contain p-1"
+                        fill
+                        sizes="112px"
+                        src={imagePreviewUrl}
+                        unoptimized
+                      />
+                      <button
+                        aria-label="선택한 이미지 삭제"
+                        className="absolute right-1.5 top-1.5 z-10 flex size-7 items-center justify-center rounded-full bg-black/65 text-white shadow-sm backdrop-blur-sm transition-colors hover:bg-black/80"
+                        onClick={clearImage}
+                        type="button"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </>
                   ) : (
                     <div className="flex size-full flex-col items-center justify-center gap-2 text-slate-400">
                       <ImagePlus className="size-6" />
@@ -387,6 +404,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
                 className="sr-only"
                 id="wish-image"
                 onChange={(event) => setImage(event.target.files?.[0] ?? null)}
+                ref={imageInputRef}
                 type="file"
               />
             </div>
