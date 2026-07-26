@@ -15,7 +15,7 @@ import {
   TabsContent as AnimateTabsContent,
   TabsContents as AnimateTabsContents,
 } from "../components/animate-ui/components/animate/tabs";
-import { Tabs as HeroTabs } from "@heroui/react";
+import { Chip, Tabs as HeroTabs } from "@heroui/react";
 import { motion, AnimatePresence, useMotionValue, animate, useTransform, useReducedMotion } from "framer-motion";
 import { RingChart } from "../components/ui/ring-chart";
 import { useRef } from "react";
@@ -282,7 +282,7 @@ const SwipeableItem = ({
 }: SwipeableItemProps) => {
   const isChecked = item.completed_by.includes(targetUser);
   const otherUser = targetUser === "gahyun" ? "minu" : "gahyun";
-  const otherUserLabel = otherUser === "gahyun" ? "가현" : "미누";
+  const otherUserLabel = otherUser === "gahyun" ? "가현쨩" : "미누쿤";
   const isShared =
     item.type === "master" ||
     item.assignees.includes("all") ||
@@ -889,38 +889,50 @@ export const ChecklistActivity: React.FC = () => {
                 <HeroTabs.ListContainer>
                   <HeroTabs.List
                     aria-label="짐싸기 담당자"
-                    className="grid h-16 w-full grid-cols-2 rounded-2xl bg-slate-100 p-1 dark:bg-slate-900 *:h-14 *:w-full"
+                    className="grid h-14 w-full grid-cols-2 rounded-2xl bg-slate-100 p-1 dark:bg-slate-900 *:h-12 *:w-full"
                   >
                     <HeroTabs.Tab
                       id="gahyun"
-                      className="relative z-0 gap-2 rounded-xl px-3 text-slate-500 data-[selected=true]:text-slate-950 dark:text-slate-400 dark:data-[selected=true]:text-white"
+                      className="relative z-0 gap-2 rounded-xl px-2 text-slate-500 data-[selected=true]:text-slate-950 dark:text-slate-400 dark:data-[selected=true]:text-white"
                     >
                       <Avatar className="size-6">
                         <AvatarImage alt="" src={avatarSources.gahyun} />
                         <AvatarFallback className="bg-gray-200 text-[10px] text-gray-700 dark:bg-gray-700 dark:text-gray-300">G</AvatarFallback>
                       </Avatar>
-                      <span className="flex min-w-0 flex-col items-start leading-none">
-                        <span className="truncate text-[13px] font-bold">가현쨩 짐싸기</span>
-                        <span className="mt-1 text-[11px] font-medium opacity-70">
-                          {gahyunCheckedCount}/{gahyunItems.length} 완료
-                        </span>
-                      </span>
+                      <span className="min-w-0 truncate text-[13px] font-bold">가현쨩</span>
+                      <Chip
+                        aria-label={`가현쨩 ${gahyunItems.length}개 중 ${gahyunCheckedCount}개 완료`}
+                        className="ml-auto min-w-10 shrink-0 justify-center border border-blue-200 bg-blue-50 px-2 tabular-nums dark:border-blue-400/20 dark:bg-blue-400/10"
+                        color="accent"
+                        size="sm"
+                        variant="tertiary"
+                      >
+                        <Chip.Label className="text-[11px] font-bold text-blue-600 dark:text-blue-300">
+                          {gahyunCheckedCount}/{gahyunItems.length}
+                        </Chip.Label>
+                      </Chip>
                       <HeroTabs.Indicator className="-z-10 rounded-xl bg-white shadow-sm dark:bg-slate-700" />
                     </HeroTabs.Tab>
                     <HeroTabs.Tab
                       id="minu"
-                      className="relative z-0 gap-2 rounded-xl px-3 text-slate-500 data-[selected=true]:text-slate-950 dark:text-slate-400 dark:data-[selected=true]:text-white"
+                      className="relative z-0 gap-2 rounded-xl px-2 text-slate-500 data-[selected=true]:text-slate-950 dark:text-slate-400 dark:data-[selected=true]:text-white"
                     >
                       <Avatar className="size-6">
                         <AvatarImage alt="" src={avatarSources.minu} />
                         <AvatarFallback className="bg-gray-200 text-[10px] text-gray-700 dark:bg-gray-700 dark:text-gray-300">M</AvatarFallback>
                       </Avatar>
-                      <span className="flex min-w-0 flex-col items-start leading-none">
-                        <span className="truncate text-[13px] font-bold">미누쿤 짐싸기</span>
-                        <span className="mt-1 text-[11px] font-medium opacity-70">
-                          {minuCheckedCount}/{minuItems.length} 완료
-                        </span>
-                      </span>
+                      <span className="min-w-0 truncate text-[13px] font-bold">미누쿤</span>
+                      <Chip
+                        aria-label={`미누쿤 ${minuItems.length}개 중 ${minuCheckedCount}개 완료`}
+                        className="ml-auto min-w-10 shrink-0 justify-center border border-blue-200 bg-blue-50 px-2 tabular-nums dark:border-blue-400/20 dark:bg-blue-400/10"
+                        color="accent"
+                        size="sm"
+                        variant="tertiary"
+                      >
+                        <Chip.Label className="text-[11px] font-bold text-blue-600 dark:text-blue-300">
+                          {minuCheckedCount}/{minuItems.length}
+                        </Chip.Label>
+                      </Chip>
                       <HeroTabs.Indicator className="-z-10 rounded-xl bg-white shadow-sm dark:bg-slate-700" />
                     </HeroTabs.Tab>
                   </HeroTabs.List>
