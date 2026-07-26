@@ -15,7 +15,6 @@ import {
   MorphingDialogTrigger,
 } from "@/components/motion-primitives/morphing-dialog";
 import {
-  buildGoogleMapsDirectionsUrl,
   formatThaiBaht,
   isWishType,
   WISH_TYPE_META,
@@ -130,9 +129,9 @@ function WishCard({ wish, type }: { wish: WishItem; type: WishType }) {
               {wish.locations.length > 0 && (
                 <DetailLinkGroup
                   icon={<MapPin className="size-4" />}
-                  items={wish.locations.map((location) => ({
-                    href: buildGoogleMapsDirectionsUrl(location),
-                    label: location,
+                  items={wish.locations.map((location, index) => ({
+                    href: location,
+                    label: `Google Maps 위치 ${index + 1}`,
                   }))}
                   title="위치"
                 />

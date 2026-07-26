@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import Image from "next/image";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -29,6 +30,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import {
+  isGoogleMapsUrl,
   normalizeExternalUrl,
   WISH_CATEGORY_SUGGESTIONS,
   WISH_TYPE_META,
@@ -53,10 +55,18 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
   const [memo, setMemo] = useState("");
   const [locations, setLocations] = useState<string[]>([]);
   const [locationDraft, setLocationDraft] = useState("");
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [links, setLinks] = useState<string[]>([]);
   const [linkDraft, setLinkDraft] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const imagePreviewUrl = useMemo(() => image ? URL.createObjectURL(image) : null, [image]);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    };
+  }, [imagePreviewUrl]);
 
   const resetForm = () => {
     setType(initialType);
@@ -68,6 +78,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
     setMemo("");
     setLocations([]);
     setLocationDraft("");
+    setLocationError(null);
     setLinks([]);
     setLinkDraft("");
     setImage(null);
@@ -90,6 +101,22 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
 
   const removeCategories = (keys: Set<Key>) => {
     setCategories((current) => current.filter((category) => !keys.has(category)));
+  };
+
+  const addLocation = () => {
+    const normalizedLocation = normalizeExternalUrl(locationDraft.trim());
+    if (!isGoogleMapsUrl(normalizedLocation)) {
+      setLocationError("Google Maps에서 복사한 링크를 입력해 주세요.");
+      return null;
+    }
+
+    setLocationError(null);
+    return addListItem(
+      normalizedLocation,
+      locations,
+      setLocations,
+      setLocationDraft,
+    );
   };
 
   const addListItem = (
@@ -160,9 +187,8 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
     if (!title.trim() || createMutation.isPending) return;
     setSubmitError(null);
     const submittedCategories = categoryDraft.trim() ? addCategory() : categories;
-    const submittedLocations = locationDraft.trim()
-      ? addListItem(locationDraft, locations, setLocations, setLocationDraft)
-      : locations;
+    const submittedLocations = locationDraft.trim() ? addLocation() : locations;
+    if (!submittedLocations) return;
     const submittedLinks = linkDraft.trim()
       ? addListItem(linkDraft, links, setLinks, setLinkDraft, normalizeExternalUrl)
       : links;
@@ -287,16 +313,20 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
 
             <div className="flex flex-col gap-5 rounded-2xl bg-slate-50 p-4 dark:bg-white/5">
               <MultiValueField
-                description="장소명이나 주소를 입력하면 Google Maps 길찾기로 연결돼요."
+                description="Google Maps에서 장소의 공유 링크를 복사해 추가해 주세요."
                 draft={locationDraft}
+                error={locationError}
                 icon={<MapPin className="size-4" />}
                 items={locations}
                 label="위치"
-                maxLength={200}
-                onAdd={() => addListItem(locationDraft, locations, setLocations, setLocationDraft)}
-                onDraftChange={setLocationDraft}
+                maxLength={2048}
+                onAdd={addLocation}
+                onDraftChange={(value) => {
+                  setLocationDraft(value);
+                  if (locationError) setLocationError(null);
+                }}
                 onRemove={(keys) => setLocations((current) => current.filter((item) => !keys.has(item)))}
-                placeholder="예: Thipsamai Pad Thai, Bangkok"
+                placeholder="Google Maps 링크 붙여넣기"
               />
               <div className="h-px bg-slate-200 dark:bg-slate-700" />
               <MultiValueField
@@ -315,9 +345,27 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="wish-image">이미지</Label>
-              <label htmlFor="wish-image" className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 text-sm text-gray-500 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-white/5 dark:hover:bg-white/10">
-                <ImagePlus className="size-5" />
-                <span>{image ? image.name : "JPG, PNG, WEBP · 최대 5MB"}</span>
+              <label htmlFor="wish-image" className="relative flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 text-sm text-gray-500 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-white/5 dark:hover:bg-white/10">
+                {imagePreviewUrl ? (
+                  <>
+                    <Image
+                      alt="선택한 위시 이미지 미리보기"
+                      className="object-cover"
+                      fill
+                      sizes="(max-width: 512px) 100vw, 464px"
+                      src={imagePreviewUrl}
+                      unoptimized
+                    />
+                    <span className="absolute inset-x-3 bottom-3 truncate rounded-xl bg-black/60 px-3 py-2 text-center text-xs font-medium text-white backdrop-blur-sm">
+                      {image?.name} · 눌러서 변경
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <ImagePlus className="size-5" />
+                    <span>JPG, PNG, WEBP · 최대 5MB</span>
+                  </>
+                )}
               </label>
               <input
                 accept="image/jpeg,image/png,image/webp"
@@ -351,6 +399,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
 interface MultiValueFieldProps {
   description: string;
   draft: string;
+  error?: string | null;
   icon: ReactNode;
   items: string[];
   label: string;
@@ -364,6 +413,7 @@ interface MultiValueFieldProps {
 function MultiValueField({
   description,
   draft,
+  error,
   icon,
   items,
   label,
@@ -413,6 +463,7 @@ function MultiValueField({
           <Plus className="size-4" />
         </Button>
       </div>
+      {error && <p role="alert" className="text-xs font-medium text-danger">{error}</p>}
       {items.length > 0 && (
         <TagGroup aria-label={`등록한 ${label}`} onRemove={onRemove} size="sm" variant="surface">
           <TagGroup.List>

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { isWishType, type WishItem } from "@/lib/wishes";
+import { isGoogleMapsUrl, isWishType, type WishItem } from "@/lib/wishes";
 
 const withImageUrl = (item: Omit<WishItem, "image_url">): WishItem => ({
   ...item,
@@ -50,6 +50,11 @@ const linksValue = (value: unknown) => {
   }
 };
 
+const locationsValue = (value: unknown) => {
+  const locations = textListValue(value, 2048);
+  return locations?.every(isGoogleMapsUrl) ? locations : undefined;
+};
+
 export async function GET(request: Request) {
   const type = new URL(request.url).searchParams.get("type");
 
@@ -72,7 +77,7 @@ export async function POST(request: Request) {
     const type = body.type;
     const title = optionalText(body.title, 100);
     const categories = categoriesValue(body.categories);
-    const locations = textListValue(body.locations, 200);
+    const locations = locationsValue(body.locations);
     const links = linksValue(body.links);
     const memo = optionalText(body.memo, 500);
     const vendor = optionalText(body.vendor, 100);

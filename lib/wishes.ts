@@ -60,8 +60,17 @@ export const WISH_CATEGORY_SUGGESTIONS: Record<WishType, string[]> = {
 export const formatThaiBaht = (value: number | null) =>
   value === null ? null : new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 }).format(value);
 
-export const buildGoogleMapsDirectionsUrl = (query: string) =>
-  `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
-
 export const normalizeExternalUrl = (value: string) =>
   /^https?:\/\//i.test(value) ? value : `https://${value}`;
+
+export const isGoogleMapsUrl = (value: string) => {
+  try {
+    const { hostname, pathname } = new URL(value);
+    return (
+      hostname === "maps.app.goo.gl"
+      || (/(^|\.)google\.[a-z.]+$/i.test(hostname) && pathname.startsWith("/maps"))
+    );
+  } catch {
+    return false;
+  }
+};

@@ -49,6 +49,21 @@ as $$
     );
 $$;
 
+create or replace function public.wish_google_maps_links_valid(value text[])
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$
+  select
+    public.wish_text_list_valid(value, 2048)
+    and not exists (
+      select 1
+      from unnest(value) as location
+      where location !~ '^https?://(maps\.app\.goo\.gl|([^/]+\.)?google\.[^/]+/maps)'
+    );
+$$;
+
 create table if not exists public.wish_items (
   id uuid primary key default gen_random_uuid(),
   type text not null check (type in ('shopping', 'snack', 'restaurant')),
@@ -60,7 +75,7 @@ create table if not exists public.wish_items (
   image_path text check (
     image_path is null or image_path ~ '^wishes/[0-9a-f-]+\.(jpg|jpeg|png|webp)$'
   ),
-  locations text[] not null default '{}' check (public.wish_text_list_valid(locations, 200)),
+  locations text[] not null default '{}' check (public.wish_google_maps_links_valid(locations)),
   links text[] not null default '{}' check (public.wish_links_valid(links)),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -81,7 +96,7 @@ create policy "wish items are insertable by anonymous users"
     and public.wish_categories_valid(categories)
     and (memo is null or char_length(memo) <= 500)
     and (vendor is null or char_length(vendor) <= 100)
-    and public.wish_text_list_valid(locations, 200)
+    and public.wish_google_maps_links_valid(locations)
     and public.wish_links_valid(links)
     and (target_price_thb is null or target_price_thb >= 0)
     and (image_path is null or image_path ~ '^wishes/[0-9a-f-]+\.(jpg|jpeg|png|webp)$')
