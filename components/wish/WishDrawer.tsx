@@ -333,13 +333,16 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
                       <InputGroupText className="text-base font-bold text-slate-500">฿</InputGroupText>
                     </InputGroupAddon>
                     <InputGroupInput
-                      className="text-right tabular-nums"
                       id="wish-target-price"
                       inputMode="decimal"
                       min={0}
                       name="targetPrice"
                       onChange={(event) => setTargetPrice(event.target.value)}
                       placeholder="0"
+                      style={{
+                        fontVariantNumeric: "tabular-nums",
+                        textAlign: "right",
+                      }}
                       type="number"
                       value={targetPrice}
                     />
