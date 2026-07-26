@@ -293,7 +293,7 @@ export const HomeActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "태국 여행 2026" }}>
-      <div className="flex flex-col flex-1 pb-24 overflow-y-auto">
+      <div className="flex min-h-full flex-col flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto">
         <WorldClockCard />
         {/* State Toggle for Mockup */}
         <div className="flex justify-center gap-2 p-4 bg-muted/30 border-b">
@@ -302,7 +302,7 @@ export const HomeActivity: React.FC = () => {
           <NeumorphButton intent={tripState === "after" ? "primary" : "secondary"} size="small" onClick={() => setTripState("after")}>여행 후</NeumorphButton>
         </div>
 
-        <div className="flex flex-col gap-6 p-4 pb-28">
+        <div className="flex flex-col gap-6 p-4">
           {tripState === "before" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
               <div className="bg-blue-100 dark:bg-blue-900 rounded-2xl p-6 text-center">
