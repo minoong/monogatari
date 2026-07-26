@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { ArrowUpRight, Image as ImageIcon, MapPin, Plus, RefreshCw, Store } from "lucide-react";
+import { ArrowUpRight, Image as ImageIcon, Link2, MapPin, Plus, RefreshCw, Store } from "lucide-react";
 import { Button, Chip } from "@heroui/react";
 import { WishDrawer } from "@/components/wish/WishDrawer";
 import {
@@ -14,7 +14,14 @@ import {
   MorphingDialogTitle,
   MorphingDialogTrigger,
 } from "@/components/motion-primitives/morphing-dialog";
-import { buildGoogleMapsDirectionsUrl, formatThaiBaht, isWishType, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
+import {
+  buildGoogleMapsDirectionsUrl,
+  formatThaiBaht,
+  isWishType,
+  WISH_TYPE_META,
+  type WishItem,
+  type WishType,
+} from "@/lib/wishes";
 
 interface WishListActivityProps { params: { type?: string } }
 
@@ -55,7 +62,6 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
 
 function WishCard({ wish, type }: { wish: WishItem; type: WishType }) {
   const price = formatThaiBaht(wish.target_price_thb);
-  const hasMap = type === "restaurant" && Boolean(wish.map_query);
 
   return (
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
@@ -121,21 +127,61 @@ function WishCard({ wish, type }: { wish: WishItem; type: WishType }) {
                   <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-200">{wish.memo}</p>
                 </div>
               )}
-              {hasMap && (
-                <a
-                  className="mt-2 flex min-h-12 items-center justify-center gap-1 rounded-2xl bg-blue-600 text-sm font-bold text-white shadow-sm transition-colors hover:bg-blue-700"
-                  href={buildGoogleMapsDirectionsUrl(wish.map_query!)}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  <MapPin className="size-4" /> Google Maps로 경로 찾기 <ArrowUpRight className="size-3.5" />
-                </a>
+              {wish.locations.length > 0 && (
+                <DetailLinkGroup
+                  icon={<MapPin className="size-4" />}
+                  items={wish.locations.map((location) => ({
+                    href: buildGoogleMapsDirectionsUrl(location),
+                    label: location,
+                  }))}
+                  title="위치"
+                />
+              )}
+              {wish.links.length > 0 && (
+                <DetailLinkGroup
+                  icon={<Link2 className="size-4" />}
+                  items={wish.links.map((link) => ({ href: link, label: link }))}
+                  title="관련 링크"
+                />
               )}
             </MorphingDialogDescription>
           </div>
         </MorphingDialogContent>
       </MorphingDialogContainer>
     </MorphingDialog>
+  );
+}
+
+function DetailLinkGroup({
+  icon,
+  items,
+  title,
+}: {
+  icon: ReactNode;
+  items: { href: string; label: string }[];
+  title: string;
+}) {
+  return (
+    <div>
+      <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+        {icon}
+        {title}
+      </p>
+      <div className="flex flex-col gap-2">
+        {items.map((item) => (
+          <a
+            key={item.href}
+            className="flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-300"
+            href={item.href}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <span className="min-w-0 truncate">{item.label}</span>
+            <ArrowUpRight className="size-4 shrink-0" />
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }
 

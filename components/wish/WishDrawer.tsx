@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -17,7 +17,7 @@ import {
   TextField,
   type Key,
 } from "@heroui/react";
-import { ImagePlus, MapPin, Plus, Upload } from "lucide-react";
+import { ImagePlus, Link2, MapPin, Plus, Upload } from "lucide-react";
 import { toast } from "sonner";
 import {
   Drawer,
@@ -28,7 +28,13 @@ import {
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { WISH_CATEGORY_SUGGESTIONS, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
+import {
+  normalizeExternalUrl,
+  WISH_CATEGORY_SUGGESTIONS,
+  WISH_TYPE_META,
+  type WishItem,
+  type WishType,
+} from "@/lib/wishes";
 
 interface WishDrawerProps {
   open: boolean;
@@ -45,7 +51,10 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
   const [targetPrice, setTargetPrice] = useState("");
   const [vendor, setVendor] = useState("");
   const [memo, setMemo] = useState("");
-  const [mapQuery, setMapQuery] = useState("");
+  const [locations, setLocations] = useState<string[]>([]);
+  const [locationDraft, setLocationDraft] = useState("");
+  const [links, setLinks] = useState<string[]>([]);
+  const [linkDraft, setLinkDraft] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -57,7 +66,10 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
     setTargetPrice("");
     setVendor("");
     setMemo("");
-    setMapQuery("");
+    setLocations([]);
+    setLocationDraft("");
+    setLinks([]);
+    setLinkDraft("");
     setImage(null);
     setSubmitError(null);
   };
@@ -80,8 +92,31 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
     setCategories((current) => current.filter((category) => !keys.has(category)));
   };
 
+  const addListItem = (
+    draft: string,
+    items: string[],
+    setItems: (items: string[]) => void,
+    setDraft: (value: string) => void,
+    transform: (value: string) => string = (value) => value,
+  ) => {
+    const nextItem = transform(draft.trim());
+    if (!nextItem || items.includes(nextItem)) return items;
+    const nextItems = [...items, nextItem];
+    setItems(nextItems);
+    setDraft("");
+    return nextItems;
+  };
+
   const createMutation = useMutation({
-    mutationFn: async (submittedCategories: string[]): Promise<WishItem> => {
+    mutationFn: async ({
+      submittedCategories,
+      submittedLocations,
+      submittedLinks,
+    }: {
+      submittedCategories: string[];
+      submittedLocations: string[];
+      submittedLinks: string[];
+    }): Promise<WishItem> => {
       let imagePath: string | null = null;
 
       if (image) {
@@ -103,7 +138,8 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
           target_price_thb: type === "restaurant" ? null : targetPrice,
           vendor,
           memo,
-          map_query: type === "restaurant" ? mapQuery : null,
+          locations: submittedLocations,
+          links: submittedLinks,
           image_path: imagePath,
         }),
       });
@@ -124,7 +160,13 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
     if (!title.trim() || createMutation.isPending) return;
     setSubmitError(null);
     const submittedCategories = categoryDraft.trim() ? addCategory() : categories;
-    createMutation.mutate(submittedCategories);
+    const submittedLocations = locationDraft.trim()
+      ? addListItem(locationDraft, locations, setLocations, setLocationDraft)
+      : locations;
+    const submittedLinks = linkDraft.trim()
+      ? addListItem(linkDraft, links, setLinks, setLinkDraft, normalizeExternalUrl)
+      : links;
+    createMutation.mutate({ submittedCategories, submittedLocations, submittedLinks });
   };
 
   return (
@@ -243,13 +285,33 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
               <Input autoComplete="off" placeholder={type === "restaurant" ? "예: 팁싸마이 프라투피" : "예: 세븐일레븐, 짜뚜짝 시장"} />
             </TextField>
 
-            {type === "restaurant" && (
-              <TextField name="mapQuery" value={mapQuery} onChange={setMapQuery}>
-                <Label><MapPin className="mr-1 inline size-4" />길찾기 장소 또는 주소</Label>
-                <Input autoComplete="off" placeholder="예: Thipsamai Pad Thai, Bangkok" />
-                <Description>입력하면 카드에서 Google Maps 길찾기를 열 수 있어요.</Description>
-              </TextField>
-            )}
+            <div className="flex flex-col gap-5 rounded-2xl bg-slate-50 p-4 dark:bg-white/5">
+              <MultiValueField
+                description="장소명이나 주소를 입력하면 Google Maps 길찾기로 연결돼요."
+                draft={locationDraft}
+                icon={<MapPin className="size-4" />}
+                items={locations}
+                label="위치"
+                maxLength={200}
+                onAdd={() => addListItem(locationDraft, locations, setLocations, setLocationDraft)}
+                onDraftChange={setLocationDraft}
+                onRemove={(keys) => setLocations((current) => current.filter((item) => !keys.has(item)))}
+                placeholder="예: Thipsamai Pad Thai, Bangkok"
+              />
+              <div className="h-px bg-slate-200 dark:bg-slate-700" />
+              <MultiValueField
+                description="공식 홈페이지, 메뉴, SNS 등 관련 링크를 따로 모아 둘 수 있어요."
+                draft={linkDraft}
+                icon={<Link2 className="size-4" />}
+                items={links}
+                label="관련 링크"
+                maxLength={500}
+                onAdd={() => addListItem(linkDraft, links, setLinks, setLinkDraft, normalizeExternalUrl)}
+                onDraftChange={setLinkDraft}
+                onRemove={(keys) => setLinks((current) => current.filter((item) => !keys.has(item)))}
+                placeholder="예: instagram.com/example"
+              />
+            </div>
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="wish-image">이미지</Label>
@@ -283,5 +345,85 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
         </Form>
       </DrawerPopup>
     </Drawer>
+  );
+}
+
+interface MultiValueFieldProps {
+  description: string;
+  draft: string;
+  icon: ReactNode;
+  items: string[];
+  label: string;
+  maxLength: number;
+  onAdd: () => void;
+  onDraftChange: (value: string) => void;
+  onRemove: (keys: Set<Key>) => void;
+  placeholder: string;
+}
+
+function MultiValueField({
+  description,
+  draft,
+  icon,
+  items,
+  label,
+  maxLength,
+  onAdd,
+  onDraftChange,
+  onRemove,
+  placeholder,
+}: MultiValueFieldProps) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div>
+        <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+          {icon}
+          <span>{label}</span>
+          {items.length > 0 && (
+            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-bold text-blue-600 dark:bg-blue-500/15 dark:text-blue-300">
+              {items.length}
+            </span>
+          )}
+        </div>
+        <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
+      </div>
+      <div className="flex items-end gap-2">
+        <TextField className="min-w-0 flex-1" value={draft} onChange={onDraftChange}>
+          <Input
+            aria-label={`${label} 입력`}
+            autoComplete="off"
+            maxLength={maxLength}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                onAdd();
+              }
+            }}
+            placeholder={placeholder}
+            variant="secondary"
+          />
+        </TextField>
+        <Button
+          aria-label={`${label} 추가`}
+          isDisabled={!draft.trim()}
+          onPress={onAdd}
+          type="button"
+          variant="secondary"
+        >
+          <Plus className="size-4" />
+        </Button>
+      </div>
+      {items.length > 0 && (
+        <TagGroup aria-label={`등록한 ${label}`} onRemove={onRemove} size="sm" variant="surface">
+          <TagGroup.List>
+            {items.map((item) => (
+              <Tag key={item} id={item} textValue={item}>
+                <span className="max-w-60 truncate">{item}</span>
+              </Tag>
+            ))}
+          </TagGroup.List>
+        </TagGroup>
+      )}
+    </div>
   );
 }

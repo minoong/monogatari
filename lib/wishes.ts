@@ -12,7 +12,8 @@ export interface WishItem {
   vendor: string | null;
   image_path: string | null;
   image_url: string | null;
-  map_query: string | null;
+  locations: string[];
+  links: string[];
   created_at: string;
   updated_at: string;
 }
@@ -61,3 +62,6 @@ export const formatThaiBaht = (value: number | null) =>
 
 export const buildGoogleMapsDirectionsUrl = (query: string) =>
   `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
+
+export const normalizeExternalUrl = (value: string) =>
+  /^https?:\/\//i.test(value) ? value : `https://${value}`;

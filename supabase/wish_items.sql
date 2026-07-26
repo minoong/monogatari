@@ -15,6 +15,40 @@ as $$
     );
 $$;
 
+create or replace function public.wish_text_list_valid(value text[], max_length integer)
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$
+  select
+    array_position(value, null) is null
+    and cardinality(value) = (
+      select count(distinct item)
+      from unnest(value) as item
+    )
+    and not exists (
+      select 1
+      from unnest(value) as item
+      where btrim(item) = '' or char_length(item) > max_length
+    );
+$$;
+
+create or replace function public.wish_links_valid(value text[])
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$
+  select
+    public.wish_text_list_valid(value, 500)
+    and not exists (
+      select 1
+      from unnest(value) as link
+      where link !~ '^https?://'
+    );
+$$;
+
 create table if not exists public.wish_items (
   id uuid primary key default gen_random_uuid(),
   type text not null check (type in ('shopping', 'snack', 'restaurant')),
@@ -26,7 +60,8 @@ create table if not exists public.wish_items (
   image_path text check (
     image_path is null or image_path ~ '^wishes/[0-9a-f-]+\.(jpg|jpeg|png|webp)$'
   ),
-  map_query text check (map_query is null or char_length(map_query) <= 200),
+  locations text[] not null default '{}' check (public.wish_text_list_valid(locations, 200)),
+  links text[] not null default '{}' check (public.wish_links_valid(links)),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -46,7 +81,8 @@ create policy "wish items are insertable by anonymous users"
     and public.wish_categories_valid(categories)
     and (memo is null or char_length(memo) <= 500)
     and (vendor is null or char_length(vendor) <= 100)
-    and (map_query is null or char_length(map_query) <= 200)
+    and public.wish_text_list_valid(locations, 200)
+    and public.wish_links_valid(links)
     and (target_price_thb is null or target_price_thb >= 0)
     and (image_path is null or image_path ~ '^wishes/[0-9a-f-]+\.(jpg|jpeg|png|webp)$')
   );

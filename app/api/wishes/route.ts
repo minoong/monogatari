@@ -26,6 +26,30 @@ const categoriesValue = (value: unknown) => {
   return categories as string[];
 };
 
+const textListValue = (value: unknown, maxLength: number) => {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value)) return undefined;
+
+  const items = value.map((item) => typeof item === "string" ? item.trim() : null);
+  if (items.some((item) => !item || item.length > maxLength)) return undefined;
+  if (new Set(items).size !== items.length) return undefined;
+  return items as string[];
+};
+
+const linksValue = (value: unknown) => {
+  const links = textListValue(value, 500);
+  if (!links) return undefined;
+
+  try {
+    return links.every((link) => {
+      const url = new URL(link);
+      return url.protocol === "http:" || url.protocol === "https:";
+    }) ? links : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 export async function GET(request: Request) {
   const type = new URL(request.url).searchParams.get("type");
 
@@ -48,9 +72,10 @@ export async function POST(request: Request) {
     const type = body.type;
     const title = optionalText(body.title, 100);
     const categories = categoriesValue(body.categories);
+    const locations = textListValue(body.locations, 200);
+    const links = linksValue(body.links);
     const memo = optionalText(body.memo, 500);
     const vendor = optionalText(body.vendor, 100);
-    const mapQuery = optionalText(body.map_query, 200);
     const imagePath = optionalText(body.image_path, 200);
     const targetPrice = body.target_price_thb === "" || body.target_price_thb === null || body.target_price_thb === undefined
       ? null
@@ -60,7 +85,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "type and title are required" }, { status: 400 });
     }
 
-    if (categories === undefined || [memo, vendor, mapQuery, imagePath].some((value) => value === undefined)) {
+    if (
+      categories === undefined
+      || locations === undefined
+      || links === undefined
+      || [memo, vendor, imagePath].some((value) => value === undefined)
+    ) {
       return NextResponse.json({ error: "Invalid text field" }, { status: 400 });
     }
 
@@ -86,7 +116,8 @@ export async function POST(request: Request) {
         memo,
         vendor,
         image_path: imagePath,
-        map_query: type === "restaurant" ? mapQuery : null,
+        locations,
+        links,
       })
       .select()
       .single();
