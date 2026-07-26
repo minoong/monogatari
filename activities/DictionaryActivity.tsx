@@ -88,7 +88,7 @@ export const DictionaryActivity: React.FC = () => {
         <div className="h-2 bg-gray-200 dark:bg-gray-800 shrink-0 shadow-inner z-10" />
 
         {/* Bottom Half (My view) */}
-        <div className="flex-1 flex flex-col bg-white dark:bg-black p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,16px))] overflow-y-auto">
+        <div className="flex-1 flex flex-col bg-white dark:bg-black p-6 pb-[calc(1.5rem+clamp(16px,env(safe-area-inset-bottom),34px))] overflow-y-auto">
           <div className="mb-6 flex justify-between items-start gap-4">
             <div>
               <h3 className="text-3xl font-extrabold text-blue-600 dark:text-blue-400">

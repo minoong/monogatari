@@ -38,7 +38,7 @@ export const ScheduleActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "3일간의 일정표" }}>
-      <div className="flex flex-col flex-1 h-full pb-[calc(3.5rem+max(env(safe-area-inset-bottom,0px),8px))] bg-gray-50 dark:bg-gray-900">
+      <div className="flex flex-col flex-1 h-full pb-[calc(3.5rem+clamp(0px,env(safe-area-inset-bottom),34px))] bg-gray-50 dark:bg-gray-900">
         
         {/* Tabs */}
         <div className="flex p-4 gap-2 overflow-x-auto no-scrollbar shrink-0">
