@@ -10,16 +10,18 @@ import {
   Form,
   Input,
   Label,
-  Radio,
-  RadioGroup,
+  ListBox,
   Tag,
   TagGroup,
   TextArea,
   TextField,
   type Key,
 } from "@heroui/react";
-import { ImagePlus, Link2, MapPin, Plus, Upload, X } from "lucide-react";
+import { Check, ImagePlus, Link2, MapPin, Plus, Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import StatusButton from "@/components/animata/button/status-button";
+import { triggerHapticFeedback } from "@/components/BottomNav";
+import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import {
   Drawer,
   DrawerDescription,
@@ -75,7 +77,10 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   const [image, setImage] = useState<File | null>(null);
   const [imageRemoved, setImageRemoved] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const imagePreviewUrl = useMemo(() => image ? URL.createObjectURL(image) : null, [image]);
   const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
     queryKey: EXCHANGE_RATE_QUERY_KEY,
@@ -88,6 +93,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   useEffect(() => {
     return () => {
       if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     };
   }, [imagePreviewUrl]);
 
@@ -108,6 +114,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
     setImageRemoved(false);
     if (imageInputRef.current) imageInputRef.current.value = "";
     setSubmitError(null);
+    setSuccess(false);
   };
 
   const clearImage = () => {
@@ -208,9 +215,10 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
       return payload.data;
     },
     onSuccess: async () => {
+      setSuccess(true);
       await queryClient.invalidateQueries({ queryKey: ["wishes"] });
       toast.success(isEditing ? "위시를 수정했어요." : "위시에 추가했어요.");
-      handleOpenChange(false);
+      closeTimerRef.current = setTimeout(() => handleOpenChange(false), 800);
     },
     onError: (error) => setSubmitError(error instanceof Error ? error.message : "잠시 후 다시 시도해 주세요."),
   });
@@ -231,7 +239,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerPopup id="wish-drawer" variant="inset" showBar>
-        <Form aria-label={isEditing ? "위시 편집" : "위시 등록"} className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit} validationBehavior="native">
+        <Form ref={formRef} aria-label={isEditing ? "위시 편집" : "위시 등록"} className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit} validationBehavior="native">
           <DrawerHeader className="px-6 pb-4 text-left">
             <DrawerTitle>{isEditing ? "위시 편집" : "위시 등록"}</DrawerTitle>
             <DrawerDescription>
@@ -240,29 +248,47 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
           </DrawerHeader>
 
           <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-4">
-            <RadioGroup
-              name="type"
-              orientation="horizontal"
-              value={type}
-              onChange={(value) => {
-                setType(value as WishType);
-                setCategories([]);
-                setCategoryDraft("");
-              }}
-            >
+            <div className="flex flex-col gap-2">
               <Label>종류</Label>
-              <div className="grid grid-cols-3 gap-2 pt-2">
+              <ListBox
+                aria-label="위시 종류"
+                className="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-2 rounded-2xl bg-slate-100 p-1.5 dark:bg-white/5"
+                disallowEmptySelection
+                selectedKeys={new Set([type])}
+                selectionMode="single"
+                onSelectionChange={(keys) => {
+                  if (keys === "all") return;
+                  const selectedType = Array.from(keys)[0] as WishType | undefined;
+                  if (!selectedType || selectedType === type) return;
+                  setType(selectedType);
+                  setCategories([]);
+                  setCategoryDraft("");
+                }}
+              >
                 {(Object.keys(WISH_TYPE_META) as WishType[]).map((itemType) => (
-                  <Radio key={itemType} value={itemType}>
-                    <Radio.Content className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-center text-xs">
-                      <Radio.Control><Radio.Indicator /></Radio.Control>
-                      <span>{WISH_TYPE_META[itemType].icon}</span>
-                      <span>{WISH_TYPE_META[itemType].title.replace(" 정보", "")}</span>
-                    </Radio.Content>
-                  </Radio>
+                  <ListBox.Item
+                    key={itemType}
+                    id={itemType}
+                    textValue={WISH_TYPE_META[itemType].title}
+                    className="group relative flex min-w-0 w-auto! cursor-pointer flex-col items-center gap-1.5 rounded-xl border border-transparent px-2 py-3 text-center outline-none transition-all data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-blue-500 data-[selected=true]:border-blue-200 data-[selected=true]:bg-white data-[selected=true]:shadow-sm dark:data-[selected=true]:border-blue-500/30 dark:data-[selected=true]:bg-blue-500/10"
+                  >
+                    <span className="flex size-9 items-center justify-center rounded-xl bg-white text-xl shadow-sm ring-1 ring-slate-200/70 transition-transform group-data-[selected=true]:scale-105 dark:bg-white/10 dark:ring-white/10">
+                      {WISH_TYPE_META[itemType].icon}
+                    </span>
+                    <span className="truncate text-xs font-semibold text-slate-500 group-data-[selected=true]:text-blue-600 dark:text-slate-400 dark:group-data-[selected=true]:text-blue-300">
+                      {WISH_TYPE_META[itemType].title.replace(" 정보", "")}
+                    </span>
+                    <ListBox.ItemIndicator className="absolute right-1.5 top-1.5">
+                      {({ isSelected }) => isSelected ? (
+                        <span className="flex size-4 items-center justify-center rounded-full bg-blue-500 text-white">
+                          <Check className="size-3" strokeWidth={3} />
+                        </span>
+                      ) : null}
+                    </ListBox.ItemIndicator>
+                  </ListBox.Item>
                 ))}
-              </div>
-            </RadioGroup>
+              </ListBox>
+            </div>
 
             <TextField isRequired name="title" value={title} onChange={setTitle}>
               <Label>{type === "restaurant" ? "식당 이름" : "이름"}</Label>
@@ -494,15 +520,29 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             >
               취소
             </Button>
-            <Button
-              fullWidth
-              className="h-12 rounded-2xl text-base"
-              isPending={saveMutation.isPending}
-              size="lg"
-              type="submit"
-            >
-              {({ isPending }) => isPending ? "저장 중…" : isEditing ? "변경 저장" : "등록하기"}
-            </Button>
+            <div className="relative h-12 min-w-0">
+              <StatusButton
+                aria-hidden="true"
+                className="pointer-events-none h-12 rounded-2xl text-base"
+                fullWidth
+                idleText={isEditing ? "변경 저장" : "등록하기"}
+                isDisabled={!title.trim() || success}
+                loadingText="저장 중…"
+                size="lg"
+                status={saveMutation.isPending ? "loading" : success ? "success" : "idle"}
+                successText={isEditing ? "수정 완료!" : "등록 완료!"}
+                type="submit"
+              />
+              <NativeHapticSwitch
+                ariaLabel={isEditing ? "위시 변경 저장" : "위시 등록하기"}
+                checked={false}
+                disabled={!title.trim() || saveMutation.isPending || success}
+                onChange={() => {
+                  triggerHapticFeedback(15);
+                  formRef.current?.requestSubmit();
+                }}
+              />
+            </div>
           </DrawerFooter>
         </Form>
       </DrawerPopup>
@@ -620,16 +660,44 @@ function MultiValueField({
       </div>
       {error && <p role="alert" className="text-xs font-medium text-danger">{error}</p>}
       {items.length > 0 && (
-        <TagGroup aria-label={`등록한 ${label}`} onRemove={onRemove} size="sm" variant="surface">
-          <TagGroup.List>
-            {items.map((item) => (
-              <Tag key={item} id={item} textValue={item}>
-                <span className="max-w-60 truncate">{item}</span>
-              </Tag>
-            ))}
-          </TagGroup.List>
-        </TagGroup>
+        <ul aria-label={`등록한 ${label}`} className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+          {items.map((item, index) => (
+            <li
+              key={item}
+              className="flex min-h-12 min-w-0 items-center gap-3 border-b border-slate-100 px-3 py-2 last:border-b-0 dark:border-slate-800"
+            >
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300">
+                {icon}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[11px] font-semibold text-slate-400">
+                  {label} {index + 1}
+                </span>
+                <span className="block truncate text-xs font-medium text-slate-700 dark:text-slate-200" title={item}>
+                  {formatLinkLabel(item)}
+                </span>
+              </span>
+              <button
+                aria-label={`${label} ${index + 1} 삭제`}
+                className="flex size-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 dark:hover:bg-red-500/10"
+                onClick={() => onRemove(new Set([item]))}
+                type="button"
+              >
+                <X className="size-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
+}
+
+function formatLinkLabel(value: string) {
+  try {
+    const url = new URL(value);
+    return `${url.hostname.replace(/^www\./, "")}${url.pathname === "/" ? "" : url.pathname}`;
+  } catch {
+    return value;
+  }
 }
