@@ -110,6 +110,7 @@ export interface GooeyInputProps {
   onValueChange?: (value: string) => void;
   onOpenChange?: (open: boolean) => void;
   disabled?: boolean;
+  fullWidthOnExpand?: boolean;
 }
 
 export function GooeyInput({
@@ -125,6 +126,7 @@ export function GooeyInput({
   onValueChange,
   onOpenChange,
   disabled = false,
+  fullWidthOnExpand = false,
 }: GooeyInputProps) {
   const reactId = useId();
   const safeId = reactId.replace(/:/g, "");
@@ -170,9 +172,14 @@ export function GooeyInput({
   const buttonVariants = useMemo(
     () => ({
       collapsed: { width: collapsedWidth, marginLeft: 0 },
-      expanded: { width: expandedWidth, marginLeft: expandedOffset },
+      expanded: {
+        width: fullWidthOnExpand
+          ? `calc(100% - ${expandedOffset}px)`
+          : expandedWidth,
+        marginLeft: expandedOffset,
+      },
     }),
-    [collapsedWidth, expandedWidth, expandedOffset],
+    [collapsedWidth, expandedWidth, expandedOffset, fullWidthOnExpand],
   );
 
   const handleExpand = useCallback(() => {
@@ -211,6 +218,7 @@ export function GooeyInput({
       <div
         className={cn(
           "relative flex h-10 items-center justify-center",
+          fullWidthOnExpand && "w-full",
           classNames?.filterWrap,
         )}
         style={{ filter: `url(#${filterId})` }}

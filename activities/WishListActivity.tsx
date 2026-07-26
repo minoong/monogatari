@@ -99,19 +99,14 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
 
           <div
             aria-label={`${meta.title} 검색 및 필터`}
-            className="flex min-h-16 items-center justify-between gap-3 overflow-hidden rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            className="flex min-h-16 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900"
             data-slot="wish-filter-toolbar"
             role="search"
           >
-            <div className="min-w-0 shrink">
-              <p className="text-xs font-semibold text-slate-400">목록 찾기</p>
-              <p aria-live="polite" className="mt-0.5 truncate text-sm font-bold text-slate-700 dark:text-slate-200">
-                {searchQuery.trim() ? `검색 결과 ${filteredWishes.length}개` : `전체 ${wishes.length}개`}
-              </p>
-            </div>
             <GooeyInput
-              className="shrink-0"
+              className="w-full"
               collapsedWidth={128}
+              fullWidthOnExpand
               onValueChange={setSearchQuery}
               placeholder={`${meta.title.replace(" 정보", "")} 검색`}
               value={searchQuery}
