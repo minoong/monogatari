@@ -188,6 +188,19 @@ export function ImageZoomModal({
                     >
                       <RotateCcw className="size-4" />
                     </button>
+                    <div className="w-px h-4 bg-white/20 mx-1" />
+                    <button
+                      onClick={handleClose}
+                      onMouseDown={handleStopPropagation}
+                      onPointerDown={handleStopPropagation}
+                      onTouchStart={handleStopPropagation}
+                      aria-label="모달 닫기"
+                      title="닫기"
+                      type="button"
+                      className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition active:scale-95"
+                    >
+                      <X className="size-4" />
+                    </button>
                   </div>
                 </div>
               </>

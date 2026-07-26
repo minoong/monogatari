@@ -77,6 +77,7 @@ const IMAGE_COMPRESSION_OPTIONS = {
   maxWidthOrHeight: 1920,
   preserveExif: false,
   useWebWorker: true,
+  fileType: "image/jpeg",
 };
 
 export function WishDrawer({ open, initialType, onOpenChange, wish = null }: WishDrawerProps) {
@@ -102,7 +103,14 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   const formRef = useRef<HTMLFormElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const imagePreviewUrl = useMemo(() => image ? URL.createObjectURL(image) : null, [image]);
+  const imagePreviewUrl = useMemo(() => {
+    if (!image) return null;
+    try {
+      return URL.createObjectURL(image);
+    } catch {
+      return null;
+    }
+  }, [image]);
   const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
     queryKey: EXCHANGE_RATE_QUERY_KEY,
     queryFn: fetchThbToKrwRate,
