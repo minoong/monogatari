@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import NumberFlow from "@number-flow/react";
+import imageCompression from "browser-image-compression";
 import {
   Avatar,
   Button,
@@ -71,6 +72,13 @@ const WISH_TYPE_DESCRIPTIONS: Record<WishType, string> = {
 
 const isDiningType = (type: WishType) => type === "restaurant" || type === "menu";
 
+const IMAGE_COMPRESSION_OPTIONS = {
+  maxSizeMB: 1,
+  maxWidthOrHeight: 1920,
+  preserveExif: false,
+  useWebWorker: true,
+};
+
 export function WishDrawer({ open, initialType, onOpenChange, wish = null }: WishDrawerProps) {
   const queryClient = useQueryClient();
   const isEditing = wish !== null;
@@ -88,6 +96,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   const [linkDraft, setLinkDraft] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imageRemoved, setImageRemoved] = useState(false);
+  const [isCompressingImage, setIsCompressingImage] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -197,8 +206,18 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
       let imagePath = imageRemoved ? null : wish?.image_path ?? null;
 
       if (image) {
+        let compressedImage: File;
+        try {
+          setIsCompressingImage(true);
+          compressedImage = await imageCompression(image, IMAGE_COMPRESSION_OPTIONS);
+        } catch {
+          throw new Error("이미지를 압축하지 못했습니다. 다른 이미지를 선택해 주세요.");
+        } finally {
+          setIsCompressingImage(false);
+        }
+
         const imageFormData = new FormData();
-        imageFormData.append("image", image);
+        imageFormData.append("image", compressedImage);
         const imageResponse = await fetch("/api/wishes/image", { method: "POST", body: imageFormData });
         const imagePayload = await imageResponse.json();
         if (!imageResponse.ok) throw new Error(imagePayload.error ?? "이미지를 업로드하지 못했습니다.");
@@ -534,7 +553,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                 fullWidth
                 idleText={isEditing ? "변경 저장" : "등록하기"}
                 isDisabled={!title.trim() || success}
-                loadingText="저장 중…"
+                loadingText={isCompressingImage ? "이미지 압축 중…" : "저장 중…"}
                 size="lg"
                 status={saveMutation.isPending ? "loading" : success ? "success" : "idle"}
                 successText={isEditing ? "수정 완료!" : "등록 완료!"}
