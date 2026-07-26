@@ -1,4 +1,4 @@
-import React, { useState, type ReactNode } from "react";
+import React, { useDeferredValue, useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import NumberFlow from "@number-flow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
@@ -6,6 +6,7 @@ import { ArrowUpRight, Image as ImageIcon, Link2, MapPin, Pencil, Plus, RefreshC
 import { Button, Chip } from "@heroui/react";
 import { toast } from "sonner";
 import { WishDrawer } from "@/components/wish/WishDrawer";
+import { GooeyInput } from "@/components/ui/gooey-input";
 import {
   AlertDialog,
   AlertDialogDescription,
@@ -54,7 +55,13 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
   const [drawerSession, setDrawerSession] = useState(0);
   const [editingWish, setEditingWish] = useState<WishItem | null>(null);
   const [deletingWish, setDeletingWish] = useState<WishItem | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes", type], queryFn: () => fetchWishes(type) });
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const filteredWishes = useMemo(
+    () => wishes.filter((wish) => wishMatchesSearch(wish, deferredSearchQuery)),
+    [deferredSearchQuery, wishes],
+  );
   const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
     queryKey: EXCHANGE_RATE_QUERY_KEY,
     queryFn: fetchThbToKrwRate,
@@ -90,10 +97,39 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
             <p className="mt-1 text-sm text-white/80">{meta.description}</p>
           </header>
 
+          <div
+            aria-label={`${meta.title} 검색 및 필터`}
+            className="flex min-h-16 items-center justify-between gap-3 overflow-hidden rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            data-slot="wish-filter-toolbar"
+            role="search"
+          >
+            <div className="min-w-0 shrink">
+              <p className="text-xs font-semibold text-slate-400">목록 찾기</p>
+              <p aria-live="polite" className="mt-0.5 truncate text-sm font-bold text-slate-700 dark:text-slate-200">
+                {searchQuery.trim() ? `검색 결과 ${filteredWishes.length}개` : `전체 ${wishes.length}개`}
+              </p>
+            </div>
+            <GooeyInput
+              className="shrink-0"
+              collapsedWidth={128}
+              onValueChange={setSearchQuery}
+              placeholder={`${meta.title.replace(" 정보", "")} 검색`}
+              value={searchQuery}
+            />
+          </div>
+
           {isLoading && Array.from({ length: 3 }).map((_, index) => <div key={index} className="h-36 animate-pulse rounded-3xl bg-white dark:bg-white/5" />)}
           {isError && <div className="rounded-3xl border border-red-100 bg-white px-5 py-8 text-center shadow-sm dark:border-red-900/60 dark:bg-slate-900"><p className="font-semibold text-slate-800 dark:text-slate-100">위시를 불러오지 못했어요.</p><p className="mt-1 text-sm text-slate-500">데이터베이스 설정과 네트워크를 확인해 주세요.</p><Button className="mt-4" variant="secondary" onPress={() => refetch()}><RefreshCw className="size-4" /> 다시 시도</Button></div>}
           {!isLoading && !isError && wishes.length === 0 && <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white px-6 text-center dark:border-slate-700 dark:bg-slate-900"><span className="text-4xl" aria-hidden="true">{meta.icon}</span><h2 className="mt-3 font-bold text-slate-800 dark:text-slate-100">아직 담긴 항목이 없어요</h2><p className="mt-1 text-sm leading-6 text-slate-500">{meta.emptyMessage}</p><Button className="mt-5" onPress={openCreateDrawer}><Plus className="size-4" /> 등록하기</Button></div>}
-          {!isLoading && !isError && wishes.map((wish) => (
+          {!isLoading && !isError && wishes.length > 0 && filteredWishes.length === 0 && (
+            <div className="flex min-h-52 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white px-6 text-center dark:border-slate-700 dark:bg-slate-900">
+              <span className="text-3xl" aria-hidden="true">🔎</span>
+              <h2 className="mt-3 font-bold text-slate-800 dark:text-slate-100">검색 결과가 없어요</h2>
+              <p className="mt-1 text-sm text-slate-500">다른 이름이나 카테고리로 찾아보세요.</p>
+              <Button className="mt-4" variant="secondary" onPress={() => setSearchQuery("")}>검색 초기화</Button>
+            </div>
+          )}
+          {!isLoading && !isError && filteredWishes.map((wish) => (
             <WishCard
               key={wish.id}
               onDelete={() => setDeletingWish(wish)}
@@ -154,6 +190,18 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
     </AppScreen>
   );
 };
+
+function wishMatchesSearch(wish: WishItem, query: string) {
+  const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR");
+  if (!normalizedQuery) return true;
+
+  return [
+    wish.title,
+    wish.vendor,
+    wish.memo,
+    ...wish.categories,
+  ].some((value) => value?.toLocaleLowerCase("ko-KR").includes(normalizedQuery));
+}
 
 function WishCard({
   wish,
