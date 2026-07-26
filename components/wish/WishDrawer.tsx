@@ -54,23 +54,26 @@ interface WishDrawerProps {
   open: boolean;
   initialType: WishType;
   onOpenChange: (open: boolean) => void;
+  wish?: WishItem | null;
 }
 
-export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps) {
+export function WishDrawer({ open, initialType, onOpenChange, wish = null }: WishDrawerProps) {
   const queryClient = useQueryClient();
-  const [type, setType] = useState<WishType>(initialType);
-  const [title, setTitle] = useState("");
-  const [categories, setCategories] = useState<string[]>([]);
+  const isEditing = wish !== null;
+  const [type, setType] = useState<WishType>(wish?.type ?? initialType);
+  const [title, setTitle] = useState(wish?.title ?? "");
+  const [categories, setCategories] = useState<string[]>(wish?.categories ?? []);
   const [categoryDraft, setCategoryDraft] = useState("");
-  const [targetPrice, setTargetPrice] = useState("");
-  const [vendor, setVendor] = useState("");
-  const [memo, setMemo] = useState("");
-  const [locations, setLocations] = useState<string[]>([]);
+  const [targetPrice, setTargetPrice] = useState(wish?.target_price_thb?.toString() ?? "");
+  const [vendor, setVendor] = useState(wish?.vendor ?? "");
+  const [memo, setMemo] = useState(wish?.memo ?? "");
+  const [locations, setLocations] = useState<string[]>(wish?.locations ?? []);
   const [locationDraft, setLocationDraft] = useState("");
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [links, setLinks] = useState<string[]>([]);
+  const [links, setLinks] = useState<string[]>(wish?.links ?? []);
   const [linkDraft, setLinkDraft] = useState("");
   const [image, setImage] = useState<File | null>(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imagePreviewUrl = useMemo(() => image ? URL.createObjectURL(image) : null, [image]);
@@ -80,6 +83,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
   });
   const targetPriceValue = Number(targetPrice) || 0;
   const targetPriceKrw = Math.round(targetPriceValue * thbToKrwRate);
+  const displayedImageUrl = imagePreviewUrl ?? (!imageRemoved ? wish?.image_url : null);
 
   useEffect(() => {
     return () => {
@@ -101,12 +105,14 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
     setLinks([]);
     setLinkDraft("");
     setImage(null);
+    setImageRemoved(false);
     if (imageInputRef.current) imageInputRef.current.value = "";
     setSubmitError(null);
   };
 
   const clearImage = () => {
     setImage(null);
+    setImageRemoved(true);
     if (imageInputRef.current) imageInputRef.current.value = "";
   };
 
@@ -159,7 +165,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
     return nextItems;
   };
 
-  const createMutation = useMutation({
+  const saveMutation = useMutation({
     mutationFn: async ({
       submittedCategories,
       submittedLocations,
@@ -169,7 +175,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
       submittedLocations: string[];
       submittedLinks: string[];
     }): Promise<WishItem> => {
-      let imagePath: string | null = null;
+      let imagePath = imageRemoved ? null : wish?.image_path ?? null;
 
       if (image) {
         const imageFormData = new FormData();
@@ -180,8 +186,8 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
         imagePath = imagePayload.data.path;
       }
 
-      const response = await fetch("/api/wishes", {
-        method: "POST",
+      const response = await fetch(wish ? `/api/wishes?id=${wish.id}` : "/api/wishes", {
+        method: isEditing ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type,
@@ -196,12 +202,14 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
         }),
       });
       const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error ?? "위시를 등록하지 못했습니다.");
+      if (!response.ok) {
+        throw new Error(payload.error ?? (isEditing ? "위시를 수정하지 못했습니다." : "위시를 등록하지 못했습니다."));
+      }
       return payload.data;
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["wishes"] });
-      toast.success("위시에 추가했어요.");
+      toast.success(isEditing ? "위시를 수정했어요." : "위시에 추가했어요.");
       handleOpenChange(false);
     },
     onError: (error) => setSubmitError(error instanceof Error ? error.message : "잠시 후 다시 시도해 주세요."),
@@ -209,7 +217,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!title.trim() || createMutation.isPending) return;
+    if (!title.trim() || saveMutation.isPending) return;
     setSubmitError(null);
     const submittedCategories = categoryDraft.trim() ? addCategory() : categories;
     const submittedLocations = locationDraft.trim() ? addLocation() : locations;
@@ -217,16 +225,18 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
     const submittedLinks = linkDraft.trim()
       ? addListItem(linkDraft, links, setLinks, setLinkDraft, normalizeExternalUrl)
       : links;
-    createMutation.mutate({ submittedCategories, submittedLocations, submittedLinks });
+    saveMutation.mutate({ submittedCategories, submittedLocations, submittedLinks });
   };
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerPopup id="wish-drawer" variant="inset" showBar>
-        <Form aria-label="위시 등록" className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit} validationBehavior="native">
+        <Form aria-label={isEditing ? "위시 편집" : "위시 등록"} className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit} validationBehavior="native">
           <DrawerHeader className="px-6 pb-4 text-left">
-            <DrawerTitle>위시 등록</DrawerTitle>
-            <DrawerDescription>여행 중 사고 싶거나 먹고 싶은 것을 가볍게 담아 두세요.</DrawerDescription>
+            <DrawerTitle>{isEditing ? "위시 편집" : "위시 등록"}</DrawerTitle>
+            <DrawerDescription>
+              {isEditing ? "저장한 정보와 이미지를 필요한 만큼 수정하세요." : "여행 중 사고 싶거나 먹고 싶은 것을 가볍게 담아 두세요."}
+            </DrawerDescription>
           </DrawerHeader>
 
           <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-4">
@@ -410,14 +420,14 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
                   className="w-28 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm dark:border-slate-700 dark:bg-slate-800"
                   ratio={1}
                 >
-                  {imagePreviewUrl ? (
+                  {displayedImageUrl ? (
                     <>
                       <Image
-                        alt="선택한 위시 이미지 미리보기"
+                        alt={image ? "선택한 위시 이미지 미리보기" : "저장된 위시 이미지"}
                         className="object-contain p-1"
                         fill
                         sizes="112px"
-                        src={imagePreviewUrl}
+                        src={displayedImageUrl}
                         unoptimized
                       />
                       <button
@@ -443,7 +453,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
                 >
                   <span className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
                     <Upload className="size-4 text-blue-500" />
-                    {image ? "이미지 변경" : "이미지 선택"}
+                    {displayedImageUrl ? "이미지 변경" : "이미지 선택"}
                   </span>
                   <span className="mt-1 truncate text-xs text-slate-500">
                     {image?.name ?? "JPG, PNG, WEBP"}
@@ -455,7 +465,10 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
                 accept="image/jpeg,image/png,image/webp"
                 className="sr-only"
                 id="wish-image"
-                onChange={(event) => setImage(event.target.files?.[0] ?? null)}
+                onChange={(event) => {
+                  setImage(event.target.files?.[0] ?? null);
+                  setImageRemoved(false);
+                }}
                 ref={imageInputRef}
                 type="file"
               />
@@ -473,7 +486,7 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
             <Button
               fullWidth
               className="h-12 rounded-2xl text-base"
-              isDisabled={createMutation.isPending}
+              isDisabled={saveMutation.isPending}
               onPress={() => handleOpenChange(false)}
               size="lg"
               type="button"
@@ -484,11 +497,11 @@ export function WishDrawer({ open, initialType, onOpenChange }: WishDrawerProps)
             <Button
               fullWidth
               className="h-12 rounded-2xl text-base"
-              isPending={createMutation.isPending}
+              isPending={saveMutation.isPending}
               size="lg"
               type="submit"
             >
-              {({ isPending }) => isPending ? "등록 중…" : "등록하기"}
+              {({ isPending }) => isPending ? "저장 중…" : isEditing ? "변경 저장" : "등록하기"}
             </Button>
           </DrawerFooter>
         </Form>

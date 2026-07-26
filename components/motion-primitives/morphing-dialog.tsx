@@ -381,8 +381,10 @@ function MorphingDialogImage({
 }
 
 export type MorphingDialogCloseProps = {
+  ariaLabel?: string;
   children?: React.ReactNode;
   className?: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   variants?: {
     initial: Variant;
     animate: Variant;
@@ -391,21 +393,24 @@ export type MorphingDialogCloseProps = {
 };
 
 function MorphingDialogClose({
+  ariaLabel = '상세 닫기',
   children,
   className,
+  onClick,
   variants,
 }: MorphingDialogCloseProps) {
   const { setIsOpen, uniqueId } = useMorphingDialog();
 
-  const handleClose = useCallback(() => {
+  const handleClose = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setIsOpen(false);
-  }, [setIsOpen]);
+    onClick?.(event);
+  }, [onClick, setIsOpen]);
 
   return (
     <motion.button
       onClick={handleClose}
       type='button'
-      aria-label='상세 닫기'
+      aria-label={ariaLabel}
       key={`dialog-close-${uniqueId}`}
       className={cn('absolute top-6 right-6', className)}
       initial='initial'
