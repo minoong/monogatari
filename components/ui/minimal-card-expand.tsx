@@ -54,6 +54,7 @@ const SkiperCard = ({
   <motion.button
     type="button"
     ref={expanded ? activeCardRef : undefined}
+    data-minimal-card-expand-card
     aria-pressed={expanded}
     aria-label={`${item.title} 카드 선택`}
     onClick={() => onUserExpand(item.id)}
@@ -68,7 +69,7 @@ const SkiperCard = ({
       backgroundPosition: "center",
       backgroundSize: "cover",
     } : undefined}
-    className={`relative flex min-w-0 cursor-pointer flex-col items-start justify-between overflow-hidden rounded-[24px] p-3 text-left text-white outline-none transition-transform duration-150 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${item.colorClassName} ${
+    className={`relative flex min-w-0 cursor-pointer flex-col items-start justify-between overflow-hidden rounded-[24px] p-3 text-left text-white outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${item.colorClassName} ${
       expanded
         ? "col-span-3 row-start-1 h-[180px] w-full"
         : condensed
@@ -203,6 +204,10 @@ export function MinimalCardExpand({
     if (!expandedId) return;
 
     const handleOutsidePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest("[data-minimal-card-expand-card]")) {
+        return;
+      }
       if (activeCardRef.current && !activeCardRef.current.contains(event.target as Node)) {
         setExpanded(null);
       }
