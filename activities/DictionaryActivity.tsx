@@ -118,7 +118,7 @@ export const DictionaryActivity: React.FC = () => {
               onOpenChange={setSearchOpen}
               onValueChange={setSearchQuery}
               open={searchOpen}
-              placeholder="회화 초성(예: ㄱㅅ) 또는 단어 검색..."
+              placeholder=""
               value={searchQuery}
             />
           </div>
