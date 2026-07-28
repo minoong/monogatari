@@ -312,11 +312,11 @@ export const DictionaryActivity: React.FC = () => {
 
               {/* Main Showcase Body */}
               <div className="my-auto flex w-full flex-col items-center justify-center gap-6 text-center">
-                {/* 태국어 대형 텍스트 전용 흰색 카드 (집중도 극대화 & 흰 배경 검은 텍스트) */}
-                <div className="w-full rounded-3xl bg-white p-7 text-slate-900 shadow-xl border border-slate-100">
+                {/* 태국어 대형 텍스트 전용 흰색 카드 (좌우 여백 없이 꽉 채움) */}
+                <div className="-mx-6 w-[calc(100%+3rem)] bg-white px-4 py-8 text-slate-900 shadow-xl border-y border-slate-100">
                   <h2
                     className={cn(
-                      "text-5xl font-black leading-tight tracking-tight text-slate-900 sm:text-6xl transition-transform duration-300",
+                      "text-5xl font-black leading-tight tracking-tight text-slate-900 sm:text-6xl transition-transform duration-300 break-words",
                       isRotated && "rotate-180"
                     )}
                   >
