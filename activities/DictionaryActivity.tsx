@@ -6,12 +6,12 @@ import {
   Clock,
   Maximize2,
   RotateCcw,
+  Search,
   Volume2,
   X,
 } from "lucide-react";
 import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
 import { triggerHapticFeedback } from "@/components/BottomNav";
-import { GooeyInput } from "@/components/ui/gooey-input";
 import { cn } from "@/lib/utils";
 
 const RECENT_SEARCHES_KEY = "monogatari_recent_phrase_searches";
@@ -116,22 +116,60 @@ export const DictionaryActivity: React.FC = () => {
     <AppScreen appBar={{ title: "회화 사전" }}>
       <main className="min-h-full w-full bg-slate-50 pb-28 dark:bg-slate-950">
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-4">
-          {/* Fixed Bottom Search Bar (GooeyInput - 쇼핑 리스트와 동일) */}
+          {/* Fixed Bottom Floating Search Bar (SVG 잔상 0% 모던 돋보기 플로팅 바) */}
           <div
             aria-label="회화 사전 검색"
-            className="fixed bottom-4 inset-x-0 z-40 mx-auto flex max-w-lg items-center justify-center px-5"
-            data-slot="dictionary-filter-toolbar"
+            className="fixed bottom-5 inset-x-0 z-40 mx-auto flex max-w-lg items-center justify-end px-5 pointer-events-none"
             role="search"
           >
-            <GooeyInput
-              className="w-full shadow-lg"
-              fullWidthOnExpand
-              onOpenChange={setSearchOpen}
-              onValueChange={setSearchQuery}
-              open={searchOpen}
-              placeholder=""
-              value={searchQuery}
-            />
+            {searchOpen || searchQuery ? (
+              <div className="pointer-events-auto flex h-12 w-full items-center gap-2 rounded-full border border-slate-200/90 bg-white/95 px-4 shadow-xl backdrop-blur-md transition-all animate-in fade-in zoom-in-95 duration-200 dark:border-slate-800 dark:bg-slate-900/95">
+                <Search className="size-4 shrink-0 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="한국어 또는 초성 검색 (예: ㄳㅎ)"
+                  autoFocus
+                  className="w-full bg-transparent text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-white"
+                />
+                {searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHapticFeedback(10);
+                      setSearchQuery("");
+                    }}
+                    className="flex size-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHapticFeedback(10);
+                      setSearchOpen(false);
+                    }}
+                    className="flex size-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHapticFeedback(12);
+                  setSearchOpen(true);
+                }}
+                aria-label="검색창 열기"
+                className="pointer-events-auto flex size-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-xl shadow-blue-600/30 transition hover:bg-blue-500 active:scale-95"
+              >
+                <Search className="size-5.5" />
+              </button>
+            )}
           </div>
 
           {/* Recent Searches (PWA LocalStorage) */}
