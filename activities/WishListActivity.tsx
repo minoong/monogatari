@@ -362,18 +362,19 @@ function WishListItem({
 
                 {wish.locations.length > 0 && (
                   <DetailLinkGroup
-                    icon={<MapPin className="size-3.5" />}
+                    icon={<MapPin className="size-3.5 text-red-500" />}
+                    isMap
                     items={wish.locations.map((location, index) => ({
                       href: location,
                       label: `Google Maps 위치 ${index + 1}`,
                     }))}
-                    title="위치"
+                    title="위치 지도"
                   />
                 )}
 
                 {wish.links.length > 0 && (
                   <DetailLinkGroup
-                    icon={<Link2 className="size-3.5" />}
+                    icon={<Link2 className="size-3.5 text-blue-500" />}
                     items={wish.links.map((link) => ({ href: link, label: link }))}
                     title="관련 링크"
                   />
@@ -435,34 +436,56 @@ function WishListItem({
 
 
 
+function formatLinkUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "");
+    if (host.includes("instagram")) return "인스타그램 바로가기";
+    if (host.includes("google") && parsed.pathname.includes("maps")) return "구글 맵스 지도";
+    if (host.includes("naver")) return "네이버 페이지";
+    if (host.includes("youtube")) return "유튜브 영상";
+    return `${host} 이동`;
+  } catch {
+    return url;
+  }
+}
+
 function DetailLinkGroup({
   icon,
   items,
   title,
+  isMap = false,
 }: {
   icon: ReactNode;
   items: { href: string; label: string }[];
   title: string;
+  isMap?: boolean;
 }) {
   return (
-    <div className="py-0.5 border-b border-slate-100/60 dark:border-slate-800/60 pb-2">
-      <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+    <div className="py-1">
+      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-slate-400">
         {icon}
         {title}
       </p>
-      <div className="flex flex-col gap-1">
-        {items.map((item) => (
-          <a
-            key={item.href}
-            className="flex items-center justify-between py-1 text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-            href={item.href}
-            rel="noreferrer"
-            target="_blank"
-          >
-            <span className="min-w-0 truncate">{item.label}</span>
-            <ArrowUpRight className="size-3.5 shrink-0" />
-          </a>
-        ))}
+      <div className="flex flex-wrap gap-2">
+        {items.map((item, index) => {
+          const displayLabel = isMap
+            ? items.length > 1 ? `구글 맵스 위치 ${index + 1}` : "구글 맵스에서 위치 확인"
+            : formatLinkUrl(item.href);
+
+          return (
+            <a
+              key={item.href}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100/90 px-3.5 py-2 text-xs font-bold text-slate-700 transition-all hover:bg-slate-200 active:scale-95 dark:bg-slate-800/90 dark:text-slate-200 dark:hover:bg-slate-700"
+              href={item.href}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <span className="min-w-0 max-w-[200px] truncate">{displayLabel}</span>
+              <ArrowUpRight className="size-3.5 shrink-0 opacity-60" />
+            </a>
+          );
+        })}
       </div>
     </div>
   );
