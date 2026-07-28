@@ -310,21 +310,23 @@ export const DictionaryActivity: React.FC = () => {
                 </div>
               </div>
 
-              {/* Main Big Thai Text Showcase */}
-              <div className="my-auto flex flex-col items-center justify-center text-center">
-                {/* 태국어 대형 텍스트만 180도 회전 (현지인 전용) */}
-                <h2
-                  className={cn(
-                    "text-4xl font-black leading-tight text-yellow-300 drop-shadow-md sm:text-5xl transition-transform duration-300",
-                    isRotated && "rotate-180"
-                  )}
-                >
-                  {showcasePhrase.th}
-                </h2>
+              {/* Main Showcase Body */}
+              <div className="my-auto flex w-full flex-col items-center justify-center gap-6 text-center">
+                {/* 태국어 대형 텍스트 전용 흰색 카드 (집중도 극대화 & 흰 배경 검은 텍스트) */}
+                <div className="w-full rounded-3xl bg-white p-7 text-slate-900 shadow-xl border border-slate-100">
+                  <h2
+                    className={cn(
+                      "text-5xl font-black leading-tight tracking-tight text-slate-900 sm:text-6xl transition-transform duration-300",
+                      isRotated && "rotate-180"
+                    )}
+                  >
+                    {showcasePhrase.th}
+                  </h2>
+                </div>
 
-                {/* 한국어 의미 & 발음은 사용자용 정방향 유지 */}
-                <div className="mt-8 flex flex-col items-center justify-center gap-1.5">
-                  <p className="text-xl font-bold text-white/90">
+                {/* 하단 한국어 의미 & 한글 발음 (사용자용 정방향 고정) */}
+                <div className="flex flex-col items-center justify-center gap-1.5 px-2">
+                  <p className="text-xl font-extrabold text-white">
                     {showcasePhrase.ko}
                   </p>
                   <p className="text-sm font-semibold text-blue-200">
