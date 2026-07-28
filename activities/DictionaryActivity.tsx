@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { Button, Card, Chip } from "@heroui/react";
+import { Button, Chip } from "@heroui/react";
 import {
   ArrowLeftRight,
   Clock,
@@ -219,10 +219,10 @@ export const DictionaryActivity: React.FC = () => {
             )}
           </div>
 
-          {/* Phrases List (HeroUI v3 Compound Component Card) */}
-          <div className="flex flex-col gap-3">
+          {/* Phrases List (좌우 여백 없는 엣지 투 엣지 컴팩트 리스트) */}
+          <div className="-mx-5 flex flex-col divide-y divide-slate-100 border-y border-slate-200/80 bg-white dark:divide-slate-800/80 dark:border-slate-800 dark:bg-slate-900">
             {filteredPhrases.length === 0 ? (
-              <div className="flex min-h-44 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex min-h-44 flex-col items-center justify-center p-6 text-center">
                 <p className="text-2xl">🔎</p>
                 <p className="mt-2 text-sm font-bold text-slate-700 dark:text-slate-300">
                   일치하는 회화 표현이 없어요
@@ -233,36 +233,36 @@ export const DictionaryActivity: React.FC = () => {
               </div>
             ) : (
               filteredPhrases.map((item) => (
-                <Card
+                <div
                   key={item.id}
-                  className="group relative cursor-pointer border border-slate-200/80 bg-white shadow-2xs transition-all hover:border-blue-400/80 hover:shadow-md active:scale-[0.99] dark:border-slate-800/90 dark:bg-slate-900 dark:hover:border-blue-500"
                   onClick={() => handleCardClick(item)}
+                  className="group relative cursor-pointer px-5 py-2.5 transition-colors hover:bg-slate-50 active:bg-slate-100 dark:hover:bg-slate-800/50 dark:active:bg-slate-800"
                 >
-                  <Card.Header className="flex flex-row items-start justify-between gap-2 p-4 pb-2">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="flex min-w-0 flex-wrap items-center gap-1.5 pr-2">
                       <Chip
                         size="sm"
                         variant="soft"
                         color="accent"
-                        className="font-extrabold text-[10px]"
+                        className="font-extrabold text-[10px] h-5 px-1.5"
                       >
                         {item.category}
                       </Chip>
-                      <Card.Title className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                      <span className="truncate text-xs font-bold text-slate-900 dark:text-white">
                         {item.ko}
-                      </Card.Title>
+                      </span>
                     </div>
 
-                    <div className="flex shrink-0 items-center gap-1.5">
+                    <div className="flex shrink-0 items-center gap-1">
                       <Button
                         isIconOnly
                         size="sm"
                         variant="secondary"
                         aria-label="발음 듣기"
                         onPress={(e) => playAudio(item.th, e)}
-                        className="size-8.5 rounded-xl text-blue-600 dark:text-blue-400"
+                        className="size-7.5 rounded-lg text-blue-600 dark:text-blue-400"
                       >
-                        <Volume2 className="size-4" />
+                        <Volume2 className="size-3.5" />
                       </Button>
                       <Button
                         isIconOnly
@@ -270,24 +270,23 @@ export const DictionaryActivity: React.FC = () => {
                         variant="secondary"
                         aria-label="현지인에게 크게 보여주기"
                         onPress={() => handleCardClick(item)}
-                        className="size-8.5 rounded-xl text-blue-600 dark:text-blue-400"
+                        className="size-7.5 rounded-lg text-blue-600 dark:text-blue-400"
                       >
-                        <Maximize2 className="size-4" />
+                        <Maximize2 className="size-3.5" />
                       </Button>
                     </div>
-                  </Card.Header>
+                  </div>
 
-                  <Card.Content className="p-4 pt-0">
-                    <p className="font-thai text-base font-semibold text-slate-900 dark:text-slate-100">
-                      {item.th}
-                    </p>
-                    <div className="pt-0.5">
-                      <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                        🗣️ {item.pron}
-                      </p>
-                    </div>
-                  </Card.Content>
-                </Card>
+                  {/* Thai Text */}
+                  <p className="mt-1 font-thai text-base font-semibold leading-snug text-slate-900 dark:text-slate-100">
+                    {item.th}
+                  </p>
+
+                  {/* Pronunciation */}
+                  <p className="mt-0.5 text-xs font-bold text-blue-600 dark:text-blue-400">
+                    🗣️ {item.pron}
+                  </p>
+                </div>
               ))
             )}
           </div>
