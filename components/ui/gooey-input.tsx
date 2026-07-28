@@ -23,7 +23,7 @@ function GooeyFilter({
   return (
     <svg className="pointer-events-none absolute size-0 overflow-hidden opacity-0" aria-hidden="true">
       <defs>
-        <filter id={filterId} x="0" y="0" width="100%" height="100%">
+        <filter id={filterId} x="-10%" y="-10%" width="120%" height="120%">
           <feGaussianBlur in="SourceGraphic" stdDeviation={blur} result="blur" />
           <feColorMatrix
             in="blur"
