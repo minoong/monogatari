@@ -362,7 +362,7 @@ function WishListItem({
 
                 {wish.locations.length > 0 && (
                   <DetailLinkGroup
-                    icon={<MapPin className="size-3.5 text-red-500" />}
+                    icon={<MapPin className="size-3.5" />}
                     isMap
                     items={wish.locations.map((location, index) => ({
                       href: location,
@@ -374,7 +374,7 @@ function WishListItem({
 
                 {wish.links.length > 0 && (
                   <DetailLinkGroup
-                    icon={<Link2 className="size-3.5 text-blue-500" />}
+                    icon={<Link2 className="size-3.5" />}
                     items={wish.links.map((link) => ({ href: link, label: link }))}
                     title="관련 링크"
                   />
@@ -440,11 +440,11 @@ function formatLinkUrl(url: string): string {
   try {
     const parsed = new URL(url);
     const host = parsed.hostname.replace(/^www\./, "");
-    if (host.includes("instagram")) return "인스타그램 바로가기";
+    if (host.includes("instagram")) return "인스타그램";
     if (host.includes("google") && parsed.pathname.includes("maps")) return "구글 맵스 지도";
     if (host.includes("naver")) return "네이버 페이지";
     if (host.includes("youtube")) return "유튜브 영상";
-    return `${host} 이동`;
+    return host;
   } catch {
     return url;
   }
