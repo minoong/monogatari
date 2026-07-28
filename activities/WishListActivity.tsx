@@ -270,7 +270,7 @@ function WishListItem({
                 <MorphingDialogTitle className="min-w-0">
                   <h2 className="truncate text-sm font-bold text-slate-900 dark:text-white">{wish.title}</h2>
                 </MorphingDialogTitle>
-                {price && <span className="shrink-0 rounded-lg bg-amber-50 px-2 py-0.5 text-xs font-extrabold tabular-nums text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">฿ {price}</span>}
+                {price && <span className="shrink-0 text-sm font-black tabular-nums text-amber-600 dark:text-amber-400">฿{price}</span>}
               </div>
               {wish.categories.length > 0 && (
                 <div className="mt-1.5 flex min-w-0 items-center gap-1 overflow-hidden">
@@ -408,20 +408,20 @@ function AnimatedPriceBlock({
   krwValue: number;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-100/70 px-4 py-2.5 dark:bg-slate-800/50">
-      <div className="flex items-center gap-2 min-w-0">
-        <span className="shrink-0 rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-extrabold text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">THB</span>
-        <div className="flex items-baseline gap-1 text-base font-extrabold tabular-nums text-slate-900 dark:text-white">
-          <span className="text-slate-400 font-semibold">฿</span>
+    <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 dark:border-white/5 dark:bg-white/5">
+      <div className="flex items-baseline gap-1.5 min-w-0">
+        <span className="text-xs font-bold text-amber-600 dark:text-amber-400">THB</span>
+        <div className="flex items-baseline gap-0.5 text-xl font-black tabular-nums tracking-tight text-slate-900 dark:text-white">
+          <span className="text-sm font-bold text-slate-400">฿</span>
           <NumberFlow format={{ maximumFractionDigits: 0 }} value={thbValue} />
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 text-xs font-semibold tabular-nums text-slate-500 dark:text-slate-400">
-        <span className="text-[11px] text-slate-400">약</span>
-        <div className="flex items-baseline gap-0.5 text-sm font-bold text-slate-700 dark:text-slate-200">
-          <span className="text-xs text-slate-400 font-normal">₩</span>
+      <div className="flex items-center gap-1 text-xs font-semibold tabular-nums text-slate-400">
+        <span>약</span>
+        <div className="flex items-baseline gap-0.5 font-bold text-slate-600 dark:text-slate-300">
           <NumberFlow format={{ maximumFractionDigits: 0 }} value={krwValue} />
+          <span className="text-[11px] font-normal text-slate-400">원</span>
         </div>
       </div>
     </div>
