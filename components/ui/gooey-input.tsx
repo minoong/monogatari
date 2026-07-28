@@ -21,9 +21,9 @@ function GooeyFilter({
   blur: number;
 }) {
   return (
-    <svg className="absolute hidden h-0 w-0" aria-hidden>
+    <svg className="pointer-events-none absolute size-0 overflow-hidden opacity-0" aria-hidden="true">
       <defs>
-        <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
+        <filter id={filterId} x="0" y="0" width="100%" height="100%">
           <feGaussianBlur in="SourceGraphic" stdDeviation={blur} result="blur" />
           <feColorMatrix
             in="blur"
