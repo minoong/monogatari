@@ -163,10 +163,10 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
                         onClick={() => handleCategoryToggle(cat)}
                         type="button"
                         className={cn(
-                          "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95",
+                          "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95",
                           isSelected
-                            ? "bg-slate-900 text-white shadow-xs dark:bg-white dark:text-slate-900"
-                            : "bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800",
+                            ? "border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900"
+                            : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400",
                         )}
                       >
                         {cat}
