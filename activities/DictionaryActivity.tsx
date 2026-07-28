@@ -6,7 +6,6 @@ import {
   Clock,
   Maximize2,
   RotateCcw,
-  Sparkles,
   Volume2,
   X,
 } from "lucide-react";
@@ -296,26 +295,28 @@ export const DictionaryActivity: React.FC = () => {
         {/* 현지인 보여주기 전면 모달 (Full-Screen Showcase Modal) */}
         {/* ======================================================== */}
         {showcasePhrase && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="relative flex h-[82dvh] w-full max-w-md flex-col justify-between overflow-hidden rounded-3xl border border-slate-700/80 bg-slate-900 p-6 text-white shadow-2xl">
-              {/* Header Actions */}
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 rounded-full border border-blue-400/30 bg-blue-500/15 px-3 py-1 text-xs font-bold text-blue-300">
-                  <Sparkles className="size-3.5" />
-                  <span>🇹🇭 현지인 보여주기용</span>
-                </span>
-
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="relative flex h-[82dvh] w-full max-w-md flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+              {/* Clean Minimal Header */}
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/80">
                 <div className="flex items-center gap-2">
+                  <span className="text-base">🇹🇭</span>
+                  <span className="text-sm font-extrabold text-slate-900 dark:text-white">
+                    현지인 보여주기
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => {
                       triggerHapticFeedback(12);
                       setIsRotated((prev) => !prev);
                     }}
-                    className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 transition hover:bg-slate-700 active:scale-95"
+                    className="flex items-center gap-1 rounded-xl border border-slate-200/80 bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-200 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                   >
-                    <ArrowLeftRight className="size-3.5 text-blue-400" />
-                    <span>태국어 {isRotated ? "정방향" : "180° 뒤집기"}</span>
+                    <ArrowLeftRight className="size-3.5 text-blue-600 dark:text-blue-400" />
+                    <span>{isRotated ? "180° 회전됨" : "정방향"}</span>
                   </button>
 
                   <button
@@ -325,7 +326,7 @@ export const DictionaryActivity: React.FC = () => {
                       setShowcasePhrase(null);
                     }}
                     aria-label="닫기"
-                    className="flex size-8 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-slate-300 transition hover:bg-slate-700 hover:text-white active:scale-90"
+                    className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700 active:scale-90 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white"
                   >
                     <X className="size-4" />
                   </button>
@@ -334,11 +335,11 @@ export const DictionaryActivity: React.FC = () => {
 
               {/* Main Showcase Body */}
               <div className="my-auto flex w-full flex-col items-center justify-center gap-6 text-center">
-                {/* 태국어 대형 텍스트 전용 흰색 카드 (좌우 여백 없이 꽉 채움) */}
-                <div className="-mx-6 w-[calc(100%+3rem)] border-y border-slate-200 bg-white px-5 py-9 text-slate-950 shadow-2xl">
+                {/* 태국어 대형 텍스트 카드 (깔끔한 블루 틴트 배경) */}
+                <div className="-mx-6 w-[calc(100%+3rem)] border-y border-blue-100 bg-blue-50/60 px-5 py-9 text-slate-900 shadow-2xs dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-white">
                   <h2
                     className={cn(
-                      "font-thai text-4xl sm:text-5xl font-semibold leading-relaxed tracking-wide text-slate-950 transition-transform duration-300 break-words",
+                      "font-thai text-4xl sm:text-5xl font-semibold leading-relaxed tracking-wide text-slate-900 transition-transform duration-300 break-words dark:text-slate-50",
                       isRotated && "rotate-180"
                     )}
                   >
@@ -346,12 +347,12 @@ export const DictionaryActivity: React.FC = () => {
                   </h2>
                 </div>
 
-                {/* 하단 한국어 의미 & 한글 발음 (사용자용 정방향 고정) */}
+                {/* 하단 한국어 의미 & 한글 발음 */}
                 <div className="flex flex-col items-center justify-center gap-2 px-2">
-                  <p className="text-2xl font-black tracking-tight text-white">
+                  <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                     {showcasePhrase.ko}
                   </p>
-                  <p className="inline-flex items-center gap-1 rounded-full border border-blue-800/60 bg-blue-950/70 px-3.5 py-1 text-xs font-extrabold text-blue-300">
+                  <p className="inline-flex items-center gap-1 rounded-full border border-blue-200/80 bg-blue-50 px-3.5 py-1 text-xs font-bold text-blue-600 dark:border-blue-800/40 dark:bg-blue-950/60 dark:text-blue-400">
                     <span>🗣️ 발음:</span>
                     <span>{showcasePhrase.pron}</span>
                   </p>
@@ -359,11 +360,11 @@ export const DictionaryActivity: React.FC = () => {
               </div>
 
               {/* Bottom Actions */}
-              <div className="flex items-center justify-between gap-3 border-t border-slate-800 pt-4">
+              <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => playAudio(showcasePhrase.th)}
-                  className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 font-extrabold text-white shadow-lg shadow-blue-600/30 transition hover:bg-blue-500 active:scale-95"
+                  className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 font-extrabold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 active:scale-95"
                 >
                   <Volume2 className="size-5" />
                   <span>태국어 발음 듣기</span>
@@ -374,7 +375,7 @@ export const DictionaryActivity: React.FC = () => {
                     triggerHapticFeedback(10);
                     setShowcasePhrase(null);
                   }}
-                  className="flex h-12 items-center justify-center rounded-2xl border border-slate-700 bg-slate-800 px-6 font-bold text-slate-200 transition hover:bg-slate-700 active:scale-95"
+                  className="flex h-12 items-center justify-center rounded-2xl border border-slate-200/80 bg-slate-100 px-6 font-bold text-slate-700 transition hover:bg-slate-200 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                 >
                   닫기
                 </button>
