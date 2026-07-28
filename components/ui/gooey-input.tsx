@@ -300,11 +300,6 @@ export function GooeyInput({
               autoComplete="off"
               value={searchText}
               onChange={handleChange}
-              onFocus={() => {
-                if (typeof window !== "undefined") {
-                  window.scrollTo(0, 0);
-                }
-              }}
               onBlur={handleBlur}
               disabled={disabled || !isExpanded}
               placeholder={placeholder}

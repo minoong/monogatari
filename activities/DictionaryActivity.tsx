@@ -49,13 +49,14 @@ export const DictionaryActivity: React.FC = () => {
       const vv = window.visualViewport;
       if (!vv) return;
 
-      const windowHeight = window.innerHeight;
-      const vvHeight = vv.height;
-      const heightDiff = windowHeight - vvHeight;
+      const keyboardInset = Math.max(
+        0,
+        window.innerHeight - (vv.height + vv.offsetTop),
+      );
 
       // 키보드가 나타났을 때 (100px 이상 차이 감지)
-      if (heightDiff > 100) {
-        setKeyboardHeight(heightDiff);
+      if (keyboardInset > 100) {
+        setKeyboardHeight(keyboardInset);
       } else {
         setKeyboardHeight(0);
       }
@@ -70,13 +71,6 @@ export const DictionaryActivity: React.FC = () => {
       vv.removeEventListener("scroll", handleViewportChange);
     };
   }, []);
-
-  // 검색 포커스 시 뷰포트 스크롤로 인해 화면 전체가 위로 튀어 올라가는 현상 원천 차단
-  useEffect(() => {
-    if (searchOpen && keyboardHeight > 0) {
-      window.scrollTo(0, 0);
-    }
-  }, [searchOpen, keyboardHeight]);
 
   // 최근 검색어 추가 (초성/검색어로 필터 후 카드를 탭했을 때 저장)
   const saveRecentSearch = (query: string) => {
@@ -159,30 +153,8 @@ export const DictionaryActivity: React.FC = () => {
           style={{
             paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 80}px` : "96px",
           }}
-        >
-          <section className="mx-auto flex w-full max-w-lg flex-col gap-4">
-            {/* Recent Searches (PWA LocalStorage) */}
-          {/* Fixed Bottom Search Bar (visualViewport 키보드 자동 대응) */}
-          <div
-            aria-label="회화 사전 검색"
-            className="fixed inset-x-0 z-40 mx-auto flex max-w-lg items-center justify-center px-5 transition-[bottom] duration-150 ease-out"
-            style={{
-              bottom: keyboardHeight > 0 ? `${keyboardHeight + 12}px` : "16px",
-            }}
-            data-slot="dictionary-filter-toolbar"
-            role="search"
           >
-            <GooeyInput
-              className="w-full"
-              fullWidthOnExpand
-              onOpenChange={setSearchOpen}
-              onValueChange={setSearchQuery}
-              open={searchOpen}
-              placeholder=""
-              value={searchQuery}
-            />
-          </div>
-
+          <section className="mx-auto flex w-full max-w-lg flex-col gap-4">
           {/* Recent Searches (PWA LocalStorage) */}
           {recentSearches.length > 0 && (
             <div className="flex flex-col gap-1.5 pt-0.5">
@@ -348,6 +320,26 @@ export const DictionaryActivity: React.FC = () => {
         </section>
       </div>
 
+      <div
+        aria-label="회화 사전 검색"
+        className="fixed inset-x-0 z-40 mx-auto flex max-w-lg items-center justify-center px-5 transition-[bottom] duration-150 ease-out"
+        style={{
+          bottom: keyboardHeight > 0 ? `${keyboardHeight + 12}px` : "16px",
+        }}
+        data-slot="dictionary-filter-toolbar"
+        role="search"
+      >
+        <GooeyInput
+          className="w-full"
+          fullWidthOnExpand
+          onOpenChange={setSearchOpen}
+          onValueChange={setSearchQuery}
+          open={searchOpen}
+          placeholder=""
+          value={searchQuery}
+        />
+      </div>
+
         {/* ======================================================== */}
         {/* 현지인 보여주기 전면 모달 (Full-Screen Showcase Modal) */}
         {/* ======================================================== */}
@@ -445,4 +437,3 @@ export const DictionaryActivity: React.FC = () => {
     </AppScreen>
   );
 };
-
