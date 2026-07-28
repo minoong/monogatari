@@ -60,7 +60,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
   const [deletingWish, setDeletingWish] = useState<WishItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes", type], queryFn: () => fetchWishes(type) });
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
@@ -74,15 +74,27 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
     return ["전체", ...Array.from(categoriesSet)];
   }, [wishes]);
 
+  const handleCategoryToggle = (cat: string) => {
+    triggerHapticFeedback(10);
+    if (cat === "전체") {
+      setSelectedCategories([]);
+      return;
+    }
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
+    );
+  };
+
   const filteredWishes = useMemo(
     () =>
       wishes.filter((wish) => {
         const matchesSearch = wishMatchesSearch(wish, deferredSearchQuery);
         const matchesCategory =
-          selectedCategory === "전체" || wish.categories.includes(selectedCategory);
+          selectedCategories.length === 0 ||
+          selectedCategories.some((selectedCat) => wish.categories.includes(selectedCat));
         return matchesSearch && matchesCategory;
       }),
-    [deferredSearchQuery, selectedCategory, wishes],
+    [deferredSearchQuery, selectedCategories, wishes],
   );
   const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
     queryKey: EXCHANGE_RATE_QUERY_KEY,
@@ -119,7 +131,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
           <div
             aria-label={`${meta.title} 검색 및 필터`}
-            className="sticky top-0 z-30 -mx-2 flex min-h-14 items-center justify-center px-2 py-2 backdrop-blur-md"
+            className="-mx-2 flex min-h-14 items-center justify-center px-2 py-2"
             data-slot="wish-filter-toolbar"
             role="search"
           >
@@ -137,18 +149,18 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
           {/* Category Filter Chips & Status Bar */}
           {!isLoading && !isError && wishes.length > 0 && (
             <div className="-mt-1 flex flex-col gap-3">
-              {/* Category Filter Chips */}
+              {/* Category Filter Chips (Multi-Select) */}
               {availableCategories.length > 1 && (
                 <div className="-mx-5 flex items-center gap-1.5 overflow-x-auto px-5 no-scrollbar py-0.5">
                   {availableCategories.map((cat) => {
-                    const isSelected = selectedCategory === cat;
+                    const isSelected =
+                      cat === "전체"
+                        ? selectedCategories.length === 0
+                        : selectedCategories.includes(cat);
                     return (
                       <button
                         key={cat}
-                        onClick={() => {
-                          triggerHapticFeedback(10);
-                          setSelectedCategory(cat);
-                        }}
+                        onClick={() => handleCategoryToggle(cat)}
                         type="button"
                         className={cn(
                           "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95",
@@ -168,24 +180,24 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
               <div className="flex items-center justify-between px-1 text-xs text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-1.5 font-medium">
                   <span>
-                    {searchQuery || selectedCategory !== "전체" ? "검색/필터 결과" : "전체"}
+                    {searchQuery || selectedCategories.length > 0 ? "검색/필터 결과" : "전체"}
                   </span>
                   <span className="font-extrabold text-slate-900 dark:text-white tabular-nums">
                     {filteredWishes.length}건
                   </span>
-                  {(searchQuery || selectedCategory !== "전체") && (
+                  {(searchQuery || selectedCategories.length > 0) && (
                     <span className="text-[11px] text-slate-400">
                       (총 {wishes.length}건)
                     </span>
                   )}
                 </div>
 
-                {(searchQuery || selectedCategory !== "전체") && (
+                {(searchQuery || selectedCategories.length > 0) && (
                   <button
                     onClick={() => {
                       triggerHapticFeedback(10);
                       setSearchQuery("");
-                      setSelectedCategory("전체");
+                      setSelectedCategories([]);
                     }}
                     type="button"
                     className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
