@@ -104,21 +104,7 @@ export const DictionaryActivity: React.FC = () => {
     <AppScreen appBar={{ title: "회화 사전" }}>
       <main className="min-h-full w-full bg-slate-50 pb-16 dark:bg-slate-950">
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
-          {/* Header Banner */}
-          <header className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 p-5 text-white shadow-lg shadow-blue-500/20">
-            <div className="flex items-center justify-between">
-              <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold backdrop-blur-md">
-                🇹🇭 필수 회화 30선
-              </span>
-              <span className="text-xs text-white/80">초성 검색 지원</span>
-            </div>
-            <h1 className="mt-3 text-xl font-black leading-tight">
-              태국 여행 필살 회화 사전
-            </h1>
-            <p className="mt-1 text-xs text-white/80">
-              카드 탭 시 현지인에게 크게 보여줄 수 있어요!
-            </p>
-          </header>
+
 
           {/* Search Bar */}
           <div className="relative flex items-center">
