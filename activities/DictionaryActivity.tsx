@@ -17,13 +17,11 @@ import { cn } from "@/lib/utils";
 const RECENT_SEARCHES_KEY = "monogatari_recent_phrase_searches";
 const MAX_RECENT_SEARCHES = 8;
 
-// 태국어 문장 길이에 따른 가변 반응형 폰트 크기 계산
+// 태국어 텍스트 시원하고 큼직한 가변 폰트 크기 계산 (항상 현지인이 잘 보이도록 대형 유지)
 const getDynamicThaiFontSize = (text: string) => {
   const len = text.length;
-  if (len <= 10) return "text-5xl sm:text-6xl font-bold";
-  if (len <= 18) return "text-3xl sm:text-4xl font-semibold";
-  if (len <= 30) return "text-2xl sm:text-3xl font-semibold";
-  return "text-xl sm:text-2xl font-semibold";
+  if (len <= 14) return "text-4xl sm:text-5xl font-semibold";
+  return "text-3xl sm:text-4xl font-semibold";
 };
 
 export const DictionaryActivity: React.FC = () => {
