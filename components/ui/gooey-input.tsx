@@ -149,7 +149,12 @@ export function GooeyInput({
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
   const [measuredCollapsedWidth, setMeasuredCollapsedWidth] = useState(115);
   const [availableWidth, setAvailableWidth] = useState(0);
-  const [isFocusProxyActive, setIsFocusProxyActive] = useState(false);
+  const [focusProxyRect, setFocusProxyRect] = useState<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  } | null>(null);
 
   const isControlled = valueProp !== undefined;
   const isOpenControlled = openProp !== undefined;
@@ -178,13 +183,43 @@ export function GooeyInput({
   );
 
   useLayoutEffect(() => {
-    if (isExpanded) {
+    if (isExpanded && (!focusProxy || focusProxyRect)) {
       focusTargetRef.current?.focus({ preventScroll: true });
     } else if (prevExpandedRef.current) {
       setSearchText("");
     }
     prevExpandedRef.current = isExpanded;
-  }, [focusTargetRef, isExpanded, setSearchText]);
+  }, [focusProxy, focusProxyRect, focusTargetRef, isExpanded, setSearchText]);
+
+  useLayoutEffect(() => {
+    if (!focusProxy || !isExpanded || !inputRef.current) {
+      setFocusProxyRect(null);
+      return;
+    }
+
+    const updateFocusProxyRect = () => {
+      const rect = inputRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setFocusProxyRect({
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+      });
+    };
+
+    const observer = new ResizeObserver(updateFocusProxyRect);
+    observer.observe(inputRef.current);
+    window.visualViewport?.addEventListener("resize", updateFocusProxyRect);
+    window.visualViewport?.addEventListener("scroll", updateFocusProxyRect);
+    updateFocusProxyRect();
+
+    return () => {
+      observer.disconnect();
+      window.visualViewport?.removeEventListener("resize", updateFocusProxyRect);
+      window.visualViewport?.removeEventListener("scroll", updateFocusProxyRect);
+    };
+  }, [focusProxy, isExpanded]);
 
   useLayoutEffect(() => {
     if (collapsedWidth !== undefined) return;
@@ -242,14 +277,6 @@ export function GooeyInput({
     setSearchText("");
     focusTargetRef.current?.focus({ preventScroll: true });
   }, [focusTargetRef, setSearchText]);
-
-  const handleFocusProxyPointerDown = useCallback(
-    (event: React.PointerEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      focusProxyRef.current?.focus({ preventScroll: true });
-    },
-    [],
-  );
 
   const surfaceClass =
     "bg-foreground text-background shadow-sm ring-1 ring-border/60";
@@ -331,22 +358,6 @@ export function GooeyInput({
                 classNames?.input,
               )}
             />
-            {focusProxy && isExpanded && (
-              <button
-                aria-label="검색어 입력"
-                className="absolute inset-y-0 left-4 right-14 z-10 flex min-w-0 items-center overflow-hidden text-left text-base font-medium text-background outline-none"
-                onPointerDown={handleFocusProxyPointerDown}
-                type="button"
-              >
-                <span className="truncate">{searchText}</span>
-                {isFocusProxyActive && (
-                  <span
-                    aria-hidden="true"
-                    className="ml-0.5 h-5 w-0.5 shrink-0 animate-caret-blink rounded-full bg-blue-400"
-                  />
-                )}
-              </button>
-            )}
             {isExpanded && searchText && (
               <button
                 aria-label="검색어 지우기"
@@ -384,22 +395,18 @@ export function GooeyInput({
       </div>
       {focusProxy &&
         isExpanded &&
+        focusProxyRect &&
         typeof document !== "undefined" &&
         createPortal(
           <input
             ref={focusProxyRef}
-            aria-hidden="true"
             autoComplete="off"
-            className="fixed top-0 left-0 h-px w-px opacity-0"
+            className="fixed z-50 border-0 bg-transparent px-0 text-base font-medium text-background outline-none [&::-webkit-search-cancel-button]:hidden"
             enterKeyHint="search"
             inputMode="search"
-            onBlur={() => {
-              setIsFocusProxyActive(false);
-              handleBlur();
-            }}
+            onBlur={handleBlur}
             onChange={handleChange}
-            onFocus={() => setIsFocusProxyActive(true)}
-            tabIndex={-1}
+            style={focusProxyRect}
             type="search"
             value={searchText}
           />,
