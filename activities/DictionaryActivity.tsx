@@ -74,13 +74,13 @@ export const DictionaryActivity: React.FC = () => {
     });
   }, [searchQuery, selectedCategory]);
 
-  // 카드 탭 시: 현지인 크게 보여주기 모달 오픈 + 최근 검색어 자동 저장
+  // 카드 탭 시: 현지인 크게 보여주기 모달 오픈 (기본 180도 뒤집힌 본문) + 최근 검색어 자동 저장
   const handleCardClick = (phrase: PhraseItem) => {
     triggerHapticFeedback(15);
     if (searchQuery.trim()) {
       saveRecentSearch(searchQuery);
     }
-    setIsRotated(false);
+    setIsRotated(true);
     setShowcasePhrase(phrase);
   };
 
@@ -278,12 +278,7 @@ export const DictionaryActivity: React.FC = () => {
         {/* ======================================================== */}
         {showcasePhrase && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-in fade-in duration-200">
-            <div
-              className={cn(
-                "relative flex h-[85dvh] w-full max-w-md flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 via-blue-950 to-slate-950 p-6 text-white shadow-2xl transition-transform duration-300",
-                isRotated && "rotate-180"
-              )}
-            >
+            <div className="relative flex h-[85dvh] w-full max-w-md flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 via-blue-950 to-slate-950 p-6 text-white shadow-2xl">
               {/* Header Actions */}
               <div className="flex items-center justify-between">
                 <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold backdrop-blur-md">
@@ -299,7 +294,7 @@ export const DictionaryActivity: React.FC = () => {
                     className="flex items-center gap-1 rounded-xl bg-white/15 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-white/25 active:scale-95"
                   >
                     <ArrowLeftRight className="size-3.5" />
-                    180° 뒤집기
+                    본문 {isRotated ? "정방향" : "180° 뒤집기"}
                   </button>
                   <button
                     type="button"
@@ -315,15 +310,20 @@ export const DictionaryActivity: React.FC = () => {
                 </div>
               </div>
 
-              {/* Main Big Thai Text */}
-              <div className="my-auto flex flex-col items-center justify-center text-center">
+              {/* Main Big Thai Text (Only Content Rotated) */}
+              <div
+                className={cn(
+                  "my-auto flex flex-col items-center justify-center text-center transition-transform duration-300",
+                  isRotated && "rotate-180"
+                )}
+              >
                 <h2 className="text-4xl font-black leading-tight text-yellow-300 drop-shadow-md sm:text-5xl">
                   {showcasePhrase.th}
                 </h2>
                 <p className="mt-6 text-xl font-bold text-white/90">
                   {showcasePhrase.ko}
                 </p>
-                <p className="mt-2 text-sm text-blue-200 font-semibold">
+                <p className="mt-2 text-sm font-semibold text-blue-200">
                   발음: {showcasePhrase.pron}
                 </p>
               </div>
