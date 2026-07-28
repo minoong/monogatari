@@ -17,6 +17,15 @@ import { cn } from "@/lib/utils";
 const RECENT_SEARCHES_KEY = "monogatari_recent_phrase_searches";
 const MAX_RECENT_SEARCHES = 8;
 
+// 태국어 문장 길이에 따른 가변 반응형 폰트 크기 계산
+const getDynamicThaiFontSize = (text: string) => {
+  const len = text.length;
+  if (len <= 10) return "text-5xl sm:text-6xl font-bold";
+  if (len <= 18) return "text-3xl sm:text-4xl font-semibold";
+  if (len <= 30) return "text-2xl sm:text-3xl font-semibold";
+  return "text-xl sm:text-2xl font-semibold";
+};
+
 export const DictionaryActivity: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -335,11 +344,12 @@ export const DictionaryActivity: React.FC = () => {
 
               {/* Main Showcase Body */}
               <div className="my-auto flex w-full flex-col items-center justify-center gap-6 text-center">
-                {/* 태국어 대형 텍스트 카드 (깔끔한 블루 틴트 배경) */}
-                <div className="-mx-6 w-[calc(100%+3rem)] border-y border-blue-100 bg-blue-50/60 px-5 py-9 text-slate-900 shadow-2xs dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-white">
+                {/* 태국어 대형 텍스트 카드 (길이에 따른 가변 반응형 폰트 크기) */}
+                <div className="-mx-6 w-[calc(100%+3rem)] border-y border-blue-100 bg-blue-50/60 px-5 py-9 text-slate-900 shadow-2xs dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-white flex items-center justify-center min-h-[140px]">
                   <h2
                     className={cn(
-                      "font-thai text-4xl sm:text-5xl font-semibold leading-relaxed tracking-wide text-slate-900 transition-transform duration-300 break-words dark:text-slate-50",
+                      "font-thai leading-relaxed tracking-wide text-slate-900 transition-all duration-300 break-words text-center dark:text-slate-50",
+                      getDynamicThaiFontSize(showcasePhrase.th),
                       isRotated && "rotate-180"
                     )}
                   >
