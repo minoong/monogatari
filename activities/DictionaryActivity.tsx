@@ -4,12 +4,12 @@ import {
   ArrowLeftRight,
   Clock,
   RotateCcw,
-  Search,
   Volume2,
   X,
 } from "lucide-react";
 import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
 import { triggerHapticFeedback } from "@/components/BottomNav";
+import { GooeyInput } from "@/components/ui/gooey-input";
 import { cn } from "@/lib/utils";
 
 const RECENT_SEARCHES_KEY = "monogatari_recent_phrase_searches";
@@ -17,6 +17,7 @@ const MAX_RECENT_SEARCHES = 8;
 
 export const DictionaryActivity: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("전체");
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
@@ -102,32 +103,24 @@ export const DictionaryActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "회화 사전" }}>
-      <main className="min-h-full w-full bg-slate-50 pb-16 dark:bg-slate-950">
+      <main className="min-h-full w-full bg-slate-50 pb-28 dark:bg-slate-950">
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
-
-
-          {/* Search Bar */}
-          <div className="relative flex items-center">
-            <Search className="absolute left-4 size-4.5 text-slate-400" />
-            <input
-              type="text"
+          {/* Fixed Bottom Search Bar (GooeyInput - 쇼핑 리스트와 동일) */}
+          <div
+            aria-label="회화 사전 검색"
+            className="fixed bottom-4 inset-x-0 z-40 mx-auto flex max-w-lg items-center justify-center px-5"
+            data-slot="dictionary-filter-toolbar"
+            role="search"
+          >
+            <GooeyInput
+              className="w-full shadow-lg"
+              fullWidthOnExpand
+              onOpenChange={setSearchOpen}
+              onValueChange={setSearchQuery}
+              open={searchOpen}
+              placeholder="회화 초성(예: ㄱㅅ) 또는 단어 검색..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="한글 초성(예: ㄱㅅ, ㅁㅇㅃ) 또는 단어로 검색..."
-              className="h-12 w-full rounded-2xl border border-slate-200/80 bg-white pl-11 pr-10 text-sm font-semibold text-slate-800 shadow-2xs transition placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
             />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHapticFeedback(10);
-                  setSearchQuery("");
-                }}
-                className="absolute right-3.5 flex size-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400"
-              >
-                <X className="size-3.5" />
-              </button>
-            )}
           </div>
 
           {/* Recent Searches (PWA LocalStorage) */}
