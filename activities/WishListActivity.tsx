@@ -1,13 +1,15 @@
 import React, { useDeferredValue, useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { ArrowUpRight, Image as ImageIcon, Link2, MapPin, Pencil, Plus, RefreshCw, Store, Trash2, ZoomIn } from "lucide-react";
+import { ArrowUpRight, Image as ImageIcon, Link2, MapPin, Pencil, Plus, RefreshCw, RotateCcw, Store, Trash2, ZoomIn } from "lucide-react";
 import { Button, Chip } from "@heroui/react";
 import { toast } from "sonner";
 import { WishDrawer } from "@/components/wish/WishDrawer";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { GooeyInput } from "@/components/ui/gooey-input";
+import { triggerHapticFeedback } from "@/components/BottomNav";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogDescription,
@@ -58,11 +60,29 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
   const [deletingWish, setDeletingWish] = useState<WishItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("전체");
   const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes", type], queryFn: () => fetchWishes(type) });
   const deferredSearchQuery = useDeferredValue(searchQuery);
+
+  const availableCategories = useMemo(() => {
+    const categoriesSet = new Set<string>();
+    wishes.forEach((wish) => {
+      wish.categories.forEach((cat) => {
+        if (cat.trim()) categoriesSet.add(cat.trim());
+      });
+    });
+    return ["전체", ...Array.from(categoriesSet)];
+  }, [wishes]);
+
   const filteredWishes = useMemo(
-    () => wishes.filter((wish) => wishMatchesSearch(wish, deferredSearchQuery)),
-    [deferredSearchQuery, wishes],
+    () =>
+      wishes.filter((wish) => {
+        const matchesSearch = wishMatchesSearch(wish, deferredSearchQuery);
+        const matchesCategory =
+          selectedCategory === "전체" || wish.categories.includes(selectedCategory);
+        return matchesSearch && matchesCategory;
+      }),
+    [deferredSearchQuery, selectedCategory, wishes],
   );
   const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
     queryKey: EXCHANGE_RATE_QUERY_KEY,
@@ -99,7 +119,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
           <div
             aria-label={`${meta.title} 검색 및 필터`}
-            className="sticky top-0 z-30 -mx-2 flex min-h-14 items-center justify-center px-2 py-2"
+            className="sticky top-0 z-30 -mx-2 flex min-h-14 items-center justify-center px-2 py-2 backdrop-blur-md"
             data-slot="wish-filter-toolbar"
             role="search"
           >
@@ -113,6 +133,70 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
               value={searchQuery}
             />
           </div>
+
+          {/* Category Filter Chips & Status Bar */}
+          {!isLoading && !isError && wishes.length > 0 && (
+            <div className="-mt-1 flex flex-col gap-3">
+              {/* Category Filter Chips */}
+              {availableCategories.length > 1 && (
+                <div className="-mx-5 flex items-center gap-1.5 overflow-x-auto px-5 no-scrollbar py-0.5">
+                  {availableCategories.map((cat) => {
+                    const isSelected = selectedCategory === cat;
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => {
+                          triggerHapticFeedback(10);
+                          setSelectedCategory(cat);
+                        }}
+                        type="button"
+                        className={cn(
+                          "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95",
+                          isSelected
+                            ? "bg-slate-900 text-white shadow-xs dark:bg-white dark:text-slate-900"
+                            : "bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800",
+                        )}
+                      >
+                        {cat}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Result Count & Clear Status */}
+              <div className="flex items-center justify-between px-1 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-1.5 font-medium">
+                  <span>
+                    {searchQuery || selectedCategory !== "전체" ? "검색/필터 결과" : "전체"}
+                  </span>
+                  <span className="font-extrabold text-slate-900 dark:text-white tabular-nums">
+                    {filteredWishes.length}건
+                  </span>
+                  {(searchQuery || selectedCategory !== "전체") && (
+                    <span className="text-[11px] text-slate-400">
+                      (총 {wishes.length}건)
+                    </span>
+                  )}
+                </div>
+
+                {(searchQuery || selectedCategory !== "전체") && (
+                  <button
+                    onClick={() => {
+                      triggerHapticFeedback(10);
+                      setSearchQuery("");
+                      setSelectedCategory("전체");
+                    }}
+                    type="button"
+                    className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                  >
+                    <RotateCcw className="size-3" />
+                    필터 초기화
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           <header className={`rounded-3xl bg-gradient-to-br ${meta.accent} px-5 py-5 text-white shadow-lg shadow-slate-200/70 dark:shadow-none`}>
             <p className="text-2xl" aria-hidden="true">{meta.icon}</p>
