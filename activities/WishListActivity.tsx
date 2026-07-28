@@ -334,14 +334,15 @@ function WishListItem({
                 </h2>
               </MorphingDialogTitle>
 
-              {/* E-Commerce Price Section */}
+              {/* Price Section */}
               {price && priceKrw !== null && (
-                <div className="mt-2 flex items-baseline gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
-                  <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
+                <div className="mt-1 flex items-center gap-1.5 text-sm tabular-nums">
+                  <span className="font-extrabold text-amber-600 dark:text-amber-400">
                     ฿ {wish.target_price_thb!.toLocaleString()}
                   </span>
-                  <span className="text-xs font-semibold text-slate-400 tabular-nums">
-                    (약 {priceKrw.toLocaleString()}원)
+                  <span className="text-slate-300 dark:text-slate-700">·</span>
+                  <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
+                    약 {priceKrw.toLocaleString()}원
                   </span>
                 </div>
               )}
