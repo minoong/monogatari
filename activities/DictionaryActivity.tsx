@@ -294,7 +294,7 @@ export const DictionaryActivity: React.FC = () => {
                     className="flex items-center gap-1 rounded-xl bg-white/15 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-white/25 active:scale-95"
                   >
                     <ArrowLeftRight className="size-3.5" />
-                    본문 {isRotated ? "정방향" : "180° 뒤집기"}
+                    태국어 {isRotated ? "정방향" : "180° 뒤집기"}
                   </button>
                   <button
                     type="button"
@@ -310,22 +310,27 @@ export const DictionaryActivity: React.FC = () => {
                 </div>
               </div>
 
-              {/* Main Big Thai Text (Only Content Rotated) */}
-              <div
-                className={cn(
-                  "my-auto flex flex-col items-center justify-center text-center transition-transform duration-300",
-                  isRotated && "rotate-180"
-                )}
-              >
-                <h2 className="text-4xl font-black leading-tight text-yellow-300 drop-shadow-md sm:text-5xl">
+              {/* Main Big Thai Text Showcase */}
+              <div className="my-auto flex flex-col items-center justify-center text-center">
+                {/* 태국어 대형 텍스트만 180도 회전 (현지인 전용) */}
+                <h2
+                  className={cn(
+                    "text-4xl font-black leading-tight text-yellow-300 drop-shadow-md sm:text-5xl transition-transform duration-300",
+                    isRotated && "rotate-180"
+                  )}
+                >
                   {showcasePhrase.th}
                 </h2>
-                <p className="mt-6 text-xl font-bold text-white/90">
-                  {showcasePhrase.ko}
-                </p>
-                <p className="mt-2 text-sm font-semibold text-blue-200">
-                  발음: {showcasePhrase.pron}
-                </p>
+
+                {/* 한국어 의미 & 발음은 사용자용 정방향 유지 */}
+                <div className="mt-8 flex flex-col items-center justify-center gap-1.5">
+                  <p className="text-xl font-bold text-white/90">
+                    {showcasePhrase.ko}
+                  </p>
+                  <p className="text-sm font-semibold text-blue-200">
+                    발음: {showcasePhrase.pron}
+                  </p>
+                </div>
               </div>
 
               {/* Bottom Actions */}
