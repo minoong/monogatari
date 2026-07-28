@@ -86,6 +86,38 @@ export const DictionaryActivity: React.FC = () => {
     };
   }, []);
 
+  // iOS는 키보드를 열 때 Stackflow의 상위 스크롤 컨테이너까지 자동으로 이동시킬 수 있습니다.
+  // 검색 포커스 중에는 화면의 기준점을 항상 최상단으로 되돌리고, 목록만 내부에서 스크롤합니다.
+  useLayoutEffect(() => {
+    if (!searchOpen || typeof window === "undefined") return;
+
+    const resetScreenScroll = () => {
+      const paperContent = document.querySelector<HTMLElement>(
+        ".dictionary-screen > [data-part='paper'] > div",
+      );
+
+      paperContent?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    };
+
+    const frameId = requestAnimationFrame(resetScreenScroll);
+    const settleTimer = window.setTimeout(resetScreenScroll, 180);
+    const viewport = window.visualViewport;
+
+    resetScreenScroll();
+    viewport?.addEventListener("resize", resetScreenScroll);
+    viewport?.addEventListener("scroll", resetScreenScroll);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.clearTimeout(settleTimer);
+      viewport?.removeEventListener("resize", resetScreenScroll);
+      viewport?.removeEventListener("scroll", resetScreenScroll);
+    };
+  }, [searchOpen]);
+
   // 최근 검색어 추가 (초성/검색어로 필터 후 카드를 탭했을 때 저장)
   const saveRecentSearch = (query: string) => {
     const trimmed = query.trim();

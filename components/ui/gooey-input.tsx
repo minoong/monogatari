@@ -173,7 +173,7 @@ export function GooeyInput({
 
   useEffect(() => {
     if (isExpanded) {
-      inputRef.current?.focus();
+      inputRef.current?.focus({ preventScroll: true });
     } else if (prevExpandedRef.current) {
       setSearchText("");
     }
