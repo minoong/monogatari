@@ -197,25 +197,47 @@ export function GooeyInput({
       return;
     }
 
+    let animationFrameId: number;
+
     const updateFocusProxyRect = () => {
       const rect = inputRef.current?.getBoundingClientRect();
       if (!rect) return;
-      setFocusProxyRect({
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height,
+      setFocusProxyRect((previous) => {
+        const next = {
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height,
+        };
+
+        if (
+          previous &&
+          Math.abs(previous.left - next.left) < 0.5 &&
+          Math.abs(previous.top - next.top) < 0.5 &&
+          Math.abs(previous.width - next.width) < 0.5 &&
+          Math.abs(previous.height - next.height) < 0.5
+        ) {
+          return previous;
+        }
+
+        return next;
       });
+    };
+
+    const syncFocusProxyRect = () => {
+      updateFocusProxyRect();
+      animationFrameId = requestAnimationFrame(syncFocusProxyRect);
     };
 
     const observer = new ResizeObserver(updateFocusProxyRect);
     observer.observe(inputRef.current);
     window.visualViewport?.addEventListener("resize", updateFocusProxyRect);
     window.visualViewport?.addEventListener("scroll", updateFocusProxyRect);
-    updateFocusProxyRect();
+    syncFocusProxyRect();
 
     return () => {
       observer.disconnect();
+      cancelAnimationFrame(animationFrameId);
       window.visualViewport?.removeEventListener("resize", updateFocusProxyRect);
       window.visualViewport?.removeEventListener("scroll", updateFocusProxyRect);
     };
@@ -361,7 +383,7 @@ export function GooeyInput({
             {isExpanded && searchText && (
               <button
                 aria-label="검색어 지우기"
-                className="mr-1 flex size-7 shrink-0 items-center justify-center rounded-full bg-background/15 text-background ring-1 ring-background/30 transition-colors hover:bg-background/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/70"
+                className="relative z-[60] mr-1 flex size-7 shrink-0 items-center justify-center rounded-full bg-background/15 text-background ring-1 ring-background/30 transition-colors hover:bg-background/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/70"
                 onClick={handleClear}
                 onMouseDown={(event) => event.preventDefault()}
                 type="button"
