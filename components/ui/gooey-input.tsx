@@ -9,6 +9,7 @@ import {
   useCallback,
   type ChangeEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -112,6 +113,8 @@ export interface GooeyInputProps {
   open?: boolean;
   disabled?: boolean;
   fullWidthOnExpand?: boolean;
+  /** iOS PWA에서 화면 스크롤 없이 키보드를 열기 위한 문서 최상단 포커스 input 사용 여부 */
+  focusProxy?: boolean;
 }
 
 export function GooeyInput({
@@ -129,6 +132,7 @@ export function GooeyInput({
   open: openProp,
   disabled = false,
   fullWidthOnExpand = false,
+  focusProxy = false,
 }: GooeyInputProps) {
   const reactId = useId();
   const safeId = reactId.replace(/:/g, "");
@@ -137,6 +141,7 @@ export function GooeyInput({
   const inputLayoutId = `gooey-input-field-${safeId}`;
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const focusProxyRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const placeholderMeasureRef = useRef<HTMLSpanElement>(null);
   const prevExpandedRef = useRef(false);
@@ -149,6 +154,7 @@ export function GooeyInput({
   const isOpenControlled = openProp !== undefined;
   const isExpanded = isOpenControlled ? openProp : uncontrolledOpen;
   const searchText = isControlled ? valueProp : uncontrolledValue;
+  const focusTargetRef = focusProxy ? focusProxyRef : inputRef;
 
   const setSearchText = useCallback(
     (next: string) => {
@@ -172,12 +178,12 @@ export function GooeyInput({
 
   useLayoutEffect(() => {
     if (isExpanded) {
-      inputRef.current?.focus({ preventScroll: true });
+      focusTargetRef.current?.focus({ preventScroll: true });
     } else if (prevExpandedRef.current) {
       setSearchText("");
     }
     prevExpandedRef.current = isExpanded;
-  }, [isExpanded, setSearchText]);
+  }, [focusTargetRef, isExpanded, setSearchText]);
 
   useLayoutEffect(() => {
     if (collapsedWidth !== undefined) return;
@@ -233,8 +239,8 @@ export function GooeyInput({
 
   const handleClear = useCallback(() => {
     setSearchText("");
-    inputRef.current?.focus();
-  }, [setSearchText]);
+    focusTargetRef.current?.focus({ preventScroll: true });
+  }, [focusTargetRef, setSearchText]);
 
   const surfaceClass =
     "bg-foreground text-background shadow-sm ring-1 ring-border/60";
@@ -298,15 +304,20 @@ export function GooeyInput({
               enterKeyHint="search"
               autoComplete="off"
               value={searchText}
-              onChange={handleChange}
-              onBlur={handleBlur}
+              onChange={focusProxy ? undefined : handleChange}
+              onBlur={focusProxy ? undefined : handleBlur}
               disabled={disabled || !isExpanded}
+              readOnly={focusProxy}
+              tabIndex={focusProxy ? -1 : undefined}
               placeholder={placeholder}
               className={cn(
                 "h-full min-w-0 flex-1 bg-transparent text-base text-background outline-none font-medium",
                 "[&::-webkit-search-cancel-button]:hidden",
                 isExpanded
-                  ? "placeholder:text-background/50 dark:placeholder:text-background/45"
+                  ? cn(
+                      "placeholder:text-background/50 dark:placeholder:text-background/45",
+                      focusProxy && "pointer-events-none caret-transparent",
+                    )
                   : "pointer-events-none placeholder:text-background/80 dark:placeholder:text-background/70",
                 classNames?.input,
               )}
@@ -346,6 +357,25 @@ export function GooeyInput({
           </div>
         </motion.div>
       </div>
+      {focusProxy &&
+        isExpanded &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <input
+            ref={focusProxyRef}
+            aria-hidden="true"
+            autoComplete="off"
+            className="fixed top-0 left-0 h-px w-px opacity-0"
+            enterKeyHint="search"
+            inputMode="search"
+            onBlur={handleBlur}
+            onChange={handleChange}
+            tabIndex={-1}
+            type="search"
+            value={searchText}
+          />,
+          document.body,
+        )}
     </div>
   );
 }

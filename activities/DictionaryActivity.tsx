@@ -346,6 +346,7 @@ export const DictionaryActivity: React.FC = () => {
       >
         <GooeyInput
           className="w-full"
+          focusProxy
           fullWidthOnExpand
           onOpenChange={setSearchOpen}
           onValueChange={setSearchQuery}
