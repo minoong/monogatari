@@ -3,7 +3,6 @@
 import {
   useState,
   useRef,
-  useEffect,
   useLayoutEffect,
   useId,
   useMemo,
@@ -171,7 +170,7 @@ export function GooeyInput({
     [isOpenControlled, onOpenChange],
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isExpanded) {
       inputRef.current?.focus({ preventScroll: true });
     } else if (prevExpandedRef.current) {
