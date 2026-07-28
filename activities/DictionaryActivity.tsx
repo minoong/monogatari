@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Button, Chip } from "@heroui/react";
 import {
@@ -39,6 +39,44 @@ export const DictionaryActivity: React.FC = () => {
   });
   const [showcasePhrase, setShowcasePhrase] = useState<PhraseItem | null>(null);
   const [isRotated, setIsRotated] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  // PWA iOS/AOS 가상 키보드 높이 동적 추적 (visualViewport API)
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.visualViewport) return;
+
+    const handleViewportChange = () => {
+      const vv = window.visualViewport;
+      if (!vv) return;
+
+      const windowHeight = window.innerHeight;
+      const vvHeight = vv.height;
+      const heightDiff = windowHeight - vvHeight;
+
+      // 키보드가 나타났을 때 (100px 이상 차이 감지)
+      if (heightDiff > 100) {
+        setKeyboardHeight(heightDiff);
+      } else {
+        setKeyboardHeight(0);
+      }
+    };
+
+    const vv = window.visualViewport;
+    vv.addEventListener("resize", handleViewportChange);
+    vv.addEventListener("scroll", handleViewportChange);
+
+    return () => {
+      vv.removeEventListener("resize", handleViewportChange);
+      vv.removeEventListener("scroll", handleViewportChange);
+    };
+  }, []);
+
+  // 검색 포커스 시 뷰포트 스크롤로 인해 화면 전체가 위로 튀어 올라가는 현상 원천 차단
+  useEffect(() => {
+    if (searchOpen && keyboardHeight > 0) {
+      window.scrollTo(0, 0);
+    }
+  }, [searchOpen, keyboardHeight]);
 
   // 최근 검색어 추가 (초성/검색어로 필터 후 카드를 탭했을 때 저장)
   const saveRecentSearch = (query: string) => {
@@ -114,12 +152,20 @@ export const DictionaryActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "회화 사전" }}>
-      <main className="min-h-full w-full bg-slate-50 pb-28 dark:bg-slate-950">
+      <main
+        className="min-h-full w-full bg-slate-50 transition-[padding] duration-150 dark:bg-slate-950"
+        style={{
+          paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 96}px` : "112px",
+        }}
+      >
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-4">
-          {/* Fixed Bottom Search Bar (GooeyInput - 쇼핑 리스트와 동일) */}
+          {/* Fixed Bottom Search Bar (visualViewport 키보드 자동 대응) */}
           <div
             aria-label="회화 사전 검색"
-            className="fixed bottom-4 inset-x-0 z-40 mx-auto flex max-w-lg items-center justify-center px-5"
+            className="fixed inset-x-0 z-40 mx-auto flex max-w-lg items-center justify-center px-5 transition-[bottom] duration-150 ease-out"
+            style={{
+              bottom: keyboardHeight > 0 ? `${keyboardHeight + 12}px` : "16px",
+            }}
             data-slot="dictionary-filter-toolbar"
             role="search"
           >
