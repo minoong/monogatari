@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { Button, Chip } from "@heroui/react";
+import { Button, Card, Chip } from "@heroui/react";
 import {
   ArrowLeftRight,
   Clock,
@@ -87,8 +87,10 @@ export const DictionaryActivity: React.FC = () => {
   };
 
   // 태국어 음성 읽기 (TTS)
-  const playAudio = (text: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const playAudio = (text: string, e?: React.MouseEvent | unknown) => {
+    if (e && typeof e === "object" && "stopPropagation" in e) {
+      (e as React.MouseEvent).stopPropagation();
+    }
     triggerHapticFeedback(12);
 
     if ("speechSynthesis" in window) {
@@ -205,7 +207,7 @@ export const DictionaryActivity: React.FC = () => {
                 size="sm"
                 variant="ghost"
                 className="h-7 px-2 font-bold text-blue-600 dark:text-blue-400"
-                onClick={() => {
+                onPress={() => {
                   triggerHapticFeedback(10);
                   setSearchQuery("");
                   setSelectedCategory("전체");
@@ -217,7 +219,7 @@ export const DictionaryActivity: React.FC = () => {
             )}
           </div>
 
-          {/* Phrases List */}
+          {/* Phrases List (HeroUI v3 Compound Component Card) */}
           <div className="flex flex-col gap-3">
             {filteredPhrases.length === 0 ? (
               <div className="flex min-h-44 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
@@ -231,12 +233,12 @@ export const DictionaryActivity: React.FC = () => {
               </div>
             ) : (
               filteredPhrases.map((item) => (
-                <div
+                <Card
                   key={item.id}
+                  className="group relative cursor-pointer border border-slate-200/80 bg-white shadow-2xs transition-all hover:border-blue-400/80 hover:shadow-md active:scale-[0.99] dark:border-slate-800/90 dark:bg-slate-900 dark:hover:border-blue-500"
                   onClick={() => handleCardClick(item)}
-                  className="group relative flex cursor-pointer flex-col gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs transition-all hover:border-blue-400/80 hover:shadow-md active:scale-[0.99] dark:border-slate-800/90 dark:bg-slate-900 dark:hover:border-blue-500"
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <Card.Header className="flex flex-row items-start justify-between gap-2 p-4 pb-2">
                     <div className="flex min-w-0 flex-wrap items-center gap-1.5 pr-2">
                       <Chip
                         size="sm"
@@ -246,9 +248,9 @@ export const DictionaryActivity: React.FC = () => {
                       >
                         {item.category}
                       </Chip>
-                      <span className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                      <Card.Title className="truncate text-xs font-bold text-slate-900 dark:text-white">
                         {item.ko}
-                      </span>
+                      </Card.Title>
                     </div>
 
                     <div className="flex shrink-0 items-center gap-1.5">
@@ -257,7 +259,7 @@ export const DictionaryActivity: React.FC = () => {
                         size="sm"
                         variant="secondary"
                         aria-label="발음 듣기"
-                        onClick={(e) => playAudio(item.th, e)}
+                        onPress={(e) => playAudio(item.th, e)}
                         className="size-8.5 rounded-xl text-blue-600 dark:text-blue-400"
                       >
                         <Volume2 className="size-4" />
@@ -267,26 +269,25 @@ export const DictionaryActivity: React.FC = () => {
                         size="sm"
                         variant="secondary"
                         aria-label="현지인에게 크게 보여주기"
-                        onClick={() => handleCardClick(item)}
+                        onPress={() => handleCardClick(item)}
                         className="size-8.5 rounded-xl text-blue-600 dark:text-blue-400"
                       >
                         <Maximize2 className="size-4" />
                       </Button>
                     </div>
-                  </div>
+                  </Card.Header>
 
-                  {/* Thai Text */}
-                  <p className="font-thai text-base font-semibold text-slate-900 dark:text-slate-100">
-                    {item.th}
-                  </p>
-
-                  {/* Pronunciation */}
-                  <div className="pt-0.5">
-                    <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                      🗣️ {item.pron}
+                  <Card.Content className="p-4 pt-0">
+                    <p className="font-thai text-base font-semibold text-slate-900 dark:text-slate-100">
+                      {item.th}
                     </p>
-                  </div>
-                </div>
+                    <div className="pt-0.5">
+                      <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                        🗣️ {item.pron}
+                      </p>
+                    </div>
+                  </Card.Content>
+                </Card>
               ))
             )}
           </div>
@@ -316,7 +317,7 @@ export const DictionaryActivity: React.FC = () => {
                     size="sm"
                     variant="secondary"
                     className="font-bold text-xs"
-                    onClick={() => {
+                    onPress={() => {
                       triggerHapticFeedback(12);
                       setIsRotated((prev) => !prev);
                     }}
@@ -330,7 +331,7 @@ export const DictionaryActivity: React.FC = () => {
                     variant="secondary"
                     aria-label="닫기"
                     className="rounded-full bg-white/15 text-white hover:bg-white/25"
-                    onClick={() => {
+                    onPress={() => {
                       triggerHapticFeedback(10);
                       setShowcasePhrase(null);
                     }}
@@ -371,7 +372,7 @@ export const DictionaryActivity: React.FC = () => {
                   size="lg"
                   variant="primary"
                   className="flex-1 font-extrabold shadow-lg"
-                  onClick={() => playAudio(showcasePhrase.th)}
+                  onPress={() => playAudio(showcasePhrase.th)}
                 >
                   <Volume2 className="size-5" />
                   <span>태국어 발음 듣기</span>
@@ -380,7 +381,7 @@ export const DictionaryActivity: React.FC = () => {
                   size="lg"
                   variant="secondary"
                   className="bg-white/10 font-bold text-white hover:bg-white/20"
-                  onClick={() => {
+                  onPress={() => {
                     triggerHapticFeedback(10);
                     setShowcasePhrase(null);
                   }}
