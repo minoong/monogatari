@@ -300,11 +300,16 @@ export function GooeyInput({
               autoComplete="off"
               value={searchText}
               onChange={handleChange}
+              onFocus={() => {
+                if (typeof window !== "undefined") {
+                  window.scrollTo(0, 0);
+                }
+              }}
               onBlur={handleBlur}
               disabled={disabled || !isExpanded}
               placeholder={placeholder}
               className={cn(
-                "h-full min-w-0 flex-1 bg-transparent text-sm text-background outline-none",
+                "h-full min-w-0 flex-1 bg-transparent text-base text-background outline-none font-medium",
                 "[&::-webkit-search-cancel-button]:hidden",
                 isExpanded
                   ? "placeholder:text-background/50 dark:placeholder:text-background/45"

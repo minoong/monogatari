@@ -152,13 +152,16 @@ export const DictionaryActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "회화 사전" }}>
-      <main
-        className="min-h-full w-full bg-slate-50 transition-[padding] duration-150 dark:bg-slate-950"
-        style={{
-          paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 96}px` : "112px",
-        }}
-      >
-        <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-4">
+      <main className="relative flex h-[calc(100dvh-56px)] w-full flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
+        {/* 독립 스크롤 영역 (화면은 고정되고 이 영역만 독립 스크롤) */}
+        <div
+          className="flex-1 overflow-y-auto px-5 pt-4 transition-[padding] duration-150 no-scrollbar"
+          style={{
+            paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 80}px` : "96px",
+          }}
+        >
+          <section className="mx-auto flex w-full max-w-lg flex-col gap-4">
+            {/* Recent Searches (PWA LocalStorage) */}
           {/* Fixed Bottom Search Bar (visualViewport 키보드 자동 대응) */}
           <div
             aria-label="회화 사전 검색"
@@ -343,6 +346,7 @@ export const DictionaryActivity: React.FC = () => {
             )}
           </div>
         </section>
+      </div>
 
         {/* ======================================================== */}
         {/* 현지인 보여주기 전면 모달 (Full-Screen Showcase Modal) */}
