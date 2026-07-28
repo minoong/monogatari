@@ -269,7 +269,7 @@ function WishListItem({
                 <MorphingDialogTitle className="min-w-0">
                   <h2 className="truncate text-sm font-bold text-slate-900 dark:text-white">{wish.title}</h2>
                 </MorphingDialogTitle>
-                {price && <span className="shrink-0 text-sm font-black tabular-nums text-amber-600 dark:text-amber-400">฿{price}</span>}
+                {price && <span className="shrink-0 text-sm font-bold tabular-nums text-slate-800 dark:text-slate-200">฿{price}</span>}
               </div>
               {wish.categories.length > 0 && (
                 <div className="mt-1.5 flex min-w-0 items-center gap-1 overflow-hidden">
@@ -337,7 +337,7 @@ function WishListItem({
               {/* Price Section */}
               {price && priceKrw !== null && (
                 <div className="mt-1 flex items-center gap-1.5 text-sm tabular-nums">
-                  <span className="font-extrabold text-amber-600 dark:text-amber-400">
+                  <span className="font-bold text-slate-900 dark:text-white">
                     ฿ {wish.target_price_thb!.toLocaleString()}
                   </span>
                   <span className="text-slate-300 dark:text-slate-700">·</span>
