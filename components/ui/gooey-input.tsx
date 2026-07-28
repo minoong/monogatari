@@ -149,6 +149,7 @@ export function GooeyInput({
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
   const [measuredCollapsedWidth, setMeasuredCollapsedWidth] = useState(115);
   const [availableWidth, setAvailableWidth] = useState(0);
+  const [isFocusProxyActive, setIsFocusProxyActive] = useState(false);
 
   const isControlled = valueProp !== undefined;
   const isOpenControlled = openProp !== undefined;
@@ -242,6 +243,14 @@ export function GooeyInput({
     focusTargetRef.current?.focus({ preventScroll: true });
   }, [focusTargetRef, setSearchText]);
 
+  const handleFocusProxyPointerDown = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      focusProxyRef.current?.focus({ preventScroll: true });
+    },
+    [],
+  );
+
   const surfaceClass =
     "bg-foreground text-background shadow-sm ring-1 ring-border/60";
 
@@ -316,12 +325,28 @@ export function GooeyInput({
                 isExpanded
                   ? cn(
                       "placeholder:text-background/50 dark:placeholder:text-background/45",
-                      focusProxy && "pointer-events-none caret-transparent",
+                      focusProxy && "pointer-events-none text-transparent caret-transparent",
                     )
                   : "pointer-events-none placeholder:text-background/80 dark:placeholder:text-background/70",
                 classNames?.input,
               )}
             />
+            {focusProxy && isExpanded && (
+              <button
+                aria-label="검색어 입력"
+                className="absolute inset-y-0 left-4 right-14 z-10 flex min-w-0 items-center overflow-hidden text-left text-base font-medium text-background outline-none"
+                onPointerDown={handleFocusProxyPointerDown}
+                type="button"
+              >
+                <span className="truncate">{searchText}</span>
+                {isFocusProxyActive && (
+                  <span
+                    aria-hidden="true"
+                    className="ml-0.5 h-5 w-0.5 shrink-0 animate-caret-blink rounded-full bg-blue-400"
+                  />
+                )}
+              </button>
+            )}
             {isExpanded && searchText && (
               <button
                 aria-label="검색어 지우기"
@@ -368,8 +393,12 @@ export function GooeyInput({
             className="fixed top-0 left-0 h-px w-px opacity-0"
             enterKeyHint="search"
             inputMode="search"
-            onBlur={handleBlur}
+            onBlur={() => {
+              setIsFocusProxyActive(false);
+              handleBlur();
+            }}
             onChange={handleChange}
+            onFocus={() => setIsFocusProxyActive(true)}
             tabIndex={-1}
             type="search"
             value={searchText}
