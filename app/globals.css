@@ -195,6 +195,16 @@ body {
   /* Disables pull-to-refresh on iOS/Android */
 }
 
+/*
+ * AppScreen의 기본 paperContent는 스크롤 컨테이너입니다. 회화 사전은 내부 목록만
+ * 별도로 스크롤하므로, iOS가 input 포커스 때 이 상위 컨테이너를 강제로 올리지 않게 막습니다.
+ */
+.dictionary-screen > [data-part="paper"] > div {
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: auto;
+}
+
 :root {
   --sa-bottom: env(safe-area-inset-bottom, 0px);
   --card: var(--color-white);

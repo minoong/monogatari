@@ -159,7 +159,7 @@ export const DictionaryActivity: React.FC = () => {
   const categories = ["전체", "기본", "이동", "식당", "쇼핑", "긴급"];
 
   return (
-    <AppScreen appBar={{ title: "회화 사전" }}>
+    <AppScreen className="dictionary-screen" appBar={{ title: "회화 사전" }}>
       <main ref={mainRef} className="relative flex h-[calc(100svh-56px)] w-full flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
         {/* 독립 스크롤 영역 (화면은 고정되고 이 영역만 독립 스크롤) */}
         <div
