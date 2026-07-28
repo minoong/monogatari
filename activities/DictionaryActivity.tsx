@@ -3,7 +3,6 @@ import { AppScreen } from "@stackflow/plugin-basic-ui";
 import {
   ArrowLeftRight,
   Clock,
-  Mic,
   RotateCcw,
   Search,
   Volume2,
@@ -30,8 +29,6 @@ export const DictionaryActivity: React.FC = () => {
   });
   const [showcasePhrase, setShowcasePhrase] = useState<PhraseItem | null>(null);
   const [isRotated, setIsRotated] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState("");
 
   // 최근 검색어 추가 (초성/검색어로 필터 후 카드를 탭했을 때 저장)
   const saveRecentSearch = (query: string) => {
@@ -99,45 +96,6 @@ export const DictionaryActivity: React.FC = () => {
       utterance.lang = "th-TH";
       window.speechSynthesis.speak(utterance);
     }
-  };
-
-  // 음성 인식 (마이크 받아쓰기)
-  const startListening = () => {
-    triggerHapticFeedback(15);
-    // @ts-expect-error window speech recognition
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("이 브라우저에서는 음성 인식(받아쓰기)이 지원되지 않습니다.");
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = "ko-KR";
-    recognition.interimResults = false;
-
-    recognition.onstart = () => {
-      setIsListening(true);
-      setTranscript("말씀해 주세요...");
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recognition.onresult = (event: any) => {
-      const text = event.results[0][0].transcript;
-      setTranscript(`인식됨: "${text}"`);
-      setSearchQuery(text);
-      setIsListening(false);
-    };
-
-    recognition.onerror = () => {
-      setTranscript("음성 인식 실패");
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.start();
   };
 
   const categories = ["전체", "기본", "이동", "식당", "쇼핑", "긴급"];
@@ -244,27 +202,7 @@ export const DictionaryActivity: React.FC = () => {
           </div>
 
           {/* Speech Recognition Button */}
-          <div className="flex flex-col gap-1.5">
-            <button
-              type="button"
-              onClick={startListening}
-              disabled={isListening}
-              className={cn(
-                "flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold transition active:scale-95",
-                isListening
-                  ? "animate-pulse border border-red-200 bg-red-50 text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-400"
-                  : "border border-slate-200/80 bg-white text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
-              )}
-            >
-              <Mic className={cn("size-4", isListening && "text-red-500 animate-spin")} />
-              <span className="text-xs">{isListening ? "듣고 있어요..." : "마이크로 한국어 말해서 검색"}</span>
-            </button>
-            {transcript && (
-              <p className="text-center text-xs font-semibold text-slate-400">
-                {transcript}
-              </p>
-            )}
-          </div>
+
 
           {/* Status Bar */}
           <div className="flex items-center justify-between px-1 text-xs text-slate-500 dark:text-slate-400">
