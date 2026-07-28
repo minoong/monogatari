@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Button, Chip } from "@heroui/react";
 import {
@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
 
 const RECENT_SEARCHES_KEY = "monogatari_recent_phrase_searches";
 const MAX_RECENT_SEARCHES = 8;
+const SEARCH_BAR_HEIGHT = 40;
+const SEARCH_BAR_GAP = 12;
 
 // 태국어 텍스트 시원하고 큼직한 가변 폰트 크기 계산 (항상 현지인이 잘 보이도록 대형 유지)
 const getDynamicThaiFontSize = (text: string) => {
@@ -40,19 +42,21 @@ export const DictionaryActivity: React.FC = () => {
   const [showcasePhrase, setShowcasePhrase] = useState<PhraseItem | null>(null);
   const [isRotated, setIsRotated] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [searchBarTop, setSearchBarTop] = useState<number | null>(null);
+  const mainRef = useRef<HTMLElement>(null);
 
   // PWA iOS/AOS 가상 키보드 높이 동적 추적 (visualViewport API)
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof window === "undefined" || !window.visualViewport) return;
 
     const handleViewportChange = () => {
       const vv = window.visualViewport;
       if (!vv) return;
 
-      const keyboardInset = Math.max(
-        0,
-        window.innerHeight - (vv.height + vv.offsetTop),
-      );
+      const mainTop = mainRef.current?.getBoundingClientRect().top ?? 0;
+      const visibleBottom = vv.height + vv.offsetTop;
+      const keyboardInset = Math.max(0, window.innerHeight - visibleBottom);
+      const bottomGap = keyboardInset > 100 ? SEARCH_BAR_GAP : 16;
 
       // 키보드가 나타났을 때 (100px 이상 차이 감지)
       if (keyboardInset > 100) {
@@ -60,15 +64,25 @@ export const DictionaryActivity: React.FC = () => {
       } else {
         setKeyboardHeight(0);
       }
+
+      setSearchBarTop(
+        Math.max(
+          0,
+          Math.round(visibleBottom - mainTop - SEARCH_BAR_HEIGHT - bottomGap),
+        ),
+      );
     };
 
     const vv = window.visualViewport;
     vv.addEventListener("resize", handleViewportChange);
     vv.addEventListener("scroll", handleViewportChange);
+    window.addEventListener("resize", handleViewportChange);
+    handleViewportChange();
 
     return () => {
       vv.removeEventListener("resize", handleViewportChange);
       vv.removeEventListener("scroll", handleViewportChange);
+      window.removeEventListener("resize", handleViewportChange);
     };
   }, []);
 
@@ -146,14 +160,14 @@ export const DictionaryActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "회화 사전" }}>
-      <main className="relative flex h-[calc(100dvh-56px)] w-full flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
+      <main ref={mainRef} className="relative flex h-[calc(100svh-56px)] w-full flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
         {/* 독립 스크롤 영역 (화면은 고정되고 이 영역만 독립 스크롤) */}
         <div
           className="flex-1 overflow-y-auto px-5 pt-4 transition-[padding] duration-150 no-scrollbar"
           style={{
             paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 80}px` : "96px",
           }}
-          >
+        >
           <section className="mx-auto flex w-full max-w-lg flex-col gap-4">
           {/* Recent Searches (PWA LocalStorage) */}
           {recentSearches.length > 0 && (
@@ -322,9 +336,10 @@ export const DictionaryActivity: React.FC = () => {
 
       <div
         aria-label="회화 사전 검색"
-        className="fixed inset-x-0 z-40 mx-auto flex max-w-lg items-center justify-center px-5 transition-[bottom] duration-150 ease-out"
+        className="absolute inset-x-0 z-40 mx-auto flex max-w-lg items-center justify-center px-5 transition-[top] duration-100 ease-out"
         style={{
-          bottom: keyboardHeight > 0 ? `${keyboardHeight + 12}px` : "16px",
+          top: searchBarTop === null ? undefined : `${searchBarTop}px`,
+          bottom: searchBarTop === null ? "16px" : undefined,
         }}
         data-slot="dictionary-filter-toolbar"
         role="search"
