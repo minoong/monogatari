@@ -3,6 +3,7 @@ import { AppScreen } from "@stackflow/plugin-basic-ui";
 import {
   ArrowLeftRight,
   Clock,
+  Maximize2,
   RotateCcw,
   Volume2,
   X,
@@ -224,23 +225,35 @@ export const DictionaryActivity: React.FC = () => {
                   className="group relative flex cursor-pointer flex-col gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs transition hover:border-blue-400 active:scale-[0.99] dark:border-slate-800/90 dark:bg-slate-900 dark:hover:border-blue-500"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+                    <div className="flex min-w-0 flex-wrap items-center gap-1.5 pr-2">
+                      <span className="shrink-0 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
                         {item.category}
                       </span>
-                      <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      <span className="truncate text-xs font-bold text-slate-900 dark:text-white">
                         {item.ko}
                       </span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => playAudio(item.th, e)}
-                      aria-label="발음 듣기"
-                      className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-blue-600 transition hover:bg-blue-100 active:scale-90 dark:bg-slate-800 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                    >
-                      <Volume2 className="size-4.5" />
-                    </button>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={(e) => playAudio(item.th, e)}
+                        aria-label="발음 듣기"
+                        title="발음 듣기"
+                        className="flex size-8.5 items-center justify-center rounded-xl bg-slate-100 text-blue-600 transition hover:bg-blue-100 active:scale-90 dark:bg-slate-800 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                      >
+                        <Volume2 className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCardClick(item)}
+                        aria-label="현지인에게 크게 보여주기"
+                        title="현지인에게 크게 보여주기"
+                        className="flex size-8.5 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition hover:bg-blue-100 active:scale-90 dark:bg-blue-950/60 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                      >
+                        <Maximize2 className="size-4" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Thai Text */}
@@ -249,13 +262,10 @@ export const DictionaryActivity: React.FC = () => {
                   </p>
 
                   {/* Pronunciation */}
-                  <div className="flex items-center justify-between pt-1">
+                  <div className="pt-0.5">
                     <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
                       🗣️ {item.pron}
                     </p>
-                    <span className="text-[11px] font-semibold text-slate-400 group-hover:text-blue-500">
-                      📱 크게 보여주기 ↗
-                    </span>
                   </div>
                 </div>
               ))
