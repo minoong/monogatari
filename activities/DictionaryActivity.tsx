@@ -1,29 +1,118 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
+import {
+  ArrowLeftRight,
+  Clock,
+  Mic,
+  RotateCcw,
+  Search,
+  Volume2,
+  X,
+} from "lucide-react";
+import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
+import { triggerHapticFeedback } from "@/components/BottomNav";
+import { cn } from "@/lib/utils";
 
-const PHRASES = [
-  { ko: "안녕하세요", th: "사와디캅 (สวัสดีครับ/ค่ะ)", pron: "Sawatdee krap/kha" },
-  { ko: "감사합니다", th: "코쿤캅 (ขอบคุณครับ/ค่ะ)", pron: "Khop khun krap/kha" },
-  { ko: "얼마인가요?", th: "타오라이 캅? (เท่าไหร่ครับ/คะ)", pron: "Tao rai krap/kha?" },
-  { ko: "너무 비싸요", th: "팽 빠이 (แพงไป)", pron: "Paeng pai" },
-  { ko: "고수 빼주세요", th: "마이 싸이 팍치 (ไม่ใส่ผักชี)", pron: "Mai sai phak chi" },
-];
+const RECENT_SEARCHES_KEY = "monogatari_recent_phrase_searches";
+const MAX_RECENT_SEARCHES = 8;
 
 export const DictionaryActivity: React.FC = () => {
-  const [selected, setSelected] = useState(PHRASES[0]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("전체");
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [showcasePhrase, setShowcasePhrase] = useState<PhraseItem | null>(null);
+  const [isRotated, setIsRotated] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
 
+  // 최근 검색어 추가 (초성/검색어로 필터 후 카드를 탭했을 때 저장)
+  const saveRecentSearch = (query: string) => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+
+    setRecentSearches((prev) => {
+      const filtered = prev.filter((item) => item !== trimmed);
+      const next = [trimmed, ...filtered].slice(0, MAX_RECENT_SEARCHES);
+      try {
+        localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+      } catch {
+        // localStorage 에러 무시
+      }
+      return next;
+    });
+  };
+
+  // 최근 검색어 삭제
+  const removeRecentSearch = (queryToRemove: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    triggerHapticFeedback(10);
+    setRecentSearches((prev) => {
+      const next = prev.filter((item) => item !== queryToRemove);
+      try {
+        localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+      } catch {
+        // 무시
+      }
+      return next;
+    });
+  };
+
+  // 필터링된 회화 데이터
+  const filteredPhrases = useMemo(() => {
+    return THAI_PHRASES.filter((phrase) => {
+      const matchesCat =
+        selectedCategory === "전체" || phrase.category === selectedCategory;
+      const matchesSearch = matchKoreanSearch(phrase, searchQuery);
+      return matchesCat && matchesSearch;
+    });
+  }, [searchQuery, selectedCategory]);
+
+  // 카드 탭 시: 현지인 크게 보여주기 모달 오픈 + 최근 검색어 자동 저장
+  const handleCardClick = (phrase: PhraseItem) => {
+    triggerHapticFeedback(15);
+    if (searchQuery.trim()) {
+      saveRecentSearch(searchQuery);
+    }
+    setIsRotated(false);
+    setShowcasePhrase(phrase);
+  };
+
+  // 태국어 음성 읽기 (TTS)
+  const playAudio = (text: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    triggerHapticFeedback(12);
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+      const thaiVoice = voices.find((v) => v.lang.includes("th"));
+      if (thaiVoice) utterance.voice = thaiVoice;
+      utterance.lang = "th-TH";
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  // 음성 인식 (마이크 받아쓰기)
   const startListening = () => {
-    // @ts-expect-error window extension
+    triggerHapticFeedback(15);
+    // @ts-expect-error window speech recognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("이 브라우저에서는 마이크(받아쓰기) 기능이 지원되지 않습니다.");
+      alert("이 브라우저에서는 음성 인식(받아쓰기)이 지원되지 않습니다.");
       return;
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = 'ko-KR'; // Listen in Korean
+    recognition.lang = "ko-KR";
     recognition.interimResults = false;
 
     recognition.onstart = () => {
@@ -35,12 +124,8 @@ export const DictionaryActivity: React.FC = () => {
     recognition.onresult = (event: any) => {
       const text = event.results[0][0].transcript;
       setTranscript(`인식됨: "${text}"`);
-      
-      // Auto-select if the phrase matches
-      const matched = PHRASES.find(p => p.ko.includes(text) || text.includes(p.ko.replace('?', '')));
-      if (matched) {
-        setSelected(matched);
-      }
+      setSearchQuery(text);
+      setIsListening(false);
     };
 
     recognition.onerror = () => {
@@ -55,99 +140,292 @@ export const DictionaryActivity: React.FC = () => {
     recognition.start();
   };
 
-  const playAudio = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Stop any currently playing audio
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voices = window.speechSynthesis.getVoices();
-      const thaiVoice = voices.find(v => v.lang.includes('th'));
-      if (thaiVoice) utterance.voice = thaiVoice;
-      utterance.lang = 'th-TH'; // Force Thai language
-      window.speechSynthesis.speak(utterance);
-    } else {
-      alert("이 브라우저에서는 음성 듣기 기능이 지원되지 않습니다.");
-    }
-  };
-
-  const thaiTextOnly = selected.th.split('(')[1]?.replace(')','') || selected.th;
+  const categories = ["전체", "기본", "이동", "식당", "쇼핑", "긴급"];
 
   return (
     <AppScreen appBar={{ title: "회화 사전" }}>
-      <div className="flex flex-col flex-1 h-full bg-gray-50 dark:bg-gray-900">
-        
-        {/* Top Half (Opposite person - Rotated) */}
-        <div className="flex-1 flex flex-col justify-center items-center p-8 bg-blue-500 text-white rotate-180 relative transition-all">
-          <p className="text-sm opacity-80 mb-4">현지인에게 이 화면을 보여주세요</p>
-          <h2 className="text-5xl font-bold text-center leading-tight">
-            {thaiTextOnly}
-          </h2>
-          <p className="text-xl mt-4 opacity-90">{selected.ko}</p>
-        </div>
-
-        {/* Divider */}
-        <div className="h-2 bg-gray-200 dark:bg-gray-800 shrink-0 shadow-inner z-10" />
-
-        {/* Bottom Half (My view) */}
-        <div className="flex-1 flex flex-col bg-white dark:bg-black p-6 pb-6 overflow-y-auto">
-          <div className="mb-6 flex justify-between items-start gap-4">
-            <div>
-              <h3 className="text-3xl font-extrabold text-blue-600 dark:text-blue-400">
-                {selected.th.split('(')[0]}
-              </h3>
-              <p className="text-gray-500 text-sm mt-1">발음: {selected.pron}</p>
+      <main className="min-h-full w-full bg-slate-50 pb-16 dark:bg-slate-950">
+        <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
+          {/* Header Banner */}
+          <header className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 p-5 text-white shadow-lg shadow-blue-500/20">
+            <div className="flex items-center justify-between">
+              <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold backdrop-blur-md">
+                🇹🇭 필수 회화 30선
+              </span>
+              <span className="text-xs text-white/80">초성 검색 지원</span>
             </div>
-            
-            <button 
-              onClick={() => playAudio(thaiTextOnly)}
-              className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm active:scale-90 transition-transform"
-              aria-label="듣기"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z" />
-                <path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z" />
-              </svg>
-            </button>
+            <h1 className="mt-3 text-xl font-black leading-tight">
+              태국 여행 필살 회화 사전
+            </h1>
+            <p className="mt-1 text-xs text-white/80">
+              카드 탭 시 현지인에게 크게 보여줄 수 있어요!
+            </p>
+          </header>
+
+          {/* Search Bar */}
+          <div className="relative flex items-center">
+            <Search className="absolute left-4 size-4.5 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="한글 초성(예: ㄱㅅ, ㅁㅇㅃ) 또는 단어로 검색..."
+              className="h-12 w-full rounded-2xl border border-slate-200/80 bg-white pl-11 pr-10 text-sm font-semibold text-slate-800 shadow-2xs transition placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHapticFeedback(10);
+                  setSearchQuery("");
+                }}
+                className="absolute right-3.5 flex size-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400"
+              >
+                <X className="size-3.5" />
+              </button>
+            )}
           </div>
 
-          {/* Voice Recognition Section */}
-          <div className="mb-6 flex flex-col gap-2">
+          {/* Recent Searches (PWA LocalStorage) */}
+          {recentSearches.length > 0 && (
+            <div className="flex flex-col gap-1.5 pt-0.5">
+              <div className="flex items-center justify-between text-xs text-slate-400">
+                <span className="flex items-center gap-1 font-semibold">
+                  <Clock className="size-3" /> 최근 검색어
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {recentSearches.map((item) => (
+                  <span
+                    key={item}
+                    onClick={() => {
+                      triggerHapticFeedback(10);
+                      setSearchQuery(item);
+                    }}
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200/70 bg-white px-3 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-100 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                  >
+                    <span>{item}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => removeRecentSearch(item, e)}
+                      className="rounded-full p-0.5 hover:bg-slate-200 dark:hover:bg-slate-800"
+                    >
+                      <X className="size-3 text-slate-400" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Category Filter Chips */}
+          <div className="-mx-5 flex items-center gap-1.5 overflow-x-auto px-5 no-scrollbar py-0.5">
+            {categories.map((cat) => {
+              const isSelected = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => {
+                    triggerHapticFeedback(10);
+                    setSelectedCategory(cat);
+                  }}
+                  className={cn(
+                    "shrink-0 rounded-full border px-4 py-1.5 text-xs font-bold transition-all active:scale-95",
+                    isSelected
+                      ? "border-blue-600 bg-blue-600 text-white shadow-xs dark:border-blue-500 dark:bg-blue-500"
+                      : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
+                  )}
+                >
+                  {cat === "기본" ? "🥇 필수기본" : cat === "이동" ? "🥈 이동" : cat === "식당" ? "🥉 식당" : cat}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Speech Recognition Button */}
+          <div className="flex flex-col gap-1.5">
             <button
+              type="button"
               onClick={startListening}
               disabled={isListening}
-              className={`flex items-center justify-center gap-2 p-4 rounded-2xl font-bold transition-all ${
-                isListening 
-                  ? "bg-red-100 text-red-600 border border-red-200 animate-pulse" 
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 active:scale-95"
-              }`}
+              className={cn(
+                "flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold transition active:scale-95",
+                isListening
+                  ? "animate-pulse border border-red-200 bg-red-50 text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-400"
+                  : "border border-slate-200/80 bg-white text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+              )}
             >
-              <span className="text-xl">🎤</span>
-              {isListening ? "듣고 있어요..." : "마이크 누르고 한국어로 말하기"}
+              <Mic className={cn("size-4", isListening && "text-red-500 animate-spin")} />
+              <span className="text-xs">{isListening ? "듣고 있어요..." : "마이크로 한국어 말해서 검색"}</span>
             </button>
             {transcript && (
-              <p className="text-sm text-center text-gray-500 font-medium">
+              <p className="text-center text-xs font-semibold text-slate-400">
                 {transcript}
               </p>
             )}
           </div>
 
-          <h4 className="font-bold text-gray-700 dark:text-gray-300 mb-3">자주 쓰는 표현</h4>
-          <div className="flex flex-wrap gap-2">
-            {PHRASES.map((item, idx) => (
-              <button 
-                key={idx}
-                onClick={() => setSelected(item)}
-                className={`px-4 py-3 rounded-full text-sm font-semibold transition-colors ${
-                  selected.ko === item.ko 
-                    ? "bg-blue-600 text-white shadow-md" 
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                }`}
+          {/* Status Bar */}
+          <div className="flex items-center justify-between px-1 text-xs text-slate-500 dark:text-slate-400">
+            <span className="font-semibold">
+              조회 결과 <strong className="text-slate-900 dark:text-white">{filteredPhrases.length}</strong>건
+            </span>
+            {(searchQuery || selectedCategory !== "전체") && (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHapticFeedback(10);
+                  setSearchQuery("");
+                  setSelectedCategory("전체");
+                }}
+                className="flex items-center gap-1 font-semibold text-blue-600 hover:underline dark:text-blue-400"
               >
-                {item.ko}
+                <RotateCcw className="size-3" />
+                초기화
               </button>
-            ))}
+            )}
           </div>
-        </div>
-      </div>
+
+          {/* Phrases List */}
+          <div className="flex flex-col gap-3">
+            {filteredPhrases.length === 0 ? (
+              <div className="flex min-h-44 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
+                <p className="text-2xl">🔎</p>
+                <p className="mt-2 text-sm font-bold text-slate-700 dark:text-slate-300">
+                  일치하는 회화 표현이 없어요
+                </p>
+                <p className="mt-1 text-xs text-slate-400">
+                  검색어를 다시 확인하거나 초성으로 입력해 보세요!
+                </p>
+              </div>
+            ) : (
+              filteredPhrases.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => handleCardClick(item)}
+                  className="group relative flex cursor-pointer flex-col gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs transition hover:border-blue-400 active:scale-[0.99] dark:border-slate-800/90 dark:bg-slate-900 dark:hover:border-blue-500"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+                        {item.category}
+                      </span>
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">
+                        {item.ko}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => playAudio(item.th, e)}
+                      aria-label="발음 듣기"
+                      className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-blue-600 transition hover:bg-blue-100 active:scale-90 dark:bg-slate-800 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                    >
+                      <Volume2 className="size-4.5" />
+                    </button>
+                  </div>
+
+                  {/* Thai Text */}
+                  <p className="text-lg font-black text-slate-900 dark:text-slate-100">
+                    {item.th}
+                  </p>
+
+                  {/* Pronunciation */}
+                  <div className="flex items-center justify-between pt-1">
+                    <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                      🗣️ {item.pron}
+                    </p>
+                    <span className="text-[11px] font-semibold text-slate-400 group-hover:text-blue-500">
+                      📱 크게 보여주기 ↗
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        {/* ======================================================== */}
+        {/* 현지인 보여주기 전면 모달 (Full-Screen Showcase Modal) */}
+        {/* ======================================================== */}
+        {showcasePhrase && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-in fade-in duration-200">
+            <div
+              className={cn(
+                "relative flex h-[85dvh] w-full max-w-md flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 via-blue-950 to-slate-950 p-6 text-white shadow-2xl transition-transform duration-300",
+                isRotated && "rotate-180"
+              )}
+            >
+              {/* Header Actions */}
+              <div className="flex items-center justify-between">
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold backdrop-blur-md">
+                  🇹🇭 현지인용 대형 화면
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHapticFeedback(12);
+                      setIsRotated((prev) => !prev);
+                    }}
+                    className="flex items-center gap-1 rounded-xl bg-white/15 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-white/25 active:scale-95"
+                  >
+                    <ArrowLeftRight className="size-3.5" />
+                    180° 뒤집기
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHapticFeedback(10);
+                      setShowcasePhrase(null);
+                    }}
+                    aria-label="닫기"
+                    className="flex size-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 active:scale-90"
+                  >
+                    <X className="size-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Main Big Thai Text */}
+              <div className="my-auto flex flex-col items-center justify-center text-center">
+                <h2 className="text-4xl font-black leading-tight text-yellow-300 drop-shadow-md sm:text-5xl">
+                  {showcasePhrase.th}
+                </h2>
+                <p className="mt-6 text-xl font-bold text-white/90">
+                  {showcasePhrase.ko}
+                </p>
+                <p className="mt-2 text-sm text-blue-200 font-semibold">
+                  발음: {showcasePhrase.pron}
+                </p>
+              </div>
+
+              {/* Bottom Actions */}
+              <div className="flex items-center justify-between gap-3 pt-4 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => playAudio(showcasePhrase.th)}
+                  className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 font-extrabold text-white shadow-lg transition hover:bg-blue-500 active:scale-95"
+                >
+                  <Volume2 className="size-5" />
+                  <span>태국어 발음 듣기</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHapticFeedback(10);
+                    setShowcasePhrase(null);
+                  }}
+                  className="flex h-12 px-6 items-center justify-center rounded-2xl bg-white/10 font-bold text-white transition hover:bg-white/20 active:scale-95"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </AppScreen>
   );
 };
