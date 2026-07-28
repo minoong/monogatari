@@ -316,26 +316,49 @@ function WishListItem({
             )}
 
             <div className="p-6">
-              <MorphingDialogTitle>
-                <h2 className="pr-10 text-2xl font-extrabold text-slate-900 dark:text-white">{wish.title}</h2>
-              </MorphingDialogTitle>
+              {/* Category Chips */}
               {wish.categories.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {wish.categories.map((category) => <Chip key={category} color="accent" size="sm" variant="soft">{category}</Chip>)}
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {wish.categories.map((category) => (
+                    <Chip key={category} color="accent" size="sm" variant="soft">
+                      {category}
+                    </Chip>
+                  ))}
                 </div>
               )}
 
-              <MorphingDialogDescription disableLayoutAnimation className="mt-6 flex flex-col gap-4">
-                {price && priceKrw !== null && (
-                  <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-white/5">
-                    <p className="text-xs font-semibold text-slate-400">예상 금액</p>
-                    <div className="mt-1 flex items-baseline gap-1.5 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                      <span className="tabular-nums">฿ {wish.target_price_thb!.toLocaleString()}</span>
-                      <span className="text-xs font-normal text-slate-400 tabular-nums">(약 ₩{priceKrw.toLocaleString()})</span>
-                    </div>
+              {/* Product Title */}
+              <MorphingDialogTitle>
+                <h2 className="text-2xl font-black leading-tight text-slate-900 dark:text-white">
+                  {wish.title}
+                </h2>
+              </MorphingDialogTitle>
+
+              {/* E-Commerce Price Section */}
+              {price && priceKrw !== null && (
+                <div className="mt-3.5 flex items-baseline gap-2 border-b border-slate-100 pb-5 dark:border-slate-800">
+                  <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
+                    ฿ {wish.target_price_thb!.toLocaleString()}
+                  </span>
+                  <span className="text-sm font-semibold text-slate-400 tabular-nums">
+                    (약 {priceKrw.toLocaleString()}원)
+                  </span>
+                </div>
+              )}
+
+              {/* Product Details & Specs Section */}
+              <MorphingDialogDescription disableLayoutAnimation className="mt-5 flex flex-col gap-4">
+                {wish.vendor && (
+                  <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 dark:bg-white/5">
+                    <span className="text-xs font-semibold text-slate-400">
+                      {type === "restaurant" || type === "menu" ? "식당 · 지점" : "판매처"}
+                    </span>
+                    <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                      {wish.vendor}
+                    </span>
                   </div>
                 )}
-                {wish.vendor && <DetailRow label={type === "restaurant" || type === "menu" ? "식당 또는 지점" : "판매점"} value={wish.vendor} />}
+
                 {wish.locations.length > 0 && (
                   <DetailLinkGroup
                     icon={<MapPin className="size-4" />}
@@ -343,20 +366,24 @@ function WishListItem({
                       href: location,
                       label: `Google Maps 위치 ${index + 1}`,
                     }))}
-                    title="위치"
+                    title="매장 및 장소 위치"
                   />
                 )}
+
                 {wish.links.length > 0 && (
                   <DetailLinkGroup
                     icon={<Link2 className="size-4" />}
                     items={wish.links.map((link) => ({ href: link, label: link }))}
-                    title="관련 링크"
+                    title="관련 링크 / 구매 몰"
                   />
                 )}
+
                 {wish.memo && (
-                  <div>
-                    <p className="text-xs font-semibold text-slate-400">메모</p>
-                    <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-200">{wish.memo}</p>
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-white/5">
+                    <p className="text-xs font-bold text-slate-400">상품 메모 및 팁</p>
+                    <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                      {wish.memo}
+                    </p>
                   </div>
                 )}
               </MorphingDialogDescription>
@@ -440,11 +467,4 @@ function DetailLinkGroup({
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-white/5">
-      <p className="text-xs font-semibold text-slate-400">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{value}</p>
-    </div>
-  );
-}
+
