@@ -288,90 +288,104 @@ function WishListItem({
       </MorphingDialogTrigger>
 
       <MorphingDialogContainer>
-        <MorphingDialogContent className="relative mx-4 max-h-[85dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
+        <MorphingDialogContent className="relative mx-4 flex max-h-[85dvh] w-[calc(100%-2rem)] max-w-md flex-col overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
           <MorphingDialogClose className="right-4 top-4 z-10 flex size-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur" />
-          {wish.image_url ? (
-            <div className="relative">
-              <MorphingDialogImage
-                alt={`${wish.title} 이미지`}
-                className="h-56 w-full cursor-pointer object-cover"
-                onClick={() => setZoomModalOpen(true)}
-                src={wish.image_url}
-              />
-              <button
-                type="button"
-                onClick={() => setZoomModalOpen(true)}
-                className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/65 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md shadow-md transition hover:bg-black/85"
-              >
-                <ZoomIn className="size-3.5" />
-                <span>탭하여 확대</span>
-              </button>
-            </div>
-          ) : (
-            <div className="flex h-40 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400 dark:from-slate-800 dark:to-slate-900">
-              <ImageIcon aria-hidden="true" className="size-10" />
-            </div>
-          )}
-
-          <div className="p-6">
-            <MorphingDialogTitle>
-              <h2 className="pr-10 text-2xl font-extrabold text-slate-900 dark:text-white">{wish.title}</h2>
-            </MorphingDialogTitle>
-            {wish.categories.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {wish.categories.map((category) => <Chip key={category} color="accent" size="sm" variant="soft">{category}</Chip>)}
+          
+          {/* Scrollable Body */}
+          <div className="flex-1 overflow-y-auto">
+            {wish.image_url ? (
+              <div className="relative">
+                <MorphingDialogImage
+                  alt={`${wish.title} 이미지`}
+                  className="h-56 w-full cursor-pointer object-cover"
+                  onClick={() => setZoomModalOpen(true)}
+                  src={wish.image_url}
+                />
+                <button
+                  type="button"
+                  onClick={() => setZoomModalOpen(true)}
+                  className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/65 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md shadow-md transition hover:bg-black/85"
+                >
+                  <ZoomIn className="size-3.5" />
+                  <span>탭하여 확대</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex h-40 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400 dark:from-slate-800 dark:to-slate-900">
+                <ImageIcon aria-hidden="true" className="size-10" />
               </div>
             )}
 
-            <MorphingDialogDescription disableLayoutAnimation className="mt-6 flex flex-col gap-4">
-              {price && priceKrw !== null && (
-                <div className="grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-slate-50 px-1 py-3 dark:divide-slate-700 dark:bg-white/5">
-                  <AnimatedPrice label="태국 바트 (THB)" symbol="฿" value={wish.target_price_thb!} />
-                  <AnimatedPrice label="대한민국 원 (KRW)" symbol="₩" value={priceKrw} />
+            <div className="p-6">
+              <MorphingDialogTitle>
+                <h2 className="pr-10 text-2xl font-extrabold text-slate-900 dark:text-white">{wish.title}</h2>
+              </MorphingDialogTitle>
+              {wish.categories.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {wish.categories.map((category) => <Chip key={category} color="accent" size="sm" variant="soft">{category}</Chip>)}
                 </div>
               )}
-              {wish.vendor && <DetailRow label={type === "restaurant" || type === "menu" ? "식당 또는 지점" : "판매점"} value={wish.vendor} />}
-              {wish.locations.length > 0 && (
-                <DetailLinkGroup
-                  icon={<MapPin className="size-4" />}
-                  items={wish.locations.map((location, index) => ({
-                    href: location,
-                    label: `Google Maps 위치 ${index + 1}`,
-                  }))}
-                  title="위치"
-                />
-              )}
-              {wish.links.length > 0 && (
-                <DetailLinkGroup
-                  icon={<Link2 className="size-4" />}
-                  items={wish.links.map((link) => ({ href: link, label: link }))}
-                  title="관련 링크"
-                />
-              )}
-              {wish.memo && (
-                <div>
-                  <p className="text-xs font-semibold text-slate-400">메모</p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-200">{wish.memo}</p>
-                </div>
-              )}
-            </MorphingDialogDescription>
-            <div className="mt-6 grid grid-cols-[1fr_auto] gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+
+              <MorphingDialogDescription disableLayoutAnimation className="mt-6 flex flex-col gap-4">
+                {price && priceKrw !== null && (
+                  <div className="grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-slate-50 px-1 py-3 dark:divide-slate-700 dark:bg-white/5">
+                    <AnimatedPrice label="태국 바트 (THB)" symbol="฿" value={wish.target_price_thb!} />
+                    <AnimatedPrice label="대한민국 원 (KRW)" symbol="₩" value={priceKrw} />
+                  </div>
+                )}
+                {wish.vendor && <DetailRow label={type === "restaurant" || type === "menu" ? "식당 또는 지점" : "판매점"} value={wish.vendor} />}
+                {wish.locations.length > 0 && (
+                  <DetailLinkGroup
+                    icon={<MapPin className="size-4" />}
+                    items={wish.locations.map((location, index) => ({
+                      href: location,
+                      label: `Google Maps 위치 ${index + 1}`,
+                    }))}
+                    title="위치"
+                  />
+                )}
+                {wish.links.length > 0 && (
+                  <DetailLinkGroup
+                    icon={<Link2 className="size-4" />}
+                    items={wish.links.map((link) => ({ href: link, label: link }))}
+                    title="관련 링크"
+                  />
+                )}
+                {wish.memo && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-400">메모</p>
+                    <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-200">{wish.memo}</p>
+                  </div>
+                )}
+              </MorphingDialogDescription>
+            </div>
+          </div>
+
+          {/* Fixed Footer */}
+          <div className="shrink-0 border-t border-slate-100 bg-slate-50/70 p-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
+            <div className="flex items-center gap-2">
+              <button
+                aria-label={`${wish.title} 삭제`}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400"
+                onClick={onDelete}
+                type="button"
+              >
+                <Trash2 className="size-4.5" />
+              </button>
+              <MorphingDialogClose
+                ariaLabel="다이얼로그 닫기"
+                className="static flex h-11 flex-1 items-center justify-center rounded-xl bg-slate-200/70 font-semibold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                닫기
+              </MorphingDialogClose>
               <MorphingDialogClose
                 ariaLabel={`${wish.title} 편집`}
-                className="static flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-50 font-bold text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-300"
+                className="static flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 font-bold text-white shadow-sm transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
                 onClick={onEdit}
               >
                 <Pencil className="size-4" />
                 편집
               </MorphingDialogClose>
-              <button
-                aria-label={`${wish.title} 삭제`}
-                className="flex size-11 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-300"
-                onClick={onDelete}
-                type="button"
-              >
-                <Trash2 className="size-4" />
-              </button>
             </div>
           </div>
         </MorphingDialogContent>
