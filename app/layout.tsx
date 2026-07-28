@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Kanit } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
@@ -8,6 +8,12 @@ import { QueryProvider } from "@/components/providers/query-provider";
 const interHeading = Inter({subsets:['latin'],variable:'--font-heading'});
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+
+const kanit = Kanit({
+  weight: ["400", "600", "700", "800", "900"],
+  subsets: ["thai", "latin"],
+  variable: "--font-kanit",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={cn("h-[100dvh] w-full overflow-hidden overscroll-none", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable, interHeading.variable)}
+      className={cn("h-[100dvh] w-full overflow-hidden overscroll-none", "antialiased", geistSans.variable, geistMono.variable, kanit.variable, "font-sans", inter.variable, interHeading.variable)}
     >
       <body className="h-[100dvh] w-full overflow-hidden overscroll-none isolate flex flex-col relative">
         <QueryProvider>
