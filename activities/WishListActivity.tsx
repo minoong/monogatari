@@ -374,13 +374,13 @@ function WishListItem({
               </button>
               <MorphingDialogClose
                 ariaLabel="다이얼로그 닫기"
-                className="static flex h-11 flex-1 items-center justify-center rounded-xl bg-slate-200/70 font-semibold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                className="static flex h-11 flex-1 items-center justify-center rounded-xl bg-slate-100 font-semibold text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 닫기
               </MorphingDialogClose>
               <MorphingDialogClose
                 ariaLabel={`${wish.title} 편집`}
-                className="static flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 font-bold text-white shadow-sm transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                className="static flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 font-bold text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
                 onClick={onEdit}
               >
                 <Pencil className="size-4" />
