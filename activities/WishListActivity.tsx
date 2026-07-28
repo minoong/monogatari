@@ -1,6 +1,5 @@
 import React, { useDeferredValue, useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import NumberFlow from "@number-flow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { ArrowUpRight, Image as ImageIcon, Link2, MapPin, Pencil, Plus, RefreshCw, Store, Trash2, ZoomIn } from "lucide-react";
 import { Button, Chip } from "@heroui/react";
@@ -328,7 +327,13 @@ function WishListItem({
 
               <MorphingDialogDescription disableLayoutAnimation className="mt-6 flex flex-col gap-4">
                 {price && priceKrw !== null && (
-                  <AnimatedPriceBlock thbValue={wish.target_price_thb!} krwValue={priceKrw} />
+                  <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-white/5">
+                    <p className="text-xs font-semibold text-slate-400">예상 금액</p>
+                    <div className="mt-1 flex items-baseline gap-1.5 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      <span className="tabular-nums">฿ {wish.target_price_thb!.toLocaleString()}</span>
+                      <span className="text-xs font-normal text-slate-400 tabular-nums">(약 ₩{priceKrw.toLocaleString()})</span>
+                    </div>
+                  </div>
                 )}
                 {wish.vendor && <DetailRow label={type === "restaurant" || type === "menu" ? "식당 또는 지점" : "판매점"} value={wish.vendor} />}
                 {wish.locations.length > 0 && (
@@ -400,33 +405,7 @@ function WishListItem({
   );
 }
 
-function AnimatedPriceBlock({
-  thbValue,
-  krwValue,
-}: {
-  thbValue: number;
-  krwValue: number;
-}) {
-  return (
-    <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 dark:border-white/5 dark:bg-white/5">
-      <div className="flex items-baseline gap-1.5 min-w-0">
-        <span className="text-xs font-bold text-amber-600 dark:text-amber-400">THB</span>
-        <div className="flex items-baseline gap-0.5 text-xl font-black tabular-nums tracking-tight text-slate-900 dark:text-white">
-          <span className="text-sm font-bold text-slate-400">฿</span>
-          <NumberFlow format={{ maximumFractionDigits: 0 }} value={thbValue} />
-        </div>
-      </div>
 
-      <div className="flex items-center gap-1 text-xs font-semibold tabular-nums text-slate-400">
-        <span>약</span>
-        <div className="flex items-baseline gap-0.5 font-bold text-slate-600 dark:text-slate-300">
-          <NumberFlow format={{ maximumFractionDigits: 0 }} value={krwValue} />
-          <span className="text-[11px] font-normal text-slate-400">원</span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function DetailLinkGroup({
   icon,
