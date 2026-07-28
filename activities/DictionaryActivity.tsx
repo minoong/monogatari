@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
+import { Button, Chip } from "@heroui/react";
 import {
   ArrowLeftRight,
   Clock,
   Maximize2,
   RotateCcw,
+  Sparkles,
   Volume2,
   X,
 } from "lucide-react";
@@ -105,7 +107,7 @@ export const DictionaryActivity: React.FC = () => {
   return (
     <AppScreen appBar={{ title: "회화 사전" }}>
       <main className="min-h-full w-full bg-slate-50 pb-28 dark:bg-slate-950">
-        <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
+        <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-4">
           {/* Fixed Bottom Search Bar (GooeyInput - 쇼핑 리스트와 동일) */}
           <div
             aria-label="회화 사전 검색"
@@ -134,55 +136,64 @@ export const DictionaryActivity: React.FC = () => {
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {recentSearches.map((item) => (
-                  <span
+                  <Chip
                     key={item}
+                    size="sm"
+                    variant="secondary"
+                    className="cursor-pointer font-bold text-slate-700 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800"
                     onClick={() => {
                       triggerHapticFeedback(10);
                       setSearchQuery(item);
                     }}
-                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200/70 bg-white px-3 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-100 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
                   >
-                    <span>{item}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => removeRecentSearch(item, e)}
-                      className="rounded-full p-0.5 hover:bg-slate-200 dark:hover:bg-slate-800"
-                    >
-                      <X className="size-3 text-slate-400" />
-                    </button>
-                  </span>
+                    <span className="flex items-center gap-1">
+                      <span>{item}</span>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => removeRecentSearch(item, e)}
+                        className="rounded-full p-0.5 hover:bg-slate-300 dark:hover:bg-slate-700"
+                      >
+                        <X className="size-3 text-slate-400" />
+                      </span>
+                    </span>
+                  </Chip>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Category Filter Chips */}
-          <div className="-mx-5 flex items-center gap-1.5 overflow-x-auto px-5 no-scrollbar py-0.5">
+          {/* Category Filter Chips (HeroUI Chip 기반 스크롤 필터) */}
+          <div className="-mx-5 flex items-center gap-2 overflow-x-auto px-5 no-scrollbar py-1">
             {categories.map((cat) => {
               const isSelected = selectedCategory === cat;
+              const label =
+                cat === "기본"
+                  ? "🥇 필수기본"
+                  : cat === "이동"
+                  ? "🥈 이동"
+                  : cat === "식당"
+                  ? "🥉 식당"
+                  : cat;
               return (
-                <button
+                <Chip
                   key={cat}
-                  type="button"
+                  size="md"
+                  variant={isSelected ? "primary" : "tertiary"}
+                  className={cn(
+                    "cursor-pointer font-bold transition-all active:scale-95",
+                    !isSelected && "bg-white text-slate-600 shadow-2xs dark:bg-slate-900 dark:text-slate-300"
+                  )}
                   onClick={() => {
                     triggerHapticFeedback(10);
                     setSelectedCategory(cat);
                   }}
-                  className={cn(
-                    "shrink-0 rounded-full border px-4 py-1.5 text-xs font-bold transition-all active:scale-95",
-                    isSelected
-                      ? "border-blue-600 bg-blue-600 text-white shadow-xs dark:border-blue-500 dark:bg-blue-500"
-                      : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
-                  )}
                 >
-                  {cat === "기본" ? "🥇 필수기본" : cat === "이동" ? "🥈 이동" : cat === "식당" ? "🥉 식당" : cat}
-                </button>
+                  {label}
+                </Chip>
               );
             })}
           </div>
-
-          {/* Speech Recognition Button */}
-
 
           {/* Status Bar */}
           <div className="flex items-center justify-between px-1 text-xs text-slate-500 dark:text-slate-400">
@@ -190,18 +201,19 @@ export const DictionaryActivity: React.FC = () => {
               조회 결과 <strong className="text-slate-900 dark:text-white">{filteredPhrases.length}</strong>건
             </span>
             {(searchQuery || selectedCategory !== "전체") && (
-              <button
-                type="button"
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 font-bold text-blue-600 dark:text-blue-400"
                 onClick={() => {
                   triggerHapticFeedback(10);
                   setSearchQuery("");
                   setSelectedCategory("전체");
                 }}
-                className="flex items-center gap-1 font-semibold text-blue-600 hover:underline dark:text-blue-400"
               >
                 <RotateCcw className="size-3" />
-                초기화
-              </button>
+                <span>초기화</span>
+              </Button>
             )}
           </div>
 
@@ -222,37 +234,44 @@ export const DictionaryActivity: React.FC = () => {
                 <div
                   key={item.id}
                   onClick={() => handleCardClick(item)}
-                  className="group relative flex cursor-pointer flex-col gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs transition hover:border-blue-400 active:scale-[0.99] dark:border-slate-800/90 dark:bg-slate-900 dark:hover:border-blue-500"
+                  className="group relative flex cursor-pointer flex-col gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs transition-all hover:border-blue-400/80 hover:shadow-md active:scale-[0.99] dark:border-slate-800/90 dark:bg-slate-900 dark:hover:border-blue-500"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex min-w-0 flex-wrap items-center gap-1.5 pr-2">
-                      <span className="shrink-0 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+                      <Chip
+                        size="sm"
+                        variant="soft"
+                        color="accent"
+                        className="font-extrabold text-[10px]"
+                      >
                         {item.category}
-                      </span>
+                      </Chip>
                       <span className="truncate text-xs font-bold text-slate-900 dark:text-white">
                         {item.ko}
                       </span>
                     </div>
 
                     <div className="flex shrink-0 items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={(e) => playAudio(item.th, e)}
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="secondary"
                         aria-label="발음 듣기"
-                        title="발음 듣기"
-                        className="flex size-8.5 items-center justify-center rounded-xl bg-slate-100 text-blue-600 transition hover:bg-blue-100 active:scale-90 dark:bg-slate-800 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        onClick={(e) => playAudio(item.th, e)}
+                        className="size-8.5 rounded-xl text-blue-600 dark:text-blue-400"
                       >
                         <Volume2 className="size-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleCardClick(item)}
+                      </Button>
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="secondary"
                         aria-label="현지인에게 크게 보여주기"
-                        title="현지인에게 크게 보여주기"
-                        className="flex size-8.5 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition hover:bg-blue-100 active:scale-90 dark:bg-blue-950/60 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        onClick={() => handleCardClick(item)}
+                        className="size-8.5 rounded-xl text-blue-600 dark:text-blue-400"
                       >
                         <Maximize2 className="size-4" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
@@ -281,32 +300,43 @@ export const DictionaryActivity: React.FC = () => {
             <div className="relative flex h-[85dvh] w-full max-w-md flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 via-blue-950 to-slate-950 p-6 text-white shadow-2xl">
               {/* Header Actions */}
               <div className="flex items-center justify-between">
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold backdrop-blur-md">
-                  🇹🇭 현지인용 대형 화면
-                </span>
+                <Chip
+                  variant="soft"
+                  color="accent"
+                  size="sm"
+                  className="font-bold backdrop-blur-md"
+                >
+                  <span className="flex items-center gap-1">
+                    <Sparkles className="size-3" />
+                    <span>현지인 전용 화면</span>
+                  </span>
+                </Chip>
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="font-bold text-xs"
                     onClick={() => {
                       triggerHapticFeedback(12);
                       setIsRotated((prev) => !prev);
                     }}
-                    className="flex items-center gap-1 rounded-xl bg-white/15 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-white/25 active:scale-95"
                   >
                     <ArrowLeftRight className="size-3.5" />
-                    태국어 {isRotated ? "정방향" : "180° 뒤집기"}
-                  </button>
-                  <button
-                    type="button"
+                    <span>태국어 {isRotated ? "정방향" : "180° 뒤집기"}</span>
+                  </Button>
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="secondary"
+                    aria-label="닫기"
+                    className="rounded-full bg-white/15 text-white hover:bg-white/25"
                     onClick={() => {
                       triggerHapticFeedback(10);
                       setShowcasePhrase(null);
                     }}
-                    aria-label="닫기"
-                    className="flex size-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 active:scale-90"
                   >
-                    <X className="size-5" />
-                  </button>
+                    <X className="size-4" />
+                  </Button>
                 </div>
               </div>
 
@@ -337,24 +367,26 @@ export const DictionaryActivity: React.FC = () => {
 
               {/* Bottom Actions */}
               <div className="flex items-center justify-between gap-3 pt-4 border-t border-white/10">
-                <button
-                  type="button"
+                <Button
+                  size="lg"
+                  variant="primary"
+                  className="flex-1 font-extrabold shadow-lg"
                   onClick={() => playAudio(showcasePhrase.th)}
-                  className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 font-extrabold text-white shadow-lg transition hover:bg-blue-500 active:scale-95"
                 >
                   <Volume2 className="size-5" />
                   <span>태국어 발음 듣기</span>
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="bg-white/10 font-bold text-white hover:bg-white/20"
                   onClick={() => {
                     triggerHapticFeedback(10);
                     setShowcasePhrase(null);
                   }}
-                  className="flex h-12 px-6 items-center justify-center rounded-2xl bg-white/10 font-bold text-white transition hover:bg-white/20 active:scale-95"
                 >
                   닫기
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -363,3 +395,4 @@ export const DictionaryActivity: React.FC = () => {
     </AppScreen>
   );
 };
+
