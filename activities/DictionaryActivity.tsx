@@ -257,7 +257,7 @@ export const DictionaryActivity: React.FC = () => {
                   </div>
 
                   {/* Thai Text */}
-                  <p className="font-thai text-lg font-bold text-slate-900 dark:text-slate-100">
+                  <p className="font-thai text-base font-semibold text-slate-900 dark:text-slate-100">
                     {item.th}
                   </p>
 
@@ -316,7 +316,7 @@ export const DictionaryActivity: React.FC = () => {
                 <div className="-mx-6 w-[calc(100%+3rem)] bg-white px-4 py-8 text-slate-900 shadow-xl border-y border-slate-100">
                   <h2
                     className={cn(
-                      "font-thai text-5xl font-bold leading-normal tracking-normal text-slate-900 sm:text-6xl transition-transform duration-300 break-words",
+                      "font-thai text-4xl sm:text-5xl font-semibold leading-relaxed tracking-wide text-slate-900 transition-transform duration-300 break-words",
                       isRotated && "rotate-180"
                     )}
                   >
