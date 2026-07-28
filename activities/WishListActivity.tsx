@@ -131,7 +131,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
           <div
             aria-label={`${meta.title} 검색 및 필터`}
-            className="-mx-2 flex min-h-14 items-center justify-center px-2 py-2"
+            className="sticky top-0 z-30 -mx-2 flex min-h-14 items-center justify-center px-2 py-2"
             data-slot="wish-filter-toolbar"
             role="search"
           >
