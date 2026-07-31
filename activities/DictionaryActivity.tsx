@@ -130,9 +130,8 @@ function DictionaryPhraseDialog({
         initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 420, damping: 32, delay: prefersReducedMotion ? 0 : Math.min(index, 7) * 0.028 }}
-        whileHover={prefersReducedMotion ? undefined : { x: 4 }}
         whileTap={prefersReducedMotion ? undefined : { scale: 0.992 }}
-        className="group relative flex gap-3 border-b border-slate-200/80 px-5 py-4 last:border-b-0 hover:bg-slate-50 dark:border-slate-800/80 dark:hover:bg-slate-800/60"
+        className="group relative flex gap-3 border-b border-slate-200/80 px-5 py-4 last:border-b-0 dark:border-slate-800/80"
       >
         <span className={cn("absolute inset-y-3 left-0 w-1 rounded-r-full", meta.stripClass)} />
         <span className="pt-0.5 text-[11px] font-black tabular-nums text-slate-300 dark:text-slate-600">{String(index + 1).padStart(2, "0")}</span>
@@ -177,9 +176,6 @@ function DictionaryPhraseDialog({
             style={{ transformOrigin: "center top" }}
           >
             <div className="flex items-center gap-2">
-              <span className={cn("grid size-8 place-items-center rounded-xl text-white", meta.stripClass)}>
-                <span className="text-sm">🇹🇭</span>
-              </span>
               <div>
                 <span className="block text-[10px] font-black tracking-[0.16em] text-white/45">SHOW LOCALLY</span>
                 <span className="text-sm font-extrabold text-white">현지인에게 보여주기</span>
@@ -206,7 +202,6 @@ function DictionaryPhraseDialog({
           <div className="my-auto flex w-full flex-col items-center justify-center gap-6 py-6 text-center">
             <div className="relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_38%),linear-gradient(145deg,#252930,#0d0f12)] px-5 py-10 text-white shadow-[inset_0_1px_rgba(255,255,255,0.12)]">
               <div className={cn("absolute left-0 top-0 h-full w-1", meta.stripClass)} />
-              <p className="mb-4 text-[10px] font-black tracking-[0.22em] text-white/45">THAI PHRASE</p>
               <motion.h2
                 className={cn("font-thai break-words text-center leading-relaxed tracking-wide text-white", getDynamicThaiFontSize(item.th))}
                 animate={{ rotate: isRotated ? 180 : 0 }}
