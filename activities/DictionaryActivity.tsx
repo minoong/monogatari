@@ -167,9 +167,9 @@ function DictionaryPhraseDialog({
       </motion.article>
 
       <MorphingDialogContainer>
-        <MorphingDialogContent className="relative mx-4 flex h-[82dvh] w-[calc(100%-2rem)] max-w-md flex-col overflow-hidden rounded-[30px] border border-white/10 bg-[#15171b] p-5 text-slate-100 shadow-[0_32px_90px_-28px_rgba(0,0,0,0.8)]">
+        <MorphingDialogContent className="relative mx-4 flex h-[82dvh] w-[calc(100%-2rem)] max-w-md flex-col overflow-hidden rounded-[30px] border border-slate-200 bg-white p-5 text-slate-900 shadow-[0_32px_90px_-28px_rgba(15,23,42,0.28)]">
           <motion.div
-            className="flex items-center justify-between border-b border-white/10 pb-3"
+            className="flex items-center justify-between border-b border-slate-100 pb-3"
             initial={prefersReducedMotion ? false : { opacity: 0, y: -14, scaleX: 0.96 }}
             animate={{ opacity: 1, y: 0, scaleX: 1 }}
             transition={{ delay: prefersReducedMotion ? 0 : 0.12, duration: prefersReducedMotion ? 0 : 0.24, ease: "easeOut" }}
@@ -177,8 +177,8 @@ function DictionaryPhraseDialog({
           >
             <div className="flex items-center gap-2">
               <div>
-                <span className="block text-[10px] font-black tracking-[0.16em] text-white/45">SHOW LOCALLY</span>
-                <span className="text-sm font-extrabold text-white">현지인에게 보여주기</span>
+                <span className="block text-[10px] font-black tracking-[0.16em] text-slate-400">SHOW LOCALLY</span>
+                <span className="text-sm font-extrabold text-slate-900">현지인에게 보여주기</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
@@ -188,22 +188,22 @@ function DictionaryPhraseDialog({
                   triggerHapticFeedback(12);
                   setIsRotated((prev) => !prev);
                 }}
-                className="flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/80 transition hover:bg-white/10"
+                className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-100"
               >
                 <ArrowLeftRight className="size-3.5 text-blue-600 dark:text-blue-400" />
                 <span>{isRotated ? "180° 회전됨" : "정방향"}</span>
               </button>
-              <MorphingDialogClose ariaLabel="닫기" className="static flex size-8 items-center justify-center rounded-full bg-white/8 text-white/65 transition hover:bg-white/15 hover:text-white">
+              <MorphingDialogClose ariaLabel="닫기" className="static flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700">
                 <X className="size-4" />
               </MorphingDialogClose>
             </div>
           </motion.div>
 
           <div className="my-auto flex w-full flex-col items-center justify-center gap-6 py-6 text-center">
-            <div className="relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_38%),linear-gradient(145deg,#252930,#0d0f12)] px-5 py-10 text-white shadow-[inset_0_1px_rgba(255,255,255,0.12)]">
+            <div className="relative w-full overflow-hidden rounded-[28px] border border-slate-200 bg-slate-50 px-5 py-10 text-slate-900 shadow-sm">
               <div className={cn("absolute left-0 top-0 h-full w-1", meta.stripClass)} />
               <motion.h2
-                className={cn("font-thai break-words text-center leading-relaxed tracking-wide text-white", getDynamicThaiFontSize(item.th))}
+                className={cn("font-thai break-words text-center leading-relaxed tracking-wide text-slate-950", getDynamicThaiFontSize(item.th))}
                 animate={{ rotate: isRotated ? 180 : 0 }}
                 transition={{ duration: prefersReducedMotion ? 0 : 0.35, ease: "easeInOut" }}
               >
@@ -214,7 +214,7 @@ function DictionaryPhraseDialog({
             <div className="flex flex-col items-center justify-center gap-2 px-2">
               <span className={cn("rounded-full px-2 py-1 text-[10px] font-black", meta.railClass)}>{meta.label}</span>
               <MorphingDialogTitle>
-                <p className="text-2xl font-extrabold tracking-tight text-white">{item.ko}</p>
+                <p className="text-2xl font-extrabold tracking-tight text-slate-900">{item.ko}</p>
               </MorphingDialogTitle>
               <MorphingDialogDescription disableLayoutAnimation className="inline-flex items-center gap-1 rounded-full border border-orange-200/80 bg-orange-50 px-3.5 py-1 text-xs font-bold text-orange-700 dark:border-orange-800/40 dark:bg-orange-950/60 dark:text-orange-300">
                 <span>🗣️ 발음:</span>
@@ -224,7 +224,7 @@ function DictionaryPhraseDialog({
           </div>
 
           <motion.div
-            className="flex items-center justify-between gap-3 border-t border-white/10 pt-4"
+            className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4"
             initial={prefersReducedMotion ? false : { opacity: 0, y: 14, scaleX: 0.96 }}
             animate={{ opacity: 1, y: 0, scaleX: 1 }}
             transition={{ delay: prefersReducedMotion ? 0 : 0.18, duration: prefersReducedMotion ? 0 : 0.24, ease: "easeOut" }}
@@ -238,7 +238,7 @@ function DictionaryPhraseDialog({
               <Volume2 className="size-5" />
               <span>태국어 발음 듣기</span>
             </button>
-            <MorphingDialogClose ariaLabel="다이얼로그 닫기" className="static flex h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/8 px-6 font-bold text-white/80 transition hover:bg-white/15">
+            <MorphingDialogClose ariaLabel="다이얼로그 닫기" className="static flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 px-6 font-bold text-slate-700 transition hover:bg-slate-200">
               닫기
             </MorphingDialogClose>
           </motion.div>
