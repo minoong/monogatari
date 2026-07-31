@@ -21,8 +21,6 @@ import { motion, useReducedMotion } from "motion/react";
 import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { GooeyInput } from "@/components/ui/gooey-input";
-import { SlidingNumber } from "@/components/core/sliding-number";
-import { WordRotate } from "@/components/ui/word-rotate";
 import {
   MorphingDialog,
   MorphingDialogClose,
@@ -422,39 +420,6 @@ export const DictionaryActivity: React.FC = () => {
           }}
         >
           <section ref={introRef} className="mx-auto flex w-full max-w-lg flex-col gap-5">
-          <header data-dictionary-intro className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#121418] px-5 py-5 text-white shadow-[0_18px_38px_-24px_rgba(15,23,42,0.7)]">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_86%_0%,rgba(101,114,135,0.38),transparent_36%),linear-gradient(120deg,transparent_32%,rgba(255,255,255,0.04))]" />
-            <div className="pointer-events-none absolute inset-x-5 bottom-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
-            <div className="relative flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[10px] font-black tracking-[0.22em] text-white/45">THAILAND · FIELD NOTES</p>
-                <h1 className="mt-1 text-3xl font-black tracking-tight">회화 사전</h1>
-                <WordRotate
-                  words={[
-                    "필요한 한마디를 바로 꺼내 보세요",
-                    "여행 중 바로 쓸 태국어 표현",
-                    "현지인에게 크게 보여줄 수도 있어요",
-                  ]}
-                  duration={3200}
-                  disabled={Boolean(prefersReducedMotion)}
-                  className="mt-1 block text-sm font-semibold text-white/55"
-                  motionProps={{
-                    initial: { opacity: 0, y: -12 },
-                    animate: { opacity: 1, y: 0 },
-                    exit: { opacity: 0, y: 12 },
-                    transition: { duration: 0.22, ease: "easeOut" },
-                  }}
-                />
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-right backdrop-blur-sm">
-                <p className="text-[10px] font-bold tracking-wide text-white/45">ENTRIES</p>
-                <p className="mt-0.5 flex items-baseline justify-end gap-1 text-2xl font-black tabular-nums">
-                  <SlidingNumber value={filteredPhrases.length} />
-                  <span className="text-xs font-bold">개</span>
-                </p>
-              </div>
-            </div>
-          </header>
 
           {recentSearches.length > 0 && (
             <div data-dictionary-intro className="flex flex-col gap-1.5">
@@ -530,11 +495,7 @@ export const DictionaryActivity: React.FC = () => {
             })}
           </div>
 
-          <div data-dictionary-intro className="flex items-center justify-between px-1">
-            <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
-              <span className="mr-1 text-slate-900 dark:text-white">●</span>
-              FIELD PHRASES
-            </p>
+          <div data-dictionary-intro className="flex h-7 items-center justify-end px-1">
             {(searchQuery || selectedCategory !== "전체") && (
               <Button
                 size="sm"
