@@ -125,7 +125,15 @@ function DictionaryPhraseDialog({
 
   return (
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
-      <article className="group relative flex gap-3 border-b border-orange-50 px-5 py-4 last:border-b-0 hover:bg-[#fffaf4] dark:border-slate-800/80 dark:hover:bg-slate-800/60">
+      <motion.article
+        layout="position"
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 420, damping: 32, delay: prefersReducedMotion ? 0 : Math.min(index, 7) * 0.028 }}
+        whileHover={prefersReducedMotion ? undefined : { x: 4 }}
+        whileTap={prefersReducedMotion ? undefined : { scale: 0.992 }}
+        className="group relative flex gap-3 border-b border-slate-200/80 px-5 py-4 last:border-b-0 hover:bg-slate-50 dark:border-slate-800/80 dark:hover:bg-slate-800/60"
+      >
         <span className={cn("absolute inset-y-3 left-0 w-1 rounded-r-full", meta.stripClass)} />
         <span className="pt-0.5 text-[11px] font-black tabular-nums text-slate-300 dark:text-slate-600">{String(index + 1).padStart(2, "0")}</span>
         <div className="min-w-0 flex-1" onClickCapture={onOpen}>
@@ -157,12 +165,12 @@ function DictionaryPhraseDialog({
             <Volume2 className="size-4" />
           </Button>
         </div>
-      </article>
+      </motion.article>
 
       <MorphingDialogContainer>
-        <MorphingDialogContent className="relative mx-4 flex h-[82dvh] w-[calc(100%-2rem)] max-w-md flex-col overflow-hidden rounded-[30px] border border-white/70 bg-white p-5 shadow-[0_28px_70px_-26px_rgba(15,23,42,0.7)] dark:border-slate-800 dark:bg-slate-900">
+        <MorphingDialogContent className="relative mx-4 flex h-[82dvh] w-[calc(100%-2rem)] max-w-md flex-col overflow-hidden rounded-[30px] border border-white/10 bg-[#15171b] p-5 text-slate-100 shadow-[0_32px_90px_-28px_rgba(0,0,0,0.8)]">
           <motion.div
-            className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800/80"
+            className="flex items-center justify-between border-b border-white/10 pb-3"
             initial={prefersReducedMotion ? false : { opacity: 0, y: -14, scaleX: 0.96 }}
             animate={{ opacity: 1, y: 0, scaleX: 1 }}
             transition={{ delay: prefersReducedMotion ? 0 : 0.12, duration: prefersReducedMotion ? 0 : 0.24, ease: "easeOut" }}
@@ -173,8 +181,8 @@ function DictionaryPhraseDialog({
                 <span className="text-sm">🇹🇭</span>
               </span>
               <div>
-                <span className="block text-[10px] font-black tracking-[0.16em] text-slate-400">SHOW LOCALLY</span>
-                <span className="text-sm font-extrabold text-slate-900 dark:text-white">현지인에게 보여주기</span>
+                <span className="block text-[10px] font-black tracking-[0.16em] text-white/45">SHOW LOCALLY</span>
+                <span className="text-sm font-extrabold text-white">현지인에게 보여주기</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
@@ -184,22 +192,23 @@ function DictionaryPhraseDialog({
                   triggerHapticFeedback(12);
                   setIsRotated((prev) => !prev);
                 }}
-                className="flex items-center gap-1 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                className="flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/80 transition hover:bg-white/10"
               >
                 <ArrowLeftRight className="size-3.5 text-blue-600 dark:text-blue-400" />
                 <span>{isRotated ? "180° 회전됨" : "정방향"}</span>
               </button>
-              <MorphingDialogClose ariaLabel="닫기" className="static flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white">
+              <MorphingDialogClose ariaLabel="닫기" className="static flex size-8 items-center justify-center rounded-full bg-white/8 text-white/65 transition hover:bg-white/15 hover:text-white">
                 <X className="size-4" />
               </MorphingDialogClose>
             </div>
           </motion.div>
 
           <div className="my-auto flex w-full flex-col items-center justify-center gap-6 py-6 text-center">
-            <div className={cn("w-full rounded-[28px] border px-5 py-10 text-slate-900 shadow-sm dark:text-white", meta.panelClass)}>
-              <p className="mb-4 text-[10px] font-black tracking-[0.22em] text-slate-500 dark:text-slate-400">THAI PHRASE</p>
+            <div className="relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_38%),linear-gradient(145deg,#252930,#0d0f12)] px-5 py-10 text-white shadow-[inset_0_1px_rgba(255,255,255,0.12)]">
+              <div className={cn("absolute left-0 top-0 h-full w-1", meta.stripClass)} />
+              <p className="mb-4 text-[10px] font-black tracking-[0.22em] text-white/45">THAI PHRASE</p>
               <motion.h2
-                className={cn("font-thai break-words text-center leading-relaxed tracking-wide text-slate-900 dark:text-slate-50", getDynamicThaiFontSize(item.th))}
+                className={cn("font-thai break-words text-center leading-relaxed tracking-wide text-white", getDynamicThaiFontSize(item.th))}
                 animate={{ rotate: isRotated ? 180 : 0 }}
                 transition={{ duration: prefersReducedMotion ? 0 : 0.35, ease: "easeInOut" }}
               >
@@ -210,7 +219,7 @@ function DictionaryPhraseDialog({
             <div className="flex flex-col items-center justify-center gap-2 px-2">
               <span className={cn("rounded-full px-2 py-1 text-[10px] font-black", meta.railClass)}>{meta.label}</span>
               <MorphingDialogTitle>
-                <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">{item.ko}</p>
+                <p className="text-2xl font-extrabold tracking-tight text-white">{item.ko}</p>
               </MorphingDialogTitle>
               <MorphingDialogDescription disableLayoutAnimation className="inline-flex items-center gap-1 rounded-full border border-orange-200/80 bg-orange-50 px-3.5 py-1 text-xs font-bold text-orange-700 dark:border-orange-800/40 dark:bg-orange-950/60 dark:text-orange-300">
                 <span>🗣️ 발음:</span>
@@ -220,7 +229,7 @@ function DictionaryPhraseDialog({
           </div>
 
           <motion.div
-            className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800"
+            className="flex items-center justify-between gap-3 border-t border-white/10 pt-4"
             initial={prefersReducedMotion ? false : { opacity: 0, y: 14, scaleX: 0.96 }}
             animate={{ opacity: 1, y: 0, scaleX: 1 }}
             transition={{ delay: prefersReducedMotion ? 0 : 0.18, duration: prefersReducedMotion ? 0 : 0.24, ease: "easeOut" }}
@@ -234,7 +243,7 @@ function DictionaryPhraseDialog({
               <Volume2 className="size-5" />
               <span>태국어 발음 듣기</span>
             </button>
-            <MorphingDialogClose ariaLabel="다이얼로그 닫기" className="static flex h-12 items-center justify-center rounded-2xl border border-slate-200/80 bg-slate-100 px-6 font-bold text-slate-700 transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+            <MorphingDialogClose ariaLabel="다이얼로그 닫기" className="static flex h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/8 px-6 font-bold text-white/80 transition hover:bg-white/15">
               닫기
             </MorphingDialogClose>
           </motion.div>
@@ -409,7 +418,7 @@ export const DictionaryActivity: React.FC = () => {
 
   return (
     <AppScreen className="dictionary-screen" appBar={{ title: "회화 사전" }}>
-      <main ref={mainRef} className="relative flex h-[calc(100svh-56px)] w-full flex-col overflow-hidden bg-[#fffaf2] dark:bg-slate-950">
+      <main ref={mainRef} className="relative flex h-[calc(100svh-56px)] w-full flex-col overflow-hidden bg-[#f2f4f7] dark:bg-[#0b0d10]">
         {/* 독립 스크롤 영역 (화면은 고정되고 이 영역만 독립 스크롤) */}
         <div
           className="flex-1 overflow-y-auto px-5 pt-4 transition-[padding] duration-150 no-scrollbar"
@@ -417,11 +426,13 @@ export const DictionaryActivity: React.FC = () => {
             paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 80}px` : "96px",
           }}
         >
-          <section ref={introRef} className="mx-auto flex w-full max-w-lg flex-col gap-4">
-          <header data-dictionary-intro className="overflow-hidden rounded-[28px] bg-gradient-to-br from-[#ff7a59] via-[#ff9a4f] to-[#ffc45c] px-5 py-5 text-white shadow-[0_16px_34px_-24px_rgba(234,88,12,0.75)]">
-            <div className="flex items-start justify-between gap-4">
+          <section ref={introRef} className="mx-auto flex w-full max-w-lg flex-col gap-5">
+          <header data-dictionary-intro className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#121418] px-5 py-5 text-white shadow-[0_18px_38px_-24px_rgba(15,23,42,0.7)]">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_86%_0%,rgba(101,114,135,0.38),transparent_36%),linear-gradient(120deg,transparent_32%,rgba(255,255,255,0.04))]" />
+            <div className="pointer-events-none absolute inset-x-5 bottom-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+            <div className="relative flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-black tracking-[0.22em] text-white/75">🇹🇭 THAI TRAVEL GUIDE</p>
+                <p className="text-[10px] font-black tracking-[0.22em] text-white/45">THAILAND · FIELD NOTES</p>
                 <h1 className="mt-1 text-3xl font-black tracking-tight">회화 사전</h1>
                 <WordRotate
                   words={[
@@ -431,7 +442,7 @@ export const DictionaryActivity: React.FC = () => {
                   ]}
                   duration={3200}
                   disabled={Boolean(prefersReducedMotion)}
-                  className="mt-1 block text-sm font-semibold text-white/80"
+                  className="mt-1 block text-sm font-semibold text-white/55"
                   motionProps={{
                     initial: { opacity: 0, y: -12 },
                     animate: { opacity: 1, y: 0 },
@@ -440,8 +451,8 @@ export const DictionaryActivity: React.FC = () => {
                   }}
                 />
               </div>
-              <div className="rounded-2xl border border-white/30 bg-white/16 px-3 py-2 text-right backdrop-blur-sm">
-                <p className="text-[10px] font-bold text-white/75">표현</p>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-right backdrop-blur-sm">
+                <p className="text-[10px] font-bold tracking-wide text-white/45">ENTRIES</p>
                 <p className="mt-0.5 flex items-baseline justify-end gap-1 text-2xl font-black tabular-nums">
                   <SlidingNumber value={filteredPhrases.length} />
                   <span className="text-xs font-bold">개</span>
@@ -453,7 +464,7 @@ export const DictionaryActivity: React.FC = () => {
           {recentSearches.length > 0 && (
             <div data-dictionary-intro className="flex flex-col gap-1.5">
               <p className="flex items-center gap-1.5 px-1 text-[11px] font-black tracking-wide text-slate-500 dark:text-slate-400">
-                <Clock className="size-3.5 text-orange-500" /> 최근 꺼내 본 말
+                <Clock className="size-3.5 text-slate-950 dark:text-white" /> 최근 꺼내 본 말
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {recentSearches.map((item) => (
@@ -461,7 +472,7 @@ export const DictionaryActivity: React.FC = () => {
                     key={item}
                     size="sm"
                     variant="secondary"
-                    className="cursor-pointer border border-orange-100 bg-white font-bold text-slate-700 shadow-sm hover:bg-orange-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                    className="cursor-pointer border border-slate-200 bg-white font-bold text-slate-700 shadow-sm transition-transform hover:-translate-y-0.5 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                     onClick={() => {
                       triggerHapticFeedback(10);
                       setSearchQuery(item);
@@ -503,10 +514,10 @@ export const DictionaryActivity: React.FC = () => {
                     setSelectedCategory(category);
                   }}
                   className={cn(
-                    "relative flex shrink-0 items-center gap-1.5 overflow-hidden rounded-2xl px-3.5 py-2 text-xs font-black ring-1 transition-colors",
+                    "relative flex shrink-0 items-center gap-1.5 overflow-hidden rounded-2xl px-3.5 py-2 text-xs font-black ring-1 transition-[color,background-color,box-shadow]",
                     isSelected
-                      ? meta?.activeClass ?? "bg-slate-900 text-white shadow-slate-900/20"
-                      : meta?.railClass ?? "bg-white text-slate-700 ring-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:ring-slate-800",
+                      ? "bg-[#15171b] text-white shadow-[0_10px_20px_-12px_rgba(15,23,42,0.8)]"
+                      : "bg-white text-slate-500 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800",
                     isSelected && "shadow-lg",
                   )}
                 >
@@ -515,7 +526,7 @@ export const DictionaryActivity: React.FC = () => {
                   {isSelected && (
                     <motion.span
                       layoutId="dictionary-category-indicator"
-                      className="absolute inset-x-3.5 bottom-1 h-0.5 rounded-full bg-current/70"
+                      className={cn("absolute inset-x-3.5 bottom-1 h-0.5 rounded-full", meta?.stripClass ?? "bg-white")}
                       transition={{ type: "spring", stiffness: 460, damping: 32 }}
                     />
                   )}
@@ -526,14 +537,14 @@ export const DictionaryActivity: React.FC = () => {
 
           <div data-dictionary-intro className="flex items-center justify-between px-1">
             <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
-              <span className="mr-1 text-orange-500">●</span>
-              지금 바로 쓸 수 있는 표현
+              <span className="mr-1 text-slate-900 dark:text-white">●</span>
+              FIELD PHRASES
             </p>
             {(searchQuery || selectedCategory !== "전체") && (
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-7 rounded-full px-2 font-bold text-orange-600 dark:text-orange-400"
+                className="h-7 rounded-full px-2 font-bold text-slate-600 dark:text-slate-300"
                 onPress={() => {
                   triggerHapticFeedback(10);
                   setSearchQuery("");
@@ -546,10 +557,10 @@ export const DictionaryActivity: React.FC = () => {
             )}
           </div>
 
-          <div data-dictionary-intro className="-mx-5 overflow-hidden border-y border-orange-100 bg-white shadow-[0_10px_25px_-25px_rgba(194,65,12,0.75)] dark:border-slate-800 dark:bg-slate-900">
+          <div data-dictionary-intro className="-mx-5 overflow-hidden border-y border-slate-200 bg-white shadow-[0_14px_30px_-28px_rgba(15,23,42,0.55)] dark:border-slate-800 dark:bg-slate-900">
             {filteredPhrases.length === 0 ? (
               <div className="flex min-h-52 flex-col items-center justify-center px-6 text-center">
-                <span className="grid size-12 place-items-center rounded-2xl bg-orange-100 text-xl dark:bg-orange-950/50">🔎</span>
+                <span className="grid size-12 place-items-center rounded-2xl bg-slate-100 text-xl dark:bg-slate-800">🔎</span>
                 <p className="mt-3 text-sm font-black text-slate-800 dark:text-slate-100">찾는 표현이 없어요</p>
                 <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">다른 단어 또는 초성으로 다시 찾아보세요.</p>
               </div>
