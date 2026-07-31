@@ -74,15 +74,29 @@ export const DictionaryActivity: React.FC = () => {
     };
 
     const vv = window.visualViewport;
+    const handlePageResume = () => {
+      handleViewportChange();
+      requestAnimationFrame(handleViewportChange);
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        handlePageResume();
+      }
+    };
+
     vv.addEventListener("resize", handleViewportChange);
     vv.addEventListener("scroll", handleViewportChange);
     window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("pageshow", handlePageResume);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     handleViewportChange();
 
     return () => {
       vv.removeEventListener("resize", handleViewportChange);
       vv.removeEventListener("scroll", handleViewportChange);
       window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("pageshow", handlePageResume);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 

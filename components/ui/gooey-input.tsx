@@ -229,10 +229,23 @@ export function GooeyInput({
       animationFrameId = requestAnimationFrame(syncFocusProxyRect);
     };
 
+    const handlePageResume = () => {
+      updateFocusProxyRect();
+      requestAnimationFrame(updateFocusProxyRect);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        handlePageResume();
+      }
+    };
+
     const observer = new ResizeObserver(updateFocusProxyRect);
     observer.observe(inputRef.current);
     window.visualViewport?.addEventListener("resize", updateFocusProxyRect);
     window.visualViewport?.addEventListener("scroll", updateFocusProxyRect);
+    window.addEventListener("pageshow", handlePageResume);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     syncFocusProxyRect();
 
     return () => {
@@ -240,6 +253,8 @@ export function GooeyInput({
       cancelAnimationFrame(animationFrameId);
       window.visualViewport?.removeEventListener("resize", updateFocusProxyRect);
       window.visualViewport?.removeEventListener("scroll", updateFocusProxyRect);
+      window.removeEventListener("pageshow", handlePageResume);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [focusProxy, isExpanded]);
 
@@ -428,6 +443,9 @@ export function GooeyInput({
             inputMode="search"
             onBlur={handleBlur}
             onChange={handleChange}
+            onPointerDown={(event) => {
+              event.currentTarget.focus({ preventScroll: true });
+            }}
             style={focusProxyRect}
             type="search"
             value={searchText}
