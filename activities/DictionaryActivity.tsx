@@ -22,7 +22,7 @@ import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { GooeyInput } from "@/components/ui/gooey-input";
 import { SlidingNumber } from "@/components/core/sliding-number";
-import ShinyText from "@/components/ShinyText";
+import { WordRotate } from "@/components/ui/word-rotate";
 import {
   MorphingDialog,
   MorphingDialogClose,
@@ -423,13 +423,21 @@ export const DictionaryActivity: React.FC = () => {
               <div>
                 <p className="text-[10px] font-black tracking-[0.22em] text-white/75">🇹🇭 THAI TRAVEL GUIDE</p>
                 <h1 className="mt-1 text-3xl font-black tracking-tight">회화 사전</h1>
-                <ShinyText
-                  text="필요한 한마디를 바로 꺼내 보세요"
+                <WordRotate
+                  words={[
+                    "필요한 한마디를 바로 꺼내 보세요",
+                    "여행 중 바로 쓸 태국어 표현",
+                    "현지인에게 크게 보여줄 수도 있어요",
+                  ]}
+                  duration={3200}
                   disabled={Boolean(prefersReducedMotion)}
-                  speed={4}
-                  color="rgba(255,255,255,.78)"
-                  shineColor="#fff7df"
-                  className="mt-1 text-sm font-semibold"
+                  className="mt-1 block text-sm font-semibold text-white/80"
+                  motionProps={{
+                    initial: { opacity: 0, y: -12 },
+                    animate: { opacity: 1, y: 0 },
+                    exit: { opacity: 0, y: 12 },
+                    transition: { duration: 0.22, ease: "easeOut" },
+                  }}
                 />
               </div>
               <div className="rounded-2xl border border-white/30 bg-white/16 px-3 py-2 text-right backdrop-blur-sm">
