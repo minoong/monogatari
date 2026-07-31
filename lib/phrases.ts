@@ -2,7 +2,7 @@ import { getChoseong } from "es-hangul";
 
 export interface PhraseItem {
   id: number;
-  category: "기본" | "이동" | "식당" | "쇼핑" | "긴급";
+  category: "기본" | "이동" | "식당" | "쇼핑" | "마사지" | "긴급";
   importance: "최고" | "높음" | "보통";
   ko: string;
   th: string;
@@ -91,7 +91,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     importance: "높음",
     ko: "여기서 세워주세요 / 내려주세요",
     th: "จอดที่นี่",
-    pron: "쩜 티니 크럽/카",
+    pron: "쩟 티니 크럽/카",
   },
   {
     id: 11,
@@ -253,11 +253,123 @@ export const THAI_PHRASES: PhraseItem[] = [
   },
   {
     id: 30,
-    category: "긴급",
+    category: "식당",
     importance: "보통",
-    ko: "추천해 주실 수 있나요? (음식/상점 등)",
+    ko: "추천해 주세요 / 추천해줘",
     th: "แนะนำหน่อย",
     pron: "내남 노이 크럽/카?",
+  },
+  {
+    id: 31,
+    category: "식당",
+    importance: "보통",
+    ko: "얼음 주세요",
+    th: "น้ำแข็ง",
+    pron: "남깽 크럽/카",
+  },
+  {
+    id: 32,
+    category: "식당",
+    importance: "보통",
+    ko: "콜라 제로 주세요",
+    th: "โค้กซีโร่",
+    pron: "콕 씨 로 크럽/카",
+  },
+  {
+    id: 33,
+    category: "식당",
+    importance: "높음",
+    ko: "배고파요!",
+    th: "หิวมาก",
+    pron: "히우 막",
+  },
+  {
+    id: 34,
+    category: "식당",
+    importance: "보통",
+    ko: "배불러요!",
+    th: "อิ่มจัง",
+    pron: "임 짱",
+  },
+  {
+    id: 35,
+    category: "이동",
+    importance: "높음",
+    ko: "빨리 가 주세요",
+    th: "เร็วๆ",
+    pron: "래우 래우 크럽/카",
+  },
+  {
+    id: 36,
+    category: "이동",
+    importance: "보통",
+    ko: "천천히 가 주세요",
+    th: "ช้าๆ",
+    pron: "차 차 크럽/카",
+  },
+  {
+    id: 37,
+    category: "이동",
+    importance: "높음",
+    ko: "계속 가 주세요 / 직진해 주세요",
+    th: "ตรงไป",
+    pron: "뜨롱 빠이 크럽/카",
+  },
+  {
+    id: 38,
+    category: "마사지",
+    importance: "높음",
+    ko: "아파요",
+    th: "เจ็บ",
+    pron: "쩹",
+  },
+  {
+    id: 39,
+    category: "마사지",
+    importance: "보통",
+    ko: "세게 해주세요",
+    th: "หนักๆ",
+    pron: "낙 낙 크럽/카",
+  },
+  {
+    id: 40,
+    category: "마사지",
+    importance: "보통",
+    ko: "약하게 해주세요",
+    th: "เบาๆ",
+    pron: "바오 바오 크럽/카",
+  },
+  {
+    id: 41,
+    category: "마사지",
+    importance: "보통",
+    ko: "좋아요 / 편안해요",
+    th: "สบาย",
+    pron: "사바이",
+  },
+  {
+    id: 42,
+    category: "마사지",
+    importance: "보통",
+    ko: "간지러워요",
+    th: "จั๊กกะจี้",
+    pron: "짝까찌",
+  },
+  {
+    id: 43,
+    category: "기본",
+    importance: "보통",
+    ko: "추워요",
+    th: "หนาว",
+    pron: "나오",
+  },
+  {
+    id: 44,
+    category: "기본",
+    importance: "보통",
+    ko: "더워요",
+    th: "ร้อน",
+    pron: "론",
   },
 ];
 

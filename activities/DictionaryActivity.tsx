@@ -170,7 +170,7 @@ export const DictionaryActivity: React.FC = () => {
     }
   };
 
-  const categories = ["전체", "기본", "이동", "식당", "쇼핑", "긴급"];
+  const categories = ["전체", "기본", "이동", "식당", "쇼핑", "마사지", "긴급"];
 
   return (
     <AppScreen className="dictionary-screen" appBar={{ title: "회화 사전" }}>
@@ -231,6 +231,8 @@ export const DictionaryActivity: React.FC = () => {
                   ? "🥈 이동"
                   : cat === "식당"
                   ? "🥉 식당"
+                  : cat === "마사지"
+                  ? "💆 마사지"
                   : cat;
               return (
                 <Chip
