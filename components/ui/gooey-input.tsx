@@ -145,6 +145,7 @@ export function GooeyInput({
   const rootRef = useRef<HTMLDivElement>(null);
   const placeholderMeasureRef = useRef<HTMLSpanElement>(null);
   const prevExpandedRef = useRef(false);
+  const prevFocusProxyActiveRef = useRef(false);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
   const [measuredCollapsedWidth, setMeasuredCollapsedWidth] = useState(115);
@@ -184,15 +185,25 @@ export function GooeyInput({
   );
 
   useLayoutEffect(() => {
-    if (
+    const canFocus =
       isExpanded &&
-      (!focusProxy || (isFocusProxyActive && focusProxyRect))
-    ) {
+      (!focusProxy || (isFocusProxyActive && focusProxyRect));
+
+    if (canFocus) {
+      const shouldRestoreCaret =
+        focusProxy && !prevFocusProxyActiveRef.current;
+
       focusTargetRef.current?.focus({ preventScroll: true });
-    } else if (prevExpandedRef.current) {
+      if (shouldRestoreCaret) {
+        const input = focusTargetRef.current;
+        const end = input?.value.length ?? 0;
+        input?.setSelectionRange(end, end);
+      }
+    } else if (!isExpanded && prevExpandedRef.current) {
       setSearchText("");
     }
     prevExpandedRef.current = isExpanded;
+    prevFocusProxyActiveRef.current = Boolean(canFocus);
   }, [
     focusProxy,
     focusProxyRect,
