@@ -124,10 +124,11 @@ function DictionaryPhraseDialog({
   return (
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
       <motion.article
+        data-dictionary-entry
         layout="position"
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+        initial={false}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 420, damping: 32, delay: prefersReducedMotion ? 0 : Math.min(index, 7) * 0.028 }}
+        transition={{ type: "spring", stiffness: 420, damping: 32 }}
         whileTap={prefersReducedMotion ? undefined : { scale: 0.992 }}
         className="group relative flex gap-3 border-b border-slate-200/80 px-5 py-4 last:border-b-0 dark:border-slate-800/80"
       >
@@ -324,18 +325,33 @@ export const DictionaryActivity: React.FC = () => {
     const media = gsap.matchMedia();
 
     media.add("(prefers-reduced-motion: no-preference)", () => {
-      gsap.fromTo(
-        "[data-dictionary-intro]",
-        { autoAlpha: 0, y: 16 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.52,
-          ease: "power3.out",
-          stagger: 0.07,
-          clearProps: "transform,visibility",
-        },
-      );
+      const entries = gsap.utils.toArray<HTMLElement>("[data-dictionary-entry]").slice(0, 7);
+      const timeline = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+      timeline
+        .fromTo(
+          "[data-dictionary-intro='rail']",
+          { autoAlpha: 0, y: 18, scale: 0.98 },
+          { autoAlpha: 1, y: 0, scale: 1, duration: 0.52 },
+        )
+        .fromTo(
+          "[data-dictionary-intro='toolbar']",
+          { autoAlpha: 0, y: 10 },
+          { autoAlpha: 1, y: 0, duration: 0.36 },
+          "-=0.25",
+        )
+        .fromTo(
+          "[data-dictionary-intro='list']",
+          { autoAlpha: 0, y: 14, scale: 0.99 },
+          { autoAlpha: 1, y: 0, scale: 1, duration: 0.48 },
+          "-=0.18",
+        )
+        .fromTo(
+          entries,
+          { autoAlpha: 0, y: 18 },
+          { autoAlpha: 1, y: 0, duration: 0.42, stagger: 0.055, clearProps: "transform,visibility" },
+          "-=0.28",
+        );
     });
 
     return () => media.revert();
@@ -455,7 +471,7 @@ export const DictionaryActivity: React.FC = () => {
             </div>
           )}
 
-          <div data-dictionary-intro className="-mx-5 flex gap-2 overflow-x-auto px-5 py-1 no-scrollbar" aria-label="회화 카테고리">
+          <div data-dictionary-intro="rail" className="-mx-5 flex gap-2 overflow-x-auto px-5 py-1 no-scrollbar" aria-label="회화 카테고리">
             {CATEGORY_FILTERS.map((category) => {
               const isSelected = selectedCategory === category;
               const meta = category === "전체" ? null : CATEGORY_META[category];
@@ -495,7 +511,7 @@ export const DictionaryActivity: React.FC = () => {
             })}
           </div>
 
-          <div data-dictionary-intro className="flex h-7 items-center justify-end px-1">
+          <div data-dictionary-intro="toolbar" className="flex h-7 items-center justify-end px-1">
             {(searchQuery || selectedCategory !== "전체") && (
               <Button
                 size="sm"
@@ -513,7 +529,7 @@ export const DictionaryActivity: React.FC = () => {
             )}
           </div>
 
-          <div data-dictionary-intro className="-mx-5 overflow-hidden border-y border-slate-200 bg-white shadow-[0_14px_30px_-28px_rgba(15,23,42,0.55)] dark:border-slate-800 dark:bg-slate-900">
+          <div data-dictionary-intro="list" className="-mx-5 overflow-hidden border-y border-slate-200 bg-white shadow-[0_14px_30px_-28px_rgba(15,23,42,0.55)] dark:border-slate-800 dark:bg-slate-900">
             {filteredPhrases.length === 0 ? (
               <div className="flex min-h-52 flex-col items-center justify-center px-6 text-center">
                 <span className="grid size-12 place-items-center rounded-2xl bg-slate-100 text-xl dark:bg-slate-800">🔎</span>
