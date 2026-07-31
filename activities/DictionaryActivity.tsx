@@ -12,6 +12,7 @@ import {
 import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { GooeyInput } from "@/components/ui/gooey-input";
+import AnimatedList from "@/components/AnimatedList";
 import { cn } from "@/lib/utils";
 
 const RECENT_SEARCHES_KEY = "monogatari_recent_phrase_searches";
@@ -289,62 +290,66 @@ export const DictionaryActivity: React.FC = () => {
                 </p>
               </div>
             ) : (
-              filteredPhrases.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => handleCardClick(item)}
-                  className="group relative cursor-pointer px-5 py-2.5 transition-colors hover:bg-slate-50 active:bg-slate-100 dark:hover:bg-slate-800/50 dark:active:bg-slate-800"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex min-w-0 flex-wrap items-center gap-1.5 pr-2">
-                      <Chip
-                        size="sm"
-                        variant="soft"
-                        color="accent"
-                        className="font-extrabold text-[10px] h-5 px-1.5"
-                      >
-                        {item.category}
-                      </Chip>
-                      <span className="truncate text-xs font-bold text-slate-900 dark:text-white">
-                        {item.ko}
-                      </span>
+              <AnimatedList
+                items={filteredPhrases}
+                getItemKey={(item) => item.id}
+                className="divide-y divide-slate-100 dark:divide-slate-800/80"
+                renderItem={(item) => (
+                  <div
+                    onClick={() => handleCardClick(item)}
+                    className="group relative cursor-pointer px-5 py-2.5 transition-colors hover:bg-slate-50 active:bg-slate-100 dark:hover:bg-slate-800/50 dark:active:bg-slate-800"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 flex-wrap items-center gap-1.5 pr-2">
+                        <Chip
+                          size="sm"
+                          variant="soft"
+                          color="accent"
+                          className="font-extrabold text-[10px] h-5 px-1.5"
+                        >
+                          {item.category}
+                        </Chip>
+                        <span className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                          {item.ko}
+                        </span>
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-1">
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="secondary"
+                          aria-label="발음 듣기"
+                          onPress={(e) => playAudio(item.th, e)}
+                          className="size-7.5 rounded-lg text-blue-600 dark:text-blue-400"
+                        >
+                          <Volume2 className="size-3.5" />
+                        </Button>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="secondary"
+                          aria-label="현지인에게 크게 보여주기"
+                          onPress={() => handleCardClick(item)}
+                          className="size-7.5 rounded-lg text-blue-600 dark:text-blue-400"
+                        >
+                          <Maximize2 className="size-3.5" />
+                        </Button>
+                      </div>
                     </div>
 
-                    <div className="flex shrink-0 items-center gap-1">
-                      <Button
-                        isIconOnly
-                        size="sm"
-                        variant="secondary"
-                        aria-label="발음 듣기"
-                        onPress={(e) => playAudio(item.th, e)}
-                        className="size-7.5 rounded-lg text-blue-600 dark:text-blue-400"
-                      >
-                        <Volume2 className="size-3.5" />
-                      </Button>
-                      <Button
-                        isIconOnly
-                        size="sm"
-                        variant="secondary"
-                        aria-label="현지인에게 크게 보여주기"
-                        onPress={() => handleCardClick(item)}
-                        className="size-7.5 rounded-lg text-blue-600 dark:text-blue-400"
-                      >
-                        <Maximize2 className="size-3.5" />
-                      </Button>
-                    </div>
+                    {/* Thai Text */}
+                    <p className="mt-1 font-thai text-base font-semibold leading-snug text-slate-900 dark:text-slate-100">
+                      {item.th}
+                    </p>
+
+                    {/* Pronunciation */}
+                    <p className="mt-0.5 text-xs font-bold text-blue-600 dark:text-blue-400">
+                      🗣️ {item.pron}
+                    </p>
                   </div>
-
-                  {/* Thai Text */}
-                  <p className="mt-1 font-thai text-base font-semibold leading-snug text-slate-900 dark:text-slate-100">
-                    {item.th}
-                  </p>
-
-                  {/* Pronunciation */}
-                  <p className="mt-0.5 text-xs font-bold text-blue-600 dark:text-blue-400">
-                    🗣️ {item.pron}
-                  </p>
-                </div>
-              ))
+                )}
+              />
             )}
           </div>
         </section>
