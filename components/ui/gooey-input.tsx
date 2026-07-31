@@ -237,21 +237,21 @@ export function GooeyInput({
     const updateFocusProxyRect = () => {
       const rect = inputRef.current?.getBoundingClientRect();
       if (!rect) return;
-      setFocusProxyRect((previous) => {
-        const next = {
-          left: rect.left,
-          top: rect.top,
-          width: rect.width,
-          height: rect.height,
-        };
+      const next = {
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+      };
+      const proxyInput = focusProxyRef.current;
+      if (proxyInput) {
+        proxyInput.style.width = `${rect.width}px`;
+        proxyInput.style.height = `${rect.height}px`;
+        proxyInput.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0)`;
+      }
 
-        if (
-          previous &&
-          Math.abs(previous.left - next.left) < 0.5 &&
-          Math.abs(previous.top - next.top) < 0.5 &&
-          Math.abs(previous.width - next.width) < 0.5 &&
-          Math.abs(previous.height - next.height) < 0.5
-        ) {
+      setFocusProxyRect((previous) => {
+        if (previous) {
           return previous;
         }
 
@@ -504,7 +504,13 @@ export function GooeyInput({
             }}
             onChange={handleChange}
             onFocus={() => setIsFocusProxyActive(true)}
-            style={focusProxyRect}
+            style={{
+              left: 0,
+              top: 0,
+              width: focusProxyRect.width,
+              height: focusProxyRect.height,
+              transform: `translate3d(${focusProxyRect.left}px, ${focusProxyRect.top}px, 0)`,
+            }}
             type="search"
             value={searchText}
           />,
