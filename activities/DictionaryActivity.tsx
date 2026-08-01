@@ -2,6 +2,7 @@ import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button, Chip } from "@heroui/react";
 import {
   ArrowLeftRight,
@@ -258,7 +259,9 @@ export const DictionaryActivity: React.FC = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [searchBarTop, setSearchBarTop] = useState<number | null>(null);
   const mainRef = useRef<HTMLElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
   // PWA iOS/AOS 가상 키보드 높이 동적 추적 (visualViewport API)
@@ -317,6 +320,7 @@ export const DictionaryActivity: React.FC = () => {
   }, []);
 
   useGSAP(() => {
+    gsap.registerPlugin(ScrollTrigger);
     const media = gsap.matchMedia();
 
     media.add("(prefers-reduced-motion: no-preference)", () => {
@@ -347,6 +351,21 @@ export const DictionaryActivity: React.FC = () => {
           { autoAlpha: 1, y: 0, duration: 0.42, stagger: 0.055, clearProps: "transform,visibility" },
           "-=0.28",
         );
+
+      if (scrollRef.current && listRef.current) {
+        gsap.to(listRef.current, {
+          y: -14,
+          ease: "none",
+          scrollTrigger: {
+            scroller: scrollRef.current,
+            trigger: listRef.current,
+            start: "top bottom",
+            end: "top top",
+            scrub: 0.45,
+            invalidateOnRefresh: true,
+          },
+        });
+      }
     });
 
     return () => media.revert();
@@ -425,6 +444,7 @@ export const DictionaryActivity: React.FC = () => {
       <main ref={mainRef} className="relative flex h-[calc(100svh-56px)] w-full flex-col overflow-hidden bg-[#f2f4f7] dark:bg-[#0b0d10]">
         {/* 독립 스크롤 영역 (화면은 고정되고 이 영역만 독립 스크롤) */}
         <div
+          ref={scrollRef}
           className="flex-1 overflow-y-auto px-5 pt-4 transition-[padding] duration-150 no-scrollbar"
           style={{
             paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 80}px` : "96px",
@@ -466,7 +486,11 @@ export const DictionaryActivity: React.FC = () => {
             </div>
           )}
 
-          <div data-dictionary-intro="rail" className="-mx-5 flex gap-2 overflow-x-auto px-5 py-1 no-scrollbar" aria-label="회화 카테고리">
+          <div
+            data-dictionary-intro="rail"
+            className="sticky top-0 z-20 -mx-5 flex gap-2 overflow-x-auto bg-[#f2f4f7]/88 px-5 py-3 backdrop-blur-xl no-scrollbar dark:bg-[#0b0d10]/88"
+            aria-label="회화 카테고리"
+          >
             {CATEGORY_FILTERS.map((category) => {
               const isSelected = selectedCategory === category;
               const meta = category === "전체" ? null : CATEGORY_META[category];
@@ -524,7 +548,7 @@ export const DictionaryActivity: React.FC = () => {
             )}
           </div>
 
-          <div data-dictionary-intro="list" className="-mx-5 overflow-hidden border-y border-slate-200 bg-white shadow-[0_14px_30px_-28px_rgba(15,23,42,0.55)] dark:border-slate-800 dark:bg-slate-900">
+          <div ref={listRef} data-dictionary-intro="list" className="-mx-5 overflow-hidden border-y border-slate-200 bg-white shadow-[0_14px_30px_-28px_rgba(15,23,42,0.55)] will-change-transform dark:border-slate-800 dark:bg-slate-900">
             {filteredPhrases.length === 0 ? (
               <div className="flex min-h-52 flex-col items-center justify-center px-6 text-center">
                 <span className="grid size-12 place-items-center rounded-2xl bg-slate-100 text-xl dark:bg-slate-800">🔎</span>
