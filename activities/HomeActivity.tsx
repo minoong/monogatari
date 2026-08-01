@@ -14,7 +14,6 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
-import { ScrambleText } from "../components/ui/scramble-text";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -201,8 +200,8 @@ const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }>
       <div className="flex items-center gap-2">
         <span className="flex size-8 items-center justify-center rounded-xl bg-gray-100 text-gray-600"><Hotel size={17} /></span>
         <div>
-          <p className="text-sm font-bold text-gray-900"><ScrambleText text="HP!" delay={340} duration={360} /></p>
-          <p className="text-[11px] text-gray-400"><ScrambleText text="8/29–9/1 · 3곳" delay={400} duration={520} /></p>
+          <p className="text-sm font-bold text-gray-900">HP!</p>
+          <p className="text-[11px] text-gray-400">8/29–9/1 · 3곳</p>
         </div>
       </div>
       <DotLottieReact
@@ -307,26 +306,26 @@ export const HomeActivity: React.FC = () => {
           {tripState === "before" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
               <div className="bg-blue-100 dark:bg-blue-900 rounded-2xl p-6 text-center">
-                <h2 className="text-xl font-bold mb-1"><ScrambleText text="방콕 출발까지" delay={40} /></h2>
-                <p className="text-4xl font-extrabold text-blue-600 dark:text-blue-400"><ScrambleText text="D-14" delay={140} duration={420} /></p>
+                <h2 className="text-xl font-bold mb-1">방콕 출발까지</h2>
+                <p className="text-4xl font-extrabold text-blue-600 dark:text-blue-400">D-14</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <button onClick={() => replace("ChecklistActivity", {}, { animate: false })} className="p-4 bg-white dark:bg-gray-800 rounded-2xl border shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform">
                   <span className="text-2xl">📝</span>
-                  <ScrambleText className="font-semibold" text="준비물 리스트" delay={180} />
+                  <span className="font-semibold">준비물 리스트</span>
                 </button>
                 <button onClick={() => push("ExchangeActivity", {})} className="p-4 bg-white dark:bg-gray-800 rounded-2xl border shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform">
                   <span className="text-2xl">💱</span>
-                  <ScrambleText className="font-semibold" text="환율 계산기" delay={240} />
+                  <span className="font-semibold">환율 계산기</span>
                 </button>
               </div>
 
               <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
 
               <button onClick={() => push("DiscoverActivity", {})} className="p-4 bg-orange-50 dark:bg-orange-900/30 rounded-2xl border border-orange-200 dark:border-orange-800 text-left active:scale-95 transition-transform">
-                <h3 className="font-bold text-lg"><ScrambleText text="태국 맛집 & 쇼핑 추천 🇹🇭" delay={520} /></h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1"><ScrambleText text="세븐일레븐 필수 간식부터 야시장 맛집까지" delay={600} duration={780} /></p>
+                <h3 className="font-bold text-lg">태국 맛집 & 쇼핑 추천 🇹🇭</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">세븐일레븐 필수 간식부터 야시장 맛집까지</p>
               </button>
             </motion.div>
           )}

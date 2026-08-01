@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
@@ -22,6 +22,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { GooeyInput } from "@/components/ui/gooey-input";
+import { ScrambleText } from "@/components/ui/scramble-text";
 import {
   MorphingDialog,
   MorphingDialogClose,
@@ -110,6 +111,7 @@ function DictionaryPhraseDialog({
   index,
   meta,
   prefersReducedMotion,
+  shouldScramble,
   onOpen,
   onPlayAudio,
 }: {
@@ -117,10 +119,12 @@ function DictionaryPhraseDialog({
   index: number;
   meta: (typeof CATEGORY_META)[PhraseItem["category"]];
   prefersReducedMotion: boolean | null;
+  shouldScramble: boolean;
   onOpen: () => void;
   onPlayAudio: (text: string, event?: React.MouseEvent | unknown) => void;
 }) {
   const [isRotated, setIsRotated] = useState(true);
+  const [shouldScrambleOnMount] = useState(shouldScramble);
 
   return (
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
@@ -137,13 +141,31 @@ function DictionaryPhraseDialog({
           >
             <div className="flex min-w-0 items-center gap-2">
               <MorphingDialogTitle className="min-w-0">
-                <span className="block truncate text-sm font-black text-slate-800 dark:text-slate-100">{item.ko}</span>
+                <ScrambleText
+                  text={item.ko}
+                  delay={620 + index * 95}
+                  duration={440}
+                  enabled={shouldScrambleOnMount}
+                  className="block truncate text-sm font-black text-slate-800 dark:text-slate-100"
+                />
               </MorphingDialogTitle>
               <span className={cn("shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-black", meta.railClass)}>{meta.label}</span>
             </div>
             <MorphingDialogDescription disableLayoutAnimation className="block">
-              <p className="mt-1 font-thai text-2xl font-semibold leading-tight text-slate-950 dark:text-white">{item.th}</p>
-              <p className="mt-1 text-xs font-bold text-orange-600 dark:text-orange-400">🗣️ {item.pron}</p>
+              <ScrambleText
+                text={item.th}
+                delay={675 + index * 95}
+                  duration={500}
+                  enabled={shouldScrambleOnMount}
+                className="mt-1 block font-thai text-2xl font-semibold leading-tight text-slate-950 dark:text-white"
+              />
+              <ScrambleText
+                text={`🗣️ ${item.pron}`}
+                delay={725 + index * 95}
+                  duration={470}
+                  enabled={shouldScrambleOnMount}
+                className="mt-1 block text-xs font-bold text-orange-600 dark:text-orange-400"
+              />
             </MorphingDialogDescription>
           </MorphingDialogTrigger>
         </div>
@@ -262,7 +284,13 @@ export const DictionaryActivity: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const [shouldScramble, setShouldScramble] = useState(true);
   const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShouldScramble(false), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   // PWA iOS/AOS 가상 키보드 높이 동적 추적 (visualViewport API)
   useLayoutEffect(() => {
@@ -565,6 +593,7 @@ export const DictionaryActivity: React.FC = () => {
                   onOpen={handlePhraseOpen}
                   onPlayAudio={playAudio}
                   prefersReducedMotion={prefersReducedMotion}
+                  shouldScramble={shouldScramble}
                 />
               ))
             )}

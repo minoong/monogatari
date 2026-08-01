@@ -10,7 +10,14 @@ type ScrambleTextProps = {
   className?: string;
   delay?: number;
   duration?: number;
+  enabled?: boolean;
 };
+
+const getInitialScramble = (text: string) => Array.from(text)
+  .map((character, index) => (
+    character === " " ? character : SCRAMBLE_CHARACTERS[index % SCRAMBLE_CHARACTERS.length]
+  ))
+  .join("");
 
 /** 첫 진입에서만 랜덤 문자 사이로 원문이 드러나는 짧은 텍스트 리빌 효과 */
 export function ScrambleText({
@@ -18,12 +25,13 @@ export function ScrambleText({
   className,
   delay = 0,
   duration = 620,
+  enabled = true,
 }: ScrambleTextProps) {
   const prefersReducedMotion = useReducedMotion();
-  const [displayText, setDisplayText] = useState(text);
+  const [displayText, setDisplayText] = useState(() => getInitialScramble(text));
 
   useEffect(() => {
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion || !enabled) {
       return;
     }
 
@@ -55,11 +63,11 @@ export function ScrambleText({
       window.clearTimeout(timeout);
       window.cancelAnimationFrame(animationFrame);
     };
-  }, [delay, duration, prefersReducedMotion, text]);
+  }, [delay, duration, enabled, prefersReducedMotion, text]);
 
   return (
     <span aria-label={text} className={className}>
-      <span aria-hidden="true">{prefersReducedMotion ? text : displayText}</span>
+      <span aria-hidden="true">{prefersReducedMotion || !enabled ? text : displayText}</span>
     </span>
   );
 }
