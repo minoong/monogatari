@@ -123,13 +123,8 @@ function DictionaryPhraseDialog({
 
   return (
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
-      <motion.article
+      <article
         data-dictionary-entry
-        layout="position"
-        initial={false}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 420, damping: 32 }}
-        whileTap={prefersReducedMotion ? undefined : { scale: 0.992 }}
         className="group relative flex gap-3 border-b border-slate-200/80 px-5 py-4 last:border-b-0 dark:border-slate-800/80"
       >
         <span className={cn("absolute inset-y-3 left-0 w-1 rounded-r-full", meta.stripClass)} />
@@ -163,7 +158,7 @@ function DictionaryPhraseDialog({
             <Volume2 className="size-4" />
           </Button>
         </div>
-      </motion.article>
+      </article>
 
       <MorphingDialogContainer>
         <MorphingDialogContent className="relative mx-4 flex h-[82dvh] w-[calc(100%-2rem)] max-w-md flex-col overflow-hidden rounded-[30px] border border-slate-200 bg-white p-5 text-slate-900 shadow-[0_32px_90px_-28px_rgba(15,23,42,0.28)]">
