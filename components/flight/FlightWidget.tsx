@@ -3,7 +3,7 @@
 import React from "react";
 import { Button, Card, Tabs } from "@heroui/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { ArrowUpRight, MonitorPlay, Plug } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StateTextRoll } from "@/components/core/state-text-roll";
@@ -158,10 +158,6 @@ const duration = getDurationParts(flight.duration);
                     </a>
                     <span className="text-[11px] font-bold">{flight.cabin}</span>
                     <span className="rounded-full bg-[#e1f3fd] px-2 py-0.5 text-[10px] font-bold">{flight.fareFamily}</span>
-                    <span className="ml-auto flex items-center gap-2.5">
-                      <span className="inline-flex" aria-label="기내 전원 공급 장치"><Plug className="size-4" aria-hidden="true" /></span>
-                      <span className="inline-flex" aria-label="기내 엔터테인먼트"><MonitorPlay className="size-4" aria-hidden="true" /></span>
-                    </span>
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-3">
                     <div className="flex items-center gap-2" aria-label={`탑승객 ${passenger.name}`}><Avatar className="size-8 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar><span className="text-xs font-semibold text-slate-500"><StateTextRoll value={`${passenger.name} 티켓`} previousValue={`${previousPassenger.name} 티켓`} transitionKey={transitionKey} className="min-w-[5.5em]" /></span></div>

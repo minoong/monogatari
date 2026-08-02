@@ -100,10 +100,6 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
         </a>
         <span className="text-sm font-bold">{flight.cabin}</span>
         <span className="rounded-full bg-[#e1f3fd] px-2.5 py-1 text-xs font-bold">{flight.fareFamily}</span>
-        <span className="ml-auto flex items-center gap-4 text-[#0b3478]">
-          <span className="inline-flex" aria-label="기내 전원 공급 장치"><Plug className="size-5" aria-hidden="true" /></span>
-          <span className="inline-flex" aria-label="기내 엔터테인먼트"><MonitorPlay className="size-5" aria-hidden="true" /></span>
-        </span>
       </div>
 
       <section className="mt-5 border-t border-[#e3edf6] pt-4">
