@@ -139,45 +139,48 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
         </section>
 
         <section data-flight-tabs className="mt-5">
-          <Tabs selectedKey={selectedPassenger} onSelectionChange={(key) => {
+          <Tabs variant="secondary" selectedKey={selectedPassenger} onSelectionChange={(key) => {
             const nextPassenger = String(key) as FlightPassengerId;
             setSelectedPassenger(nextPassenger);
             setSelectedFlight(FLIGHT_TICKETS[nextPassenger][0].id);
           }}>
             <Tabs.ListContainer>
-              <Tabs.List aria-label="탑승객" className="grid h-13 w-full grid-cols-2 rounded-2xl bg-[#e9f1f9] p-1.5 *:h-10 *:w-full">
+              <Tabs.List aria-label="탑승객" className="grid h-12 w-full grid-cols-2 border-b border-[#d9e6f1] bg-transparent p-0 *:h-12 *:w-full">
                 {FLIGHT_PASSENGERS.map((item) => (
-                  <Tabs.Tab key={item.id} id={item.id} className="relative z-0 flex gap-2 rounded-xl text-sm font-extrabold text-slate-500 data-[selected=true]:text-[#0a3479]">
+                  <Tabs.Tab key={item.id} id={item.id} className="relative z-0 flex gap-2 rounded-none text-sm font-extrabold text-slate-400 data-[selected=true]:text-[#0a3479]">
                     <Avatar className="size-6"><AvatarImage src={item.image} alt="" /><AvatarFallback>{item.initials}</AvatarFallback></Avatar>
                     {item.name}
-                    <Tabs.Indicator className="-z-10 rounded-xl bg-white shadow-[0_4px_12px_-7px_rgba(6,48,107,0.65)]" />
+                    <Tabs.Indicator className="-z-10 bottom-0 h-0.5 rounded-full bg-[#1269b0]" />
                   </Tabs.Tab>
                 ))}
               </Tabs.List>
             </Tabs.ListContainer>
+            <Tabs.Panel id={selectedPassenger} className="pt-4">
+              <Tabs variant="secondary" selectedKey={selectedFlight} onSelectionChange={(key) => setSelectedFlight(String(key) as typeof selectedFlight)}>
+                <Tabs.ListContainer>
+                  <Tabs.List aria-label={`${passenger.name}의 구간`} className="grid h-10 w-full grid-cols-2 border-b border-[#dce8f3] bg-transparent p-0 *:h-10 *:w-full">
+                    {tickets.map((item) => (
+                      <Tabs.Tab key={item.id} id={item.id} className="relative z-0 rounded-none text-xs font-extrabold text-slate-400 data-[selected=true]:text-[#0a3479]">
+                        {item.label} · {item.departure.code} → {item.arrival.code}
+                        <Tabs.Indicator className="-z-10 bottom-0 h-0.5 rounded-full bg-[#66aedd]" />
+                      </Tabs.Tab>
+                    ))}
+                  </Tabs.List>
+                </Tabs.ListContainer>
+                <Tabs.Panel id={selectedFlight} className="pt-4">
+                  <div className="flex items-center gap-2 px-1 text-xs font-semibold text-[#4772a1]"><Check className="size-4" aria-hidden="true" />{flight.duration} · {flight.flightNumber} · {flight.departure.terminal ?? "출발 터미널 확인"}</div>
+                  <section className="mt-4 space-y-4" aria-label={`${flight.label} 탑승객 티켓`}>
+                    <PassengerTicket key={`${flight.id}-${passenger.id}`} passenger={passenger} flight={flight} />
+                    <div className="flex items-center gap-2 rounded-2xl border border-[#dce9f5] bg-white px-4 py-3 text-xs font-semibold text-slate-500">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={KOREAN_AIR_MARK_URL} alt="" className="size-4" />
+                      탑승객별 항공편과 터미널 정보는 각각 독립적으로 관리됩니다.
+                    </div>
+                  </section>
+                </Tabs.Panel>
+              </Tabs>
+            </Tabs.Panel>
           </Tabs>
-          <Tabs className="mt-3" selectedKey={selectedFlight} onSelectionChange={(key) => setSelectedFlight(String(key) as typeof selectedFlight)}>
-            <Tabs.ListContainer>
-              <Tabs.List aria-label={`${passenger.name}의 구간`} className="grid h-11 w-full grid-cols-2 rounded-xl bg-white p-1 ring-1 ring-[#dce8f3] *:h-9 *:w-full">
-                {tickets.map((item) => (
-                  <Tabs.Tab key={item.id} id={item.id} className="relative z-0 rounded-lg text-xs font-extrabold text-slate-500 data-[selected=true]:text-[#0a3479]">
-                    {item.label} · {item.departure.code} → {item.arrival.code}
-                    <Tabs.Indicator className="-z-10 rounded-lg bg-[#eaf4fc]" />
-                  </Tabs.Tab>
-                ))}
-              </Tabs.List>
-            </Tabs.ListContainer>
-          </Tabs>
-          <div className="mt-4 flex items-center gap-2 px-1 text-xs font-semibold text-[#4772a1]"><Check className="size-4" aria-hidden="true" />{flight.duration} · {flight.flightNumber} · {flight.departure.terminal ?? "출발 터미널 확인"}</div>
-        </section>
-
-        <section className="mt-4 space-y-4" aria-label={`${flight.label} 탑승객 티켓`}>
-          <PassengerTicket key={`${flight.id}-${passenger.id}`} passenger={passenger} flight={flight} />
-          <div className="flex items-center gap-2 rounded-2xl border border-[#dce9f5] bg-white px-4 py-3 text-xs font-semibold text-slate-500">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={KOREAN_AIR_MARK_URL} alt="" className="size-4" />
-            탑승객별 항공편과 터미널 정보는 각각 독립적으로 관리됩니다.
-          </div>
         </section>
       </main>
     </AppScreen>
