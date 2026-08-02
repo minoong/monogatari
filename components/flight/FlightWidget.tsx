@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Button, Card, Tabs } from "@heroui/react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { ArrowUpRight, MonitorPlay, Plug } from "lucide-react";
 import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,6 +68,17 @@ const duration = getDurationParts(flight.duration);
     <Card className="overflow-hidden rounded-[28px] border border-[#d5e1ef] bg-white p-0 shadow-[0_20px_42px_-34px_rgba(3,41,91,0.72)] [font-family:var(--font-korean-air)]">
       <Card.Content className="p-0">
         <div className="px-5 pb-4 pt-3">
+          <div className="mb-0.5 flex h-10 items-center justify-between">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-4 w-auto" />
+            <DotLottieReact
+              src="/korean-air/airplane.lottie"
+              autoplay
+              loop
+              aria-hidden="true"
+              className="size-10 shrink-0"
+            />
+          </div>
           <Tabs variant="secondary" selectedKey={selectedPassenger} onSelectionChange={handlePassengerSelection}>
             <Tabs.ListContainer>
               <Tabs.List aria-label="탑승객" className="grid h-11 w-full grid-cols-2 border-b border-[#dce8f3] bg-transparent p-0 *:h-11 *:w-full">
@@ -95,8 +107,6 @@ const duration = getDurationParts(flight.duration);
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-[11px] font-bold text-[#5b83ab]"><StateTextRoll value={`${flight.date.slice(0, 4)}년 ${flight.date.slice(5)} (${flight.day})`} previousValue={`${previousFlight.date.slice(0, 4)}년 ${previousFlight.date.slice(5)} (${previousFlight.day})`} transitionKey={transitionKey} className="min-w-[10.5em]" /></p>
                     <div className="flex flex-col items-end gap-1">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-4 w-auto" />
                       <p className="text-[9px] font-bold tracking-[0.12em] text-[#7995b4]">항공권 번호</p>
                       <p className="font-mono text-[10px] font-bold text-[#0b3478]" aria-label={`항공권 번호 ${ticketNumber}`}>{ticketNumber}</p>
                     </div>
