@@ -57,12 +57,15 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
           <p className="mt-1 text-xl font-black text-[#0b3478]">{flight.departure.code}</p>
           <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">{flight.departure.airport}{flight.departure.terminal ? ` · ${flight.departure.terminal}` : ""}</p>
         </div>
-        <div className="relative flex h-20 flex-col items-center justify-between">
-          <span data-flight-line className="absolute inset-y-2 left-1/2 -translate-x-1/2 border-l-2 border-dotted border-[#82b1d8]" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img data-flight-plane src="/korean-air/flight-to.svg" alt="" className="relative size-5" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/korean-air/flight-dot.svg" alt="" className="relative size-3" />
+        <div className="flex h-24 flex-col items-center">
+          <span className="whitespace-nowrap text-[11px] font-bold text-[#4772a1]">{flight.duration}</span>
+          <div className="relative mt-3 flex min-h-0 flex-1 flex-col items-center justify-between">
+            <span data-flight-line className="absolute inset-y-2 left-1/2 -translate-x-1/2 border-l-2 border-dotted border-[#82b1d8]" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img data-flight-plane src="/korean-air/flight-to.svg" alt="" className="relative size-5" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/korean-air/flight-dot.svg" alt="" className="relative size-3" />
+          </div>
         </div>
         <div className="text-right">
           <p className="text-3xl font-black text-[#0b3478]"><FlightTime value={flight.arrival.time} align="right" /></p>
