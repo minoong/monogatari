@@ -1,9 +1,9 @@
 "use client";
 
-import { Button, Card } from "@heroui/react";
+import React from "react";
+import { Button, Card, Tabs } from "@heroui/react";
 import { ArrowUpRight, Plane } from "lucide-react";
-import Image from "next/image";
-import { FLIGHT_PASSENGERS, FLIGHT_ROUTE_LABEL, FLIGHT_SEGMENTS } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_SEGMENTS, KOREAN_AIR_LOGO_URL } from "@/lib/flights";
 import { TextEffect } from "@/components/core/text-effect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -12,39 +12,66 @@ interface FlightWidgetProps {
 }
 
 export function FlightWidget({ onOpen }: FlightWidgetProps) {
-  const [outbound, returnFlight] = FLIGHT_SEGMENTS;
+  const [selectedFlight, setSelectedFlight] = React.useState(FLIGHT_SEGMENTS[0].id);
+  const flight = FLIGHT_SEGMENTS.find((item) => item.id === selectedFlight) ?? FLIGHT_SEGMENTS[0];
 
   return (
-    <Card className="overflow-hidden rounded-3xl border border-[#d7e6f7] bg-white p-0 shadow-[0_18px_42px_-30px_rgba(10,68,148,0.55)]">
+    <Card className="overflow-hidden rounded-[28px] border border-[#d5e1ef] bg-white p-0 shadow-[0_20px_42px_-34px_rgba(3,41,91,0.72)]">
       <Card.Content className="p-0">
-        <div className="bg-[linear-gradient(135deg,#073778_0%,#0f63b4_54%,#5cbcec_100%)] px-5 pb-4 pt-5 text-white">
-          <div className="flex items-center justify-between gap-3">
+        <div className="relative overflow-hidden bg-[#071c4a] px-5 pb-5 pt-4 text-white">
+          <div className="pointer-events-none absolute -right-12 -top-16 size-48 rounded-full border border-white/10" />
+          <div className="pointer-events-none absolute -right-4 -top-7 size-28 rounded-full border border-white/10" />
+          <div className="relative flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <span className="flex size-9 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20"><Plane className="size-5 -rotate-45" aria-hidden="true" /></span>
+              <span className="flex size-9 items-center justify-center rounded-xl bg-[#2879bc] shadow-inner shadow-white/15"><Plane className="size-5 -rotate-45" aria-hidden="true" /></span>
               <div>
-                <p className="text-xs font-bold tracking-[0.18em] text-white/70">KOREAN AIR</p>
-                <p className="mt-0.5 text-sm font-semibold">우리의 방콕 왕복 항공권</p>
+                <p className="text-[10px] font-bold tracking-[0.22em] text-[#9bc5eb]">KOREAN AIR</p>
+                <p className="mt-0.5 text-sm font-semibold text-white/90">우리의 방콕 항공권</p>
               </div>
             </div>
-            <Image src="/korean-air-mark.svg" alt="Korean Air" width={176} height={44} className="h-6 w-auto brightness-0 invert" />
+            <span className="rounded-lg bg-white px-2.5 py-1.5 shadow-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-4 w-auto" />
+            </span>
           </div>
-          <TextEffect as="p" per="word" preset="slide" speedReveal={1.6} className="mt-5 text-2xl font-black tracking-[-0.045em]" segmentTransition={{ duration: 0.32 }}>
-            {FLIGHT_ROUTE_LABEL}
+          <TextEffect as="p" per="word" preset="fade" speedReveal={1.8} className="relative mt-5 text-xl font-black tracking-[-0.05em]" segmentTransition={{ duration: 0.25 }}>
+            {flight.id === "outbound" ? "방콕으로 떠나는 날" : "서울로 돌아오는 날"}
           </TextEffect>
         </div>
 
         <div className="px-5 pb-5 pt-4">
-          <div className="grid grid-cols-2 gap-3">
-            {[outbound, returnFlight].map((flight) => (
-              <div key={flight.id} className="min-w-0 rounded-2xl bg-[#f3f8fd] px-3 py-3">
-                <p className="text-[11px] font-bold text-[#3977b5]">{flight.label}</p>
-                <p className="mt-1 truncate text-sm font-extrabold text-[#102d5c]">{flight.departure.code} → {flight.arrival.code}</p>
-                <p className="mt-1 text-xs font-medium text-slate-500">{flight.date.slice(5)} · {flight.flightNumber}</p>
-              </div>
-            ))}
+          <Tabs selectedKey={selectedFlight} onSelectionChange={(key) => setSelectedFlight(String(key) as typeof selectedFlight)}>
+            <Tabs.ListContainer>
+              <Tabs.List aria-label="항공편 구간" className="grid h-11 w-full grid-cols-2 rounded-xl bg-[#eef4fa] p-1 *:h-9 *:w-full">
+                {FLIGHT_SEGMENTS.map((item) => (
+                  <Tabs.Tab key={item.id} id={item.id} className="relative z-0 rounded-lg text-xs font-extrabold text-slate-500 data-[selected=true]:text-[#0b3478]">
+                    {item.label}
+                    <Tabs.Indicator className="-z-10 rounded-lg bg-white shadow-sm" />
+                  </Tabs.Tab>
+                ))}
+              </Tabs.List>
+            </Tabs.ListContainer>
+          </Tabs>
+
+          <div className="mt-5 grid grid-cols-[minmax(0,1fr)_42px_minmax(0,1fr)] items-center gap-1">
+            <div>
+              <p className="text-[11px] font-bold text-[#5b83ab]">{flight.date.slice(5)} ({flight.day})</p>
+              <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums">{flight.departure.time}</p>
+              <p className="mt-1 text-sm font-black text-[#0b3478]">{flight.departure.code}</p>
+            </div>
+            <div className="flex flex-col items-center gap-1.5 text-[#4e93ca]" aria-label={`${flight.duration} 비행`}>
+              <span className="h-px w-full bg-[#b9d5ed]" />
+              <Plane className="size-4 -rotate-45" aria-hidden="true" />
+              <span className="h-px w-full bg-[#b9d5ed]" />
+            </div>
+            <div className="text-right">
+              <p className="text-[11px] font-bold text-[#5b83ab]">{flight.arrival.nextDay ? "+1일 도착" : flight.duration}</p>
+              <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums">{flight.arrival.time}</p>
+              <p className="mt-1 text-sm font-black text-[#0b3478]">{flight.arrival.code}</p>
+            </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between gap-3">
+          <div className="mt-4 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-4">
             <div className="flex -space-x-2" aria-label="탑승객 가현짱, 미누쿤">
               {FLIGHT_PASSENGERS.map((passenger) => (
                 <Avatar key={passenger.id} className="size-8 border-2 border-white bg-sky-100">
@@ -52,10 +79,10 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
                   <AvatarFallback>{passenger.initials}</AvatarFallback>
                 </Avatar>
               ))}
-              <span className="pl-4 text-xs font-semibold text-slate-500">가현짱 · 미누쿤</span>
+              <span className="pl-4 text-xs font-semibold text-slate-500">2명 탑승</span>
             </div>
-            <Button variant="ghost" size="sm" className="shrink-0 font-bold text-[#135ba9]" onPress={onOpen}>
-              상세 보기 <ArrowUpRight className="size-4" aria-hidden="true" />
+            <Button variant="ghost" size="sm" className="shrink-0 px-0 font-bold text-[#135ba9]" onPress={onOpen}>
+              티켓 보기 <ArrowUpRight className="size-4" aria-hidden="true" />
             </Button>
           </div>
         </div>

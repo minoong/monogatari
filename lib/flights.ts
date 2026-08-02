@@ -58,3 +58,5 @@ export const FLIGHT_SEGMENTS: readonly FlightSegment[] = [
 ] as const;
 
 export const FLIGHT_ROUTE_LABEL = "ICN → BKK · BKK → ICN";
+
+export const KOREAN_AIR_LOGO_URL = "https://www.koreanair.com/header/header/images/logo/logo__koreanair.svg";
