@@ -12,7 +12,8 @@ interface StateTextRollProps {
 }
 
 // Matched to Skiper58's source implementation.
-const STAGGER = 0.035;
+const STAGGER = 0.022;
+const DURATION = 0.24;
 
 const outgoingVariants = {
   initial: { y: 0 },
@@ -54,7 +55,7 @@ export function StateTextRoll({ value, transitionKey, className }: StateTextRoll
         visibleValueRef.current = value;
         setOutgoingValue(value);
         setIsRolling(false);
-      }, 320 + longestText * STAGGER * 1000);
+      }, DURATION * 1000 + Math.ceil((longestText - 1) / 2) * STAGGER * 1000 + 40);
     });
 
     return () => {
@@ -82,7 +83,7 @@ export function StateTextRoll({ value, transitionKey, className }: StateTextRoll
               <motion.span
                 key={`${transitionKey}-out-${character}-${index}`}
                 variants={outgoingVariants}
-                transition={{ ease: "easeInOut", delay: getDelay(index, characters.length) }}
+                transition={{ duration: DURATION, ease: "easeInOut", delay: getDelay(index, characters.length) }}
                 className="inline-block"
               >
                 {character}
@@ -94,7 +95,7 @@ export function StateTextRoll({ value, transitionKey, className }: StateTextRoll
               <motion.span
                 key={`${transitionKey}-in-${character}-${index}`}
                 variants={incomingVariants}
-                transition={{ ease: "easeInOut", delay: getDelay(index, characters.length) }}
+                transition={{ duration: DURATION, ease: "easeInOut", delay: getDelay(index, characters.length) }}
                 className="inline-block"
               >
                 {character}
