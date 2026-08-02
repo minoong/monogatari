@@ -9,17 +9,18 @@ type SlidingNumberProps = React.HTMLAttributes<HTMLSpanElement> & {
 };
 
 const DIGITS = Array.from({ length: 10 }, (_, index) => index);
+const DIGIT_LINE_HEIGHT = 1.12;
 
 const SlidingDigit: React.FC<{ value: number }> = ({ value }) => (
-  <span className="relative inline-block h-[1em] w-[0.62em] overflow-hidden align-bottom" aria-hidden="true">
+  <span className="relative inline-block h-[1.12em] w-[0.72em] align-bottom [clip-path:inset(0_-0.12em)]" aria-hidden="true">
     <motion.span
       className="absolute inset-x-0 top-0 flex flex-col items-center"
       initial={false}
-      animate={{ y: `-${value}em` }}
+      animate={{ y: `-${value * DIGIT_LINE_HEIGHT}em` }}
       transition={{ type: "spring", stiffness: 220, damping: 24, mass: 0.5 }}
     >
       {DIGITS.map((digit) => (
-        <span key={digit} className="flex h-[1em] items-center justify-center">
+        <span key={digit} className="flex h-[1.12em] items-center justify-center leading-none">
           {digit}
         </span>
       ))}

@@ -5,7 +5,6 @@ import { gsap } from "gsap";
 import { Check, Luggage, MonitorPlay, Plane, Plug, Plus, Sparkles, Ticket } from "lucide-react";
 import { Chip, Tabs } from "@heroui/react";
 import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
-import { TextEffect } from "@/components/core/text-effect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 gsap.registerPlugin(useGSAP);
@@ -117,18 +116,16 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
       return () => timeline.kill();
     });
     return () => media.revert();
-  }, { scope: screenRef, dependencies: [selectedFlight], revertOnUpdate: true });
+  }, { scope: screenRef, dependencies: [], revertOnUpdate: false });
 
   return (
     <AppScreen appBar={{ title: "항공권" }}>
-      <main ref={screenRef} className="min-h-full w-full bg-[#f5f9fd] px-4 pb-10 pt-5">
+      <main ref={screenRef} className="min-h-full w-full bg-[#f5f9fd] px-4 pb-10 pt-5 [font-family:var(--font-korean-air)]">
         <section data-flight-header className="rounded-[28px] bg-[linear-gradient(135deg,#071c4a_0%,#0c3f85_62%,#2789c9_100%)] px-5 py-5 text-white shadow-[0_20px_44px_-30px_rgba(4,44,103,0.9)]">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-[10px] font-bold tracking-[0.2em] text-[#acd6f6]">KOREAN AIR · BANGKOK 2026</p>
-              <TextEffect as="h1" per="word" preset="fade-in-blur" speedReveal={1.8} className="mt-2 text-2xl font-black tracking-[-0.055em]" segmentTransition={{ duration: 0.28 }}>
-                {`${passenger.name}의 티켓`}
-              </TextEffect>
+              <h1 className="mt-2 text-2xl font-black tracking-[-0.055em]">{`${passenger.name}의 티켓`}</h1>
             </div>
             <span className="rounded-lg bg-white px-2.5 py-2 shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -170,7 +167,7 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
                 <Tabs.Panel id={selectedFlight} className="pt-4">
                   <div className="flex items-center gap-2 px-1 text-xs font-semibold text-[#4772a1]"><Check className="size-4" aria-hidden="true" />{flight.duration} · {flight.flightNumber} · {flight.departure.terminal ?? "출발 터미널 확인"}</div>
                   <section className="mt-4 space-y-4" aria-label={`${flight.label} 탑승객 티켓`}>
-                    <PassengerTicket key={`${flight.id}-${passenger.id}`} passenger={passenger} flight={flight} />
+                    <PassengerTicket passenger={passenger} flight={flight} />
                     <div className="flex items-center gap-2 rounded-2xl border border-[#dce9f5] bg-white px-4 py-3 text-xs font-semibold text-slate-500">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={KOREAN_AIR_MARK_URL} alt="" className="size-4" />

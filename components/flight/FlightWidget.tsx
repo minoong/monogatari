@@ -23,7 +23,7 @@ function FlightTime({ value, align = "left" }: { value: string; align?: "left" |
   return (
     <span
       className={`inline-flex w-full items-center ${align === "right" ? "justify-end" : "justify-start"} leading-none`}
-      style={{ fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums slashed-zero" }}
+      style={{ fontFamily: "var(--font-korean-air)", fontVariantNumeric: "tabular-nums" }}
       aria-label={value}
     >
       <SlidingNumber value={hours} padStart aria-hidden="true" />
@@ -61,7 +61,7 @@ const duration = getDurationParts(flight.duration);
   };
 
   return (
-    <Card className="overflow-hidden rounded-[28px] border border-[#d5e1ef] bg-white p-0 shadow-[0_20px_42px_-34px_rgba(3,41,91,0.72)]">
+    <Card className="overflow-hidden rounded-[28px] border border-[#d5e1ef] bg-white p-0 shadow-[0_20px_42px_-34px_rgba(3,41,91,0.72)] [font-family:var(--font-korean-air)]">
       <Card.Content className="p-0">
         <div className="px-5 pb-5 pt-4">
           <div className="mb-1 flex justify-end">
@@ -101,7 +101,7 @@ const duration = getDurationParts(flight.duration);
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.departure.airport}{flight.departure.terminal ? ` · ${flight.departure.terminal}` : ""}</p>
                     </div>
                     <div className="flex flex-col items-center gap-2 text-[#4e93ca]" aria-label={`${flight.duration} 비행`}>
-                      <div className="flex items-center justify-center gap-0.5 whitespace-nowrap text-[10px] font-bold text-[#4772a1]" style={{ fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums" }}>
+                      <div className="flex items-center justify-center gap-0.5 whitespace-nowrap text-[10px] font-bold text-[#4772a1]" style={{ fontFamily: "var(--font-korean-air)", fontVariantNumeric: "tabular-nums" }}>
                         <SlidingNumber value={duration.hours} />
                         <span>시간</span>
                         <SlidingNumber value={duration.minutes} padStart />
