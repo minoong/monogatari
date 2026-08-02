@@ -40,10 +40,8 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
       <Card.Content className="p-0">
         <div className="px-5 pb-5 pt-4">
           <div className="mb-1 flex justify-end">
-            <span className="rounded-lg border border-[#dbe7f2] bg-white px-2.5 py-1.5 shadow-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-4 w-auto" />
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-4 w-auto" />
           </div>
           <Tabs variant="secondary" selectedKey={selectedPassenger} onSelectionChange={(key) => {
             const nextPassenger = String(key) as FlightPassengerId;
