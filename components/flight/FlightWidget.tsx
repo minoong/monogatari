@@ -5,7 +5,7 @@ import { Button, Card, Tabs } from "@heroui/react";
 import { ArrowUpRight, Plane } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
-import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, type FlightPassengerId } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 gsap.registerPlugin(useGSAP);
@@ -39,6 +39,12 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
     <Card ref={widgetRef} className="overflow-hidden rounded-[28px] border border-[#d5e1ef] bg-white p-0 shadow-[0_20px_42px_-34px_rgba(3,41,91,0.72)]">
       <Card.Content className="p-0">
         <div className="px-5 pb-5 pt-4">
+          <div className="mb-1 flex justify-end">
+            <span className="rounded-lg border border-[#dbe7f2] bg-white px-2.5 py-1.5 shadow-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-4 w-auto" />
+            </span>
+          </div>
           <Tabs variant="secondary" selectedKey={selectedPassenger} onSelectionChange={(key) => {
             const nextPassenger = String(key) as FlightPassengerId;
             setSelectedPassenger(nextPassenger);
