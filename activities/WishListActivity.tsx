@@ -355,11 +355,11 @@ function WishListItem({
         className="group block w-full text-left outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
       >
         <article className="flex min-h-24 items-center gap-3 px-5 py-3 transition-colors group-hover:bg-slate-100/70 group-active:bg-slate-200/70 dark:group-hover:bg-white/5 dark:group-active:bg-white/10" role="listitem">
-            <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+            <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-slate-400 dark:bg-slate-800">
               {wish.images[0] ? (
                 <>
                   <MorphingDialogImage alt="" className="size-full object-cover" src={wish.images[0].url} />
-                  {wish.images.length > 1 && <span className="absolute bottom-1.5 right-1.5 rounded-full bg-black/65 px-1.5 py-0.5 text-[10px] font-bold text-white">+{wish.images.length - 1}</span>}
+                  {wish.images.length > 1 && <span className="absolute bottom-1 right-1 rounded-full border border-white/30 bg-slate-950/75 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white shadow-sm backdrop-blur-sm">+{wish.images.length - 1}</span>}
                 </>
               ) : (
                 <ImageIcon aria-hidden="true" className="size-5" />

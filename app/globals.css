@@ -202,6 +202,47 @@
   font-family: var(--font-kanit), sans-serif;
 }
 
+/* Wish detail gallery: intentionally quiet controls that stay legible over photos. */
+.wish-image-gallery .swiper-button-prev,
+.wish-image-gallery .swiper-button-next {
+  width: 2rem;
+  height: 2rem;
+  margin-top: -1rem;
+  border: 1px solid rgb(255 255 255 / 0.38);
+  border-radius: 9999px;
+  background: rgb(15 23 42 / 0.38);
+  box-shadow: 0 4px 14px rgb(15 23 42 / 0.18);
+  color: white;
+  opacity: 0;
+  transition: opacity 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.wish-image-gallery:hover .swiper-button-prev,
+.wish-image-gallery:hover .swiper-button-next,
+.wish-image-gallery:focus-within .swiper-button-prev,
+.wish-image-gallery:focus-within .swiper-button-next {
+  opacity: 1;
+}
+
+.wish-image-gallery .swiper-button-prev:hover,
+.wish-image-gallery .swiper-button-next:hover {
+  background: rgb(15 23 42 / 0.65);
+  transform: scale(1.06);
+}
+
+.wish-image-gallery .swiper-button-prev::after,
+.wish-image-gallery .swiper-button-next::after {
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+@media (hover: none) {
+  .wish-image-gallery .swiper-button-prev,
+  .wish-image-gallery .swiper-button-next {
+    display: none;
+  }
+}
+
 html,
 body {
   position: relative;
