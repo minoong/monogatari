@@ -104,6 +104,35 @@ const getDynamicThaiFontSize = (text: string) => {
   return "text-3xl sm:text-4xl font-semibold";
 };
 
+function PhraseCategoryThumbnail({ category }: { category: PhraseItem["category"] }) {
+  const palette = {
+    기본: { background: "#fff7d6", primary: "#d08a00", secondary: "#ffe49a" },
+    이동: { background: "#dff8f4", primary: "#0f9a8a", secondary: "#a9e8df" },
+    식당: { background: "#fff0df", primary: "#e26c1d", secondary: "#ffd1aa" },
+    쇼핑: { background: "#ffe6ee", primary: "#dc527c", secondary: "#ffc2d3" },
+    마사지: { background: "#e1f8ed", primary: "#1e9b61", secondary: "#ade6c9" },
+    긴급: { background: "#ffe7e7", primary: "#d94c4c", secondary: "#ffbdbd" },
+  }[category];
+
+  return (
+    <div
+      aria-hidden="true"
+      className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl"
+      style={{ backgroundColor: palette.background }}
+    >
+      <svg viewBox="0 0 64 64" className="size-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 52C17 43 24 48 31 41C38 34 45 39 56 28" stroke={palette.secondary} strokeWidth="3" strokeLinecap="round" strokeDasharray="2 5" />
+        {category === "기본" && <><path d="M18 20C18 15.582 21.582 12 26 12H39C43.418 12 47 15.582 47 20V31C47 35.418 43.418 39 39 39H31L24 46V39H26C21.582 39 18 35.418 18 31V20Z" fill={palette.primary} /><path d="M27 25H39M27 30H35" stroke="white" strokeWidth="2.6" strokeLinecap="round" /></>}
+        {category === "이동" && <><path d="M17 20H45L50 28V42H14V28L17 20Z" fill={palette.primary} /><path d="M19 27H44M22 42C22 45.314 19.314 48 16 48C12.686 48 10 45.314 10 42M54 42C54 45.314 51.314 48 48 48C44.686 48 42 45.314 42 42" stroke={palette.primary} strokeWidth="3" strokeLinecap="round" /><path d="M22 34H29M36 34H43" stroke="white" strokeWidth="3" strokeLinecap="round" /></>}
+        {category === "식당" && <><path d="M16 33C16 43 23 49 32 49C41 49 48 43 48 33H16Z" fill={palette.primary} /><path d="M13 31H51" stroke={palette.primary} strokeWidth="4" strokeLinecap="round" /><path d="M22 22C23 19 25 18 27 17M32 22C33 19 35 18 37 17M42 22C43 19 45 18 47 17" stroke={palette.primary} strokeWidth="3" strokeLinecap="round" /></>}
+        {category === "쇼핑" && <><path d="M18 23H46L43 48H21L18 23Z" fill={palette.primary} /><path d="M25 25V21C25 16.582 28.582 13 33 13C37.418 13 41 16.582 41 21V25" stroke={palette.primary} strokeWidth="3.5" strokeLinecap="round" /><path d="M25 32H39" stroke="white" strokeWidth="3" strokeLinecap="round" /></>}
+        {category === "마사지" && <><path d="M18 43C23 33 29 29 34 29C40 29 44 33 47 39C48 42 46 46 42 46H24C20 46 17 46 18 43Z" fill={palette.primary} /><path d="M23 25C23 20.582 26.582 17 31 17H33C37.418 17 41 20.582 41 25V28H23V25Z" fill={palette.primary} /><path d="M25 39C30 36 36 36 42 39" stroke="white" strokeWidth="2.5" strokeLinecap="round" /></>}
+        {category === "긴급" && <><circle cx="32" cy="32" r="19" fill={palette.primary} /><path d="M32 21V34M32 41V42" stroke="white" strokeWidth="4" strokeLinecap="round" /></>}
+      </svg>
+    </div>
+  );
+}
+
 function DictionaryPhraseDialog({
   item,
   index,
@@ -123,7 +152,6 @@ function DictionaryPhraseDialog({
 }) {
   const [isRotated, setIsRotated] = useState(true);
   const [shouldScrambleOnMount] = useState(shouldScramble);
-  const CategoryIcon = meta.icon;
 
   return (
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
@@ -132,9 +160,7 @@ function DictionaryPhraseDialog({
         className="group relative flex min-h-24 items-center gap-3 px-5 py-3 transition-colors hover:bg-slate-100/70 active:bg-slate-200/70 dark:hover:bg-white/5 dark:active:bg-white/10"
         role="listitem"
       >
-        <div className={cn("flex size-16 shrink-0 items-center justify-center rounded-xl", meta.panelClass)}>
-          <CategoryIcon className="size-6" aria-hidden="true" />
-        </div>
+        <PhraseCategoryThumbnail category={item.category} />
         <div className="min-w-0 flex-1" onClickCapture={onOpen}>
           <MorphingDialogTrigger
             ariaLabel={`${item.ko} 현지인에게 크게 보여주기`}
@@ -158,7 +184,7 @@ function DictionaryPhraseDialog({
                 delay={675 + index * 95}
                 duration={500}
                 enabled={shouldScrambleOnMount}
-                className="mt-1 block truncate font-thai text-xl font-semibold leading-tight text-slate-950 dark:text-white"
+                className="mt-1 block truncate font-thai text-base font-semibold leading-tight text-slate-700 dark:text-slate-200"
               />
               <ScrambleText
                 text={`🗣️ ${item.pron}`}
@@ -481,21 +507,26 @@ export const DictionaryActivity: React.FC = () => {
           </div>
 
           <div data-dictionary-intro="toolbar" className="flex items-center justify-between px-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-            <span>전체 {filteredPhrases.length}개 표현</span>
+            <div className="flex items-center gap-1.5 font-medium">
+              <span>{searchQuery || selectedCategory !== "전체" ? "검색/필터 결과" : "전체"}</span>
+              <span className="font-extrabold tabular-nums text-slate-900 dark:text-white">{filteredPhrases.length}개</span>
+              {(searchQuery || selectedCategory !== "전체") && (
+                <span className="text-[11px] text-slate-400">(총 {THAI_PHRASES.length}개)</span>
+              )}
+            </div>
             {(searchQuery || selectedCategory !== "전체") && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 rounded-full px-2 font-bold text-slate-600 dark:text-slate-300"
-                onPress={() => {
+              <button
+                type="button"
+                className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                onClick={() => {
                   triggerHapticFeedback(10);
                   setSearchQuery("");
                   setSelectedCategory("전체");
                 }}
               >
                 <RotateCcw className="size-3" />
-                <span>초기화</span>
-              </Button>
+                <span>필터 초기화</span>
+              </button>
             )}
           </div>
 
