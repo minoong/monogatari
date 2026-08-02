@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button, Card, Tabs } from "@heroui/react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, MonitorPlay, Plug } from "lucide-react";
 import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StateTextRoll } from "@/components/core/state-text-roll";
@@ -11,6 +11,8 @@ import { SlidingNumber } from "@/components/core/sliding-number";
 interface FlightWidgetProps {
   onOpen: (passengerId: FlightPassengerId) => void;
 }
+
+const A330_SEAT_MAP_URL = "https://www.koreanair.com/contents/plan-your-travel/in-flight-experience/fleet/a330/300-276/seat-map";
 
 function getDurationParts(duration: string) {
   const match = duration.match(/(\d+)시간\s*(\d+)분/);
@@ -125,13 +127,26 @@ const duration = getDurationParts(flight.duration);
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
                     </div>
                   </div>
-                  <div className="mt-3 flex items-center gap-2 text-[11px] font-bold text-[#4772a1]">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eaf4fc] px-2.5 py-1">
+                  <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 rounded-xl bg-[#f5f6f7] px-3 py-2 text-[#0b3478]">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-black">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={KOREAN_AIR_MARK_URL} alt="대한항공" className="size-3.5" />
                       {flight.flightNumber}
                     </span>
-                    <span className="rounded-full bg-[#f2f6fa] px-2.5 py-1 text-slate-500">{flight.aircraft}</span>
+                    <a
+                      href={A330_SEAT_MAP_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11px] font-bold underline decoration-1 underline-offset-3 transition-colors hover:text-[#2778be] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2778be] focus-visible:ring-offset-2"
+                    >
+                      {flight.aircraft}
+                    </a>
+                    <span className="text-[11px] font-bold">{flight.cabin}</span>
+                    <span className="rounded-full bg-[#e1f3fd] px-2 py-0.5 text-[10px] font-bold">{flight.fareFamily}</span>
+                    <span className="ml-auto flex items-center gap-2.5">
+                      <span className="inline-flex" aria-label="기내 전원 공급 장치"><Plug className="size-4" aria-hidden="true" /></span>
+                      <span className="inline-flex" aria-label="기내 엔터테인먼트"><MonitorPlay className="size-4" aria-hidden="true" /></span>
+                    </span>
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-3">
                     <div className="flex items-center gap-2" aria-label={`탑승객 ${passenger.name}`}><Avatar className="size-8 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar><span className="text-xs font-semibold text-slate-500"><StateTextRoll value={`${passenger.name} 티켓`} previousValue={`${previousPassenger.name} 티켓`} transitionKey={transitionKey} className="min-w-[5.5em]" /></span></div>
