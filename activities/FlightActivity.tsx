@@ -4,7 +4,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { MonitorPlay, Plug, Plus, Sparkles, Ticket } from "lucide-react";
 import { Tabs } from "@heroui/react";
-import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBER, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 gsap.registerPlugin(useGSAP);
@@ -52,8 +52,14 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
             {flight.flightNumber}
           </span>
         </div>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
+        <div className="flex flex-col items-end gap-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
+          <div className="text-right leading-none">
+            <p className="text-[9px] font-bold tracking-[0.12em] text-[#7995b4]">항공권 번호</p>
+            <p className="mt-1 font-mono text-[11px] font-bold tracking-[0.08em] text-[#0b3478]" aria-label={`항공권 번호 ${FLIGHT_TICKET_NUMBER}`}>1805 4604 4372 4</p>
+          </div>
+        </div>
       </div>
 
       <div className="mt-5 grid grid-cols-[minmax(0,1fr)_minmax(82px,0.72fr)_minmax(0,1fr)] items-center gap-2">
