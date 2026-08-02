@@ -17,9 +17,9 @@ export default function Home() {
       <Stack />
       <div
         aria-hidden="true"
-        className="fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top,0px)] touch-manipulation"
+        className="fixed inset-x-0 top-0 z-[70] h-[env(safe-area-inset-top,0px)] supports-[-webkit-touch-callout:none]:h-[calc(env(safe-area-inset-top,0px)+8px)] touch-manipulation"
         data-slot="safe-area-scroll-top"
-        onClick={scrollActiveScreenToTop}
+        onPointerDown={scrollActiveScreenToTop}
       />
     </main>
   );

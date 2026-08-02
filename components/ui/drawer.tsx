@@ -107,6 +107,26 @@ export function DrawerBackdrop({
   );
 }
 
+function scrollActiveScreenToTop() {
+  const activeScreen = document.querySelector<HTMLElement>(
+    '[data-part="paper"][data-stackflow-activity-is-active="true"] > div',
+  );
+
+  activeScreen?.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function DrawerSafeAreaScrollTarget(): React.ReactElement {
+  return (
+    <div
+      aria-hidden="true"
+      className="fixed inset-x-0 top-0 z-[60] h-[env(safe-area-inset-top,0px)] supports-[-webkit-touch-callout:none]:h-[calc(env(safe-area-inset-top,0px)+8px)] touch-manipulation"
+      data-slot="drawer-safe-area-scroll-top"
+      onPointerDown={scrollActiveScreenToTop}
+    />
+  );
+}
+
 export function DrawerViewport({
   className,
   position,
@@ -158,6 +178,7 @@ export function DrawerPopup({
   return (
     <DrawerPortal {...portalProps}>
       <DrawerBackdrop />
+      <DrawerSafeAreaScrollTarget />
       <DrawerViewport position={position} variant={variant}>
         <DrawerPrimitive.Popup
           className={cn(
