@@ -33,6 +33,7 @@ where image_path is not null
 on conflict (storage_path) do nothing;
 
 alter table public.wish_images enable row level security;
+grant select, insert, update, delete on table public.wish_images to anon;
 drop policy if exists "wish images are readable by anonymous users" on public.wish_images;
 create policy "wish images are readable by anonymous users" on public.wish_images for select to anon using (true);
 drop policy if exists "wish images are insertable by anonymous users" on public.wish_images;
