@@ -98,7 +98,7 @@ export function DrawerBackdrop({
   return (
     <DrawerPrimitive.Backdrop
       className={cn(
-        "fixed inset-0 z-50 bg-black/32 opacity-[calc(1-var(--drawer-swipe-progress,0))] backdrop-blur-sm transition-[opacity,display] transition-discrete duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-ending-style:opacity-0 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)*400ms)] data-swiping:duration-0 supports-[-webkit-touch-callout:none]:absolute",
+        "fixed inset-0 z-50 bg-black/32 opacity-[calc(1-var(--drawer-swipe-progress,0))] backdrop-blur-sm transition-[opacity,display] transition-discrete duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-ending-style:opacity-0 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)*400ms)] data-swiping:duration-0",
         className,
       )}
       data-slot="drawer-backdrop"
