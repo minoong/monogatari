@@ -6,14 +6,15 @@ import { cn } from "@/lib/utils";
 
 interface StateTextRollProps {
   value: string;
+  previousValue: string;
   /** Incremented whenever either flight tab changes. */
   transitionKey: number;
   className?: string;
 }
 
 // Matched to Skiper58's source implementation.
-const STAGGER = 0.022;
-const DURATION = 0.24;
+const STAGGER = 0.016;
+const DURATION = 0.18;
 
 const outgoingVariants = {
   initial: { y: 0 },
@@ -29,57 +30,39 @@ const incomingVariants = {
  * Uses Skiper58's two-line hover construction for a value change: the outgoing
  * value rolls upward while the next value rises from below, character by character.
  */
-export function StateTextRoll({ value, transitionKey, className }: StateTextRollProps) {
+export function StateTextRoll({ value, previousValue, transitionKey, className }: StateTextRollProps) {
   const reduceMotion = useReducedMotion();
-  const visibleValueRef = React.useRef(value);
-  const transitionRef = React.useRef(transitionKey);
-  const [outgoingValue, setOutgoingValue] = React.useState(value);
-  const [isRolling, setIsRolling] = React.useState(false);
+  const [settledKey, setSettledKey] = React.useState(transitionKey);
+  const isRolling = !reduceMotion && transitionKey !== settledKey;
 
   React.useEffect(() => {
-    if (transitionRef.current === transitionKey) return;
-    transitionRef.current = transitionKey;
+    if (!isRolling) return;
 
-    if (reduceMotion) {
-      visibleValueRef.current = value;
-      return;
-    }
+    const longestText = Math.max(previousValue.length, value.length);
+    const settleTimer = window.setTimeout(
+      () => setSettledKey(transitionKey),
+      DURATION * 1000 + Math.ceil((longestText - 1) / 2) * STAGGER * 1000 + 40,
+    );
 
-    let settleTimer: number | undefined;
-    const frameId = window.requestAnimationFrame(() => {
-      setOutgoingValue(visibleValueRef.current);
-      setIsRolling(true);
-
-      const longestText = Math.max(visibleValueRef.current.length, value.length);
-      settleTimer = window.setTimeout(() => {
-        visibleValueRef.current = value;
-        setOutgoingValue(value);
-        setIsRolling(false);
-      }, DURATION * 1000 + Math.ceil((longestText - 1) / 2) * STAGGER * 1000 + 40);
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      if (settleTimer) window.clearTimeout(settleTimer);
-    };
-  }, [reduceMotion, transitionKey, value]);
+    return () => window.clearTimeout(settleTimer);
+  }, [isRolling, previousValue, transitionKey, value]);
 
   if (reduceMotion) return <span className={className}>{value}</span>;
 
   const getDelay = (index: number, length: number) => STAGGER * Math.abs(index - (length - 1) / 2);
 
   return (
-    <span className={cn("relative inline-block overflow-hidden align-middle leading-[1.2]", className)} data-state-text-roll>
+    <span className={cn("relative inline-block overflow-hidden align-middle leading-[1.24] py-[0.1em] -my-[0.1em]", className)} data-state-text-roll>
       <span className="sr-only">{value}</span>
       {isRolling ? (
         <motion.span
           initial="initial"
           animate="hovered"
-          className="relative block whitespace-pre leading-[1.2]"
+          className="relative block whitespace-pre leading-[1.24]"
           aria-hidden="true"
         >
           <span className="block whitespace-pre">
-            {[...outgoingValue].map((character, index, characters) => (
+            {[...previousValue].map((character, index, characters) => (
               <motion.span
                 key={`${transitionKey}-out-${character}-${index}`}
                 variants={outgoingVariants}
@@ -104,7 +87,7 @@ export function StateTextRoll({ value, transitionKey, className }: StateTextRoll
           </span>
         </motion.span>
       ) : (
-        <span className="block whitespace-pre leading-[1.2]" aria-hidden="true">{value}</span>
+        <span className="block whitespace-pre leading-[1.24]" aria-hidden="true">{value}</span>
       )}
     </span>
   );

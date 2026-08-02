@@ -18,15 +18,21 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
   const [transitionKey, setTransitionKey] = React.useState(0);
   const flight = tickets.find((item) => item.id === selectedFlight) ?? tickets[0];
   const passenger = FLIGHT_PASSENGERS.find((item) => item.id === selectedPassenger) ?? FLIGHT_PASSENGERS[0];
+  const [previousFlight, setPreviousFlight] = React.useState(flight);
+  const [previousPassenger, setPreviousPassenger] = React.useState(passenger);
 
   const handlePassengerSelection = (key: React.Key) => {
     const nextPassenger = String(key) as FlightPassengerId;
+    setPreviousFlight(flight);
+    setPreviousPassenger(passenger);
     setSelectedPassenger(nextPassenger);
     setSelectedFlight(FLIGHT_TICKETS[nextPassenger][0].id);
     setTransitionKey((version) => version + 1);
   };
 
   const handleFlightSelection = (key: React.Key) => {
+    setPreviousFlight(flight);
+    setPreviousPassenger(passenger);
     setSelectedFlight(String(key) as typeof selectedFlight);
     setTransitionKey((version) => version + 1);
   };
@@ -64,20 +70,25 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
                   </Tabs.List>
                 </Tabs.ListContainer>
                 <Tabs.Panel id={selectedFlight} className="pt-4">
-                  <div className="grid grid-cols-[minmax(0,1fr)_42px_minmax(0,1fr)] items-center gap-1">
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(76px,0.72fr)_minmax(0,1fr)] items-center gap-2">
                     <div>
-                      <p className="text-[11px] font-bold text-[#5b83ab]"><StateTextRoll value={`${flight.date.slice(5)} (${flight.day})`} transitionKey={transitionKey} /></p>
-                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><StateTextRoll value={flight.departure.time} transitionKey={transitionKey} /></p>
-                      <p className="mt-1 text-sm font-black text-[#0b3478]"><StateTextRoll value={flight.departure.code} transitionKey={transitionKey} /></p>
+                      <p className="text-[11px] font-bold text-[#5b83ab]"><StateTextRoll value={`${flight.date.slice(0, 4)}년 ${flight.date.slice(5)} (${flight.day})`} previousValue={`${previousFlight.date.slice(0, 4)}년 ${previousFlight.date.slice(5)} (${previousFlight.day})`} transitionKey={transitionKey} className="min-w-[10.5em]" /></p>
+                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><StateTextRoll value={flight.departure.time} previousValue={previousFlight.departure.time} transitionKey={transitionKey} className="min-w-[2.85em]" /></p>
+                      <p className="mt-1 text-sm font-black text-[#0b3478]"><StateTextRoll value={flight.departure.code} previousValue={previousFlight.departure.code} transitionKey={transitionKey} className="min-w-[2.5em]" /></p>
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.departure.airport}{flight.departure.terminal ? ` · ${flight.departure.terminal}` : ""}</p>
                     </div>
-                    <div className="flex flex-col items-center gap-1.5 text-[#4e93ca]" aria-label={`${flight.duration} 비행`}>
-                      <span className="h-px w-full bg-[#b9d5ed]" /><Plane className="size-4 -rotate-45" aria-hidden="true" /><span className="h-px w-full bg-[#b9d5ed]" />
+                    <div className="flex flex-col items-center gap-2 text-[#4e93ca]" aria-label={`${flight.duration} 비행`}>
+                      <StateTextRoll value={flight.duration} previousValue={previousFlight.duration} transitionKey={transitionKey} className="min-w-[5.7em] text-center text-[10px] font-bold text-[#4772a1]" />
+                      <div className="flex w-full items-center gap-1.5" aria-hidden="true">
+                        <span className="h-px min-w-0 flex-1 border-t border-dashed border-[#91b7da]" />
+                        <Plane className="size-4 shrink-0 -rotate-45" />
+                        <span className="h-px min-w-0 flex-1 border-t border-dashed border-[#91b7da]" />
+                      </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-[11px] font-bold text-[#5b83ab]"><StateTextRoll value={flight.arrival.nextDay ? "+1일 도착" : flight.duration} transitionKey={transitionKey} /></p>
-                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><StateTextRoll value={flight.arrival.time} transitionKey={transitionKey} /></p>
-                      <p className="mt-1 text-sm font-black text-[#0b3478]"><StateTextRoll value={flight.arrival.code} transitionKey={transitionKey} /></p>
+                      <p className="h-[1.35em] text-[11px] font-bold text-[#5b83ab]">{flight.arrival.nextDay ? <StateTextRoll value="+1일 도착" previousValue={previousFlight.arrival.nextDay ? "+1일 도착" : ""} transitionKey={transitionKey} className="min-w-[5.7em] text-right" /> : null}</p>
+                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><StateTextRoll value={flight.arrival.time} previousValue={previousFlight.arrival.time} transitionKey={transitionKey} className="min-w-[2.85em] text-right" /></p>
+                      <p className="mt-1 text-sm font-black text-[#0b3478]"><StateTextRoll value={flight.arrival.code} previousValue={previousFlight.arrival.code} transitionKey={transitionKey} className="min-w-[2.5em] text-right" /></p>
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
                     </div>
                   </div>
@@ -86,7 +97,7 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
                     <span className="rounded-full bg-[#f2f6fa] px-2.5 py-1 text-slate-500">{flight.aircraft}</span>
                   </div>
                   <div className="mt-4 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-4">
-                    <div className="flex items-center gap-2" aria-label={`탑승객 ${passenger.name}`}><Avatar className="size-8 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar><span className="text-xs font-semibold text-slate-500"><StateTextRoll value={`${passenger.name} 티켓`} transitionKey={transitionKey} /></span></div>
+                    <div className="flex items-center gap-2" aria-label={`탑승객 ${passenger.name}`}><Avatar className="size-8 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar><span className="text-xs font-semibold text-slate-500"><StateTextRoll value={`${passenger.name} 티켓`} previousValue={`${previousPassenger.name} 티켓`} transitionKey={transitionKey} className="min-w-[5.5em]" /></span></div>
                     <Button variant="ghost" size="sm" className="shrink-0 px-0 font-bold text-[#135ba9]" onPress={() => onOpen(selectedPassenger)}>티켓 보기 <ArrowUpRight className="size-4" aria-hidden="true" /></Button>
                   </div>
                 </Tabs.Panel>
