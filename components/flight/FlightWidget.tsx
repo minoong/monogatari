@@ -89,6 +89,10 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
                     </div>
                   </div>
+                  <div data-ticket-time className="mt-4 flex items-center gap-2 text-[11px] font-bold text-[#4772a1]">
+                    <span className="rounded-full bg-[#eaf4fc] px-2.5 py-1">{flight.operatingCarrier} · {flight.flightNumber}</span>
+                    <span className="rounded-full bg-[#f2f6fa] px-2.5 py-1 text-slate-500">{flight.aircraft}</span>
+                  </div>
                   <div data-ticket-footer className="mt-4 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-4">
                     <div className="flex items-center gap-2" aria-label={`탑승객 ${passenger.name}`}><Avatar className="size-8 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar><span className="text-xs font-semibold text-slate-500">{passenger.name} 티켓</span></div>
                     <Button variant="ghost" size="sm" className="shrink-0 px-0 font-bold text-[#135ba9]" onPress={() => onOpen(selectedPassenger)}>티켓 보기 <ArrowUpRight className="size-4" aria-hidden="true" /></Button>
