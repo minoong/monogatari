@@ -45,7 +45,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold text-[#5d82a9]">{flight.date} ({flight.day})</p>
-          <p className="mt-1 text-sm font-extrabold text-[#12366f]">{flight.operatingCarrier} · {flight.flightNumber}</p>
+          <p className="mt-1 text-sm font-extrabold text-[#0b3478]">{flight.operatingCarrier} · {flight.flightNumber}</p>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
@@ -53,8 +53,8 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
 
       <div className="mt-5 grid grid-cols-[minmax(0,1fr)_38px_minmax(0,1fr)] items-center gap-1">
         <div>
-          <p className="text-3xl font-black text-[#092f70]"><FlightTime value={flight.departure.time} /></p>
-          <p className="mt-1 text-xl font-black text-[#092f70]">{flight.departure.code}</p>
+          <p className="text-3xl font-black text-[#0b3478]"><FlightTime value={flight.departure.time} /></p>
+          <p className="mt-1 text-xl font-black text-[#0b3478]">{flight.departure.code}</p>
           <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">{flight.departure.airport}{flight.departure.terminal ? ` · ${flight.departure.terminal}` : ""}</p>
         </div>
         <div className="relative flex h-20 flex-col items-center justify-between">
@@ -63,17 +63,17 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
           <span className="relative size-3 rounded-full border-2 border-[#1470ba] bg-white" />
         </div>
         <div className="text-right">
-          <p className="text-3xl font-black text-[#092f70]"><FlightTime value={flight.arrival.time} align="right" /></p>
-          <p className="mt-1 text-xl font-black text-[#092f70]">{flight.arrival.code}</p>
+          <p className="text-3xl font-black text-[#0b3478]"><FlightTime value={flight.arrival.time} align="right" /></p>
+          <p className="mt-1 text-xl font-black text-[#0b3478]">{flight.arrival.code}</p>
           <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">{flight.arrival.nextDay ? "+1일 · " : ""}{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
         </div>
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2 border-t border-dashed border-[#d8e5f1] pt-4">
-        <Chip className="border-0 bg-[#eff7fd] px-2 text-xs font-bold text-[#285b93]">{flight.aircraft}</Chip>
-        <Chip className="border-0 bg-[#eff7fd] px-2 text-xs font-bold text-[#285b93]">{flight.cabin}</Chip>
-        <Chip className="border-0 bg-[#eff7fd] px-2 text-xs font-bold text-[#285b93]">{flight.fareFamily}</Chip>
-        <Chip className="border-0 bg-[#eff7fd] px-2 text-xs font-bold text-[#285b93]"><Luggage className="mr-1 inline size-3" />{flight.baggage}</Chip>
+        <Chip className="border-0 bg-[#eaf4fc] px-2 text-xs font-bold text-[#4772a1]">{flight.aircraft}</Chip>
+        <Chip className="border-0 bg-[#eaf4fc] px-2 text-xs font-bold text-[#4772a1]">{flight.cabin}</Chip>
+        <Chip className="border-0 bg-[#eaf4fc] px-2 text-xs font-bold text-[#4772a1]">{flight.fareFamily}</Chip>
+        <Chip className="border-0 bg-[#eaf4fc] px-2 text-xs font-bold text-[#4772a1]"><Luggage className="mr-1 inline size-3" />{flight.baggage}</Chip>
       </div>
 
       <section className="mt-5 border-t border-[#e3edf6] pt-4">
