@@ -2,7 +2,7 @@ import React from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
-import { Check, Luggage, MonitorPlay, Plane, Plug, Plus, Sparkles, Ticket } from "lucide-react";
+import { Check, Luggage, MonitorPlay, Plug, Plus, Sparkles, Ticket } from "lucide-react";
 import { Chip, Tabs } from "@heroui/react";
 import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -59,8 +59,10 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
         </div>
         <div className="relative flex h-20 flex-col items-center justify-between">
           <span data-flight-line className="absolute inset-y-2 left-1/2 -translate-x-1/2 border-l-2 border-dotted border-[#82b1d8]" />
-          <span className="relative flex size-5 items-center justify-center rounded-full bg-[#1470ba] text-white"><Plane data-flight-plane className="size-3 -rotate-45" aria-hidden="true" /></span>
-          <span className="relative size-3 rounded-full border-2 border-[#1470ba] bg-white" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img data-flight-plane src="/korean-air/flight-to.svg" alt="" className="relative size-5" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/korean-air/flight-dot.svg" alt="" className="relative size-3" />
         </div>
         <div className="text-right">
           <p className="text-3xl font-black text-[#0b3478]"><FlightTime value={flight.arrival.time} align="right" /></p>
