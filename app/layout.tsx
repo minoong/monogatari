@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "현쨩❤️미누쿤",
   },
 };
@@ -47,7 +47,6 @@ export const viewport: Viewport = {
   userScalable: false,
   viewportFit: "cover",
   interactiveWidget: "overlays-content",
-  themeColor: "#ffffff",
 };
 
 export default function RootLayout({

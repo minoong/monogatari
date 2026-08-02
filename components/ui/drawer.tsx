@@ -8,7 +8,7 @@ import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
 import { useRender } from "@base-ui/react/use-render";
 import { ChevronRightIcon, XIcon } from "lucide-react";
 import type React from "react";
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -40,37 +40,14 @@ export function Drawer({
 }: DrawerPrimitive.Root.Props & {
   position?: DrawerPosition;
 }): React.ReactElement {
-  const isOpen = props.open ?? props.defaultOpen ?? false;
-
   return (
     <DrawerContext.Provider value={{ position }}>
-      <DrawerThemeColor isOpen={isOpen} />
       <DrawerPrimitive.Root
         swipeDirection={swipeDirection ?? directionMap[position]}
         {...props}
       />
     </DrawerContext.Provider>
   );
-}
-
-function DrawerThemeColor({ isOpen }: { isOpen: boolean }): null {
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const themeColor = document.querySelector<HTMLMetaElement>(
-      'meta[name="theme-color"]',
-    );
-    if (!themeColor) return;
-
-    const previousColor = themeColor.content;
-    themeColor.content = "#a3a3a3";
-
-    return () => {
-      themeColor.content = previousColor;
-    };
-  }, [isOpen]);
-
-  return null;
 }
 
 export const DrawerPortal: typeof DrawerPrimitive.Portal =
@@ -121,31 +98,11 @@ export function DrawerBackdrop({
   return (
     <DrawerPrimitive.Backdrop
       className={cn(
-        "fixed inset-0 z-50 bg-black/32 opacity-[calc(1-var(--drawer-swipe-progress,0))] backdrop-blur-sm transition-[opacity,display] transition-discrete duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-ending-style:opacity-0 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)*400ms)] data-swiping:duration-0",
+        "fixed inset-0 z-50 bg-black/32 opacity-[calc(1-var(--drawer-swipe-progress,0))] backdrop-blur-sm transition-[opacity,display] transition-discrete duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-ending-style:opacity-0 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)*400ms)] data-swiping:duration-0 supports-[-webkit-touch-callout:none]:absolute",
         className,
       )}
       data-slot="drawer-backdrop"
       {...props}
-    />
-  );
-}
-
-function scrollActiveScreenToTop() {
-  const activeScreen = document.querySelector<HTMLElement>(
-    '[data-part="paper"][data-stackflow-activity-is-active="true"] > div',
-  );
-
-  activeScreen?.scrollTo({ top: 0, behavior: "smooth" });
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function DrawerSafeAreaScrollTarget(): React.ReactElement {
-  return (
-    <div
-      aria-hidden="true"
-      className="fixed inset-x-0 top-0 z-[60] h-[env(safe-area-inset-top,0px)] supports-[-webkit-touch-callout:none]:h-[calc(env(safe-area-inset-top,0px)+8px)] touch-manipulation"
-      data-slot="drawer-safe-area-scroll-top"
-      onPointerDown={scrollActiveScreenToTop}
     />
   );
 }
@@ -201,7 +158,6 @@ export function DrawerPopup({
   return (
     <DrawerPortal {...portalProps}>
       <DrawerBackdrop />
-      <DrawerSafeAreaScrollTarget />
       <DrawerViewport position={position} variant={variant}>
         <DrawerPrimitive.Popup
           className={cn(
