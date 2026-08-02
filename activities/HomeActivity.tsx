@@ -322,7 +322,7 @@ export const HomeActivity: React.FC = () => {
                 </button>
               </div>
 
-              <FlightWidget onOpen={() => push("FlightActivity", {})} />
+              <FlightWidget onOpen={(passengerId) => push("FlightActivity", { passengerId })} />
 
               <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
 
@@ -365,7 +365,7 @@ export const HomeActivity: React.FC = () => {
                 <span className="text-2xl">👉</span>
               </button>
 
-              <FlightWidget onOpen={() => push("FlightActivity", {})} />
+              <FlightWidget onOpen={(passengerId) => push("FlightActivity", { passengerId })} />
 
               <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
             </motion.div>

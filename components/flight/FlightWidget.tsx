@@ -8,7 +8,7 @@ import { TextEffect } from "@/components/core/text-effect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface FlightWidgetProps {
-  onOpen: () => void;
+  onOpen: (passengerId: FlightPassengerId) => void;
 }
 
 export function FlightWidget({ onOpen }: FlightWidgetProps) {
@@ -82,7 +82,7 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
               <p className="text-[11px] font-bold text-[#5b83ab]">{flight.date.slice(5)} ({flight.day})</p>
               <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums">{flight.departure.time}</p>
               <p className="mt-1 text-sm font-black text-[#0b3478]">{flight.departure.code}</p>
-              <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.departure.terminal ?? flight.departure.airport}</p>
+              <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.departure.airport}{flight.departure.terminal ? ` · ${flight.departure.terminal}` : ""}</p>
             </div>
             <div className="flex flex-col items-center gap-1.5 text-[#4e93ca]" aria-label={`${flight.duration} 비행`}>
               <span className="h-px w-full bg-[#b9d5ed]" />
@@ -93,7 +93,7 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
               <p className="text-[11px] font-bold text-[#5b83ab]">{flight.arrival.nextDay ? "+1일 도착" : flight.duration}</p>
               <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums">{flight.arrival.time}</p>
               <p className="mt-1 text-sm font-black text-[#0b3478]">{flight.arrival.code}</p>
-              <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.arrival.terminal ?? flight.arrival.airport}</p>
+              <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
             </div>
           </div>
 
@@ -105,7 +105,7 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
               </Avatar>
               <span className="pl-3 text-xs font-semibold text-slate-500">{passenger.name} 티켓</span>
             </div>
-            <Button variant="ghost" size="sm" className="shrink-0 px-0 font-bold text-[#135ba9]" onPress={onOpen}>
+            <Button variant="ghost" size="sm" className="shrink-0 px-0 font-bold text-[#135ba9]" onPress={() => onOpen(selectedPassenger)}>
               티켓 보기 <ArrowUpRight className="size-4" aria-hidden="true" />
             </Button>
           </div>

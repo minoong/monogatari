@@ -2,22 +2,26 @@ import React from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
-import { Check, Luggage, Plane, Ticket } from "lucide-react";
+import { Check, Luggage, MonitorPlay, Plane, Plug, Plus, Sparkles, Ticket } from "lucide-react";
 import { Chip, Tabs } from "@heroui/react";
-import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
 import { TextEffect } from "@/components/core/text-effect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 gsap.registerPlugin(useGSAP);
 
-const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number]; flight: FlightSegment }> = ({ passenger, flight }) => (
-  <article data-passenger-ticket className="relative overflow-hidden rounded-[26px] border border-[#d7e5f2] bg-white shadow-[0_18px_38px_-30px_rgba(7,47,100,0.66)]">
+const SERVICE_ICONS = [Sparkles, Plug, MonitorPlay, Plus] as const;
+
+const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number]; flight: FlightSegment }> = ({ passenger, flight }) => {
+  const detail = FLIGHT_PASSENGER_DETAILS[passenger.id];
+
+  return <article data-passenger-ticket className="relative overflow-hidden rounded-[26px] border border-[#d7e5f2] bg-white shadow-[0_18px_38px_-30px_rgba(7,47,100,0.66)]">
     <div className="absolute -right-5 top-14 size-10 rounded-full bg-[#f5f9fd]" aria-hidden="true" />
     <div className="absolute -left-5 top-14 size-10 rounded-full bg-[#f5f9fd]" aria-hidden="true" />
     <div className="flex items-center justify-between bg-[#071c4a] px-5 py-3.5 text-white">
       <div className="flex items-center gap-2.5">
         <Avatar className="size-8 border border-white/30 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar>
-        <div><p className="text-sm font-black">{passenger.name}</p><p className="text-[10px] font-bold tracking-[0.14em] text-[#a5d2f5]">BOARDING TICKET</p></div>
+        <div><p className="text-sm font-black">{detail.ticketName}</p><p className="text-[10px] font-bold tracking-[0.14em] text-[#a5d2f5]">BOARDING TICKET</p></div>
       </div>
       <Ticket className="size-5 text-[#8ac7f0]" aria-hidden="true" />
     </div>
@@ -26,7 +30,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold text-[#5d82a9]">{flight.date} ({flight.day})</p>
-          <p className="mt-1 text-sm font-extrabold text-[#12366f]">대한항공 {flight.flightNumber}</p>
+          <p className="mt-1 text-sm font-extrabold text-[#12366f]">{flight.operatingCarrier} · {flight.flightNumber}</p>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
@@ -53,15 +57,48 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
       <div className="mt-5 flex flex-wrap gap-2 border-t border-dashed border-[#d8e5f1] pt-4">
         <Chip className="border-0 bg-[#eff7fd] px-2 text-xs font-bold text-[#285b93]">{flight.aircraft}</Chip>
         <Chip className="border-0 bg-[#eff7fd] px-2 text-xs font-bold text-[#285b93]">{flight.cabin}</Chip>
+        <Chip className="border-0 bg-[#eff7fd] px-2 text-xs font-bold text-[#285b93]">{flight.fareFamily}</Chip>
         <Chip className="border-0 bg-[#eff7fd] px-2 text-xs font-bold text-[#285b93]"><Luggage className="mr-1 inline size-3" />{flight.baggage}</Chip>
       </div>
-    </div>
-  </article>
-);
 
-export const FlightActivity: React.FC = () => {
+      <section className="mt-5 border-t border-[#e3edf6] pt-4">
+        <h3 className="text-sm font-black text-[#12366f]">기내 서비스</h3>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {flight.inFlightServices.map((service, index) => {
+            const Icon = SERVICE_ICONS[index] ?? Plus;
+            return <div key={service} className="flex min-h-12 items-center gap-2 rounded-xl bg-[#f5f9fd] px-3 text-[11px] font-bold leading-4 text-[#315b8f]"><Icon className="size-4 shrink-0 text-[#2778be]" aria-hidden="true" />{service}</div>;
+          })}
+        </div>
+      </section>
+
+      <section className="mt-5 border-t border-[#e3edf6] pt-4">
+        <h3 className="text-sm font-black text-[#12366f]">좌석 및 서비스 신청</h3>
+        {"serviceApplications" in detail ? (
+          <div className="mt-3 divide-y divide-[#e4edf5] overflow-hidden rounded-2xl border border-[#dce8f3]">
+            {detail.serviceApplications.map((service, index) => (
+              <div key={service} className="flex items-center gap-3 bg-white px-3.5 py-3">
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#edf6fc] text-xs font-black text-[#2678be]">{index + 1}</span>
+                <div className="min-w-0 flex-1"><p className="text-xs font-black text-[#234a7e]">{service}</p><p className="mt-0.5 text-[11px] font-medium text-slate-500">{detail.serviceNote}</p></div>
+                <span className="text-xs font-bold text-[#2778be]">확인</span>
+              </div>
+            ))}
+          </div>
+        ) : <p className="mt-3 rounded-2xl bg-[#f5f9fd] px-4 py-3 text-xs font-semibold leading-5 text-slate-500">{detail.serviceNote}</p>}
+      </section>
+    </div>
+  </article>;
+};
+
+interface FlightActivityProps {
+  params: { passengerId?: string };
+}
+
+const getInitialPassenger = (passengerId?: string): FlightPassengerId =>
+  passengerId === "gahyun" || passengerId === "minu" ? passengerId : "gahyun";
+
+export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
   const screenRef = React.useRef<HTMLDivElement>(null);
-  const [selectedPassenger, setSelectedPassenger] = React.useState<FlightPassengerId>("gahyun");
+  const [selectedPassenger, setSelectedPassenger] = React.useState<FlightPassengerId>(() => getInitialPassenger(params.passengerId));
   const tickets = FLIGHT_TICKETS[selectedPassenger];
   const [selectedFlight, setSelectedFlight] = React.useState(tickets[0].id);
   const flight = tickets.find((item) => item.id === selectedFlight) ?? tickets[0];

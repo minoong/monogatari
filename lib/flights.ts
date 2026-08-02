@@ -5,8 +5,11 @@ export type FlightSegment = {
   day: string;
   flightNumber: string;
   aircraft: string;
+  operatingCarrier: string;
   cabin: string;
+  fareFamily: string;
   baggage: string;
+  inFlightServices: readonly string[];
   duration: string;
   departure: {
     time: string;
@@ -30,6 +33,18 @@ export const FLIGHT_PASSENGERS = [
   { id: "minu" as const, name: "미누쿤", initials: "M", image: "/avatars/minu.webp" },
 ] as const satisfies readonly { id: FlightPassengerId; name: string; initials: string; image: string }[];
 
+export const FLIGHT_PASSENGER_DETAILS = {
+  gahyun: {
+    ticketName: "가현짱",
+    serviceNote: "개별 티켓 정보 전달 대기 중",
+  },
+  minu: {
+    ticketName: "LEE MINWOO",
+    serviceNote: "LEE MINWOO 여정 1",
+    serviceApplications: ["좌석 선택", "초과 수하물", "기타 서비스"],
+  },
+} as const;
+
 export const FLIGHT_SEGMENTS: readonly FlightSegment[] = [
   {
     id: "outbound",
@@ -37,12 +52,15 @@ export const FLIGHT_SEGMENTS: readonly FlightSegment[] = [
     date: "2026년 08월 29일",
     day: "토",
     flightNumber: "KE657",
-    aircraft: "AIRBUS INDUSTRIE A330-300",
+    aircraft: "A330-300",
+    operatingCarrier: "대한항공 운항",
     cabin: "일반석 (Q)",
+    fareFamily: "일반석 세이버",
     baggage: "위탁 수하물 1개",
+    inFlightServices: ["기내 어메니티", "기내 전원 공급 장치", "기내 엔터테인먼트", "부가 서비스"],
     duration: "5시간 50분",
-    departure: { time: "09:45", code: "ICN", airport: "인천국제공항", terminal: "터미널 2" },
-    arrival: { time: "13:35", code: "BKK", airport: "수완나품국제공항" },
+    departure: { time: "09:45", code: "ICN", airport: "서울/인천", terminal: "터미널 2" },
+    arrival: { time: "13:35", code: "BKK", airport: "방콕/수완나품" },
   },
   {
     id: "return",
@@ -50,12 +68,15 @@ export const FLIGHT_SEGMENTS: readonly FlightSegment[] = [
     date: "2026년 09월 01일",
     day: "화",
     flightNumber: "KE658",
-    aircraft: "AIRBUS INDUSTRIE A330-300",
+    aircraft: "A330-300",
+    operatingCarrier: "대한항공 운항",
     cabin: "일반석 (Q)",
+    fareFamily: "일반석 세이버",
     baggage: "위탁 수하물 1개",
+    inFlightServices: ["기내 어메니티", "기내 전원 공급 장치", "기내 엔터테인먼트", "부가 서비스"],
     duration: "5시간 25분",
-    departure: { time: "21:40", code: "BKK", airport: "수완나품국제공항" },
-    arrival: { time: "05:05", code: "ICN", airport: "인천국제공항", terminal: "터미널 2", nextDay: true },
+    departure: { time: "21:40", code: "BKK", airport: "방콕/수완나품" },
+    arrival: { time: "05:05", code: "ICN", airport: "서울/인천", terminal: "터미널 2", nextDay: true },
   },
 ] as const;
 
