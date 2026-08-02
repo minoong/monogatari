@@ -35,7 +35,7 @@ export const FLIGHT_PASSENGERS = [
 
 export const FLIGHT_PASSENGER_DETAILS = {
   gahyun: {
-    ticketName: "가현짱",
+    ticketName: "OH GA HYUN",
     serviceNote: "개별 티켓 정보 전달 대기 중",
   },
   minu: {
