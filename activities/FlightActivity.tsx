@@ -2,14 +2,15 @@ import React from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
-import { Luggage, MonitorPlay, Plug, Plus, Sparkles, Ticket } from "lucide-react";
-import { Chip, Tabs } from "@heroui/react";
+import { MonitorPlay, Plug, Plus, Sparkles, Ticket } from "lucide-react";
+import { Tabs } from "@heroui/react";
 import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 gsap.registerPlugin(useGSAP);
 
 const SERVICE_ICONS = [Sparkles, Plug, MonitorPlay, Plus] as const;
+const A330_SEAT_MAP_URL = "https://www.koreanair.com/contents/plan-your-travel/in-flight-experience/fleet/a330/300-276/seat-map";
 
 const FlightTime: React.FC<{ value: string; align?: "left" | "right" }> = ({ value, align = "left" }) => {
   const [hours = "00", minutes = "00"] = value.split(":");
@@ -81,11 +82,26 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
         </div>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2 border-t border-dashed border-[#d8e5f1] pt-4">
-        <Chip className="border-0 bg-[#eaf4fc] px-2 text-xs font-bold text-[#4772a1]">{flight.aircraft}</Chip>
-        <Chip className="border-0 bg-[#eaf4fc] px-2 text-xs font-bold text-[#4772a1]">{flight.cabin}</Chip>
-        <Chip className="border-0 bg-[#eaf4fc] px-2 text-xs font-bold text-[#4772a1]">{flight.fareFamily}</Chip>
-        <Chip className="border-0 bg-[#eaf4fc] px-2 text-xs font-bold text-[#4772a1]"><Luggage className="mr-1 inline size-3" />{flight.baggage}</Chip>
+      <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-[#f5f6f7] px-4 py-3 text-[#0b3478]">
+        <span className="inline-flex items-center gap-1.5 text-sm font-black">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={KOREAN_AIR_MARK_URL} alt="대한항공" className="size-4" />
+          {flight.flightNumber}
+        </span>
+        <a
+          href={A330_SEAT_MAP_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm font-bold underline decoration-1 underline-offset-4 transition-colors hover:text-[#2778be] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2778be] focus-visible:ring-offset-2"
+        >
+          {flight.aircraft}
+        </a>
+        <span className="text-sm font-bold">{flight.cabin}</span>
+        <span className="rounded-full bg-[#e1f3fd] px-2.5 py-1 text-xs font-bold">{flight.fareFamily}</span>
+        <span className="ml-auto flex items-center gap-4 text-[#0b3478]">
+          <span className="inline-flex" aria-label="기내 전원 공급 장치"><Plug className="size-5" aria-hidden="true" /></span>
+          <span className="inline-flex" aria-label="기내 엔터테인먼트"><MonitorPlay className="size-5" aria-hidden="true" /></span>
+        </span>
       </div>
 
       <section className="mt-5 border-t border-[#e3edf6] pt-4">
