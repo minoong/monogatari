@@ -2,7 +2,7 @@ import React from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
-import { Check, Luggage, MonitorPlay, Plug, Plus, Sparkles, Ticket } from "lucide-react";
+import { Luggage, MonitorPlay, Plug, Plus, Sparkles, Ticket } from "lucide-react";
 import { Chip, Tabs } from "@heroui/react";
 import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -36,7 +36,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
     <div className="flex items-center justify-between bg-[#071c4a] px-5 py-3.5 text-white">
       <div className="flex items-center gap-2.5">
         <Avatar className="size-8 border border-white/30 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar>
-        <div><p className="text-sm font-black">{detail.ticketName}</p><p className="text-[10px] font-bold tracking-[0.14em] text-[#a5d2f5]">BOARDING TICKET</p></div>
+        <p className="text-sm font-black">{detail.ticketName}</p>
       </div>
       <Ticket className="size-5 text-[#8ac7f0]" aria-hidden="true" />
     </div>
@@ -45,26 +45,33 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold text-[#5d82a9]">{flight.date} ({flight.day})</p>
-          <p className="mt-1 text-sm font-extrabold text-[#0b3478]">{flight.operatingCarrier} · {flight.flightNumber}</p>
+          <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-[#eaf4fc] px-2.5 py-1 text-[11px] font-bold text-[#4772a1]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={KOREAN_AIR_MARK_URL} alt="대한항공" className="size-3.5" />
+            {flight.flightNumber}
+          </span>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
       </div>
 
-      <div className="mt-5 grid grid-cols-[minmax(0,1fr)_38px_minmax(0,1fr)] items-center gap-1">
+      <div className="mt-5 grid grid-cols-[minmax(0,1fr)_minmax(82px,0.72fr)_minmax(0,1fr)] items-center gap-2">
         <div>
           <p className="text-3xl font-black text-[#0b3478]"><FlightTime value={flight.departure.time} /></p>
           <p className="mt-1 text-xl font-black text-[#0b3478]">{flight.departure.code}</p>
           <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">{flight.departure.airport}{flight.departure.terminal ? ` · ${flight.departure.terminal}` : ""}</p>
         </div>
-        <div className="flex h-24 flex-col items-center">
+        <div className="flex flex-col items-center gap-2 text-[#4e93ca]" aria-label={`${flight.duration} 비행`}>
           <span className="whitespace-nowrap text-[11px] font-bold text-[#4772a1]">{flight.duration}</span>
-          <div className="relative mt-3 flex min-h-0 flex-1 flex-col items-center justify-between">
-            <span data-flight-line className="absolute inset-y-2 left-1/2 -translate-x-1/2 border-l-2 border-dotted border-[#82b1d8]" />
+          <div className="flex w-full items-center gap-1.5" aria-hidden="true">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img data-flight-plane src="/korean-air/flight-to.svg" alt="" className="relative size-5" />
+            <img data-flight-plane src="/korean-air/flight-to.svg" alt="" className="size-5 shrink-0" />
+            <span data-flight-line className="h-px min-w-0 flex-1 border-t border-dashed border-[#91b7da]" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/korean-air/flight-dot.svg" alt="" className="relative size-3" />
+            <img src="/korean-air/flight-dot.svg" alt="" className="size-3 shrink-0" />
+            <span data-flight-line className="h-px min-w-0 flex-1 border-t border-dashed border-[#91b7da]" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/korean-air/flight-dot-from.svg" alt="" className="size-3 shrink-0" />
           </div>
         </div>
         <div className="text-right">
@@ -132,7 +139,7 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
         .from("[data-flight-header]", { y: 18, autoAlpha: 0, duration: 0.5 })
         .from("[data-flight-tabs]", { y: 12, autoAlpha: 0, duration: 0.36 }, "-=0.18")
         .from("[data-passenger-ticket]", { y: 26, autoAlpha: 0, duration: 0.54, stagger: 0.12 }, "-=0.06");
-      gsap.from("[data-flight-line]", { scaleY: 0, transformOrigin: "top", duration: 0.5, stagger: 0.12, ease: "power2.inOut", delay: 0.36 });
+      gsap.from("[data-flight-line]", { scaleX: 0, transformOrigin: "left", duration: 0.5, stagger: 0.08, ease: "power2.inOut", delay: 0.36 });
       gsap.from("[data-flight-plane]", { y: -14, rotation: -18, autoAlpha: 0, duration: 0.42, stagger: 0.12, ease: "back.out(1.6)", delay: 0.52 });
       return () => timeline.kill();
     });
@@ -186,8 +193,7 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
                   </Tabs.List>
                 </Tabs.ListContainer>
                 <Tabs.Panel id={selectedFlight} className="pt-4">
-                  <div className="flex items-center gap-2 px-1 text-xs font-semibold text-[#4772a1]"><Check className="size-4" aria-hidden="true" />{flight.duration} · {flight.flightNumber} · {flight.departure.terminal ?? "출발 터미널 확인"}</div>
-                  <section className="mt-4 space-y-4" aria-label={`${flight.label} 탑승객 티켓`}>
+                  <section className="space-y-4" aria-label={`${flight.label} 탑승객 티켓`}>
                     <PassengerTicket passenger={passenger} flight={flight} />
                     <div className="flex items-center gap-2 rounded-2xl border border-[#dce9f5] bg-white px-4 py-3 text-xs font-semibold text-slate-500">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
