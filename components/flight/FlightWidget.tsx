@@ -63,8 +63,8 @@ const duration = getDurationParts(flight.duration);
   return (
     <Card className="overflow-hidden rounded-[28px] border border-[#d5e1ef] bg-white p-0 shadow-[0_20px_42px_-34px_rgba(3,41,91,0.72)] [font-family:var(--font-korean-air)]">
       <Card.Content className="p-0">
-        <div className="px-5 pb-5 pt-4">
-          <div className="mb-1 flex justify-end">
+        <div className="px-5 pb-4 pt-3">
+          <div className="mb-0.5 flex justify-end">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-4 w-auto" />
           </div>
@@ -80,7 +80,7 @@ const duration = getDurationParts(flight.duration);
                 ))}
               </Tabs.List>
             </Tabs.ListContainer>
-            <Tabs.Panel id={selectedPassenger} className="pt-3">
+            <Tabs.Panel id={selectedPassenger} className="pt-2">
               <Tabs variant="secondary" selectedKey={selectedFlight} onSelectionChange={handleFlightSelection}>
                 <Tabs.ListContainer>
                   <Tabs.List aria-label={`${passenger.name}의 항공편 구간`} className="grid h-9 w-full grid-cols-2 border-b border-[#e1ebf4] bg-transparent p-0 *:h-9 *:w-full">
@@ -92,7 +92,7 @@ const duration = getDurationParts(flight.duration);
                     ))}
                   </Tabs.List>
                 </Tabs.ListContainer>
-                <Tabs.Panel id={selectedFlight} className="pt-4">
+                <Tabs.Panel id={selectedFlight} className="pt-3">
                   <div className="grid grid-cols-[minmax(0,1fr)_minmax(76px,0.72fr)_minmax(0,1fr)] items-center gap-2">
                     <div>
                       <p className="text-[11px] font-bold text-[#5b83ab]"><StateTextRoll value={`${flight.date.slice(0, 4)}년 ${flight.date.slice(5)} (${flight.day})`} previousValue={`${previousFlight.date.slice(0, 4)}년 ${previousFlight.date.slice(5)} (${previousFlight.day})`} transitionKey={transitionKey} className="min-w-[10.5em]" /></p>
@@ -125,7 +125,7 @@ const duration = getDurationParts(flight.duration);
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
                     </div>
                   </div>
-                  <div className="mt-4 flex items-center gap-2 text-[11px] font-bold text-[#4772a1]">
+                  <div className="mt-3 flex items-center gap-2 text-[11px] font-bold text-[#4772a1]">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eaf4fc] px-2.5 py-1">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={KOREAN_AIR_MARK_URL} alt="대한항공" className="size-3.5" />
@@ -133,9 +133,16 @@ const duration = getDurationParts(flight.duration);
                     </span>
                     <span className="rounded-full bg-[#f2f6fa] px-2.5 py-1 text-slate-500">{flight.aircraft}</span>
                   </div>
-                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-4">
+                  <div className="mt-3 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-3">
                     <div className="flex items-center gap-2" aria-label={`탑승객 ${passenger.name}`}><Avatar className="size-8 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar><span className="text-xs font-semibold text-slate-500"><StateTextRoll value={`${passenger.name} 티켓`} previousValue={`${previousPassenger.name} 티켓`} transitionKey={transitionKey} className="min-w-[5.5em]" /></span></div>
-                    <Button variant="ghost" size="sm" className="shrink-0 px-0 font-bold text-[#135ba9]" onPress={() => onOpen(selectedPassenger)}>티켓 보기 <ArrowUpRight className="size-4" aria-hidden="true" /></Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="!h-5 !min-h-0 !min-w-0 !gap-1 !rounded-none !px-0 !py-0 font-bold text-[#135ba9] ![--button-bg-hover:transparent] ![--button-bg-pressed:transparent] hover:text-[#0b3478]"
+                      onPress={() => onOpen(selectedPassenger)}
+                    >
+                      티켓 보기 <ArrowUpRight className="size-4" aria-hidden="true" />
+                    </Button>
                   </div>
                 </Tabs.Panel>
               </Tabs>
