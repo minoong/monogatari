@@ -176,7 +176,9 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
           <Tabs variant="secondary" selectedKey={selectedPassenger} onSelectionChange={(key) => {
             const nextPassenger = String(key) as FlightPassengerId;
             setSelectedPassenger(nextPassenger);
-            setSelectedFlight(getDefaultFlightSegmentId());
+            if (!FLIGHT_TICKETS[nextPassenger].some((item) => item.id === selectedFlight)) {
+              setSelectedFlight(getDefaultFlightSegmentId());
+            }
           }}>
             <Tabs.ListContainer>
               <Tabs.List aria-label="탑승객" className="grid h-12 w-full grid-cols-2 border-b border-[#d9e6f1] bg-transparent p-0 *:h-12 *:w-full">

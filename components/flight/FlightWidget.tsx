@@ -53,7 +53,9 @@ const duration = getDurationParts(flight.duration);
     setPreviousFlight(flight);
     setPreviousPassenger(passenger);
     setSelectedPassenger(nextPassenger);
-    setSelectedFlight(getDefaultFlightSegmentId());
+    if (!FLIGHT_TICKETS[nextPassenger].some((item) => item.id === selectedFlight)) {
+      setSelectedFlight(getDefaultFlightSegmentId());
+    }
     setTransitionKey((version) => version + 1);
   };
 
