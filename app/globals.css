@@ -202,48 +202,18 @@
   font-family: var(--font-kanit), sans-serif;
 }
 
-/* Wish detail gallery: custom controls and a readable pager over every image. */
-.wish-gallery-control {
-  position: absolute;
-  top: 50%;
-  z-index: 10;
-  width: 2rem;
-  height: 2rem;
-  display: grid;
-  place-items: center;
-  margin-top: -1rem;
-  border: 1px solid rgb(255 255 255 / 0.38);
-  border-radius: 9999px;
-  background: rgb(15 23 42 / 0.38);
-  box-shadow: 0 4px 14px rgb(15 23 42 / 0.18);
-  color: white;
-  opacity: 0.94;
-  transition: opacity 180ms ease, background 180ms ease, transform 180ms ease;
-}
-
-.wish-gallery-prev {
-  left: 0.75rem;
-}
-
-.wish-gallery-next {
-  right: 0.75rem;
-}
-
-.wish-gallery-control:hover {
-  background: rgb(15 23 42 / 0.65);
-  transform: scale(1.06);
-}
-
+/* Wish detail gallery: a compact, high-contrast pager over the photo deck. */
 .wish-image-gallery .swiper-pagination {
-  bottom: 0.75rem;
-  left: 50%;
-  width: auto;
+  bottom: 0.75rem !important;
+  left: 50% !important;
+  right: auto !important;
+  width: max-content !important;
   padding: 0.3rem 0.5rem;
   border: 1px solid rgb(255 255 255 / 0.2);
   border-radius: 9999px;
   background: rgb(15 23 42 / 0.45);
   backdrop-filter: blur(8px);
-  transform: translateX(-50%);
+  transform: translateX(-50%) !important;
 }
 
 .wish-image-gallery .swiper-pagination-bullet {
