@@ -2,7 +2,6 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button, Chip } from "@heroui/react";
 import {
   ArrowLeftRight,
@@ -283,7 +282,6 @@ export const DictionaryActivity: React.FC = () => {
   const mainRef = useRef<HTMLElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
   const [shouldScramble, setShouldScramble] = useState(true);
   const prefersReducedMotion = useReducedMotion();
 
@@ -292,7 +290,7 @@ export const DictionaryActivity: React.FC = () => {
     return () => window.clearTimeout(timer);
   }, []);
 
-  // PWA iOS/AOS 가상 키보드 높이 동적 추적 (visualViewport API)
+  // 검색창의 기존 PWA iOS/AOS 가상 키보드 대응은 그대로 유지한다.
   useLayoutEffect(() => {
     if (typeof window === "undefined" || !window.visualViewport) return;
 
@@ -305,19 +303,8 @@ export const DictionaryActivity: React.FC = () => {
       const keyboardInset = Math.max(0, window.innerHeight - visibleBottom);
       const bottomGap = keyboardInset > 100 ? SEARCH_BAR_GAP : 16;
 
-      // 키보드가 나타났을 때 (100px 이상 차이 감지)
-      if (keyboardInset > 100) {
-        setKeyboardHeight(keyboardInset);
-      } else {
-        setKeyboardHeight(0);
-      }
-
-      setSearchBarTop(
-        Math.max(
-          0,
-          Math.round(visibleBottom - mainTop - SEARCH_BAR_HEIGHT - bottomGap),
-        ),
-      );
+      setKeyboardHeight(keyboardInset > 100 ? keyboardInset : 0);
+      setSearchBarTop(Math.max(0, Math.round(visibleBottom - mainTop - SEARCH_BAR_HEIGHT - bottomGap)));
     };
 
     const vv = window.visualViewport;
@@ -326,9 +313,7 @@ export const DictionaryActivity: React.FC = () => {
       requestAnimationFrame(handleViewportChange);
     };
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        handlePageResume();
-      }
+      if (document.visibilityState === "visible") handlePageResume();
     };
 
     vv.addEventListener("resize", handleViewportChange);
@@ -348,7 +333,6 @@ export const DictionaryActivity: React.FC = () => {
   }, []);
 
   useGSAP(() => {
-    gsap.registerPlugin(ScrollTrigger);
     const media = gsap.matchMedia();
 
     media.add("(prefers-reduced-motion: no-preference)", () => {
@@ -380,20 +364,6 @@ export const DictionaryActivity: React.FC = () => {
           "-=0.28",
         );
 
-      if (scrollRef.current && listRef.current) {
-        gsap.to(listRef.current, {
-          y: -14,
-          ease: "none",
-          scrollTrigger: {
-            scroller: scrollRef.current,
-            trigger: listRef.current,
-            start: "top bottom",
-            end: "top top",
-            scrub: 0.45,
-            invalidateOnRefresh: true,
-          },
-        });
-      }
     });
 
     return () => media.revert();
@@ -469,19 +439,77 @@ export const DictionaryActivity: React.FC = () => {
 
   return (
     <AppScreen className="dictionary-screen" appBar={{ title: "회화 사전" }}>
-      <main ref={mainRef} className="relative flex h-[calc(100svh-56px)] w-full flex-col overflow-hidden bg-[#f2f4f7] dark:bg-[#0b0d10]">
-        {/* 독립 스크롤 영역 (화면은 고정되고 이 영역만 독립 스크롤) */}
+      <main ref={mainRef} className="relative flex h-[calc(100svh-56px)] w-full flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto px-5 pt-4 transition-[padding] duration-150 no-scrollbar"
-          style={{
-            paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 80}px` : "96px",
-          }}
+          className="flex-1 overflow-y-auto px-5 pt-5 transition-[padding] duration-150 no-scrollbar"
+          style={{ paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 80}px` : "96px" }}
         >
-          <section ref={introRef} className="mx-auto flex w-full max-w-lg flex-col gap-5">
+        <section ref={introRef} className="mx-auto flex w-full max-w-lg flex-col gap-4">
+
+          <div
+            data-dictionary-intro="rail"
+            className="-mx-5 flex gap-2 overflow-x-auto px-5 no-scrollbar"
+            aria-label="회화 카테고리"
+          >
+            {CATEGORY_FILTERS.map((category) => {
+              const isSelected = selectedCategory === category;
+              const meta = category === "전체" ? null : CATEGORY_META[category];
+              const Icon = meta?.icon ?? Compass;
+
+              return (
+                <motion.button
+                  key={category}
+                  type="button"
+                  layout
+                  whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 28 }}
+                  aria-pressed={isSelected}
+                  onClick={() => {
+                    triggerHapticFeedback(10);
+                    setSelectedCategory(category);
+                  }}
+                  className={cn(
+                    "relative flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-[color,background-color,box-shadow]",
+                    isSelected
+                      ? "border-slate-900 bg-slate-900 text-white shadow-[0_8px_18px_-12px_rgba(15,23,42,0.8)] dark:border-white dark:bg-white dark:text-slate-950"
+                      : "border-slate-200 bg-white text-slate-500 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800",
+                  )}
+                >
+                  <Icon className="size-3.5" />
+                  <span>{meta?.label ?? "전체"}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <div data-dictionary-intro="toolbar" className="flex items-center justify-between px-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span>전체 {filteredPhrases.length}개 표현</span>
+            {(searchQuery || selectedCategory !== "전체") && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 rounded-full px-2 font-bold text-slate-600 dark:text-slate-300"
+                onPress={() => {
+                  triggerHapticFeedback(10);
+                  setSearchQuery("");
+                  setSelectedCategory("전체");
+                }}
+              >
+                <RotateCcw className="size-3" />
+                <span>초기화</span>
+              </Button>
+            )}
+          </div>
+
+          <div data-dictionary-intro="rail" className="rounded-3xl bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 px-5 py-5 text-white shadow-lg shadow-violet-500/20">
+            <span className="text-2xl">💬</span>
+            <h1 className="mt-3 text-xl font-extrabold">태국 회화 사전</h1>
+            <p className="mt-1 text-sm font-medium text-white/80">여행에서 바로 꺼내 쓰는 태국어 표현</p>
+          </div>
 
           {recentSearches.length > 0 && (
-            <div data-dictionary-intro className="flex flex-col gap-1.5">
+            <div data-dictionary-intro className="flex flex-col gap-1.5 px-1">
               <p className="flex items-center gap-1.5 px-1 text-[11px] font-black tracking-wide text-slate-500 dark:text-slate-400">
                 <Clock className="size-3.5 text-slate-950 dark:text-white" /> 최근 꺼내 본 말
               </p>
@@ -514,69 +542,7 @@ export const DictionaryActivity: React.FC = () => {
             </div>
           )}
 
-          <div
-            data-dictionary-intro="rail"
-            className="sticky top-0 z-20 -mx-5 flex gap-2 overflow-x-auto bg-[#f2f4f7]/88 px-5 py-3 backdrop-blur-xl no-scrollbar dark:bg-[#0b0d10]/88"
-            aria-label="회화 카테고리"
-          >
-            {CATEGORY_FILTERS.map((category) => {
-              const isSelected = selectedCategory === category;
-              const meta = category === "전체" ? null : CATEGORY_META[category];
-              const Icon = meta?.icon ?? Compass;
-
-              return (
-                <motion.button
-                  key={category}
-                  type="button"
-                  layout
-                  whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
-                  transition={{ type: "spring", stiffness: 420, damping: 28 }}
-                  aria-pressed={isSelected}
-                  onClick={() => {
-                    triggerHapticFeedback(10);
-                    setSelectedCategory(category);
-                  }}
-                  className={cn(
-                    "relative flex shrink-0 items-center gap-1.5 overflow-hidden rounded-2xl px-3.5 py-2 text-xs font-black ring-1 transition-[color,background-color,box-shadow]",
-                    isSelected
-                      ? "bg-[#15171b] text-white shadow-[0_10px_20px_-12px_rgba(15,23,42,0.8)]"
-                      : "bg-white text-slate-500 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800",
-                    isSelected && "shadow-lg",
-                  )}
-                >
-                  <Icon className="size-3.5" />
-                  <span>{meta?.label ?? "전체"}</span>
-                  {isSelected && (
-                    <motion.span
-                      layoutId="dictionary-category-indicator"
-                      className={cn("absolute inset-x-3.5 bottom-1 h-0.5 rounded-full", meta?.stripClass ?? "bg-white")}
-                      transition={{ type: "spring", stiffness: 460, damping: 32 }}
-                    />
-                  )}
-                </motion.button>
-              );
-            })}
-          </div>
-
-          <div data-dictionary-intro="toolbar" className="flex h-7 items-center justify-end px-1">
-            {(searchQuery || selectedCategory !== "전체") && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 rounded-full px-2 font-bold text-slate-600 dark:text-slate-300"
-                onPress={() => {
-                  triggerHapticFeedback(10);
-                  setSearchQuery("");
-                  setSelectedCategory("전체");
-                }}
-              >
-                <RotateCcw className="size-3" />
-                <span>초기화</span>
-              </Button>
-            )}
-          </div>
-
-          <div ref={listRef} data-dictionary-intro="list" className="-mx-5 overflow-hidden border-y border-slate-200 bg-white shadow-[0_14px_30px_-28px_rgba(15,23,42,0.55)] will-change-transform dark:border-slate-800 dark:bg-slate-900">
+          <div data-dictionary-intro="list" className="-mx-5 overflow-hidden border-y border-slate-200 bg-white shadow-[0_14px_30px_-28px_rgba(15,23,42,0.55)] dark:border-slate-800 dark:bg-slate-900">
             {filteredPhrases.length === 0 ? (
               <div className="flex min-h-52 flex-col items-center justify-center px-6 text-center">
                 <span className="grid size-12 place-items-center rounded-2xl bg-slate-100 text-xl dark:bg-slate-800">🔎</span>
@@ -599,30 +565,25 @@ export const DictionaryActivity: React.FC = () => {
             )}
           </div>
         </section>
-      </div>
-
-      <div
-        aria-label="회화 사전 검색"
-        className="absolute inset-x-0 z-40 mx-auto flex max-w-lg items-center justify-center px-5 transition-[top] duration-100 ease-out"
-        style={{
-          top: searchBarTop === null ? undefined : `${searchBarTop}px`,
-          bottom: searchBarTop === null ? "16px" : undefined,
-        }}
-        data-slot="dictionary-filter-toolbar"
-        role="search"
-      >
-        <GooeyInput
-          className="w-full"
-          focusProxy
-          fullWidthOnExpand
-          onOpenChange={setSearchOpen}
-          onValueChange={setSearchQuery}
-          open={searchOpen}
-          placeholder=""
-          value={searchQuery}
-        />
-      </div>
-
+        </div>
+        <div
+          aria-label="회화 사전 검색"
+          className="absolute inset-x-0 z-40 mx-auto flex max-w-lg items-center justify-center px-5 transition-[top] duration-100 ease-out"
+          style={{ top: searchBarTop === null ? undefined : `${searchBarTop}px`, bottom: searchBarTop === null ? "16px" : undefined }}
+          data-slot="dictionary-filter-toolbar"
+          role="search"
+        >
+          <GooeyInput
+            className="w-full"
+            focusProxy
+            fullWidthOnExpand
+            onOpenChange={setSearchOpen}
+            onValueChange={setSearchQuery}
+            open={searchOpen}
+            placeholder=""
+            value={searchQuery}
+          />
+        </div>
       </main>
     </AppScreen>
   );
