@@ -4,7 +4,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { MonitorPlay, Plug, Plus, Sparkles, Ticket } from "lucide-react";
 import { Tabs } from "@heroui/react";
-import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, getDefaultFlightSegmentId, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 gsap.registerPlugin(useGSAP);
@@ -35,7 +35,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
   return <article data-passenger-ticket className="relative overflow-hidden rounded-[26px] border border-[#d7e5f2] bg-white shadow-[0_18px_38px_-30px_rgba(7,47,100,0.66)]">
     <div className="flex items-center justify-between bg-[#071c4a] px-4 py-3.5 text-white sm:px-5">
       <div className="flex items-center gap-2.5">
-        <Avatar className="size-8 border border-white/30 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar>
+        <span key={passenger.id} className="motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-75 motion-safe:duration-200"><Avatar className="size-8 border border-white/30 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar></span>
         <p className="text-sm font-black">{detail.ticketName}</p>
       </div>
       <Ticket className="size-5 text-[#8ac7f0]" aria-hidden="true" />
@@ -151,7 +151,7 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
   const screenRef = React.useRef<HTMLDivElement>(null);
   const [selectedPassenger, setSelectedPassenger] = React.useState<FlightPassengerId>(() => getInitialPassenger(params.passengerId));
   const tickets = FLIGHT_TICKETS[selectedPassenger];
-  const [selectedFlight, setSelectedFlight] = React.useState(tickets[0].id);
+  const [selectedFlight, setSelectedFlight] = React.useState(() => getDefaultFlightSegmentId());
   const flight = tickets.find((item) => item.id === selectedFlight) ?? tickets[0];
   const passenger = FLIGHT_PASSENGERS.find((item) => item.id === selectedPassenger) ?? FLIGHT_PASSENGERS[0];
 
@@ -176,7 +176,7 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
           <Tabs variant="secondary" selectedKey={selectedPassenger} onSelectionChange={(key) => {
             const nextPassenger = String(key) as FlightPassengerId;
             setSelectedPassenger(nextPassenger);
-            setSelectedFlight(FLIGHT_TICKETS[nextPassenger][0].id);
+            setSelectedFlight(getDefaultFlightSegmentId());
           }}>
             <Tabs.ListContainer>
               <Tabs.List aria-label="탑승객" className="grid h-12 w-full grid-cols-2 border-b border-[#d9e6f1] bg-transparent p-0 *:h-12 *:w-full">

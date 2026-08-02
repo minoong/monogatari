@@ -4,7 +4,7 @@ import React from "react";
 import { Button, Card, Tabs } from "@heroui/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { ArrowUpRight } from "lucide-react";
-import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, getDefaultFlightSegmentId, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StateTextRoll } from "@/components/core/state-text-roll";
 import { SlidingNumber } from "@/components/core/sliding-number";
@@ -39,7 +39,7 @@ function FlightTime({ value, align = "left" }: { value: string; align?: "left" |
 export function FlightWidget({ onOpen }: FlightWidgetProps) {
   const [selectedPassenger, setSelectedPassenger] = React.useState<FlightPassengerId>("gahyun");
   const tickets = FLIGHT_TICKETS[selectedPassenger];
-  const [selectedFlight, setSelectedFlight] = React.useState(tickets[0].id);
+  const [selectedFlight, setSelectedFlight] = React.useState(() => getDefaultFlightSegmentId());
   const [transitionKey, setTransitionKey] = React.useState(0);
   const flight = tickets.find((item) => item.id === selectedFlight) ?? tickets[0];
   const passenger = FLIGHT_PASSENGERS.find((item) => item.id === selectedPassenger) ?? FLIGHT_PASSENGERS[0];
@@ -53,7 +53,7 @@ const duration = getDurationParts(flight.duration);
     setPreviousFlight(flight);
     setPreviousPassenger(passenger);
     setSelectedPassenger(nextPassenger);
-    setSelectedFlight(FLIGHT_TICKETS[nextPassenger][0].id);
+    setSelectedFlight(getDefaultFlightSegmentId());
     setTransitionKey((version) => version + 1);
   };
 

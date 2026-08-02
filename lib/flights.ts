@@ -81,6 +81,14 @@ export const FLIGHT_SEGMENTS: readonly FlightSegment[] = [
 ] as const;
 
 export const FLIGHT_ROUTE_LABEL = "ICN → BKK · BKK → ICN";
+
+export function getDefaultFlightSegmentId(now = new Date()): FlightSegment["id"] {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const outboundDate = new Date(2026, 7, 29);
+
+  return today > outboundDate ? "return" : "outbound";
+}
+
 export const FLIGHT_TICKET_NUMBERS: Record<FlightPassengerId, string> = {
   gahyun: "1805460443724",
   minu: "1805460443724",
