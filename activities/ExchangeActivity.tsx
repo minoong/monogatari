@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 import { Save, X } from "lucide-react";
 import NumberFlow from "@number-flow/react";
 import { NumberFlowInput } from "@daformat/react-number-flow-input";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { Card, CardContent } from "../components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import NeumorphButton from "../components/ui/neumorph-button";
@@ -112,7 +112,6 @@ export const ExchangeActivity: React.FC = () => {
 
     setThb(nextCurrency === "KRW" ? Math.round(currentKrw) : Number((currentKrw / rates.THB).toFixed(2)));
     setInputCurrency(nextCurrency);
-    requestAnimationFrame(() => inputRef.current?.focus());
   };
 
   // 가변 사이즈 로직: 모바일 환경에 맞춰 극단적으로 줄이도록 조정
@@ -137,9 +136,10 @@ export const ExchangeActivity: React.FC = () => {
       <div className="flex flex-col min-h-full w-full bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 dark:from-slate-950 dark:via-gray-950 dark:to-indigo-950/30 text-gray-900 dark:text-white pb-12 overflow-x-hidden">
         
         <motion.div layout className={`flex flex-col px-4 pb-4 gap-3 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-6'}`}>
+          <LayoutGroup id="exchange-currency-cards">
           
           {/* 메인 입력 (THB) 카드 */}
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
+          <motion.div layout layoutId={`exchange-currency-${inputCurrency}`} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
             <div className="thb-flip-container border border-white/60 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl overflow-hidden">
               <div className={`relative ${isFocused ? 'py-1.5 px-3' : 'px-4 py-3'}`}>
                 <div className={`flex flex-col`}>
@@ -265,7 +265,7 @@ export const ExchangeActivity: React.FC = () => {
           <div className="grid grid-cols-1 gap-3 mt-2">
             
             {/* 입력 통화와 반대편 환산 카드 */}
-            <motion.div layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
+            <motion.div layout layoutId={`exchange-currency-${isKrwInput ? "THB" : "KRW"}`} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
               <Card
                 role="button"
                 tabIndex={0}
@@ -281,12 +281,12 @@ export const ExchangeActivity: React.FC = () => {
                     toggleInputCurrency();
                   }
                 }}
-                className={`cursor-pointer border-white/60 dark:border-white/10 shadow-[0_4px_20px_rgb(0,0,0,0.04)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.15)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl transition-transform hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${isKrwInput ? "ring-2 ring-indigo-400/70" : ""}`}
+                className="cursor-pointer border-white/60 dark:border-white/10 shadow-[0_4px_20px_rgb(0,0,0,0.04)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.15)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl transition-transform hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <CardContent className="px-4 py-2 flex flex-col gap-1.5">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2.5">
-                      <Avatar className="size-7 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+                      <div className="relative size-7 shrink-0 overflow-hidden rounded-full bg-slate-100 shadow-sm ring-1 ring-black/5 dark:bg-slate-800 dark:ring-white/10">
                         <AnimatePresence initial={false} mode="popLayout">
                           <motion.img
                             key={`result-flag-${inputCurrency}`}
@@ -299,8 +299,7 @@ export const ExchangeActivity: React.FC = () => {
                             className="size-full object-cover"
                           />
                         </AnimatePresence>
-                        <AvatarFallback>{isKrwInput ? "TH" : "KR"}</AvatarFallback>
-                      </Avatar>
+                      </div>
                       <AnimatePresence initial={false} mode="popLayout">
                         <motion.span
                           key={`result-label-${inputCurrency}`}
@@ -376,6 +375,7 @@ export const ExchangeActivity: React.FC = () => {
             </motion.div>
             
           </div>
+          </LayoutGroup>
         </motion.div>
 
       </div>
