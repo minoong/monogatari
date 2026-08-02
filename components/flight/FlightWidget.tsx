@@ -125,7 +125,7 @@ const duration = getDurationParts(flight.duration);
                     </div>
                     <div className="flex items-center gap-3 py-1.5 text-[#4772a1]"><span className="h-px flex-1 bg-[#d7e4ef]" /><span className="whitespace-nowrap text-[11px] font-bold">{flight.duration}</span><span className="h-px flex-1 bg-[#d7e4ef]" /></div>
                     <div className="grid grid-cols-[1fr_auto] items-start gap-4">
-                      <div><div className="flex items-end gap-1.5"><p className="text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><FlightTime value={flight.arrival.time} /></p>{flight.arrival.nextDay ? <span className="mb-1 text-xs font-bold leading-none text-[#3e9468]">+1일</span> : null}</div><p className="mt-1 text-[11px] font-semibold text-slate-500">{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p></div>
+                      <div><div className="flex items-start gap-1.5"><p className="text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><FlightTime value={flight.arrival.time} /></p>{flight.arrival.nextDay ? <span className="pt-0.5 text-xs font-bold leading-none text-[#3e9468]">+1일</span> : null}</div><p className="mt-1 text-[11px] font-semibold text-slate-500">{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p></div>
                       <p className="pt-1 text-xl font-black text-[#0b3478]">{flight.arrival.code}</p>
                     </div>
                   </div>
