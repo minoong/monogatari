@@ -6,9 +6,15 @@ import { ArrowUpRight, Plane } from "lucide-react";
 import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StateTextRoll } from "@/components/core/state-text-roll";
+import { SlidingNumber } from "@/components/core/sliding-number";
 
 interface FlightWidgetProps {
   onOpen: (passengerId: FlightPassengerId) => void;
+}
+
+function getDurationParts(duration: string) {
+  const match = duration.match(/(\d+)시간\s*(\d+)분/);
+  return { hours: Number(match?.[1] ?? 0), minutes: Number(match?.[2] ?? 0) };
 }
 
 export function FlightWidget({ onOpen }: FlightWidgetProps) {
@@ -18,6 +24,7 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
   const [transitionKey, setTransitionKey] = React.useState(0);
   const flight = tickets.find((item) => item.id === selectedFlight) ?? tickets[0];
   const passenger = FLIGHT_PASSENGERS.find((item) => item.id === selectedPassenger) ?? FLIGHT_PASSENGERS[0];
+  const duration = getDurationParts(flight.duration);
   const [previousFlight, setPreviousFlight] = React.useState(flight);
   const [previousPassenger, setPreviousPassenger] = React.useState(passenger);
 
@@ -78,7 +85,12 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.departure.airport}{flight.departure.terminal ? ` · ${flight.departure.terminal}` : ""}</p>
                     </div>
                     <div className="flex flex-col items-center gap-2 text-[#4e93ca]" aria-label={`${flight.duration} 비행`}>
-                      <StateTextRoll value={flight.duration} previousValue={previousFlight.duration} transitionKey={transitionKey} className="min-w-[5.7em] text-center text-[10px] font-bold text-[#4772a1]" />
+                      <div className="flex items-center justify-center gap-0.5 whitespace-nowrap text-[10px] font-bold text-[#4772a1]" style={{ fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums" }}>
+                        <SlidingNumber value={duration.hours} />
+                        <span>시간</span>
+                        <SlidingNumber value={duration.minutes} padStart />
+                        <span>분</span>
+                      </div>
                       <div className="flex w-full items-center gap-1.5" aria-hidden="true">
                         <span className="h-px min-w-0 flex-1 border-t border-dashed border-[#91b7da]" />
                         <Plane className="size-4 shrink-0 -rotate-45" />
