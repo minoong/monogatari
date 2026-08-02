@@ -202,45 +202,62 @@
   font-family: var(--font-kanit), sans-serif;
 }
 
-/* Wish detail gallery: intentionally quiet controls that stay legible over photos. */
-.wish-image-gallery .swiper-button-prev,
-.wish-image-gallery .swiper-button-next {
+/* Wish detail gallery: custom controls and a readable pager over every image. */
+.wish-gallery-control {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
   width: 2rem;
   height: 2rem;
+  display: grid;
+  place-items: center;
   margin-top: -1rem;
   border: 1px solid rgb(255 255 255 / 0.38);
   border-radius: 9999px;
   background: rgb(15 23 42 / 0.38);
   box-shadow: 0 4px 14px rgb(15 23 42 / 0.18);
   color: white;
-  opacity: 0;
+  opacity: 0.94;
   transition: opacity 180ms ease, background 180ms ease, transform 180ms ease;
 }
 
-.wish-image-gallery:hover .swiper-button-prev,
-.wish-image-gallery:hover .swiper-button-next,
-.wish-image-gallery:focus-within .swiper-button-prev,
-.wish-image-gallery:focus-within .swiper-button-next {
-  opacity: 1;
+.wish-gallery-prev {
+  left: 0.75rem;
 }
 
-.wish-image-gallery .swiper-button-prev:hover,
-.wish-image-gallery .swiper-button-next:hover {
+.wish-gallery-next {
+  right: 0.75rem;
+}
+
+.wish-gallery-control:hover {
   background: rgb(15 23 42 / 0.65);
   transform: scale(1.06);
 }
 
-.wish-image-gallery .swiper-button-prev::after,
-.wish-image-gallery .swiper-button-next::after {
-  font-size: 0.7rem;
-  font-weight: 800;
+.wish-image-gallery .swiper-pagination {
+  bottom: 0.75rem;
+  left: 50%;
+  width: auto;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 9999px;
+  background: rgb(15 23 42 / 0.45);
+  backdrop-filter: blur(8px);
+  transform: translateX(-50%);
 }
 
-@media (hover: none) {
-  .wish-image-gallery .swiper-button-prev,
-  .wish-image-gallery .swiper-button-next {
-    display: none;
-  }
+.wish-image-gallery .swiper-pagination-bullet {
+  width: 0.35rem;
+  height: 0.35rem;
+  margin: 0 0.18rem !important;
+  background: rgb(255 255 255 / 0.7);
+  opacity: 1;
+}
+
+.wish-image-gallery .swiper-pagination-bullet-active {
+  width: 0.9rem;
+  border-radius: 9999px;
+  background: white;
 }
 
 html,
