@@ -4,7 +4,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { Check, Luggage, Plane, Ticket } from "lucide-react";
 import { Chip, Tabs } from "@heroui/react";
-import { FLIGHT_PASSENGERS, FLIGHT_SEGMENTS, KOREAN_AIR_LOGO_URL, type FlightSegment } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
 import { TextEffect } from "@/components/core/text-effect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -61,8 +61,11 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
 
 export const FlightActivity: React.FC = () => {
   const screenRef = React.useRef<HTMLDivElement>(null);
-  const [selectedFlight, setSelectedFlight] = React.useState(FLIGHT_SEGMENTS[0].id);
-  const flight = FLIGHT_SEGMENTS.find((item) => item.id === selectedFlight) ?? FLIGHT_SEGMENTS[0];
+  const [selectedPassenger, setSelectedPassenger] = React.useState<FlightPassengerId>("gahyun");
+  const tickets = FLIGHT_TICKETS[selectedPassenger];
+  const [selectedFlight, setSelectedFlight] = React.useState(tickets[0].id);
+  const flight = tickets.find((item) => item.id === selectedFlight) ?? tickets[0];
+  const passenger = FLIGHT_PASSENGERS.find((item) => item.id === selectedPassenger) ?? FLIGHT_PASSENGERS[0];
 
   useGSAP(() => {
     const media = gsap.matchMedia();
@@ -87,7 +90,7 @@ export const FlightActivity: React.FC = () => {
             <div>
               <p className="text-[10px] font-bold tracking-[0.2em] text-[#acd6f6]">KOREAN AIR · BANGKOK 2026</p>
               <TextEffect as="h1" per="word" preset="fade-in-blur" speedReveal={1.8} className="mt-2 text-2xl font-black tracking-[-0.055em]" segmentTransition={{ duration: 0.28 }}>
-                가현짱과 미누쿤의 티켓
+                {`${passenger.name}의 티켓`}
               </TextEffect>
             </div>
             <span className="rounded-lg bg-white px-2.5 py-2 shadow-sm">
@@ -95,27 +98,49 @@ export const FlightActivity: React.FC = () => {
               <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
             </span>
           </div>
-          <p className="mt-4 text-sm font-semibold text-white/80">같은 항공편으로 떠나는 두 장의 탑승권</p>
+          <p className="mt-4 text-sm font-semibold text-white/80">개별 구간과 터미널 정보를 확인하세요.</p>
         </section>
 
         <section data-flight-tabs className="mt-5">
-          <Tabs selectedKey={selectedFlight} onSelectionChange={(key) => setSelectedFlight(String(key) as typeof selectedFlight)}>
+          <Tabs selectedKey={selectedPassenger} onSelectionChange={(key) => {
+            const nextPassenger = String(key) as FlightPassengerId;
+            setSelectedPassenger(nextPassenger);
+            setSelectedFlight(FLIGHT_TICKETS[nextPassenger][0].id);
+          }}>
             <Tabs.ListContainer>
-              <Tabs.List aria-label="항공편 구간" className="grid h-13 w-full grid-cols-2 rounded-2xl bg-[#e9f1f9] p-1.5 *:h-10 *:w-full">
-                {FLIGHT_SEGMENTS.map((item) => (
-                  <Tabs.Tab key={item.id} id={item.id} className="relative z-0 rounded-xl text-sm font-extrabold text-slate-500 data-[selected=true]:text-[#0a3479]">
-                    {item.label} · {item.departure.code} → {item.arrival.code}
+              <Tabs.List aria-label="탑승객" className="grid h-13 w-full grid-cols-2 rounded-2xl bg-[#e9f1f9] p-1.5 *:h-10 *:w-full">
+                {FLIGHT_PASSENGERS.map((item) => (
+                  <Tabs.Tab key={item.id} id={item.id} className="relative z-0 flex gap-2 rounded-xl text-sm font-extrabold text-slate-500 data-[selected=true]:text-[#0a3479]">
+                    <Avatar className="size-6"><AvatarImage src={item.image} alt="" /><AvatarFallback>{item.initials}</AvatarFallback></Avatar>
+                    {item.name}
                     <Tabs.Indicator className="-z-10 rounded-xl bg-white shadow-[0_4px_12px_-7px_rgba(6,48,107,0.65)]" />
                   </Tabs.Tab>
                 ))}
               </Tabs.List>
             </Tabs.ListContainer>
           </Tabs>
-          <div className="mt-4 flex items-center gap-2 px-1 text-xs font-semibold text-[#4772a1]"><Check className="size-4" aria-hidden="true" />{flight.duration} · {flight.flightNumber} · 두 사람 동일 여정</div>
+          <Tabs className="mt-3" selectedKey={selectedFlight} onSelectionChange={(key) => setSelectedFlight(String(key) as typeof selectedFlight)}>
+            <Tabs.ListContainer>
+              <Tabs.List aria-label={`${passenger.name}의 구간`} className="grid h-11 w-full grid-cols-2 rounded-xl bg-white p-1 ring-1 ring-[#dce8f3] *:h-9 *:w-full">
+                {tickets.map((item) => (
+                  <Tabs.Tab key={item.id} id={item.id} className="relative z-0 rounded-lg text-xs font-extrabold text-slate-500 data-[selected=true]:text-[#0a3479]">
+                    {item.label} · {item.departure.code} → {item.arrival.code}
+                    <Tabs.Indicator className="-z-10 rounded-lg bg-[#eaf4fc]" />
+                  </Tabs.Tab>
+                ))}
+              </Tabs.List>
+            </Tabs.ListContainer>
+          </Tabs>
+          <div className="mt-4 flex items-center gap-2 px-1 text-xs font-semibold text-[#4772a1]"><Check className="size-4" aria-hidden="true" />{flight.duration} · {flight.flightNumber} · {flight.departure.terminal ?? "출발 터미널 확인"}</div>
         </section>
 
         <section className="mt-4 space-y-4" aria-label={`${flight.label} 탑승객 티켓`}>
-          {FLIGHT_PASSENGERS.map((passenger) => <PassengerTicket key={`${flight.id}-${passenger.id}`} passenger={passenger} flight={flight} />)}
+          <PassengerTicket key={`${flight.id}-${passenger.id}`} passenger={passenger} flight={flight} />
+          <div className="flex items-center gap-2 rounded-2xl border border-[#dce9f5] bg-white px-4 py-3 text-xs font-semibold text-slate-500">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={KOREAN_AIR_MARK_URL} alt="" className="size-4" />
+            탑승객별 항공편과 터미널 정보는 각각 독립적으로 관리됩니다.
+          </div>
         </section>
       </main>
     </AppScreen>

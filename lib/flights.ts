@@ -23,10 +23,12 @@ export type FlightSegment = {
   };
 };
 
+export type FlightPassengerId = "gahyun" | "minu";
+
 export const FLIGHT_PASSENGERS = [
-  { id: "gahyun", name: "가현짱", initials: "G", image: "/avatars/gahyun.webp" },
-  { id: "minu", name: "미누쿤", initials: "M", image: "/avatars/minu.webp" },
-] as const;
+  { id: "gahyun" as const, name: "가현짱", initials: "G", image: "/avatars/gahyun.webp" },
+  { id: "minu" as const, name: "미누쿤", initials: "M", image: "/avatars/minu.webp" },
+] as const satisfies readonly { id: FlightPassengerId; name: string; initials: string; image: string }[];
 
 export const FLIGHT_SEGMENTS: readonly FlightSegment[] = [
   {
@@ -60,3 +62,10 @@ export const FLIGHT_SEGMENTS: readonly FlightSegment[] = [
 export const FLIGHT_ROUTE_LABEL = "ICN → BKK · BKK → ICN";
 
 export const KOREAN_AIR_LOGO_URL = "https://www.koreanair.com/header/header/images/logo/logo__koreanair.svg";
+export const KOREAN_AIR_MARK_URL = "https://www.koreanair.com/assets/images/common/codeshare-ke.svg";
+
+// 탑승객별로 분리해 두어 이후 편명·시간·터미널이 달라도 독립적으로 수정할 수 있습니다.
+export const FLIGHT_TICKETS: Record<FlightPassengerId, readonly FlightSegment[]> = {
+  gahyun: FLIGHT_SEGMENTS,
+  minu: FLIGHT_SEGMENTS,
+};
