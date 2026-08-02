@@ -3,48 +3,41 @@
 import React from "react";
 import { Button, Card, Tabs } from "@heroui/react";
 import { ArrowUpRight, Plane } from "lucide-react";
-import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId } from "@/lib/flights";
-import { TextEffect } from "@/components/core/text-effect";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
+import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+gsap.registerPlugin(useGSAP);
 
 interface FlightWidgetProps {
   onOpen: (passengerId: FlightPassengerId) => void;
 }
 
 export function FlightWidget({ onOpen }: FlightWidgetProps) {
+  const widgetRef = React.useRef<HTMLDivElement>(null);
   const [selectedPassenger, setSelectedPassenger] = React.useState<FlightPassengerId>("gahyun");
   const tickets = FLIGHT_TICKETS[selectedPassenger];
   const [selectedFlight, setSelectedFlight] = React.useState(tickets[0].id);
   const flight = tickets.find((item) => item.id === selectedFlight) ?? tickets[0];
   const passenger = FLIGHT_PASSENGERS.find((item) => item.id === selectedPassenger) ?? FLIGHT_PASSENGERS[0];
 
-  return (
-    <Card className="overflow-hidden rounded-[28px] border border-[#d5e1ef] bg-white p-0 shadow-[0_20px_42px_-34px_rgba(3,41,91,0.72)]">
-      <Card.Content className="p-0">
-        <div className="relative overflow-hidden bg-[#071c4a] px-5 pb-5 pt-4 text-white">
-          <div className="pointer-events-none absolute -right-12 -top-16 size-48 rounded-full border border-white/10" />
-          <div className="pointer-events-none absolute -right-4 -top-7 size-28 rounded-full border border-white/10" />
-          <div className="relative flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <span className="flex size-9 items-center justify-center rounded-xl bg-white shadow-inner shadow-white/15">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={KOREAN_AIR_MARK_URL} alt="" className="size-5" />
-              </span>
-              <div>
-                <p className="text-[10px] font-bold tracking-[0.22em] text-[#9bc5eb]">KOREAN AIR</p>
-                <p className="mt-0.5 text-sm font-semibold text-white/90">우리의 방콕 항공권</p>
-              </div>
-            </div>
-            <span className="rounded-lg bg-white px-2.5 py-1.5 shadow-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-4 w-auto" />
-            </span>
-          </div>
-          <TextEffect as="p" per="word" preset="fade" speedReveal={1.8} className="relative mt-5 text-xl font-black tracking-[-0.05em]" segmentTransition={{ duration: 0.25 }}>
-            {`${passenger.name}의 항공권`}
-          </TextEffect>
-        </div>
+  useGSAP(() => {
+    const media = gsap.matchMedia();
+    media.add("(prefers-reduced-motion: no-preference)", () => {
+      const timeline = gsap.timeline({ defaults: { ease: "power3.out", overwrite: "auto" } });
+      timeline
+        .from("[data-ticket-content]", { y: 12, autoAlpha: 0, duration: 0.38 })
+        .from("[data-ticket-time]", { y: 8, autoAlpha: 0, duration: 0.3, stagger: 0.07 }, "-=0.2")
+        .from("[data-ticket-footer]", { y: 8, autoAlpha: 0, duration: 0.28 }, "-=0.16");
+      return () => timeline.kill();
+    });
+    return () => media.revert();
+  }, { scope: widgetRef, dependencies: [selectedPassenger, selectedFlight], revertOnUpdate: true });
 
+  return (
+    <Card ref={widgetRef} className="overflow-hidden rounded-[28px] border border-[#d5e1ef] bg-white p-0 shadow-[0_20px_42px_-34px_rgba(3,41,91,0.72)]">
+      <Card.Content className="p-0">
         <div className="px-5 pb-5 pt-4">
           <Tabs variant="secondary" selectedKey={selectedPassenger} onSelectionChange={(key) => {
             const nextPassenger = String(key) as FlightPassengerId;
@@ -74,9 +67,9 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
                     ))}
                   </Tabs.List>
                 </Tabs.ListContainer>
-                <Tabs.Panel id={selectedFlight} className="pt-4">
+                <Tabs.Panel id={selectedFlight} className="pt-4" data-ticket-content>
                   <div className="grid grid-cols-[minmax(0,1fr)_42px_minmax(0,1fr)] items-center gap-1">
-                    <div>
+                    <div data-ticket-time>
                       <p className="text-[11px] font-bold text-[#5b83ab]">{flight.date.slice(5)} ({flight.day})</p>
                       <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums">{flight.departure.time}</p>
                       <p className="mt-1 text-sm font-black text-[#0b3478]">{flight.departure.code}</p>
@@ -85,14 +78,14 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
                     <div className="flex flex-col items-center gap-1.5 text-[#4e93ca]" aria-label={`${flight.duration} 비행`}>
                       <span className="h-px w-full bg-[#b9d5ed]" /><Plane className="size-4 -rotate-45" aria-hidden="true" /><span className="h-px w-full bg-[#b9d5ed]" />
                     </div>
-                    <div className="text-right">
+                    <div data-ticket-time className="text-right">
                       <p className="text-[11px] font-bold text-[#5b83ab]">{flight.arrival.nextDay ? "+1일 도착" : flight.duration}</p>
                       <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums">{flight.arrival.time}</p>
                       <p className="mt-1 text-sm font-black text-[#0b3478]">{flight.arrival.code}</p>
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
                     </div>
                   </div>
-                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-4">
+                  <div data-ticket-footer className="mt-4 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-4">
                     <div className="flex items-center gap-2" aria-label={`탑승객 ${passenger.name}`}><Avatar className="size-8 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar><span className="text-xs font-semibold text-slate-500">{passenger.name} 티켓</span></div>
                     <Button variant="ghost" size="sm" className="shrink-0 px-0 font-bold text-[#135ba9]" onPress={() => onOpen(selectedPassenger)}>티켓 보기 <ArrowUpRight className="size-4" aria-hidden="true" /></Button>
                   </div>
