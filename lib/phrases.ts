@@ -371,6 +371,30 @@ export const THAI_PHRASES: PhraseItem[] = [
     th: "ร้อน",
     pron: "론",
   },
+  {
+    id: 45,
+    category: "쇼핑",
+    importance: "높음",
+    ko: "돈 없어요.",
+    th: "ไม่มีเงิน",
+    pron: "마이 미 응언",
+  },
+  {
+    id: 46,
+    category: "쇼핑",
+    importance: "높음",
+    ko: "돈이 부족해요.",
+    th: "เงินไม่พอ",
+    pron: "응언 마이 포",
+  },
+  {
+    id: 47,
+    category: "쇼핑",
+    importance: "높음",
+    ko: "가격 깍아주세요.",
+    th: "ลดราคาให้หน่อยได้ไหม",
+    pron: "롯 라카 하이 너이 다이 마이 크럽/카?",
+  },
 ];
 
 /**

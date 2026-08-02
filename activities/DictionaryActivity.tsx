@@ -34,6 +34,7 @@ import {
   TrendingUp,
   Utensils,
   Volume2,
+  Wallet,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -156,6 +157,9 @@ const PHRASE_THUMBNAILS: Record<number, { icon: LucideIcon; background: string; 
   28: { icon: CircleHelp, background: "#e9edff", foreground: "#526cbe" },
   29: { icon: Camera, background: "#e9edff", foreground: "#526cbe" },
   30: { icon: Sparkles, background: "#fff4d8", foreground: "#dd9508" },
+  45: { icon: Wallet, background: "#f0edf3", foreground: "#73677c" },
+  46: { icon: TrendingUp, background: "#fff0df", foreground: "#df7420" },
+  47: { icon: BadgePercent, background: "#ffe8ef", foreground: "#d85a81" },
 };
 
 function PhraseThumbnail({ id }: { id: number }) {
