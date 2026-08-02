@@ -58,7 +58,28 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-[minmax(0,1fr)_minmax(82px,0.72fr)_minmax(0,1fr)] items-center gap-2">
+      <div className="mt-5 space-y-4 md:hidden">
+        <div className="grid grid-cols-[1fr_auto] items-start gap-4">
+          <div>
+            <p className="text-3xl font-black text-[#0b3478]"><FlightTime value={flight.departure.time} /></p>
+            <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">{flight.departure.airport}{flight.departure.terminal ? ` · ${flight.departure.terminal}` : ""}</p>
+          </div>
+          <p className="pt-1 text-xl font-black text-[#0b3478]">{flight.departure.code}</p>
+        </div>
+        <div className="ml-2 flex items-center gap-3 border-l-2 border-dashed border-[#91b7da] py-1 pl-4 text-[#4e93ca]" aria-label={`${flight.duration} 비행`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img data-flight-plane src="/korean-air/flight-to.svg" alt="" className="size-5 shrink-0 rotate-90" />
+          <span className="text-[11px] font-bold text-[#4772a1]">{flight.duration}</span>
+        </div>
+        <div className="grid grid-cols-[1fr_auto] items-start gap-4">
+          <div>
+            <p className="text-3xl font-black text-[#0b3478]"><FlightTime value={flight.arrival.time} /></p>
+            <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">{flight.arrival.nextDay ? "+1일 · " : ""}{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
+          </div>
+          <div className="text-right"><p className="h-[1.35em] text-[11px] font-bold text-[#5d82a9]">{flight.arrival.nextDay ? "+1일 도착" : null}</p><p className="mt-1 text-xl font-black text-[#0b3478]">{flight.arrival.code}</p></div>
+        </div>
+      </div>
+      <div className="mt-5 hidden grid-cols-[minmax(0,1fr)_minmax(82px,0.72fr)_minmax(0,1fr)] items-center gap-2 md:grid">
         <div>
           <p className="text-3xl font-black text-[#0b3478]"><FlightTime value={flight.departure.time} /></p>
           <p className="mt-1 text-xl font-black text-[#0b3478]">{flight.departure.code}</p>
