@@ -17,6 +17,22 @@ function getDurationParts(duration: string) {
   return { hours: Number(match?.[1] ?? 0), minutes: Number(match?.[2] ?? 0) };
 }
 
+function FlightTime({ value, align = "left" }: { value: string; align?: "left" | "right" }) {
+  const [hours = 0, minutes = 0] = value.split(":").map(Number);
+
+  return (
+    <span
+      className={`inline-flex w-full items-center ${align === "right" ? "justify-end" : "justify-start"} leading-none`}
+      style={{ fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums slashed-zero" }}
+      aria-label={value}
+    >
+      <SlidingNumber value={hours} padStart aria-hidden="true" />
+      <span className="px-px text-[#31558d]" aria-hidden="true">:</span>
+      <SlidingNumber value={minutes} padStart aria-hidden="true" />
+    </span>
+  );
+}
+
 export function FlightWidget({ onOpen }: FlightWidgetProps) {
   const [selectedPassenger, setSelectedPassenger] = React.useState<FlightPassengerId>("gahyun");
   const tickets = FLIGHT_TICKETS[selectedPassenger];
@@ -80,7 +96,7 @@ const duration = getDurationParts(flight.duration);
                   <div className="grid grid-cols-[minmax(0,1fr)_minmax(76px,0.72fr)_minmax(0,1fr)] items-center gap-2">
                     <div>
                       <p className="text-[11px] font-bold text-[#5b83ab]"><StateTextRoll value={`${flight.date.slice(0, 4)}년 ${flight.date.slice(5)} (${flight.day})`} previousValue={`${previousFlight.date.slice(0, 4)}년 ${previousFlight.date.slice(5)} (${previousFlight.day})`} transitionKey={transitionKey} className="min-w-[10.5em]" /></p>
-                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><StateTextRoll value={flight.departure.time} previousValue={previousFlight.departure.time} transitionKey={transitionKey} className="min-w-[2.85em]" /></p>
+                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><FlightTime value={flight.departure.time} /></p>
                       <p className="mt-1 text-sm font-black text-[#0b3478]"><StateTextRoll value={flight.departure.code} previousValue={previousFlight.departure.code} transitionKey={transitionKey} className="min-w-[2.5em]" /></p>
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.departure.airport}{flight.departure.terminal ? ` · ${flight.departure.terminal}` : ""}</p>
                     </div>
@@ -104,7 +120,7 @@ const duration = getDurationParts(flight.duration);
                     </div>
                     <div className="text-right">
                       <p className="h-[1.35em] text-[11px] font-bold text-[#5b83ab]">{flight.arrival.nextDay ? <StateTextRoll value="+1일 도착" previousValue={previousFlight.arrival.nextDay ? "+1일 도착" : ""} transitionKey={transitionKey} className="min-w-[5.7em] text-right" /> : null}</p>
-                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><StateTextRoll value={flight.arrival.time} previousValue={previousFlight.arrival.time} transitionKey={transitionKey} className="w-full min-w-[3.15em] text-right" /></p>
+                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><FlightTime value={flight.arrival.time} align="right" /></p>
                       <p className="mt-1 text-sm font-black text-[#0b3478]"><StateTextRoll value={flight.arrival.code} previousValue={previousFlight.arrival.code} transitionKey={transitionKey} className="w-full min-w-[2.7em] text-right" /></p>
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
                     </div>
