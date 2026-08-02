@@ -136,8 +136,7 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
     media.add("(prefers-reduced-motion: no-preference)", () => {
       const timeline = gsap.timeline({ defaults: { ease: "power3.out", overwrite: "auto" } });
       timeline
-        .from("[data-flight-header]", { y: 18, autoAlpha: 0, duration: 0.5 })
-        .from("[data-flight-tabs]", { y: 12, autoAlpha: 0, duration: 0.36 }, "-=0.18")
+        .from("[data-flight-tabs]", { y: 12, autoAlpha: 0, duration: 0.36 })
         .from("[data-passenger-ticket]", { y: 26, autoAlpha: 0, duration: 0.54, stagger: 0.12 }, "-=0.06");
       gsap.from("[data-flight-line]", { scaleX: 0, transformOrigin: "left", duration: 0.5, stagger: 0.08, ease: "power2.inOut", delay: 0.36 });
       gsap.from("[data-flight-plane]", { y: -14, rotation: -18, autoAlpha: 0, duration: 0.42, stagger: 0.12, ease: "back.out(1.6)", delay: 0.52 });
@@ -149,21 +148,7 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
   return (
     <AppScreen appBar={{ title: "항공권" }}>
       <main ref={screenRef} className="min-h-full w-full bg-[#f5f9fd] px-4 pb-10 pt-5 [font-family:var(--font-korean-air)]">
-        <section data-flight-header className="rounded-[28px] bg-[linear-gradient(135deg,#071c4a_0%,#0c3f85_62%,#2789c9_100%)] px-5 py-5 text-white shadow-[0_20px_44px_-30px_rgba(4,44,103,0.9)]">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[10px] font-bold tracking-[0.2em] text-[#acd6f6]">KOREAN AIR · BANGKOK 2026</p>
-              <h1 className="mt-2 text-2xl font-black tracking-[-0.055em]">{`${passenger.name}의 티켓`}</h1>
-            </div>
-            <span className="rounded-lg bg-white px-2.5 py-2 shadow-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
-            </span>
-          </div>
-          <p className="mt-4 text-sm font-semibold text-white/80">개별 구간과 터미널 정보를 확인하세요.</p>
-        </section>
-
-        <section data-flight-tabs className="mt-5">
+        <section data-flight-tabs>
           <Tabs variant="secondary" selectedKey={selectedPassenger} onSelectionChange={(key) => {
             const nextPassenger = String(key) as FlightPassengerId;
             setSelectedPassenger(nextPassenger);
