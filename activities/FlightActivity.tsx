@@ -4,7 +4,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { MonitorPlay, Plug, Plus, Sparkles, Ticket } from "lucide-react";
 import { Tabs } from "@heroui/react";
-import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBER, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 gsap.registerPlugin(useGSAP);
@@ -30,6 +30,7 @@ const FlightTime: React.FC<{ value: string; align?: "left" | "right" }> = ({ val
 
 const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number]; flight: FlightSegment }> = ({ passenger, flight }) => {
   const detail = FLIGHT_PASSENGER_DETAILS[passenger.id];
+  const ticketNumber = FLIGHT_TICKET_NUMBERS[passenger.id];
 
   return <article data-passenger-ticket className="relative overflow-hidden rounded-[26px] border border-[#d7e5f2] bg-white shadow-[0_18px_38px_-30px_rgba(7,47,100,0.66)]">
     <div className="absolute -right-5 top-14 size-10 rounded-full bg-[#f5f9fd]" aria-hidden="true" />
@@ -52,7 +53,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
           <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
           <div className="text-right leading-none">
             <p className="text-[9px] font-bold tracking-[0.12em] text-[#7995b4]">항공권 번호</p>
-            <p className="mt-1 font-mono text-[11px] font-bold text-[#0b3478]" aria-label={`항공권 번호 ${FLIGHT_TICKET_NUMBER}`}>{FLIGHT_TICKET_NUMBER}</p>
+            <p className="mt-1 font-mono text-[11px] font-bold text-[#0b3478]" aria-label={`항공권 번호 ${ticketNumber}`}>{ticketNumber}</p>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@
 import React from "react";
 import { Button, Card, Tabs } from "@heroui/react";
 import { ArrowUpRight, MonitorPlay, Plug } from "lucide-react";
-import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBER, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StateTextRoll } from "@/components/core/state-text-roll";
 import { SlidingNumber } from "@/components/core/sliding-number";
@@ -42,6 +42,7 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
   const [transitionKey, setTransitionKey] = React.useState(0);
   const flight = tickets.find((item) => item.id === selectedFlight) ?? tickets[0];
   const passenger = FLIGHT_PASSENGERS.find((item) => item.id === selectedPassenger) ?? FLIGHT_PASSENGERS[0];
+  const ticketNumber = FLIGHT_TICKET_NUMBERS[selectedPassenger];
 const duration = getDurationParts(flight.duration);
   const [previousFlight, setPreviousFlight] = React.useState(flight);
   const [previousPassenger, setPreviousPassenger] = React.useState(passenger);
@@ -70,8 +71,8 @@ const duration = getDurationParts(flight.duration);
             <div className="flex flex-col items-end gap-1">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-4 w-auto" />
-              <p className="font-mono text-[8px] font-bold text-[#7995b4]" aria-label={`항공권 번호 ${FLIGHT_TICKET_NUMBER}`}>
-                {FLIGHT_TICKET_NUMBER}
+              <p className="font-mono text-[8px] font-bold text-[#7995b4]" aria-label={`항공권 번호 ${ticketNumber}`}>
+                {ticketNumber}
               </p>
             </div>
           </div>

@@ -81,7 +81,10 @@ export const FLIGHT_SEGMENTS: readonly FlightSegment[] = [
 ] as const;
 
 export const FLIGHT_ROUTE_LABEL = "ICN → BKK · BKK → ICN";
-export const FLIGHT_TICKET_NUMBER = "1805460443724";
+export const FLIGHT_TICKET_NUMBERS: Record<FlightPassengerId, string> = {
+  gahyun: "1805460443724",
+  minu: "1805460443724",
+};
 
 export const KOREAN_AIR_LOGO_URL = "https://www.koreanair.com/header/header/images/logo/logo__koreanair.svg";
 export const KOREAN_AIR_MARK_URL = "https://www.koreanair.com/assets/images/common/codeshare-ke.svg";
