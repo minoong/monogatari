@@ -28,6 +28,7 @@ export const ExchangeActivity: React.FC = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [rates, setRates] = useState<{ THB: number; USD: number }>({ THB: 38.5, USD: 1380 });
   const [thb, setThb] = useState<number | undefined>(0);
+  const [inputCurrency, setInputCurrency] = useState<"THB" | "KRW">("THB");
   const isClearing = useRef(false);
   const [loading, setLoading] = useState(true);
   const [inputKey, setInputKey] = useState(0);
@@ -100,8 +101,18 @@ export const ExchangeActivity: React.FC = () => {
     }
   };
 
-  const krwValue = thb ? thb * rates.THB : 0;
-  const usdValue = thb ? (thb * rates.THB) / rates.USD : 0;
+  const isKrwInput = inputCurrency === "KRW";
+  const krwValue = isKrwInput ? (thb ?? 0) : (thb ? thb * rates.THB : 0);
+  const usdValue = krwValue ? krwValue / rates.USD : 0;
+
+  const toggleInputCurrency = () => {
+    const currentKrw = isKrwInput ? (thb ?? 0) : (thb ?? 0) * rates.THB;
+    const nextCurrency = isKrwInput ? "THB" : "KRW";
+
+    setThb(nextCurrency === "KRW" ? Math.round(currentKrw) : Number((currentKrw / rates.THB).toFixed(2)));
+    setInputCurrency(nextCurrency);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
 
   // 가변 사이즈 로직: 모바일 환경에 맞춰 극단적으로 줄이도록 조정
   const getFontSize = (val: number | undefined) => {
@@ -146,19 +157,19 @@ export const ExchangeActivity: React.FC = () => {
                   >
                     {/* The Flag */}
                     <div className={`thb-flip-target relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 ${isFocused ? 'size-6 ring-2' : 'size-14 ring-4 mb-3'}`}>
-                      <img src="https://flagcdn.com/w80/th.png" alt="Thailand Flag" className="w-full h-full object-cover" />
+                      <img src={isKrwInput ? "https://flagcdn.com/w80/kr.png" : "https://flagcdn.com/w80/th.png"} alt={isKrwInput ? "South Korea Flag" : "Thailand Flag"} className="w-full h-full object-cover" />
                     </div>
 
                     {/* The disappearing text */}
                     <div className={`thb-flip-text flex justify-center w-full shrink-0 overflow-hidden ${isFocused ? 'absolute opacity-0 h-0 mb-0 pointer-events-none' : 'relative opacity-100 h-[20px] mb-8'}`}>
                       <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                        태국 바트 (THB)
+                        {isKrwInput ? "대한민국 원 (KRW)" : "태국 바트 (THB)"}
                       </p>
                     </div>
 
                     {/* The Input Row */}
                     <div className={`thb-flip-target flex items-center ${getFontSize(thb)}`}>
-                      <span className="font-bold text-slate-400 dark:text-slate-600 mr-2">฿</span>
+                      <span className="font-bold text-slate-400 dark:text-slate-600 mr-2">{isKrwInput ? "₩" : "฿"}</span>
                       <NumberFlowInput
                         key={`input-reset-${inputKey}`}
                         ref={inputRef}
@@ -234,7 +245,23 @@ export const ExchangeActivity: React.FC = () => {
             
             {/* KRW 카드 */}
             <motion.div layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
-              <Card className="border-white/60 dark:border-white/10 shadow-[0_4px_20px_rgb(0,0,0,0.04)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.15)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl transition-transform hover:scale-[1.01]">
+              <Card
+                role="button"
+                tabIndex={0}
+                aria-pressed={isKrwInput}
+                aria-label={isKrwInput ? "태국 바트 입력으로 전환" : "대한민국 원 입력으로 전환"}
+                onClick={(event) => {
+                  if ((event.target as HTMLElement).closest("input, button")) return;
+                  toggleInputCurrency();
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    toggleInputCurrency();
+                  }
+                }}
+                className={`cursor-pointer border-white/60 dark:border-white/10 shadow-[0_4px_20px_rgb(0,0,0,0.04)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.15)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl transition-transform hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${isKrwInput ? "ring-2 ring-indigo-400/70" : ""}`}
+              >
                 <CardContent className="px-4 py-2 flex flex-col gap-1.5">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2.5">
@@ -243,6 +270,7 @@ export const ExchangeActivity: React.FC = () => {
                         <AvatarFallback>KR</AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-bold text-slate-700 dark:text-slate-300">대한민국 원 (KRW)</span>
+                      {isKrwInput ? <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-600">입력 중</span> : null}
                     </div>
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
                       <span>1 THB =</span>
