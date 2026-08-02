@@ -70,7 +70,7 @@ const duration = getDurationParts(flight.duration);
             <div className="flex flex-col items-end gap-1">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-4 w-auto" />
-              <p className="font-mono text-[8px] font-bold tracking-[0.08em] text-[#7995b4]" aria-label={`항공권 번호 ${FLIGHT_TICKET_NUMBER}`}>
+              <p className="font-mono text-[8px] font-bold text-[#7995b4]" aria-label={`항공권 번호 ${FLIGHT_TICKET_NUMBER}`}>
                 {FLIGHT_TICKET_NUMBER}
               </p>
             </div>

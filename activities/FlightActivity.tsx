@@ -43,7 +43,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
     </div>
 
     <div className="px-5 pb-5 pt-4">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold text-[#5d82a9]">{flight.date} ({flight.day})</p>
         </div>
@@ -52,7 +52,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
           <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
           <div className="text-right leading-none">
             <p className="text-[9px] font-bold tracking-[0.12em] text-[#7995b4]">항공권 번호</p>
-            <p className="mt-1 font-mono text-[11px] font-bold tracking-[0.08em] text-[#0b3478]" aria-label={`항공권 번호 ${FLIGHT_TICKET_NUMBER}`}>{FLIGHT_TICKET_NUMBER}</p>
+            <p className="mt-1 font-mono text-[11px] font-bold text-[#0b3478]" aria-label={`항공권 번호 ${FLIGHT_TICKET_NUMBER}`}>{FLIGHT_TICKET_NUMBER}</p>
           </div>
         </div>
       </div>
