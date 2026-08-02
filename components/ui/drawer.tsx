@@ -8,7 +8,7 @@ import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
 import { useRender } from "@base-ui/react/use-render";
 import { ChevronRightIcon, XIcon } from "lucide-react";
 import type React from "react";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -40,14 +40,37 @@ export function Drawer({
 }: DrawerPrimitive.Root.Props & {
   position?: DrawerPosition;
 }): React.ReactElement {
+  const isOpen = props.open ?? props.defaultOpen ?? false;
+
   return (
     <DrawerContext.Provider value={{ position }}>
+      <DrawerThemeColor isOpen={isOpen} />
       <DrawerPrimitive.Root
         swipeDirection={swipeDirection ?? directionMap[position]}
         {...props}
       />
     </DrawerContext.Provider>
   );
+}
+
+function DrawerThemeColor({ isOpen }: { isOpen: boolean }): null {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const themeColor = document.querySelector<HTMLMetaElement>(
+      'meta[name="theme-color"]',
+    );
+    if (!themeColor) return;
+
+    const previousColor = themeColor.content;
+    themeColor.content = "#a3a3a3";
+
+    return () => {
+      themeColor.content = previousColor;
+    };
+  }, [isOpen]);
+
+  return null;
 }
 
 export const DrawerPortal: typeof DrawerPrimitive.Portal =

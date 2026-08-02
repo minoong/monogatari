@@ -47,6 +47,7 @@ export const viewport: Viewport = {
   userScalable: false,
   viewportFit: "cover",
   interactiveWidget: "overlays-content",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
