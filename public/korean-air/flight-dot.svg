@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="18px" viewBox="0 0 18 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>dot-line</title>
+    <g id="예약상세-개편-가이드" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="예약상세-PC-시안-B-1280" transform="translate(-791.000000, -428.000000)" fill="#FFFFFF" stroke="#051766">
+            <g id="trip-card_1-DLA-Copy" transform="translate(160.000000, 274.000000)">
+                <g id="출발지도착지" transform="translate(263.000000, 130.000000)">
+                    <g id="route-info" transform="translate(270.000000, 0.000000)">
+                        <g id="dot-line" transform="translate(98.000000, 24.000000)">
+                            <circle id="Oval-Copy-38" cx="9" cy="9" r="3.5"></circle>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

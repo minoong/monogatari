@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button, Card, Tabs } from "@heroui/react";
-import { ArrowUpRight, Plane } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StateTextRoll } from "@/components/core/state-text-roll";
@@ -24,7 +24,7 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
   const [transitionKey, setTransitionKey] = React.useState(0);
   const flight = tickets.find((item) => item.id === selectedFlight) ?? tickets[0];
   const passenger = FLIGHT_PASSENGERS.find((item) => item.id === selectedPassenger) ?? FLIGHT_PASSENGERS[0];
-  const duration = getDurationParts(flight.duration);
+const duration = getDurationParts(flight.duration);
   const [previousFlight, setPreviousFlight] = React.useState(flight);
   const [previousPassenger, setPreviousPassenger] = React.useState(passenger);
 
@@ -92,9 +92,14 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
                         <span>분</span>
                       </div>
                       <div className="flex w-full items-center gap-1.5" aria-hidden="true">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/korean-air/flight-to.svg" alt="" className="size-5 shrink-0" />
                         <span className="h-px min-w-0 flex-1 border-t border-dashed border-[#91b7da]" />
-                        <Plane className="size-4 shrink-0 -rotate-45" />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/korean-air/flight-dot.svg" alt="" className="size-3 shrink-0" />
                         <span className="h-px min-w-0 flex-1 border-t border-dashed border-[#91b7da]" />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/korean-air/flight-dot-from.svg" alt="" className="size-3 shrink-0" />
                       </div>
                     </div>
                     <div className="text-right">
