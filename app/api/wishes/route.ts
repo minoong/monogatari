@@ -62,6 +62,14 @@ const wishInputValue = (body: Record<string, unknown>) => {
 
 const selectWish = "*, wish_images(id, storage_path, sort_order)";
 const missingGalleryTable = (error: { message?: string } | null) => Boolean(error?.message?.includes("wish_images"));
+const galleryUnavailable = (error: { code?: string; message?: string } | null) =>
+  missingGalleryTable(error) || error?.code === "42P01" || /relation.*wish_images/i.test(error?.message ?? "");
+const legacyGalleryMessage = "여러 장의 사진을 저장하려면 위시 이미지 마이그레이션을 먼저 적용해 주세요.";
+
+const removeStoragePaths = async (paths: string[]) => {
+  if (paths.length) await supabase.storage.from("wish-images").remove(paths);
+};
+
 const saveImages = async (wishId: string, paths: string[], oldPaths: string[] = []) => {
   const stalePaths = oldPaths.filter((path) => !paths.includes(path));
   const { error: deleteError } = await supabase.from("wish_images").delete().eq("wish_id", wishId);
@@ -70,7 +78,7 @@ const saveImages = async (wishId: string, paths: string[], oldPaths: string[] = 
     const { error } = await supabase.from("wish_images").insert(paths.map((storage_path, sort_order) => ({ wish_id: wishId, storage_path, sort_order })));
     if (error) throw error;
   }
-  if (stalePaths.length) await supabase.storage.from("wish-images").remove(stalePaths);
+  await removeStoragePaths(stalePaths);
 };
 
 export async function GET(request: Request) {
@@ -95,7 +103,17 @@ export async function POST(request: Request) {
   try {
     const input = wishInputValue(await request.json()); if (!input.data) return NextResponse.json({ error: input.error }, { status: 400 });
     const { image_paths, ...wishData } = input.data;
-    const { data, error } = await supabase.from("wish_items").insert(wishData).select("id").single(); if (error) throw error;
+    const galleryProbe = await supabase.from("wish_images").select("id").limit(1);
+    if (galleryProbe.error && !galleryUnavailable(galleryProbe.error)) throw galleryProbe.error;
+    const isLegacyGallery = galleryUnavailable(galleryProbe.error);
+    if (isLegacyGallery && image_paths.length > 1) return NextResponse.json({ error: legacyGalleryMessage }, { status: 409 });
+
+    const legacyWishData = { ...wishData, image_path: image_paths[0] ?? null };
+    const { data, error } = await supabase.from("wish_items").insert(isLegacyGallery ? legacyWishData as never : wishData).select("id").single(); if (error) throw error;
+    if (isLegacyGallery) {
+      const { data: saved, error: readError } = await supabase.from("wish_items").select("*").eq("id", data.id).single(); if (readError) throw readError;
+      return NextResponse.json({ data: withImages(saved as WishRow) }, { status: 201 });
+    }
     await saveImages(data.id, image_paths);
     const { data: saved, error: readError } = await supabase.from("wish_items").select(selectWish).eq("id", data.id).single(); if (readError) throw readError;
     return NextResponse.json({ data: withImages(saved as WishRow) }, { status: 201 });
@@ -106,10 +124,25 @@ export async function PATCH(request: Request) {
   try {
     const id = wishIdValue(new URL(request.url).searchParams.get("id")); if (!id) return NextResponse.json({ error: "Invalid wish id" }, { status: 400 });
     const input = wishInputValue(await request.json()); if (!input.data) return NextResponse.json({ error: input.error }, { status: 400 });
-    const { data: current, error: currentError } = await supabase.from("wish_items").select(selectWish).eq("id", id).single();
+    let { data: current, error: currentError } = await supabase.from("wish_items").select(selectWish).eq("id", id).single();
+    const isLegacyGallery = galleryUnavailable(currentError);
+    if (isLegacyGallery) {
+      const legacy = await supabase.from("wish_items").select("*").eq("id", id).single();
+      current = legacy.data as typeof current;
+      currentError = legacy.error;
+    }
     if (currentError) return NextResponse.json({ error: currentError.code === "PGRST116" ? "Wish not found" : currentError.message }, { status: currentError.code === "PGRST116" ? 404 : 500 });
     const { image_paths, ...wishData } = input.data;
-    const { error } = await supabase.from("wish_items").update({ ...wishData, updated_at: new Date().toISOString() }).eq("id", id); if (error) throw error;
+    if (isLegacyGallery && image_paths.length > 1) return NextResponse.json({ error: legacyGalleryMessage }, { status: 409 });
+    const legacyImagePath = (current as WishRow).image_path;
+    const updateData = { ...wishData, updated_at: new Date().toISOString() };
+    const legacyUpdateData = { ...updateData, image_path: image_paths[0] ?? null };
+    const { error } = await supabase.from("wish_items").update(isLegacyGallery ? legacyUpdateData as never : updateData).eq("id", id); if (error) throw error;
+    if (isLegacyGallery) {
+      if (legacyImagePath && legacyImagePath !== image_paths[0]) await removeStoragePaths([legacyImagePath]);
+      const { data: saved, error: readError } = await supabase.from("wish_items").select("*").eq("id", id).single(); if (readError) throw readError;
+      return NextResponse.json({ data: withImages(saved as WishRow) });
+    }
     await saveImages(id, image_paths, (current.wish_images ?? []).map((image: { storage_path: string }) => image.storage_path));
     const { data: saved, error: readError } = await supabase.from("wish_items").select(selectWish).eq("id", id).single(); if (readError) throw readError;
     return NextResponse.json({ data: withImages(saved as WishRow) });
@@ -119,9 +152,16 @@ export async function PATCH(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const id = wishIdValue(new URL(request.url).searchParams.get("id")); if (!id) return NextResponse.json({ error: "Invalid wish id" }, { status: 400 });
-    const { data, error } = await supabase.from("wish_items").delete().eq("id", id).select(selectWish).single();
+    let { data, error } = await supabase.from("wish_items").delete().eq("id", id).select(selectWish).single();
+    const isLegacyGallery = galleryUnavailable(error);
+    if (isLegacyGallery) {
+      const legacy = await supabase.from("wish_items").delete().eq("id", id).select("*").single();
+      data = legacy.data as typeof data;
+      error = legacy.error;
+    }
     if (error) return NextResponse.json({ error: error.code === "PGRST116" ? "위시 삭제 권한이 설정되지 않았거나 항목이 없습니다." : error.message }, { status: error.code === "PGRST116" ? 403 : 500 });
-    const paths = (data.wish_images ?? []).map((image: { storage_path: string }) => image.storage_path); if (paths.length) await supabase.storage.from("wish-images").remove(paths);
+    const paths = isLegacyGallery ? [(data as WishRow).image_path].filter((path): path is string => Boolean(path)) : (data.wish_images ?? []).map((image: { storage_path: string }) => image.storage_path);
+    await removeStoragePaths(paths);
     return NextResponse.json({ data: { id: data.id } });
   } catch (error: unknown) { return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 }); }
 }
