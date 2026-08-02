@@ -178,7 +178,7 @@ const duration = getDurationParts(flight.duration);
                     <span className="rounded-full bg-[#e1f3fd] px-2 py-0.5 text-[10px] font-bold">{flight.fareFamily}</span>
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-3">
-                    <div className="flex items-center gap-2" aria-label={`탑승객 ${passenger.name}`}><Avatar className="size-8 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar><span className="text-xs font-semibold text-slate-500"><StateTextRoll value={`${passenger.name} 티켓`} previousValue={`${previousPassenger.name} 티켓`} transitionKey={transitionKey} className="min-w-[5.5em]" /></span></div>
+                    <div className="flex items-center gap-2" aria-label={`탑승객 ${passenger.name}`}><span key={selectedPassenger} className="motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-75 motion-safe:duration-200"><Avatar className="size-8 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar></span><span className="text-xs font-semibold text-slate-500"><StateTextRoll value={`${passenger.name} 티켓`} previousValue={`${previousPassenger.name} 티켓`} transitionKey={transitionKey} className="min-w-[5.5em]" /></span></div>
                     <Button
                       variant="ghost"
                       size="sm"
