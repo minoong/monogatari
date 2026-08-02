@@ -13,7 +13,7 @@ export function RollingText({ value, className }: RollingTextProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <span className={cn("relative inline-grid overflow-hidden align-baseline", className)} aria-live="polite">
+    <span className={cn("relative -my-[0.12em] inline-grid overflow-hidden py-[0.12em] align-baseline leading-[1.2]", className)} aria-live="polite">
       <span aria-hidden="true" className="invisible col-start-1 row-start-1">{value}</span>
       <span className="sr-only">{value}</span>
       <AnimatePresence initial={false} mode="popLayout">
