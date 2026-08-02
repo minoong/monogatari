@@ -45,7 +45,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold text-[#5d82a9]">{flight.date} ({flight.day})</p>
-          <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-[#eaf4fc] px-2.5 py-1 text-[11px] font-bold text-[#4772a1]">
+          <span className="mt-1 inline-flex items-center gap-1.5 text-sm font-extrabold text-[#0b3478]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={KOREAN_AIR_MARK_URL} alt="대한항공" className="size-3.5" />
             {flight.flightNumber}
