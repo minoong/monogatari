@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 import { Save, X } from "lucide-react";
 import NumberFlow from "@number-flow/react";
 import { NumberFlowInput } from "@daformat/react-number-flow-input";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Card, CardContent } from "../components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import NeumorphButton from "../components/ui/neumorph-button";
@@ -157,14 +157,34 @@ export const ExchangeActivity: React.FC = () => {
                   >
                     {/* The Flag */}
                     <div className={`thb-flip-target relative flex shrink-0 justify-center items-center rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ring-white/80 dark:ring-white/10 ${isFocused ? 'size-6 ring-2' : 'size-14 ring-4 mb-3'}`}>
-                      <img src={isKrwInput ? "https://flagcdn.com/w80/kr.png" : "https://flagcdn.com/w80/th.png"} alt={isKrwInput ? "South Korea Flag" : "Thailand Flag"} className="w-full h-full object-cover" />
+                      <AnimatePresence initial={false} mode="popLayout">
+                        <motion.img
+                          key={inputCurrency}
+                          src={isKrwInput ? "https://flagcdn.com/w80/kr.png" : "https://flagcdn.com/w80/th.png"}
+                          alt={isKrwInput ? "South Korea Flag" : "Thailand Flag"}
+                          initial={{ opacity: 0, y: 8, scale: 0.82, rotate: -8 }}
+                          animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
+                          exit={{ opacity: 0, y: -8, scale: 1.12, rotate: 8 }}
+                          transition={{ duration: 0.22, ease: "easeOut" }}
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      </AnimatePresence>
                     </div>
 
                     {/* The disappearing text */}
                     <div className={`thb-flip-text flex justify-center w-full shrink-0 overflow-hidden ${isFocused ? 'absolute opacity-0 h-0 mb-0 pointer-events-none' : 'relative opacity-100 h-[20px] mb-8'}`}>
-                      <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                        {isKrwInput ? "대한민국 원 (KRW)" : "태국 바트 (THB)"}
-                      </p>
+                      <AnimatePresence initial={false} mode="popLayout">
+                        <motion.p
+                          key={inputCurrency}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                          className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap"
+                        >
+                          {isKrwInput ? "대한민국 원 (KRW)" : "태국 바트 (THB)"}
+                        </motion.p>
+                      </AnimatePresence>
                     </div>
 
                     {/* The Input Row */}
@@ -270,7 +290,9 @@ export const ExchangeActivity: React.FC = () => {
                         <AvatarFallback>KR</AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-bold text-slate-700 dark:text-slate-300">대한민국 원 (KRW)</span>
-                      {isKrwInput ? <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-600">입력 중</span> : null}
+                      <AnimatePresence initial={false}>
+                        {isKrwInput ? <motion.span initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.16 }} className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-600">입력 중</motion.span> : null}
+                      </AnimatePresence>
                     </div>
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
                       <span>1 THB =</span>
