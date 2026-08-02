@@ -5,16 +5,37 @@ import { gsap } from "gsap";
 import { Button, Chip } from "@heroui/react";
 import {
   ArrowLeftRight,
+  BadgePercent,
+  BookOpen,
+  Camera,
+  Check,
   CircleHelp,
+  CircleStop,
   Clock,
+  Flame,
+  GlassWater,
+  Gauge,
+  Hand,
   HeartPulse,
+  Heart,
+  Languages,
+  Leaf,
+  LifeBuoy,
   MapPin,
+  MessageCircle,
+  Navigation,
+  Package,
+  Receipt,
   RotateCcw,
   ShoppingBag,
   Sparkles,
+  Star,
+  Tag,
+  TrendingUp,
   Utensils,
   Volume2,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
@@ -104,31 +125,52 @@ const getDynamicThaiFontSize = (text: string) => {
   return "text-3xl sm:text-4xl font-semibold";
 };
 
-function PhraseCategoryThumbnail({ category }: { category: PhraseItem["category"] }) {
-  const palette = {
-    기본: { background: "#fff7d6", primary: "#d08a00", secondary: "#ffe49a" },
-    이동: { background: "#dff8f4", primary: "#0f9a8a", secondary: "#a9e8df" },
-    식당: { background: "#fff0df", primary: "#e26c1d", secondary: "#ffd1aa" },
-    쇼핑: { background: "#ffe6ee", primary: "#dc527c", secondary: "#ffc2d3" },
-    마사지: { background: "#e1f8ed", primary: "#1e9b61", secondary: "#ade6c9" },
-    긴급: { background: "#ffe7e7", primary: "#d94c4c", secondary: "#ffbdbd" },
-  }[category];
+const PHRASE_THUMBNAILS: Record<number, { icon: LucideIcon; background: string; foreground: string }> = {
+  1: { icon: Hand, background: "#fff3d7", foreground: "#d78b08" },
+  2: { icon: Heart, background: "#ffe8e8", foreground: "#df5a62" },
+  3: { icon: MessageCircle, background: "#efe8ff", foreground: "#805ad5" },
+  4: { icon: Check, background: "#e1f8ec", foreground: "#25985e" },
+  5: { icon: Check, background: "#e4f3ff", foreground: "#2879c8" },
+  6: { icon: X, background: "#ffe8e8", foreground: "#d64c4c" },
+  7: { icon: CircleHelp, background: "#e3f5ff", foreground: "#2586be" },
+  8: { icon: MapPin, background: "#e1f8f3", foreground: "#169b89" },
+  9: { icon: Navigation, background: "#e1f8f3", foreground: "#169b89" },
+  10: { icon: CircleStop, background: "#fff1dd", foreground: "#df7920" },
+  11: { icon: Gauge, background: "#e8f1ff", foreground: "#3b72bd" },
+  12: { icon: Clock, background: "#e8f1ff", foreground: "#3b72bd" },
+  13: { icon: Leaf, background: "#e4f8e9", foreground: "#2c9b63" },
+  14: { icon: Leaf, background: "#fff0e1", foreground: "#df7420" },
+  15: { icon: Utensils, background: "#fff0df", foreground: "#e06d20" },
+  16: { icon: BookOpen, background: "#fff0df", foreground: "#e06d20" },
+  17: { icon: Receipt, background: "#fff0df", foreground: "#e06d20" },
+  18: { icon: Flame, background: "#ffe8e4", foreground: "#dd5735" },
+  19: { icon: GlassWater, background: "#e3f5ff", foreground: "#2384bf" },
+  20: { icon: Star, background: "#fff4d8", foreground: "#dd9508" },
+  21: { icon: Package, background: "#fff0df", foreground: "#e06d20" },
+  22: { icon: Tag, background: "#ffe8ef", foreground: "#d85a81" },
+  23: { icon: BadgePercent, background: "#ffe8ef", foreground: "#d85a81" },
+  24: { icon: TrendingUp, background: "#ffe8ef", foreground: "#d85a81" },
+  25: { icon: ShoppingBag, background: "#f0edf3", foreground: "#73677c" },
+  26: { icon: LifeBuoy, background: "#ffe7e7", foreground: "#d95151" },
+  27: { icon: Languages, background: "#e9edff", foreground: "#526cbe" },
+  28: { icon: CircleHelp, background: "#e9edff", foreground: "#526cbe" },
+  29: { icon: Camera, background: "#e9edff", foreground: "#526cbe" },
+  30: { icon: Sparkles, background: "#fff4d8", foreground: "#dd9508" },
+};
+
+function PhraseThumbnail({ id }: { id: number }) {
+  const thumbnail = PHRASE_THUMBNAILS[id] ?? PHRASE_THUMBNAILS[1];
+  const Icon = thumbnail.icon;
 
   return (
     <div
       aria-hidden="true"
-      className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl"
-      style={{ backgroundColor: palette.background }}
+      className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl"
+      style={{ backgroundColor: thumbnail.background }}
     >
-      <svg viewBox="0 0 64 64" className="size-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 52C17 43 24 48 31 41C38 34 45 39 56 28" stroke={palette.secondary} strokeWidth="3" strokeLinecap="round" strokeDasharray="2 5" />
-        {category === "기본" && <><path d="M18 20C18 15.582 21.582 12 26 12H39C43.418 12 47 15.582 47 20V31C47 35.418 43.418 39 39 39H31L24 46V39H26C21.582 39 18 35.418 18 31V20Z" fill={palette.primary} /><path d="M27 25H39M27 30H35" stroke="white" strokeWidth="2.6" strokeLinecap="round" /></>}
-        {category === "이동" && <><path d="M17 20H45L50 28V42H14V28L17 20Z" fill={palette.primary} /><path d="M19 27H44M22 42C22 45.314 19.314 48 16 48C12.686 48 10 45.314 10 42M54 42C54 45.314 51.314 48 48 48C44.686 48 42 45.314 42 42" stroke={palette.primary} strokeWidth="3" strokeLinecap="round" /><path d="M22 34H29M36 34H43" stroke="white" strokeWidth="3" strokeLinecap="round" /></>}
-        {category === "식당" && <><path d="M16 33C16 43 23 49 32 49C41 49 48 43 48 33H16Z" fill={palette.primary} /><path d="M13 31H51" stroke={palette.primary} strokeWidth="4" strokeLinecap="round" /><path d="M22 22C23 19 25 18 27 17M32 22C33 19 35 18 37 17M42 22C43 19 45 18 47 17" stroke={palette.primary} strokeWidth="3" strokeLinecap="round" /></>}
-        {category === "쇼핑" && <><path d="M18 23H46L43 48H21L18 23Z" fill={palette.primary} /><path d="M25 25V21C25 16.582 28.582 13 33 13C37.418 13 41 16.582 41 21V25" stroke={palette.primary} strokeWidth="3.5" strokeLinecap="round" /><path d="M25 32H39" stroke="white" strokeWidth="3" strokeLinecap="round" /></>}
-        {category === "마사지" && <><path d="M18 43C23 33 29 29 34 29C40 29 44 33 47 39C48 42 46 46 42 46H24C20 46 17 46 18 43Z" fill={palette.primary} /><path d="M23 25C23 20.582 26.582 17 31 17H33C37.418 17 41 20.582 41 25V28H23V25Z" fill={palette.primary} /><path d="M25 39C30 36 36 36 42 39" stroke="white" strokeWidth="2.5" strokeLinecap="round" /></>}
-        {category === "긴급" && <><circle cx="32" cy="32" r="19" fill={palette.primary} /><path d="M32 21V34M32 41V42" stroke="white" strokeWidth="4" strokeLinecap="round" /></>}
-      </svg>
+      <span className="absolute -right-3 -top-3 size-9 rounded-full bg-white/35" />
+      <span className="absolute -bottom-2 -left-2 size-6 rounded-full bg-white/25" />
+      <Icon className="relative size-7 stroke-[2.25]" style={{ color: thumbnail.foreground }} />
     </div>
   );
 }
@@ -160,7 +202,7 @@ function DictionaryPhraseDialog({
         className="group relative flex min-h-24 items-center gap-3 px-5 py-3 transition-colors hover:bg-slate-100/70 active:bg-slate-200/70 dark:hover:bg-white/5 dark:active:bg-white/10"
         role="listitem"
       >
-        <PhraseCategoryThumbnail category={item.category} />
+        <PhraseThumbnail id={item.id} />
         <div className="min-w-0 flex-1" onClickCapture={onOpen}>
           <MorphingDialogTrigger
             ariaLabel={`${item.ko} 현지인에게 크게 보여주기`}
