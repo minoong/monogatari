@@ -11,6 +11,22 @@ gsap.registerPlugin(useGSAP);
 
 const SERVICE_ICONS = [Sparkles, Plug, MonitorPlay, Plus] as const;
 
+const FlightTime: React.FC<{ value: string; align?: "left" | "right" }> = ({ value, align = "left" }) => {
+  const [hours = "00", minutes = "00"] = value.split(":");
+
+  return (
+    <span
+      className={`inline-flex w-full items-center gap-0.5 leading-none ${align === "right" ? "justify-end" : "justify-start"}`}
+      style={{ fontVariantNumeric: "tabular-nums" }}
+      aria-label={value}
+    >
+      <span className="inline-flex w-[1.44em] justify-center">{hours}</span>
+      <span className="px-px text-[#31558d]" aria-hidden="true">:</span>
+      <span className="inline-flex w-[1.44em] justify-center">{minutes}</span>
+    </span>
+  );
+};
+
 const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number]; flight: FlightSegment }> = ({ passenger, flight }) => {
   const detail = FLIGHT_PASSENGER_DETAILS[passenger.id];
 
@@ -37,7 +53,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
 
       <div className="mt-5 grid grid-cols-[minmax(0,1fr)_38px_minmax(0,1fr)] items-center gap-1">
         <div>
-          <p className="text-3xl font-black tracking-[-0.07em] text-[#092f70] tabular-nums">{flight.departure.time}</p>
+          <p className="text-3xl font-black text-[#092f70]"><FlightTime value={flight.departure.time} /></p>
           <p className="mt-1 text-xl font-black text-[#092f70]">{flight.departure.code}</p>
           <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">{flight.departure.airport}{flight.departure.terminal ? ` · ${flight.departure.terminal}` : ""}</p>
         </div>
@@ -47,7 +63,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
           <span className="relative size-3 rounded-full border-2 border-[#1470ba] bg-white" />
         </div>
         <div className="text-right">
-          <p className="text-3xl font-black tracking-[-0.07em] text-[#092f70] tabular-nums">{flight.arrival.time}</p>
+          <p className="text-3xl font-black text-[#092f70]"><FlightTime value={flight.arrival.time} align="right" /></p>
           <p className="mt-1 text-xl font-black text-[#092f70]">{flight.arrival.code}</p>
           <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">{flight.arrival.nextDay ? "+1일 · " : ""}{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
         </div>
