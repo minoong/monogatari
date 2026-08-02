@@ -103,6 +103,7 @@ export const ExchangeActivity: React.FC = () => {
 
   const isKrwInput = inputCurrency === "KRW";
   const krwValue = isKrwInput ? (thb ?? 0) : (thb ? thb * rates.THB : 0);
+  const thbValue = isKrwInput ? ((thb ?? 0) / rates.THB) : (thb ?? 0);
   const usdValue = krwValue ? krwValue / rates.USD : 0;
 
   const toggleInputCurrency = () => {
@@ -263,7 +264,7 @@ export const ExchangeActivity: React.FC = () => {
           {/* 환산 결과 (KRW, USD) */}
           <div className="grid grid-cols-1 gap-3 mt-2">
             
-            {/* KRW 카드 */}
+            {/* 입력 통화와 반대편 환산 카드 */}
             <motion.div layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
               <Card
                 role="button"
@@ -286,12 +287,31 @@ export const ExchangeActivity: React.FC = () => {
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2.5">
                       <Avatar className="size-7 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
-                        <AvatarImage src="https://flagcdn.com/w80/kr.png" alt="South Korea Flag" />
-                        <AvatarFallback>KR</AvatarFallback>
+                        <AnimatePresence initial={false} mode="popLayout">
+                          <motion.img
+                            key={`result-flag-${inputCurrency}`}
+                            src={isKrwInput ? "https://flagcdn.com/w80/th.png" : "https://flagcdn.com/w80/kr.png"}
+                            alt={isKrwInput ? "Thailand Flag" : "South Korea Flag"}
+                            initial={{ opacity: 0, y: 6, scale: 0.85 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -6, scale: 1.1 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="size-full object-cover"
+                          />
+                        </AnimatePresence>
+                        <AvatarFallback>{isKrwInput ? "TH" : "KR"}</AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-bold text-slate-700 dark:text-slate-300">대한민국 원 (KRW)</span>
-                      <AnimatePresence initial={false}>
-                        {isKrwInput ? <motion.span initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.16 }} className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-600">입력 중</motion.span> : null}
+                      <AnimatePresence initial={false} mode="popLayout">
+                        <motion.span
+                          key={`result-label-${inputCurrency}`}
+                          initial={{ opacity: 0, y: 7 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -7 }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                          className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                        >
+                          {isKrwInput ? "태국 바트 (THB)" : "대한민국 원 (KRW)"}
+                        </motion.span>
                       </AnimatePresence>
                     </div>
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
@@ -307,10 +327,10 @@ export const ExchangeActivity: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-3xl font-bold tracking-tight flex items-center justify-end gap-1.5 mt-0.5">
-                    <span className="text-slate-400 dark:text-slate-500 text-2xl font-semibold mt-0.5">₩</span>
+                    <span className="text-slate-400 dark:text-slate-500 text-2xl font-semibold mt-0.5">{isKrwInput ? "฿" : "₩"}</span>
                     <NumberFlow 
-                      value={krwValue} 
-                      format={{ notation: 'standard', maximumFractionDigits: 0 }} 
+                      value={isKrwInput ? thbValue : krwValue}
+                      format={{ notation: 'standard', maximumFractionDigits: isKrwInput ? 2 : 0 }}
                       className={`text-slate-800 dark:text-slate-100 ${loading ? "opacity-50" : ""}`}
                     />
                   </div>
