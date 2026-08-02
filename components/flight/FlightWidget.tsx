@@ -91,7 +91,7 @@ const duration = getDurationParts(flight.duration);
                 ))}
               </Tabs.List>
             </Tabs.ListContainer>
-            <Tabs.Panel id={selectedPassenger} className="pt-2">
+            <Tabs.Panel id={selectedPassenger} className="!px-0 !pb-0 !pt-2">
               <Tabs variant="secondary" selectedKey={selectedFlight} onSelectionChange={handleFlightSelection}>
                 <Tabs.ListContainer>
                   <Tabs.List aria-label={`${passenger.name}의 항공편 구간`} className="grid h-9 w-full grid-cols-2 border-b border-[#e1ebf4] bg-transparent p-0 *:h-9 *:w-full">
@@ -103,7 +103,7 @@ const duration = getDurationParts(flight.duration);
                     ))}
                   </Tabs.List>
                 </Tabs.ListContainer>
-                <Tabs.Panel id={selectedFlight} className="pt-3">
+                <Tabs.Panel id={selectedFlight} className="!px-0 !pb-0 !pt-3">
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-[11px] font-bold text-[#5b83ab]"><StateTextRoll value={`${flight.date.slice(0, 4)}년 ${flight.date.slice(5)} (${flight.day})`} previousValue={`${previousFlight.date.slice(0, 4)}년 ${previousFlight.date.slice(5)} (${previousFlight.day})`} transitionKey={transitionKey} className="min-w-[10.5em]" /></p>
                     <div className="flex flex-col items-end gap-1">

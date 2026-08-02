@@ -183,7 +183,7 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
                 ))}
               </Tabs.List>
             </Tabs.ListContainer>
-            <Tabs.Panel id={selectedPassenger} className="pt-4">
+            <Tabs.Panel id={selectedPassenger} className="!px-0 !pb-0 !pt-4">
               <Tabs variant="secondary" selectedKey={selectedFlight} onSelectionChange={(key) => setSelectedFlight(String(key) as typeof selectedFlight)}>
                 <Tabs.ListContainer>
                   <Tabs.List aria-label={`${passenger.name}의 구간`} className="grid h-10 w-full grid-cols-2 border-b border-[#dce8f3] bg-transparent p-0 *:h-10 *:w-full">
@@ -195,7 +195,7 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
                     ))}
                   </Tabs.List>
                 </Tabs.ListContainer>
-                <Tabs.Panel id={selectedFlight} className="pt-4">
+                <Tabs.Panel id={selectedFlight} className="!px-0 !pb-0 !pt-4">
                   <section className="space-y-4" aria-label={`${flight.label} 탑승객 티켓`}>
                     <PassengerTicket passenger={passenger} flight={flight} />
                     <div className="flex items-center gap-2 rounded-2xl border border-[#dce9f5] bg-white px-4 py-3 text-xs font-semibold text-slate-500">
