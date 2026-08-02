@@ -70,7 +70,7 @@ const duration = getDurationParts(flight.duration);
         <div className="px-5 pb-4 pt-3">
           <div className="mb-0.5 flex h-10 items-center justify-between">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-4 w-auto" />
+            <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
             <DotLottieReact
               src="/korean-air/airplane.lottie"
               autoplay
