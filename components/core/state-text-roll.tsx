@@ -52,7 +52,7 @@ export function StateTextRoll({ value, previousValue, transitionKey, className }
   const getDelay = (index: number, length: number) => STAGGER * Math.abs(index - (length - 1) / 2);
 
   return (
-    <span className={cn("relative inline-block overflow-hidden align-middle leading-[1.24] py-[0.1em] -my-[0.1em]", className)} data-state-text-roll>
+    <span className={cn("relative inline-block overflow-visible align-middle leading-[1.24] py-[0.1em] -my-[0.1em] [clip-path:inset(0_-0.16em)]", className)} data-state-text-roll>
       <span className="sr-only">{value}</span>
       {isRolling ? (
         <motion.span

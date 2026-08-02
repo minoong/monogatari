@@ -3,7 +3,7 @@
 import React from "react";
 import { Button, Card, Tabs } from "@heroui/react";
 import { ArrowUpRight } from "lucide-react";
-import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, type FlightPassengerId } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StateTextRoll } from "@/components/core/state-text-roll";
 import { SlidingNumber } from "@/components/core/sliding-number";
@@ -104,13 +104,17 @@ const duration = getDurationParts(flight.duration);
                     </div>
                     <div className="text-right">
                       <p className="h-[1.35em] text-[11px] font-bold text-[#5b83ab]">{flight.arrival.nextDay ? <StateTextRoll value="+1일 도착" previousValue={previousFlight.arrival.nextDay ? "+1일 도착" : ""} transitionKey={transitionKey} className="min-w-[5.7em] text-right" /> : null}</p>
-                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><StateTextRoll value={flight.arrival.time} previousValue={previousFlight.arrival.time} transitionKey={transitionKey} className="min-w-[2.85em] text-right" /></p>
-                      <p className="mt-1 text-sm font-black text-[#0b3478]"><StateTextRoll value={flight.arrival.code} previousValue={previousFlight.arrival.code} transitionKey={transitionKey} className="min-w-[2.5em] text-right" /></p>
+                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><StateTextRoll value={flight.arrival.time} previousValue={previousFlight.arrival.time} transitionKey={transitionKey} className="w-full min-w-[3.15em] text-right" /></p>
+                      <p className="mt-1 text-sm font-black text-[#0b3478]"><StateTextRoll value={flight.arrival.code} previousValue={previousFlight.arrival.code} transitionKey={transitionKey} className="w-full min-w-[2.7em] text-right" /></p>
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
                     </div>
                   </div>
                   <div className="mt-4 flex items-center gap-2 text-[11px] font-bold text-[#4772a1]">
-                    <span className="rounded-full bg-[#eaf4fc] px-2.5 py-1">{flight.operatingCarrier} · {flight.flightNumber}</span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eaf4fc] px-2.5 py-1">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={KOREAN_AIR_MARK_URL} alt="대한항공" className="size-3.5" />
+                      {flight.flightNumber}
+                    </span>
                     <span className="rounded-full bg-[#f2f6fa] px-2.5 py-1 text-slate-500">{flight.aircraft}</span>
                   </div>
                   <div className="mt-4 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-4">
