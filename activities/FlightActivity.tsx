@@ -35,7 +35,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
   return <article data-passenger-ticket className="relative overflow-hidden rounded-[26px] border border-[#d7e5f2] bg-white shadow-[0_18px_38px_-30px_rgba(7,47,100,0.66)]">
     <div className="absolute -right-5 top-14 size-10 rounded-full bg-[#f5f9fd]" aria-hidden="true" />
     <div className="absolute -left-5 top-14 size-10 rounded-full bg-[#f5f9fd]" aria-hidden="true" />
-    <div className="flex items-center justify-between bg-[#071c4a] px-5 py-3.5 text-white">
+    <div className="flex items-center justify-between bg-[#071c4a] px-4 py-3.5 text-white sm:px-5">
       <div className="flex items-center gap-2.5">
         <Avatar className="size-8 border border-white/30 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar>
         <p className="text-sm font-black">{detail.ticketName}</p>
@@ -43,7 +43,7 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
       <Ticket className="size-5 text-[#8ac7f0]" aria-hidden="true" />
     </div>
 
-    <div className="px-5 pb-5 pt-4">
+    <div className="px-4 pb-5 pt-4 sm:px-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold text-[#5d82a9]">{flight.date} ({flight.day})</p>
@@ -165,7 +165,7 @@ export const FlightActivity: React.FC<FlightActivityProps> = ({ params }) => {
 
   return (
     <AppScreen appBar={{ title: "항공권" }}>
-      <main ref={screenRef} className="min-h-full w-full bg-[#f5f9fd] px-4 pb-10 pt-5 [font-family:var(--font-korean-air)]">
+      <main ref={screenRef} className="min-h-full w-full bg-[#f5f9fd] px-3 pb-10 pt-5 sm:px-4 [font-family:var(--font-korean-air)]">
         <section data-flight-tabs>
           <Tabs variant="secondary" selectedKey={selectedPassenger} onSelectionChange={(key) => {
             const nextPassenger = String(key) as FlightPassengerId;

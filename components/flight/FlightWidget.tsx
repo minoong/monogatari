@@ -67,7 +67,7 @@ const duration = getDurationParts(flight.duration);
   return (
     <Card className="overflow-hidden rounded-[28px] border border-[#d5e1ef] bg-white p-0 shadow-[0_20px_42px_-34px_rgba(3,41,91,0.72)] [font-family:var(--font-korean-air)]">
       <Card.Content className="p-0">
-        <div className="px-5 pb-4 pt-3">
+        <div className="px-3 pb-4 pt-3 sm:px-5">
           <div className="mb-0.5 flex h-10 items-center justify-between">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
