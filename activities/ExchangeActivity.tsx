@@ -11,6 +11,7 @@ import NeumorphButton from "../components/ui/neumorph-button";
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
 import { useGSAP } from "@gsap/react";
+import { StateTextRoll } from "@/components/core/state-text-roll";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(Flip, useGSAP);
@@ -29,6 +30,8 @@ export const ExchangeActivity: React.FC = () => {
   const [rates, setRates] = useState<{ THB: number; USD: number }>({ THB: 38.5, USD: 1380 });
   const [thb, setThb] = useState<number | undefined>(0);
   const [inputCurrency, setInputCurrency] = useState<"THB" | "KRW">("THB");
+  const [previousInputCurrency, setPreviousInputCurrency] = useState<"THB" | "KRW">("THB");
+  const [currencyTransitionKey, setCurrencyTransitionKey] = useState(0);
   const isClearing = useRef(false);
   const [loading, setLoading] = useState(true);
   const [inputKey, setInputKey] = useState(0);
@@ -110,8 +113,10 @@ export const ExchangeActivity: React.FC = () => {
     const currentKrw = isKrwInput ? (thb ?? 0) : (thb ?? 0) * rates.THB;
     const nextCurrency = isKrwInput ? "THB" : "KRW";
 
+    setPreviousInputCurrency(inputCurrency);
     setThb(nextCurrency === "KRW" ? Math.round(currentKrw) : Number((currentKrw / rates.THB).toFixed(2)));
     setInputCurrency(nextCurrency);
+    setCurrencyTransitionKey((key) => key + 1);
   };
 
   // 가변 사이즈 로직: 모바일 환경에 맞춰 극단적으로 줄이도록 조정
@@ -174,18 +179,9 @@ export const ExchangeActivity: React.FC = () => {
 
                     {/* The disappearing text */}
                     <div className={`thb-flip-text flex justify-center w-full shrink-0 overflow-hidden ${isFocused ? 'absolute opacity-0 h-0 mb-0 pointer-events-none' : 'relative opacity-100 h-[20px] mb-8'}`}>
-                      <AnimatePresence initial={false} mode="popLayout">
-                        <motion.p
-                          key={inputCurrency}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.2, ease: "easeOut" }}
-                          className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap"
-                        >
-                          {isKrwInput ? "대한민국 원 (KRW)" : "태국 바트 (THB)"}
-                        </motion.p>
-                      </AnimatePresence>
+                      <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                        <StateTextRoll value={isKrwInput ? "대한민국 원 (KRW)" : "태국 바트 (THB)"} previousValue={previousInputCurrency === "KRW" ? "대한민국 원 (KRW)" : "태국 바트 (THB)"} transitionKey={currencyTransitionKey} />
+                      </p>
                     </div>
 
                     {/* The Input Row */}
@@ -300,18 +296,9 @@ export const ExchangeActivity: React.FC = () => {
                           />
                         </AnimatePresence>
                       </div>
-                      <AnimatePresence initial={false} mode="popLayout">
-                        <motion.span
-                          key={`result-label-${inputCurrency}`}
-                          initial={{ opacity: 0, y: 7 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -7 }}
-                          transition={{ duration: 0.2, ease: "easeOut" }}
-                          className="text-sm font-bold text-slate-700 dark:text-slate-300"
-                        >
-                          {isKrwInput ? "태국 바트 (THB)" : "대한민국 원 (KRW)"}
-                        </motion.span>
-                      </AnimatePresence>
+                      <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                        <StateTextRoll value={isKrwInput ? "태국 바트 (THB)" : "대한민국 원 (KRW)"} previousValue={previousInputCurrency === "KRW" ? "태국 바트 (THB)" : "대한민국 원 (KRW)"} transitionKey={currencyTransitionKey} />
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
                       <span>1 THB =</span>
