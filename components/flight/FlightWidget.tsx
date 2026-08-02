@@ -4,6 +4,7 @@ import React from "react";
 import { Button, Card, Tabs } from "@heroui/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { ArrowUpRight } from "lucide-react";
+import { motion } from "motion/react";
 import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, getDefaultFlightSegmentId, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StateTextRoll } from "@/components/core/state-text-roll";
@@ -46,12 +47,10 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
   const ticketNumber = FLIGHT_TICKET_NUMBERS[selectedPassenger];
 const duration = getDurationParts(flight.duration);
   const [previousFlight, setPreviousFlight] = React.useState(flight);
-  const [previousPassenger, setPreviousPassenger] = React.useState(passenger);
 
   const handlePassengerSelection = (key: React.Key) => {
     const nextPassenger = String(key) as FlightPassengerId;
     setPreviousFlight(flight);
-    setPreviousPassenger(passenger);
     setSelectedPassenger(nextPassenger);
     if (!FLIGHT_TICKETS[nextPassenger].some((item) => item.id === selectedFlight)) {
       setSelectedFlight(getDefaultFlightSegmentId());
@@ -61,7 +60,6 @@ const duration = getDurationParts(flight.duration);
 
   const handleFlightSelection = (key: React.Key) => {
     setPreviousFlight(flight);
-    setPreviousPassenger(passenger);
     setSelectedFlight(String(key) as typeof selectedFlight);
     setTransitionKey((version) => version + 1);
   };
@@ -180,7 +178,7 @@ const duration = getDurationParts(flight.duration);
                     <span className="rounded-full bg-[#e1f3fd] px-2 py-0.5 text-[10px] font-bold">{flight.fareFamily}</span>
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-3">
-                    <div className="flex items-center gap-2" aria-label={`탑승객 ${passenger.name}`}><span key={selectedPassenger} className="motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-75 motion-safe:duration-200"><Avatar className="size-8 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar></span><span className="text-xs font-semibold text-slate-500"><StateTextRoll value={`${passenger.name} 티켓`} previousValue={`${previousPassenger.name} 티켓`} transitionKey={transitionKey} className="min-w-[5.5em]" /></span></div>
+                    <div className="flex items-center" aria-label={`탑승객 ${passenger.name}`}><motion.div key={selectedPassenger} initial={{ opacity: 0, y: 6, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.2, ease: "easeOut" }} className="flex items-center gap-2"><Avatar className="size-8 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar><span className="text-xs font-semibold text-slate-500">{passenger.name} 티켓</span></motion.div></div>
                     <Button
                       variant="ghost"
                       size="sm"

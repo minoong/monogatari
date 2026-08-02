@@ -1,6 +1,7 @@
 import React from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useGSAP } from "@gsap/react";
+import { motion } from "motion/react";
 import { gsap } from "gsap";
 import { MonitorPlay, Plug, Plus, Sparkles, Ticket } from "lucide-react";
 import { Tabs } from "@heroui/react";
@@ -34,10 +35,10 @@ const PassengerTicket: React.FC<{ passenger: (typeof FLIGHT_PASSENGERS)[number];
 
   return <article data-passenger-ticket className="relative overflow-hidden rounded-[26px] border border-[#d7e5f2] bg-white shadow-[0_18px_38px_-30px_rgba(7,47,100,0.66)]">
     <div className="flex items-center justify-between bg-[#071c4a] px-4 py-3.5 text-white sm:px-5">
-      <div className="flex items-center gap-2.5">
-        <span key={passenger.id} className="motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-75 motion-safe:duration-200"><Avatar className="size-8 border border-white/30 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar></span>
+      <motion.div key={passenger.id} initial={{ opacity: 0, y: 6, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.2, ease: "easeOut" }} className="flex items-center gap-2.5">
+        <Avatar className="size-8 border border-white/30 bg-sky-100"><AvatarImage src={passenger.image} alt="" /><AvatarFallback>{passenger.initials}</AvatarFallback></Avatar>
         <p className="text-sm font-black">{detail.ticketName}</p>
-      </div>
+      </motion.div>
       <Ticket className="size-5 text-[#8ac7f0]" aria-hidden="true" />
     </div>
 
