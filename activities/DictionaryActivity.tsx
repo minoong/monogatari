@@ -7,7 +7,6 @@ import {
   ArrowLeftRight,
   CircleHelp,
   Clock,
-  Compass,
   HeartPulse,
   MapPin,
   RotateCcw,
@@ -124,58 +123,61 @@ function DictionaryPhraseDialog({
 }) {
   const [isRotated, setIsRotated] = useState(true);
   const [shouldScrambleOnMount] = useState(shouldScramble);
+  const CategoryIcon = meta.icon;
 
   return (
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
       <article
         data-dictionary-entry
-        className="group relative flex gap-3 border-b border-slate-200/80 px-5 py-4 last:border-b-0 dark:border-slate-800/80"
+        className="group relative flex min-h-24 items-center gap-3 px-5 py-3 transition-colors hover:bg-slate-100/70 active:bg-slate-200/70 dark:hover:bg-white/5 dark:active:bg-white/10"
+        role="listitem"
       >
-        <span className={cn("absolute inset-y-3 left-0 w-1 rounded-r-full", meta.stripClass)} />
-        <span className="pt-0.5 text-[11px] font-black tabular-nums text-slate-300 dark:text-slate-600">{String(index + 1).padStart(2, "0")}</span>
+        <div className={cn("flex size-16 shrink-0 items-center justify-center rounded-xl", meta.panelClass)}>
+          <CategoryIcon className="size-6" aria-hidden="true" />
+        </div>
         <div className="min-w-0 flex-1" onClickCapture={onOpen}>
           <MorphingDialogTrigger
             ariaLabel={`${item.ko} 현지인에게 크게 보여주기`}
             className="block w-full text-left outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-orange-400"
           >
-            <div className="flex min-w-0 items-center gap-2">
+            <div className="flex min-w-0 items-start justify-between gap-2">
               <MorphingDialogTitle className="min-w-0">
                 <ScrambleText
                   text={item.ko}
                   delay={620 + index * 95}
                   duration={440}
                   enabled={shouldScrambleOnMount}
-                  className="block truncate text-sm font-black text-slate-800 dark:text-slate-100"
+                  className="block truncate text-sm font-bold text-slate-900 dark:text-white"
                 />
               </MorphingDialogTitle>
-              <span className={cn("shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-black", meta.railClass)}>{meta.label}</span>
+              <span className="shrink-0 text-[11px] font-semibold text-slate-400">{meta.label}</span>
             </div>
             <MorphingDialogDescription disableLayoutAnimation className="block">
               <ScrambleText
                 text={item.th}
                 delay={675 + index * 95}
-                  duration={500}
-                  enabled={shouldScrambleOnMount}
-                className="mt-1 block font-thai text-2xl font-semibold leading-tight text-slate-950 dark:text-white"
+                duration={500}
+                enabled={shouldScrambleOnMount}
+                className="mt-1 block truncate font-thai text-xl font-semibold leading-tight text-slate-950 dark:text-white"
               />
               <ScrambleText
                 text={`🗣️ ${item.pron}`}
                 delay={725 + index * 95}
-                  duration={470}
-                  enabled={shouldScrambleOnMount}
-                className="mt-1 block text-xs font-bold text-orange-600 dark:text-orange-400"
+                duration={470}
+                enabled={shouldScrambleOnMount}
+                className="mt-1 block truncate text-xs text-slate-500 dark:text-slate-400"
               />
             </MorphingDialogDescription>
           </MorphingDialogTrigger>
         </div>
-        <div className="flex shrink-0 flex-col gap-1 pt-0.5">
+        <div className="flex shrink-0 flex-col gap-1">
           <Button
             isIconOnly
             size="sm"
             variant="secondary"
             aria-label="발음 듣기"
             onPress={(event) => onPlayAudio(item.th, event)}
-            className="size-8 rounded-xl text-orange-600 dark:text-orange-400"
+            className="size-8 rounded-xl text-slate-500 dark:text-slate-400"
           >
             <Volume2 className="size-4" />
           </Button>
@@ -455,7 +457,6 @@ export const DictionaryActivity: React.FC = () => {
             {CATEGORY_FILTERS.map((category) => {
               const isSelected = selectedCategory === category;
               const meta = category === "전체" ? null : CATEGORY_META[category];
-              const Icon = meta?.icon ?? Compass;
 
               return (
                 <motion.button
@@ -470,13 +471,12 @@ export const DictionaryActivity: React.FC = () => {
                     setSelectedCategory(category);
                   }}
                   className={cn(
-                    "relative flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-[color,background-color,box-shadow]",
+                    "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95",
                     isSelected
-                      ? "border-slate-900 bg-slate-900 text-white shadow-[0_8px_18px_-12px_rgba(15,23,42,0.8)] dark:border-white dark:bg-white dark:text-slate-950"
-                      : "border-slate-200 bg-white text-slate-500 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800",
+                      ? "border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900"
+                      : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400",
                   )}
                 >
-                  <Icon className="size-3.5" />
                   <span>{meta?.label ?? "전체"}</span>
                 </motion.button>
               );
@@ -542,7 +542,7 @@ export const DictionaryActivity: React.FC = () => {
             </div>
           )}
 
-          <div data-dictionary-intro="list" className="-mx-5 overflow-hidden border-y border-slate-200 bg-white shadow-[0_14px_30px_-28px_rgba(15,23,42,0.55)] dark:border-slate-800 dark:bg-slate-900">
+          <div data-dictionary-intro="list" className="-mx-5 divide-y divide-slate-200 dark:divide-slate-800" role="list">
             {filteredPhrases.length === 0 ? (
               <div className="flex min-h-52 flex-col items-center justify-center px-6 text-center">
                 <span className="grid size-12 place-items-center rounded-2xl bg-slate-100 text-xl dark:bg-slate-800">🔎</span>
