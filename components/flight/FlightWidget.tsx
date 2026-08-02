@@ -5,6 +5,7 @@ import { Button, Card, Tabs } from "@heroui/react";
 import { ArrowUpRight, Plane } from "lucide-react";
 import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, KOREAN_AIR_LOGO_URL, type FlightPassengerId } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { StateRollText } from "@/components/core/state-roll-text";
 
 interface FlightWidgetProps {
   onOpen: (passengerId: FlightPassengerId) => void;
@@ -56,18 +57,18 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
                 <Tabs.Panel id={selectedFlight} className="pt-4">
                   <div className="grid grid-cols-[minmax(0,1fr)_42px_minmax(0,1fr)] items-center gap-1">
                     <div>
-                      <p className="text-[11px] font-bold text-[#5b83ab]">{flight.date.slice(5)} ({flight.day})</p>
-                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums">{flight.departure.time}</p>
-                      <p className="mt-1 text-sm font-black text-[#0b3478]">{flight.departure.code}</p>
+                      <p className="text-[11px] font-bold text-[#5b83ab]"><StateRollText value={`${flight.date.slice(5)} (${flight.day})`} /></p>
+                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><StateRollText value={flight.departure.time} /></p>
+                      <p className="mt-1 text-sm font-black text-[#0b3478]"><StateRollText value={flight.departure.code} /></p>
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.departure.airport}{flight.departure.terminal ? ` · ${flight.departure.terminal}` : ""}</p>
                     </div>
                     <div className="flex flex-col items-center gap-1.5 text-[#4e93ca]" aria-label={`${flight.duration} 비행`}>
                       <span className="h-px w-full bg-[#b9d5ed]" /><Plane className="size-4 -rotate-45" aria-hidden="true" /><span className="h-px w-full bg-[#b9d5ed]" />
                     </div>
                     <div className="text-right">
-                      <p className="text-[11px] font-bold text-[#5b83ab]">{flight.arrival.nextDay ? "+1일 도착" : flight.duration}</p>
-                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums">{flight.arrival.time}</p>
-                      <p className="mt-1 text-sm font-black text-[#0b3478]">{flight.arrival.code}</p>
+                      <p className="text-[11px] font-bold text-[#5b83ab]"><StateRollText value={flight.arrival.nextDay ? "+1일 도착" : flight.duration} /></p>
+                      <p className="mt-1 text-3xl font-black tracking-[-0.07em] text-[#0b3478] tabular-nums"><StateRollText value={flight.arrival.time} /></p>
+                      <p className="mt-1 text-sm font-black text-[#0b3478]"><StateRollText value={flight.arrival.code} /></p>
                       <p className="mt-1 text-[10px] font-semibold text-slate-500">{flight.arrival.airport}{flight.arrival.terminal ? ` · ${flight.arrival.terminal}` : ""}</p>
                     </div>
                   </div>
