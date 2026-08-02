@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { FlightWidget } from "../components/flight/FlightWidget";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -321,6 +322,8 @@ export const HomeActivity: React.FC = () => {
                 </button>
               </div>
 
+              <FlightWidget onOpen={() => push("FlightActivity", {})} />
+
               <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
 
               <button onClick={() => push("DiscoverActivity", {})} className="p-4 bg-orange-50 dark:bg-orange-900/30 rounded-2xl border border-orange-200 dark:border-orange-800 text-left active:scale-95 transition-transform">
@@ -361,6 +364,8 @@ export const HomeActivity: React.FC = () => {
                 </div>
                 <span className="text-2xl">👉</span>
               </button>
+
+              <FlightWidget onOpen={() => push("FlightActivity", {})} />
 
               <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
             </motion.div>
