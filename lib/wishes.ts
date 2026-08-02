@@ -10,12 +10,18 @@ export interface WishItem {
   target_price_thb: number | null;
   memo: string | null;
   vendor: string | null;
-  image_path: string | null;
-  image_url: string | null;
+  images: WishImage[];
   locations: string[];
   links: string[];
   created_at: string;
   updated_at: string;
+}
+
+export interface WishImage {
+  id: string;
+  path: string;
+  url: string;
+  sort_order: number;
 }
 
 export const WISH_TYPE_META: Record<WishType, {

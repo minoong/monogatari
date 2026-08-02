@@ -40,3 +40,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const body: unknown = await request.json();
+    const paths = body && typeof body === "object" && "paths" in body ? (body as { paths?: unknown }).paths : undefined;
+    if (!Array.isArray(paths) || paths.some((path) => typeof path !== "string" || !/^wishes\/[0-9a-f-]+\.(?:jpe?g|png|webp)$/i.test(path))) {
+      return NextResponse.json({ error: "Invalid image paths" }, { status: 400 });
+    }
+    const { error } = await supabase.storage.from("wish-images").remove(paths);
+    if (error) throw error;
+    return NextResponse.json({ data: { removed: paths.length } });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
+  }
+}

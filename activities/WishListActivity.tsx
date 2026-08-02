@@ -5,6 +5,7 @@ import { ArrowUpRight, Image as ImageIcon, Link2, MapPin, Pencil, Plus, RefreshC
 import { Button, Chip } from "@heroui/react";
 import { toast } from "sonner";
 import { WishDrawer } from "@/components/wish/WishDrawer";
+import { WishImageGallery } from "@/components/wish/WishImageGallery";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { GooeyInput } from "@/components/ui/gooey-input";
@@ -341,6 +342,7 @@ function WishListItem({
   onEdit: () => void;
 }) {
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
+  const [zoomImageIndex, setZoomImageIndex] = useState(0);
   const price = formatThaiBaht(wish.target_price_thb);
   const priceKrw = wish.target_price_thb === null
     ? null
@@ -354,8 +356,11 @@ function WishListItem({
       >
         <article className="flex min-h-24 items-center gap-3 px-5 py-3 transition-colors group-hover:bg-slate-100/70 group-active:bg-slate-200/70 dark:group-hover:bg-white/5 dark:group-active:bg-white/10" role="listitem">
             <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-slate-400 dark:bg-slate-800">
-              {wish.image_url ? (
-                <MorphingDialogImage alt="" className="size-full object-cover" src={wish.image_url} />
+              {wish.images[0] ? (
+                <>
+                  <MorphingDialogImage alt="" className="size-full object-cover" src={wish.images[0].url} />
+                  {wish.images.length > 1 && <span className="absolute bottom-1.5 right-1.5 rounded-full bg-black/65 px-1.5 py-0.5 text-[10px] font-bold text-white">+{wish.images.length - 1}</span>}
+                </>
               ) : (
                 <ImageIcon aria-hidden="true" className="size-5" />
               )}
@@ -388,28 +393,10 @@ function WishListItem({
           
           {/* Scrollable Body */}
           <div className="flex-1 overflow-y-auto">
-            {wish.image_url ? (
-              <div className="relative">
-                <MorphingDialogImage
-                  alt={`${wish.title} 이미지`}
-                  className="h-56 w-full cursor-pointer object-cover"
-                  onClick={() => setZoomModalOpen(true)}
-                  src={wish.image_url}
-                />
-                <button
-                  type="button"
-                  onClick={() => setZoomModalOpen(true)}
-                  className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/65 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md shadow-md transition hover:bg-black/85"
-                >
-                  <ZoomIn className="size-3.5" />
-                  <span>탭하여 확대</span>
-                </button>
-              </div>
-            ) : (
-              <div className="flex h-40 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400 dark:from-slate-800 dark:to-slate-900">
-                <ImageIcon aria-hidden="true" className="size-10" />
-              </div>
-            )}
+            <div className="relative">
+              <WishImageGallery images={wish.images} title={wish.title} onImagePress={(index) => { setZoomImageIndex(index); setZoomModalOpen(true); }} />
+              {wish.images.length > 0 && <button type="button" onClick={() => { setZoomImageIndex(0); setZoomModalOpen(true); }} className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-full bg-black/65 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md shadow-md transition hover:bg-black/85"><ZoomIn className="size-3.5" /><span>탭하여 확대</span></button>}
+            </div>
 
             <div className="px-5 py-4">
               {/* Category Chips */}
@@ -518,11 +505,11 @@ function WishListItem({
         </MorphingDialogContent>
       </MorphingDialogContainer>
 
-      {wish.image_url && (
+      {wish.images[zoomImageIndex] && (
         <ImageZoomModal
           isOpen={zoomModalOpen}
           onClose={() => setZoomModalOpen(false)}
-          src={wish.image_url}
+          src={wish.images[zoomImageIndex].url}
           title={wish.title}
         />
       )}
@@ -586,5 +573,3 @@ function DetailLinkGroup({
     </div>
   );
 }
-
-

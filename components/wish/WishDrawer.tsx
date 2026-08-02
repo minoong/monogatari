@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import NumberFlow from "@number-flow/react";
 import imageCompression from "browser-image-compression";
@@ -20,7 +19,7 @@ import {
   TextField,
   type Key,
 } from "@heroui/react";
-import { ImagePlus, Link2, MapPin, Plus, Upload, X } from "lucide-react";
+import { Link2, MapPin, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import StatusButton from "@/components/animata/button/status-button";
 import { triggerHapticFeedback } from "@/components/BottomNav";
@@ -34,7 +33,7 @@ import {
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { WishImagePicker, type WishImageDraft } from "@/components/wish/WishImagePicker";
 import {
   InputGroup,
   InputGroupAddon,
@@ -95,36 +94,19 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   const [locationError, setLocationError] = useState<string | null>(null);
   const [links, setLinks] = useState<string[]>(wish?.links ?? []);
   const [linkDraft, setLinkDraft] = useState("");
-  const [image, setImage] = useState<File | null>(null);
-  const [imageRemoved, setImageRemoved] = useState(false);
+  const [images, setImages] = useState<WishImageDraft[]>(() => (wish?.images ?? []).map((image) => ({ id: image.id, path: image.path, url: image.url })));
   const [isCompressingImage, setIsCompressingImage] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const imagePreviewUrl = useMemo(() => {
-    if (!image) return null;
-    try {
-      return URL.createObjectURL(image);
-    } catch {
-      return null;
-    }
-  }, [image]);
   const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
     queryKey: EXCHANGE_RATE_QUERY_KEY,
     queryFn: fetchThbToKrwRate,
   });
   const targetPriceValue = Number(targetPrice) || 0;
   const targetPriceKrw = Math.round(targetPriceValue * thbToKrwRate);
-  const displayedImageUrl = imagePreviewUrl ?? (!imageRemoved ? wish?.image_url : null);
-
-  useEffect(() => {
-    return () => {
-      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    };
-  }, [imagePreviewUrl]);
+  useEffect(() => () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current); }, []);
 
   const resetForm = () => {
     setType(initialType);
@@ -139,18 +121,11 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
     setLocationError(null);
     setLinks([]);
     setLinkDraft("");
-    setImage(null);
-    setImageRemoved(false);
-    if (imageInputRef.current) imageInputRef.current.value = "";
+    setImages([]);
     setSubmitError(null);
     setSuccess(false);
   };
 
-  const clearImage = () => {
-    setImage(null);
-    setImageRemoved(true);
-    if (imageInputRef.current) imageInputRef.current.value = "";
-  };
 
   const handleInputFocus = (event: React.FocusEvent<HTMLElement>) => {
     const target = event.currentTarget;
@@ -218,47 +193,50 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
       submittedLocations: string[];
       submittedLinks: string[];
     }): Promise<WishItem> => {
-      let imagePath = imageRemoved ? null : wish?.image_path ?? null;
-
-      if (image) {
-        let compressedImage: File;
-        try {
+      const uploadedPaths: string[] = [];
+      const imagePaths: string[] = [];
+      try {
+        for (const image of images) {
+          if (image.path) { imagePaths.push(image.path); continue; }
+          if (!image.file) continue;
           setIsCompressingImage(true);
-          compressedImage = await imageCompression(image, IMAGE_COMPRESSION_OPTIONS);
-        } catch {
-          throw new Error("이미지를 압축하지 못했습니다. 다른 이미지를 선택해 주세요.");
-        } finally {
-          setIsCompressingImage(false);
+          const compressedImage = await imageCompression(image.file, IMAGE_COMPRESSION_OPTIONS);
+          const imageFormData = new FormData(); imageFormData.append("image", compressedImage);
+          const imageResponse = await fetch("/api/wishes/image", { method: "POST", body: imageFormData });
+          const imagePayload = await imageResponse.json();
+          if (!imageResponse.ok) throw new Error(imagePayload.error ?? "이미지를 업로드하지 못했습니다.");
+          uploadedPaths.push(imagePayload.data.path); imagePaths.push(imagePayload.data.path);
         }
+      } catch (error) {
+        if (uploadedPaths.length) await fetch("/api/wishes/image", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paths: uploadedPaths }) });
+        throw error;
+      } finally { setIsCompressingImage(false); }
 
-        const imageFormData = new FormData();
-        imageFormData.append("image", compressedImage);
-        const imageResponse = await fetch("/api/wishes/image", { method: "POST", body: imageFormData });
-        const imagePayload = await imageResponse.json();
-        if (!imageResponse.ok) throw new Error(imagePayload.error ?? "이미지를 업로드하지 못했습니다.");
-        imagePath = imagePayload.data.path;
+      try {
+        const response = await fetch(wish ? `/api/wishes?id=${wish.id}` : "/api/wishes", {
+          method: isEditing ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type,
+            title,
+            categories: submittedCategories,
+            target_price_thb: isDiningType(type) ? null : targetPrice,
+            vendor,
+            memo,
+            locations: submittedLocations,
+            links: submittedLinks,
+            image_paths: imagePaths,
+          }),
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error ?? (isEditing ? "위시를 수정하지 못했습니다." : "위시를 등록하지 못했습니다."));
+        }
+        return payload.data;
+      } catch (error) {
+        if (uploadedPaths.length) await fetch("/api/wishes/image", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paths: uploadedPaths }) });
+        throw error;
       }
-
-      const response = await fetch(wish ? `/api/wishes?id=${wish.id}` : "/api/wishes", {
-        method: isEditing ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type,
-          title,
-          categories: submittedCategories,
-          target_price_thb: isDiningType(type) ? null : targetPrice,
-          vendor,
-          memo,
-          locations: submittedLocations,
-          links: submittedLinks,
-          image_path: imagePath,
-        }),
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        throw new Error(payload.error ?? (isEditing ? "위시를 수정하지 못했습니다." : "위시를 등록하지 못했습니다."));
-      }
-      return payload.data;
     },
     onSuccess: async () => {
       setSuccess(true);
@@ -481,69 +459,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="wish-image">이미지</Label>
-              <div className="flex items-stretch gap-3">
-                <AspectRatio
-                  className="w-28 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm dark:border-slate-700 dark:bg-slate-800"
-                  ratio={1}
-                >
-                  {displayedImageUrl ? (
-                    <>
-                      <Image
-                        alt={image ? "선택한 위시 이미지 미리보기" : "저장된 위시 이미지"}
-                        className="object-contain p-1"
-                        fill
-                        sizes="112px"
-                        src={displayedImageUrl}
-                        unoptimized
-                      />
-                      <button
-                        aria-label="선택한 이미지 삭제"
-                        className="absolute right-1.5 top-1.5 z-10 flex size-7 items-center justify-center rounded-full bg-black/65 text-white shadow-sm backdrop-blur-sm transition-colors hover:bg-black/80"
-                        onClick={clearImage}
-                        type="button"
-                      >
-                        <X className="size-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <div className="flex size-full flex-col items-center justify-center gap-2 text-slate-400">
-                      <ImagePlus className="size-6" />
-                      <span className="text-[11px] font-medium">미리보기</span>
-                    </div>
-                  )}
-                </AspectRatio>
-
-                <label
-                  htmlFor="wish-image"
-                  className="flex min-w-0 flex-1 cursor-pointer flex-col justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 transition-colors hover:border-blue-400 hover:bg-blue-50/60 dark:border-slate-700 dark:bg-white/5 dark:hover:border-blue-500 dark:hover:bg-blue-500/10"
-                >
-                  <span className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                    <Upload className="size-4 text-blue-500" />
-                    {displayedImageUrl ? "이미지 변경" : "이미지 선택"}
-                  </span>
-                  <span className="mt-1 truncate text-xs text-slate-500">
-                    {image?.name ?? "JPG, PNG, WEBP"}
-                  </span>
-                  <span className="mt-0.5 text-[11px] text-slate-400">최대 5MB</span>
-                </label>
-              </div>
-              <input
-                accept="image/jpeg,image/png,image/webp"
-                className="sr-only"
-                id="wish-image"
-                onChange={(event) => {
-                  setImage(event.target.files?.[0] ?? null);
-                  setImageRemoved(false);
-                  setTimeout(() => {
-                    window.scrollTo(0, 0);
-                  }, 100);
-                }}
-                ref={imageInputRef}
-                type="file"
-              />
-            </div>
+            <WishImagePicker images={images} onChange={setImages} />
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="wish-memo">메모</Label>
