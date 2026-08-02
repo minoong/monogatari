@@ -1,7 +1,5 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "gsap";
 import { Button, Chip } from "@heroui/react";
 import {
   ArrowLeftRight,
@@ -42,7 +40,6 @@ import { motion, useReducedMotion } from "motion/react";
 import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { GooeyInput } from "@/components/ui/gooey-input";
-import { ScrambleText } from "@/components/ui/scramble-text";
 import {
   MorphingDialog,
   MorphingDialogClose,
@@ -181,23 +178,18 @@ function PhraseThumbnail({ id }: { id: number }) {
 
 function DictionaryPhraseDialog({
   item,
-  index,
   meta,
   prefersReducedMotion,
-  shouldScramble,
   onOpen,
   onPlayAudio,
 }: {
   item: PhraseItem;
-  index: number;
   meta: (typeof CATEGORY_META)[PhraseItem["category"]];
   prefersReducedMotion: boolean | null;
-  shouldScramble: boolean;
   onOpen: () => void;
   onPlayAudio: (text: string, event?: React.MouseEvent | unknown) => void;
 }) {
   const [isRotated, setIsRotated] = useState(true);
-  const [shouldScrambleOnMount] = useState(shouldScramble);
 
   return (
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
@@ -214,31 +206,13 @@ function DictionaryPhraseDialog({
           >
             <div className="flex min-w-0 items-start justify-between gap-2">
               <MorphingDialogTitle className="min-w-0">
-                <ScrambleText
-                  text={item.ko}
-                  delay={620 + index * 95}
-                  duration={440}
-                  enabled={shouldScrambleOnMount}
-                  className="block truncate text-sm font-bold text-slate-900 dark:text-white"
-                />
+                <span className="block truncate text-sm font-bold text-slate-900 dark:text-white">{item.ko}</span>
               </MorphingDialogTitle>
               <span className="shrink-0 text-[11px] font-semibold text-slate-400">{meta.label}</span>
             </div>
             <MorphingDialogDescription disableLayoutAnimation className="block">
-              <ScrambleText
-                text={item.th}
-                delay={675 + index * 95}
-                duration={500}
-                enabled={shouldScrambleOnMount}
-                className="mt-1 block truncate font-thai text-base font-semibold leading-tight text-slate-700 dark:text-slate-200"
-              />
-              <ScrambleText
-                text={`🗣️ ${item.pron}`}
-                delay={725 + index * 95}
-                duration={470}
-                enabled={shouldScrambleOnMount}
-                className="mt-1 block truncate text-xs text-slate-500 dark:text-slate-400"
-              />
+              <span className="mt-1 block truncate font-thai text-base font-semibold leading-tight text-slate-700 dark:text-slate-200">{item.th}</span>
+              <span className="mt-1 block truncate text-xs text-slate-500 dark:text-slate-400">🗣️ {item.pron}</span>
             </MorphingDialogDescription>
           </MorphingDialogTrigger>
         </div>
@@ -355,14 +329,7 @@ export const DictionaryActivity: React.FC = () => {
   const [searchBarTop, setSearchBarTop] = useState<number | null>(null);
   const mainRef = useRef<HTMLElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const introRef = useRef<HTMLDivElement>(null);
-  const [shouldScramble, setShouldScramble] = useState(true);
   const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setShouldScramble(false), 0);
-    return () => window.clearTimeout(timer);
-  }, []);
 
   // 검색창의 기존 PWA iOS/AOS 가상 키보드 대응은 그대로 유지한다.
   useLayoutEffect(() => {
@@ -405,43 +372,6 @@ export const DictionaryActivity: React.FC = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
-
-  useGSAP(() => {
-    const media = gsap.matchMedia();
-
-    media.add("(prefers-reduced-motion: no-preference)", () => {
-      const entries = gsap.utils.toArray<HTMLElement>("[data-dictionary-entry]").slice(0, 7);
-      const timeline = gsap.timeline({ defaults: { ease: "power4.out" } });
-
-      timeline
-        .fromTo(
-          "[data-dictionary-intro='rail']",
-          { autoAlpha: 0, y: 18, scale: 0.98 },
-          { autoAlpha: 1, y: 0, scale: 1, duration: 0.52 },
-        )
-        .fromTo(
-          "[data-dictionary-intro='toolbar']",
-          { autoAlpha: 0, y: 10 },
-          { autoAlpha: 1, y: 0, duration: 0.36 },
-          "-=0.25",
-        )
-        .fromTo(
-          "[data-dictionary-intro='list']",
-          { autoAlpha: 0, y: 14, scale: 0.99 },
-          { autoAlpha: 1, y: 0, scale: 1, duration: 0.48 },
-          "-=0.18",
-        )
-        .fromTo(
-          entries,
-          { autoAlpha: 0, y: 18 },
-          { autoAlpha: 1, y: 0, duration: 0.42, stagger: 0.055, clearProps: "transform,visibility" },
-          "-=0.28",
-        );
-
-    });
-
-    return () => media.revert();
-  }, { scope: introRef });
 
   // 최근 검색어 추가 (초성/검색어로 필터 후 카드를 탭했을 때 저장)
   const saveRecentSearch = (query: string) => {
@@ -519,10 +449,9 @@ export const DictionaryActivity: React.FC = () => {
           className="flex-1 overflow-y-auto px-5 pt-5 transition-[padding] duration-150 no-scrollbar"
           style={{ paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 80}px` : "96px" }}
         >
-        <section ref={introRef} className="mx-auto flex w-full max-w-lg flex-col gap-4">
+        <section className="mx-auto flex w-full max-w-lg flex-col gap-4">
 
           <div
-            data-dictionary-intro="rail"
             className="-mx-5 flex gap-2 overflow-x-auto px-5 no-scrollbar"
             aria-label="회화 카테고리"
           >
@@ -536,11 +465,12 @@ export const DictionaryActivity: React.FC = () => {
                   type="button"
                   aria-pressed={isSelected}
                   onClick={() => {
+                    if (isSelected) return;
                     triggerHapticFeedback(10);
                     setSelectedCategory(category);
                   }}
                   className={cn(
-                    "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95",
+                    "touch-manipulation shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors duration-150",
                     isSelected
                       ? "border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900"
                       : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400",
@@ -552,7 +482,7 @@ export const DictionaryActivity: React.FC = () => {
             })}
           </div>
 
-          <div data-dictionary-intro="toolbar" className="flex items-center justify-between px-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+          <div className="flex items-center justify-between px-1 text-xs font-medium text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1.5 font-medium">
               <span>{searchQuery || selectedCategory !== "전체" ? "검색/필터 결과" : "전체"}</span>
               <span className="font-extrabold tabular-nums text-slate-900 dark:text-white">{filteredPhrases.length}개</span>
@@ -576,14 +506,14 @@ export const DictionaryActivity: React.FC = () => {
             )}
           </div>
 
-          <div data-dictionary-intro="rail" className="rounded-3xl bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 px-5 py-5 text-white shadow-lg shadow-violet-500/20">
+          <div className="rounded-3xl bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 px-5 py-5 text-white shadow-lg shadow-violet-500/20">
             <span className="text-2xl">💬</span>
             <h1 className="mt-3 text-xl font-extrabold">태국 회화 사전</h1>
             <p className="mt-1 text-sm font-medium text-white/80">여행에서 바로 꺼내 쓰는 태국어 표현</p>
           </div>
 
           {recentSearches.length > 0 && (
-            <div data-dictionary-intro className="flex flex-col gap-1.5 px-1">
+            <div className="flex flex-col gap-1.5 px-1">
               <p className="flex items-center gap-1.5 px-1 text-[11px] font-black tracking-wide text-slate-500 dark:text-slate-400">
                 <Clock className="size-3.5 text-slate-950 dark:text-white" /> 최근 꺼내 본 말
               </p>
@@ -616,7 +546,7 @@ export const DictionaryActivity: React.FC = () => {
             </div>
           )}
 
-          <div data-dictionary-intro="list" className="-mx-5 divide-y divide-slate-200 dark:divide-slate-800" role="list">
+          <div className="-mx-5 divide-y divide-slate-200 dark:divide-slate-800" role="list">
             {filteredPhrases.length === 0 ? (
               <div className="flex min-h-52 flex-col items-center justify-center px-6 text-center">
                 <span className="grid size-12 place-items-center rounded-2xl bg-slate-100 text-xl dark:bg-slate-800">🔎</span>
@@ -624,16 +554,14 @@ export const DictionaryActivity: React.FC = () => {
                 <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">다른 단어 또는 초성으로 다시 찾아보세요.</p>
               </div>
             ) : (
-              filteredPhrases.map((item, index) => (
+              filteredPhrases.map((item) => (
                 <DictionaryPhraseDialog
                   key={item.id}
-                  index={index}
                   item={item}
                   meta={CATEGORY_META[item.category]}
                   onOpen={handlePhraseOpen}
                   onPlayAudio={playAudio}
                   prefersReducedMotion={prefersReducedMotion}
-                  shouldScramble={shouldScramble}
                 />
               ))
             )}
