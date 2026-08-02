@@ -18,7 +18,7 @@ export function WishImageGallery({ images, title, onImagePress }: { images: Wish
         modules={[Pagination, A11y]}
         slidesPerView="auto"
         spaceBetween={10}
-        pagination={{ clickable: true }}
+        pagination={{ type: "fraction" }}
         className="h-56"
         a11y={{ prevSlideMessage: "이전 사진", nextSlideMessage: "다음 사진", paginationBulletMessage: "사진 {{index}}로 이동" }}
       >
