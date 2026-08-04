@@ -904,7 +904,7 @@ export const ChecklistActivity: React.FC = () => {
   ];
 
   return (
-    <AppScreen appBar={{ title: "여행 준비물 체크리스트" }}>
+    <AppScreen appBar={{ title: "빠뜨린 거 없나 잘 체크해!" }}>
       <div className="flex flex-col min-h-full w-full bg-white dark:bg-black relative">
 
         <div className="py-4 pb-2 shrink-0 flex justify-center w-full">
@@ -915,14 +915,47 @@ export const ChecklistActivity: React.FC = () => {
 
         <div className="flex-1 overflow-y-auto p-4 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))]">
           {loading ? (
-            <div className="flex flex-col gap-4">
-              <Skeleton className="h-6 w-32 mb-2" />
-              <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-3 p-4 border-b border-gray-100 dark:border-gray-800 last:border-0">
-                    <Skeleton className="h-5 w-5 rounded-md" />
-                    <Skeleton className="h-5 flex-1" />
-                    <Skeleton className="h-5 w-5 rounded-full" />
+            <div className="flex flex-col gap-4 animate-pulse">
+              {/* Swipe Hint Skeleton */}
+              <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50/80 p-3.5 dark:border-white/10 dark:bg-white/[0.04]">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="size-5 rounded-md" />
+                  <Skeleton className="h-4 w-36 rounded-md" />
+                </div>
+                <Skeleton className="h-4 w-16 rounded-md" />
+              </div>
+
+              {/* Tabs Skeleton */}
+              <div className="mt-1 grid h-14 w-full grid-cols-2 gap-1 rounded-2xl bg-slate-100 p-1 dark:bg-slate-900">
+                <div className="flex items-center gap-2 rounded-xl bg-white p-2 shadow-sm dark:bg-slate-700">
+                  <Skeleton className="size-6 rounded-full" />
+                  <Skeleton className="h-4 w-14 rounded-md" />
+                  <Skeleton className="ml-auto h-5 w-10 rounded-full" />
+                </div>
+                <div className="flex items-center gap-2 rounded-xl px-2">
+                  <Skeleton className="size-6 rounded-full opacity-50" />
+                  <Skeleton className="h-4 w-14 rounded-md opacity-50" />
+                  <Skeleton className="ml-auto h-5 w-10 rounded-full opacity-50" />
+                </div>
+              </div>
+
+              {/* Checklist Items Container Skeleton */}
+              <div className="mt-2 overflow-hidden rounded-3xl border border-gray-100 bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className="flex min-h-16 items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 dark:border-white/10 last:border-b-0"
+                  >
+                    <Skeleton className="size-5 shrink-0 rounded-md" />
+                    <div className="flex flex-1 flex-col gap-2">
+                      <Skeleton className={`h-4 rounded-md ${i % 2 === 0 ? "w-3/5" : i % 3 === 0 ? "w-4/5" : "w-2/5"}`} />
+                      {i % 2 === 0 && (
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <Skeleton className="size-4 rounded-full" />
+                          <Skeleton className="h-3 w-20 rounded-full" />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
