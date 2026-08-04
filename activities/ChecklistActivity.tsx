@@ -3,6 +3,7 @@ import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
 import { Plus, Bell, ChevronDown, Trash2 } from "lucide-react";
 import { ChecklistDrawer } from "../components/checklist/ChecklistDrawer";
+import { ChecklistDeleteDrawer } from "../components/checklist/ChecklistDeleteDrawer";
 import { toast } from "sonner";
 import { supabase } from "../lib/supabase";
 import NumberFlow from "@number-flow/react";
@@ -190,7 +191,7 @@ interface SwipeableItemProps {
   item: PreparationItem;
   targetUser: string;
   isHighlighted: boolean;
-  onDelete: (id: string, assignees: string[], targetUser: string) => void;
+  onDelete: (id: string, title: string, assignees: string[], targetUser: string) => void;
   onToggleCheck: (id: string, targetUser: string, checked?: boolean) => void;
   onNudge: (target: string) => void;
 }
@@ -384,11 +385,12 @@ const SwipeableItem = ({
         }}
         onDragEnd={(e, info) => {
           if (info.offset.x < -80) {
-            animate(x, -500, {
-              duration: prefersReducedMotion ? 0 : 0.25,
+            animate(x, 0, {
+              duration: prefersReducedMotion ? 0 : 0.2,
               ease: "easeOut",
               onComplete: () => {
-                onDelete(item.id, item.assignees, targetUser);
+                onDelete(item.id, item.title, item.assignees, targetUser);
+                setWillDelete(false);
               }
             });
           } else if (isNudgeAllowed && info.offset.x > 80) {
@@ -821,8 +823,24 @@ export const ChecklistActivity: React.FC = () => {
     },
   });
 
-  const handleDelete = (id: string, assignees: string[], targetUser: string) => {
-    deleteMutation.mutate({ id, assignees, targetUser });
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    title: string;
+    assignees: string[];
+    targetUser: string;
+  } | null>(null);
+
+  const handleDelete = (id: string, title: string, assignees: string[], targetUser: string) => {
+    setDeleteTarget({ id, title, assignees, targetUser });
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+    deleteMutation.mutate(deleteTarget, {
+      onSuccess: () => {
+        setDeleteTarget(null);
+      },
+    });
   };
 
 
@@ -1026,6 +1044,16 @@ export const ChecklistActivity: React.FC = () => {
             }
             setDrawerOpen(open);
           }}
+        />
+
+        <ChecklistDeleteDrawer
+          open={!!deleteTarget}
+          onOpenChange={(open) => {
+            if (!open) setDeleteTarget(null);
+          }}
+          itemTitle={deleteTarget?.title}
+          onConfirmDelete={handleConfirmDelete}
+          isDeleting={deleteMutation.isPending}
         />
       </div>
       <BottomNav active="checklist" />
