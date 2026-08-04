@@ -320,13 +320,8 @@ const SwipeableItem = ({
   return (
     <motion.div
       ref={itemRef}
-      layout
       exit={{ opacity: 0, height: 0 }}
-      transition={{
-        layout: { type: "spring", stiffness: 350, damping: 30 },
-        opacity: { duration: prefersReducedMotion ? 0 : 0.2 },
-        height: { duration: prefersReducedMotion ? 0 : 0.25, ease: "easeOut" }
-      }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: "easeOut" }}
       style={{ overflow: "hidden" }}
       className="checklist-item relative border-b border-gray-200 dark:border-white/10 last:border-b-0"
     >
