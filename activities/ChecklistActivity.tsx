@@ -501,17 +501,13 @@ const SwipeableItem = ({
         }`}
       >
         {/* Background Hold Progress Gauge */}
-        <motion.div
+        <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 bg-blue-500/15 dark:bg-blue-400/20 z-0"
-          initial={false}
-          animate={{
+          className="pointer-events-none absolute inset-y-0 left-0 bg-blue-500/20 dark:bg-blue-400/25 z-0"
+          style={{
             width: `${pressProgress * 100}%`,
             opacity: pressProgress > 0 ? 1 : 0,
-          }}
-          transition={{
-            width: { duration: isPressing ? 0.04 : 0.2, ease: "linear" },
-            opacity: { duration: 0.15 },
+            transition: isPressing ? "none" : "width 0.15s ease-out, opacity 0.15s ease-out",
           }}
         />
         <div className="flex min-w-0 flex-1 items-center gap-3 py-1 z-10">
@@ -798,7 +794,7 @@ export const ChecklistActivity: React.FC = () => {
         [key]: nextState,
       }));
       sortTimersRef.current.delete(key);
-    }, prefersReducedMotion ? 0 : 480);
+    }, prefersReducedMotion ? 0 : 150);
     sortTimersRef.current.set(key, timer);
   };
 
