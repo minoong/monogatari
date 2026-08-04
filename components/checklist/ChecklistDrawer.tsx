@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import Image from "next/image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -18,7 +19,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import {
   Drawer,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerPanel,
@@ -120,22 +120,39 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
         <Form
           ref={formRef}
           aria-label="준비물 추가"
-          className="flex min-h-0 w-full flex-1 flex-col"
+          className="flex min-h-0 w-full flex-1 flex-col bg-popover"
           onSubmit={handleSubmit}
           validationBehavior="native"
         >
           <div className="flex min-h-0 w-full flex-1 flex-col">
             <div>
-              <DrawerHeader className="px-6 pb-4 text-left">
-                <DrawerTitle>준비물 추가</DrawerTitle>
-                <DrawerDescription className="text-pretty">
-                  무엇을 누가 챙길지 정해 두면 여행 준비가 한결 가벼워져요.
-                </DrawerDescription>
+              <DrawerHeader className="px-6 pb-1 pt-6 text-center">
+                <DrawerTitle className="text-xl font-bold text-gray-900">
+                  준비물 추가
+                </DrawerTitle>
               </DrawerHeader>
             </div>
 
-            <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto overscroll-contain px-6 py-5">
-              <div>
+            <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
+              <div className="flex flex-col items-center justify-center">
+                <div className="relative h-44 w-full max-w-[280px] overflow-hidden rounded-2xl border border-gray-100 shadow-sm my-1">
+                  <Image
+                    src="/ruka-add.jpg"
+                    alt="루카 이미지"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 280px, 280px"
+                  />
+                </div>
+                <p className="mt-2 text-center text-sm font-medium text-gray-800">
+                  절대 방심하면 안 되니까요! 무엇을 누가 챙길지 확실히 기록해 둘게요!
+                </p>
+                <p className="mt-0.5 text-center text-xs text-gray-400">
+                  제 가슴의 두근거림을 멈출 수 없을 테니까요! 💕
+                </p>
+              </div>
+
+              <div className="space-y-4 pt-1">
                 <TextField
                   fullWidth
                   isRequired
@@ -143,26 +160,24 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                   value={title}
                   onChange={setTitle}
                 >
-                  <Label>준비물 이름</Label>
+                  <Label className="text-sm font-bold text-gray-900">준비물 이름</Label>
                   <Input
                     ref={inputRef}
                     autoComplete="off"
                     placeholder="예: 보조배터리…"
                   />
-                  <Description>짧고 알아보기 쉬운 이름이 좋아요.</Description>
+                  <Description className="text-xs text-gray-500">짧고 알아보기 쉬운 이름이 좋아요.</Description>
                 </TextField>
-              </div>
 
-              <div>
                 <CheckboxGroup
-                  className="gap-3"
+                  className="gap-2"
                   isRequired
                   name="targets"
                   value={targets}
                   onChange={setTargets}
                 >
-                  <Label>담당자</Label>
-                  <Description>한 명 이상 선택해 주세요.</Description>
+                  <Label className="text-sm font-bold text-gray-900">담당자</Label>
+                  <Description className="text-xs text-gray-500">한 명 이상 선택해 주세요.</Description>
                   <div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">
                     {targetOptions.map((target) => (
                       <Checkbox key={target.value} value={target.value}>
@@ -199,19 +214,21 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
               >
                 <Button
                   fullWidth
-                  className="h-12 rounded-2xl text-base"
+                  className="h-12 rounded-2xl bg-gray-100 text-base font-bold text-gray-800 hover:bg-gray-200 active:bg-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
                   isDisabled={addMutation.isPending}
                   size="lg"
                   type="button"
-                  variant="secondary"
-                  onPress={handleCancel}
+                  onPress={() => {
+                    triggerHapticFeedback(10);
+                    handleCancel();
+                  }}
                 >
                   취소
                 </Button>
                 <div className="relative h-12 min-w-0">
                   <StatusButton
                     aria-hidden="true"
-                    className="pointer-events-none h-12 rounded-2xl text-base"
+                    className="pointer-events-none h-12 rounded-2xl text-base font-bold"
                     fullWidth
                     isDisabled={!canSubmit || success}
                     idleText="추가하기"
