@@ -10,7 +10,6 @@ import { supabase } from "../lib/supabase";
 import NumberFlow from "@number-flow/react";
 import { Skeleton } from "../components/ui/skeleton";
 import NeumorphButton from "../components/ui/neumorph-button";
-import { Checkbox } from "../components/animate-ui/components/radix/checkbox";
 import {
   Tabs as AnimateTabs,
   TabsContent as AnimateTabsContent,
@@ -289,7 +288,6 @@ const SwipeableItem = ({
     (item.assignees.includes(targetUser) && item.assignees.includes(otherUser));
   const isOtherUserChecked =
     item.completed_by.includes(otherUser) || item.completed_by.includes("all");
-  const checkboxId = `checkbox-${targetUser}-${item.id}`;
   const prefersReducedMotion = useReducedMotion();
   const [willDelete, setWillDelete] = useState(false);
   const [willNudge, setWillNudge] = useState(false);
@@ -516,38 +514,11 @@ const SwipeableItem = ({
             opacity: { duration: 0.15 },
           }}
         />
-        <div className="relative size-5 shrink-0">
-          <Checkbox
-            variant="default"
-            checked={isChecked}
-            id={`${checkboxId}-visual`}
-            className="pointer-events-none absolute inset-0 size-5"
-          />
-          <NativeHapticSwitch
-            ariaLabel={`${item.title} 완료 여부`}
-            checked={isChecked}
-            className="touch-pan-y"
-            id={checkboxId}
-            onClick={(event) => {
-              if (didDragRef.current) {
-                event.preventDefault();
-                event.stopPropagation();
-              }
-            }}
-            onChange={(event) => {
-              if (!didDragRef.current) {
-                triggerHapticFeedback(10);
-                onToggleCheck(item.id, targetUser, event.currentTarget.checked);
-              }
-            }}
-          />
-        </div>
-        <div className="flex min-w-0 flex-1 items-center gap-3 py-1">
+        <div className="flex min-w-0 flex-1 items-center gap-3 py-1 z-10">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <div className="flex min-w-0 flex-1 flex-col items-start">
-              <label
-                htmlFor={checkboxId}
-                className={`relative inline-block max-w-full break-words text-[16px] font-medium leading-6 tracking-tight transition-colors cursor-pointer select-none ${
+              <span
+                className={`relative inline-block max-w-full break-words text-[16px] font-medium leading-6 tracking-tight transition-colors select-none ${
                   isChecked ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-100"
                 }`}
               >
@@ -573,7 +544,7 @@ const SwipeableItem = ({
                     transition={{ duration: prefersReducedMotion ? 0 : 0.45, ease: "easeInOut" }}
                   />
                 </motion.svg>
-              </label>
+              </span>
               {isShared && (
                 <div
                   aria-label={`${otherUserLabel} ${isOtherUserChecked ? "완료" : "미완료"}`}
