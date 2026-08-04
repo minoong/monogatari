@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import NumberFlow from "@number-flow/react";
+import { AnimatedContent } from "../components/ui/animated-content";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
@@ -319,96 +320,106 @@ const BangkokDepartureCard: React.FC = () => {
       <div className="absolute -right-3 top-1/2 size-6 -translate-y-1/2 rounded-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 z-10" aria-hidden="true" />
 
       {/* Ticket Header Bar - Korean Air Deep Blue */}
-      <div className="bg-[#00256C] px-5 py-3 text-white flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-black tracking-widest uppercase text-cyan-300">
-            BOARDING PASS
-          </span>
-          <span className="text-[10px] text-blue-200/70 font-mono">KE657</span>
+      <AnimatedContent distance={20} direction="vertical" duration={0.6} delay={0.05}>
+        <div className="bg-[#00256C] px-5 py-3 text-white flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-black tracking-widest uppercase text-cyan-300">
+              BOARDING PASS
+            </span>
+            <span className="text-[10px] text-blue-200/70 font-mono">KE657</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold">
+            <span>인천 ICN</span>
+            <span className="text-cyan-400">✈️</span>
+            <span>방콕 BKK</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 text-xs font-bold">
-          <span>인천 ICN</span>
-          <span className="text-cyan-400">✈️</span>
-          <span>방콕 BKK</span>
-        </div>
-      </div>
+      </AnimatedContent>
 
       <div className="p-5 flex flex-col gap-4">
         {/* Departure Time & Flight Info */}
-        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-b border-slate-200/60 pb-3 dark:border-slate-800">
-          <div>
-            <p className="text-[10px] uppercase font-bold text-slate-400">출발일시</p>
-            <p className="font-semibold text-slate-800 dark:text-slate-200">2026.08.29 (토) 10:40</p>
+        <AnimatedContent distance={25} direction="vertical" duration={0.6} delay={0.15}>
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-b border-slate-200/60 pb-3 dark:border-slate-800">
+            <div>
+              <p className="text-[10px] uppercase font-bold text-slate-400">출발일시</p>
+              <p className="font-semibold text-slate-800 dark:text-slate-200">2026.08.29 (토) 10:40</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] uppercase font-bold text-slate-400">항공편</p>
+              <p className="font-semibold text-slate-800 dark:text-slate-200">대한항공 A330-300</p>
+            </div>
           </div>
-          <div className="text-right">
-            <p className="text-[10px] uppercase font-bold text-slate-400">항공편</p>
-            <p className="font-semibold text-slate-800 dark:text-slate-200">대한항공 A330-300</p>
-          </div>
-        </div>
+        </AnimatedContent>
 
         {/* Center Main D-Day Hero */}
-        <div className="flex flex-col items-center justify-center py-2">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-            카운트다운
-          </span>
-          <div
-            className="font-black text-6xl tracking-tighter text-[#00256C] dark:text-cyan-400"
-            style={{ fontFamily: "var(--font-korean-air)" }}
-          >
-            <NumberFlow value={timeLeft.days} prefix="D-" />
-          </div>
+        <AnimatedContent distance={30} direction="vertical" duration={0.7} delay={0.25}>
+          <div className="flex flex-col items-center justify-center py-2">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+              카운트다운
+            </span>
+            <div
+              className="font-black text-6xl tracking-tighter text-[#00256C] dark:text-cyan-400"
+              style={{ fontFamily: "var(--font-korean-air)" }}
+            >
+              <NumberFlow value={timeLeft.days} prefix="D-" />
+            </div>
 
-          {/* Realtime Rolling Clock */}
-          <div className="mt-3 flex items-center justify-center gap-1.5 rounded-full bg-slate-200/60 px-4 py-1.5 font-mono text-sm font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-            <NumberFlow value={timeLeft.hours} format={{ minimumIntegerDigits: 2 }} />
-            <span className="text-blue-600 dark:text-cyan-400 font-extrabold animate-pulse">:</span>
-            <NumberFlow value={timeLeft.minutes} format={{ minimumIntegerDigits: 2 }} />
-            <span className="text-blue-600 dark:text-cyan-400 font-extrabold animate-pulse">:</span>
-            <NumberFlow value={timeLeft.seconds} format={{ minimumIntegerDigits: 2 }} />
-            <span className="ml-1 text-[10px] font-sans font-semibold text-slate-500 dark:text-slate-400">남음</span>
+            {/* Realtime Rolling Clock */}
+            <div className="mt-3 flex items-center justify-center gap-1.5 rounded-full bg-slate-200/60 px-4 py-1.5 font-mono text-sm font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
+              <NumberFlow value={timeLeft.hours} format={{ minimumIntegerDigits: 2 }} />
+              <span className="text-blue-600 dark:text-cyan-400 font-extrabold animate-pulse">:</span>
+              <NumberFlow value={timeLeft.minutes} format={{ minimumIntegerDigits: 2 }} />
+              <span className="text-blue-600 dark:text-cyan-400 font-extrabold animate-pulse">:</span>
+              <NumberFlow value={timeLeft.seconds} format={{ minimumIntegerDigits: 2 }} />
+              <span className="ml-1 text-[10px] font-sans font-semibold text-slate-500 dark:text-slate-400">남음</span>
+            </div>
           </div>
-        </div>
+        </AnimatedContent>
 
         {/* Ticket Perforated Dashed Line */}
-        <div className="relative my-1">
-          <div className="border-t-2 border-dashed border-slate-300 dark:border-slate-700" aria-hidden="true" />
-        </div>
+        <AnimatedContent distance={15} direction="vertical" duration={0.5} delay={0.35}>
+          <div className="relative my-1">
+            <div className="border-t-2 border-dashed border-slate-300 dark:border-slate-700" aria-hidden="true" />
+          </div>
+        </AnimatedContent>
 
         {/* Bottom Ticket Barcode & Passenger Section */}
-        <div className="flex items-center justify-between pt-1">
-          <div>
-            <p className="text-[10px] uppercase font-bold text-slate-400">승객</p>
-            <p className="text-xs font-bold text-slate-800 dark:text-slate-200">내 가현짱. ❤️ 내 멍멍이.</p>
-          </div>
-
-          {/* Ticket Barcode Graphic */}
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex h-7 items-center gap-[1.5px]" aria-hidden="true">
-              <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
-              <div className="h-full w-[1px] bg-transparent" />
-              <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
-              <div className="h-full w-[2px] bg-transparent" />
-              {[1, 0, 3, 1, 0, 5, 2, 7, 0, 8, 3, 1].map((digit, idx) => (
-                <React.Fragment key={idx}>
-                  <div
-                    className="h-full bg-slate-800 dark:bg-slate-200"
-                    style={{ width: `${Math.max(1.5, ((digit % 4) + 1) * 1.5)}px` }}
-                  />
-                  <div
-                    className="h-full bg-transparent"
-                    style={{ width: `${((idx % 3) + 1) * 1.2}px` }}
-                  />
-                </React.Fragment>
-              ))}
-              <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
-              <div className="h-full w-[1px] bg-transparent" />
-              <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
+        <AnimatedContent distance={25} direction="vertical" duration={0.6} delay={0.45}>
+          <div className="flex items-center justify-between pt-1">
+            <div>
+              <p className="text-[10px] uppercase font-bold text-slate-400">승객</p>
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-200">내 가현짱. ❤️ 내 멍멍이.</p>
             </div>
-            <span className="font-mono text-[9.5px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.18em]">
-              1031 · 0527 · 0831
-            </span>
+
+            {/* Ticket Barcode Graphic */}
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex h-6 items-center gap-[1.5px]" aria-hidden="true">
+                <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
+                <div className="h-full w-[1px] bg-transparent" />
+                <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
+                <div className="h-full w-[2px] bg-transparent" />
+                {[1, 0, 3, 1, 0, 5, 2, 7, 0, 8, 3, 1].map((digit, idx) => (
+                  <React.Fragment key={idx}>
+                    <div
+                      className="h-full bg-slate-800 dark:bg-slate-200"
+                      style={{ width: `${Math.max(1.5, ((digit % 4) + 1) * 1.5)}px` }}
+                    />
+                    <div
+                      className="h-full bg-transparent"
+                      style={{ width: `${((idx % 3) + 1) * 1.2}px` }}
+                    />
+                  </React.Fragment>
+                ))}
+                <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
+                <div className="h-full w-[1px] bg-transparent" />
+                <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
+              </div>
+              <span className="font-mono text-[9.5px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.18em]">
+                1031 · 0527 · 0831
+              </span>
+            </div>
           </div>
-        </div>
+        </AnimatedContent>
       </div>
     </section>
   );
