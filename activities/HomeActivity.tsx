@@ -313,37 +313,90 @@ const BangkokDepartureCard: React.FC = () => {
   }, []);
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-gray-200/80 bg-[#f5f4f3] p-7 text-black shadow-sm dark:border-white/10 dark:bg-[#1C1C1E] dark:text-white flex flex-col items-center justify-center text-center">
-      {/* Skiper37 Top Label & Vertical Accent Line */}
-      <div className="flex flex-col items-center gap-1.5 mb-1">
-        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
-          Bangkok Departure
-        </span>
-        <div className="h-5 w-px bg-gradient-to-b from-gray-300 to-gray-400 dark:from-white/20 dark:to-white/40" aria-hidden="true" />
-      </div>
+    <section className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-[#F8FAFC] text-slate-900 shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-white">
+      {/* Side Ticket Cutouts */}
+      <div className="absolute -left-3 top-1/2 size-6 -translate-y-1/2 rounded-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 z-10" aria-hidden="true" />
+      <div className="absolute -right-3 top-1/2 size-6 -translate-y-1/2 rounded-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 z-10" aria-hidden="true" />
 
-      {/* Massive Skiper37 D-Day Hero Typography */}
-      <div className="font-extrabold text-7xl sm:text-8xl tracking-tighter text-black dark:text-white my-1 leading-none">
-        <NumberFlow value={timeLeft.days} prefix="D-" />
-      </div>
-
-      {/* Separated Live Time Clock Pill */}
-      <div className="mt-4 flex items-center justify-center gap-3 rounded-2xl bg-white/80 backdrop-blur-md px-5 py-2.5 shadow-sm border border-gray-200/60 dark:bg-white/10 dark:border-white/10">
-        <div className="flex items-center gap-1 font-mono text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-          <NumberFlow value={timeLeft.hours} format={{ minimumIntegerDigits: 2 }} />
-          <span className="text-[#ff3828] font-extrabold animate-pulse">:</span>
-          <NumberFlow value={timeLeft.minutes} format={{ minimumIntegerDigits: 2 }} />
-          <span className="text-[#ff3828] text-xl sm:text-2xl font-extrabold animate-pulse">:</span>
-          <NumberFlow value={timeLeft.seconds} format={{ minimumIntegerDigits: 2 }} />
+      {/* Ticket Header Bar - Korean Air Deep Blue */}
+      <div className="bg-[#00256C] px-5 py-3 text-white flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-black tracking-widest uppercase text-cyan-300">
+            BOARDING PASS
+          </span>
+          <span className="text-[10px] text-blue-200/70 font-mono">KE657</span>
         </div>
-        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 border-l border-gray-300/60 pl-3 dark:border-white/20">
-          남은 시간
-        </span>
+        <div className="flex items-center gap-1.5 text-xs font-bold">
+          <span>인천 ICN</span>
+          <span className="text-cyan-400">✈️</span>
+          <span>방콕 BKK</span>
+        </div>
       </div>
 
-      {/* Footer Schedule */}
-      <div className="mt-4 text-xs font-semibold text-gray-500 dark:text-gray-400">
-        2026.08.29 (토) 10:40 · 인천 (ICN) → 방콕 (BKK)
+      <div className="p-5 flex flex-col gap-4">
+        {/* Departure Time & Flight Info */}
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-b border-slate-200/60 pb-3 dark:border-slate-800">
+          <div>
+            <p className="text-[10px] uppercase font-bold text-slate-400">출발일시</p>
+            <p className="font-semibold text-slate-800 dark:text-slate-200">2026.08.29 (토) 10:40</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] uppercase font-bold text-slate-400">항공편</p>
+            <p className="font-semibold text-slate-800 dark:text-slate-200">대한항공 A330-300</p>
+          </div>
+        </div>
+
+        {/* Center Main D-Day Hero */}
+        <div className="flex flex-col items-center justify-center py-2">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+            카운트다운
+          </span>
+          <div
+            className="font-black text-6xl tracking-tighter text-[#00256C] dark:text-cyan-400"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
+          >
+            <NumberFlow value={timeLeft.days} prefix="D-" />
+          </div>
+
+          {/* Realtime Rolling Clock */}
+          <div className="mt-3 flex items-center justify-center gap-1.5 rounded-full bg-slate-200/60 px-4 py-1.5 font-mono text-sm font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
+            <NumberFlow value={timeLeft.hours} format={{ minimumIntegerDigits: 2 }} />
+            <span className="text-blue-600 dark:text-cyan-400 font-extrabold animate-pulse">:</span>
+            <NumberFlow value={timeLeft.minutes} format={{ minimumIntegerDigits: 2 }} />
+            <span className="text-blue-600 dark:text-cyan-400 font-extrabold animate-pulse">:</span>
+            <NumberFlow value={timeLeft.seconds} format={{ minimumIntegerDigits: 2 }} />
+            <span className="ml-1 text-[10px] font-sans font-semibold text-slate-500 dark:text-slate-400">남음</span>
+          </div>
+        </div>
+
+        {/* Ticket Perforated Dashed Line */}
+        <div className="relative my-1">
+          <div className="border-t-2 border-dashed border-slate-300 dark:border-slate-700" aria-hidden="true" />
+        </div>
+
+        {/* Bottom Ticket Barcode & Passenger Section */}
+        <div className="flex items-center justify-between pt-1">
+          <div>
+            <p className="text-[10px] uppercase font-bold text-slate-400">승객</p>
+            <p className="text-xs font-bold text-slate-800 dark:text-slate-200">GAHYUN & MINU</p>
+          </div>
+
+          {/* Ticket Barcode Graphic */}
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex h-6 items-center gap-0.5" aria-hidden="true">
+              {[2, 1, 3, 1, 2, 4, 1, 2, 1, 3, 1, 2, 1, 4, 2, 1, 3, 1, 2].map((w, i) => (
+                <div
+                  key={i}
+                  className="h-full bg-slate-800 dark:bg-slate-300"
+                  style={{ width: `${w * 1.5}px` }}
+                />
+              ))}
+            </div>
+            <span className="font-mono text-[9px] text-slate-400 tracking-wider">
+              KE 657 BKK 20260829
+            </span>
+          </div>
+        </div>
       </div>
     </section>
   );
