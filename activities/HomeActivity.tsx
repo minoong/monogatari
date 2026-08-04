@@ -378,7 +378,7 @@ const BangkokDepartureCard: React.FC = () => {
         <div className="flex items-center justify-between pt-1">
           <div>
             <p className="text-[10px] uppercase font-bold text-slate-400">승객</p>
-            <p className="text-xs font-bold text-slate-800 dark:text-slate-200">GAHYUN & MINU</p>
+            <p className="text-xs font-bold text-slate-800 dark:text-slate-200">내 가현짱. ❤️ 내 멍멍이.</p>
           </div>
 
           {/* Ticket Barcode Graphic */}
