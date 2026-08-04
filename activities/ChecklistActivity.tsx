@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { supabase } from "../lib/supabase";
 import NumberFlow from "@number-flow/react";
 import { Skeleton } from "../components/ui/skeleton";
-import { ImportanceChip } from "../components/ui/chip";
 import NeumorphButton from "../components/ui/neumorph-button";
 import { Checkbox } from "../components/animate-ui/components/radix/checkbox";
 import {
@@ -262,7 +261,6 @@ const SwipeHint = () => {
         >
           <span className="flex size-5 shrink-0 items-center justify-center rounded-md border-2 border-gray-300 dark:border-gray-600" />
           <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-800 dark:text-gray-100">여행용 충전기</span>
-          <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">보통</span>
         </motion.div>
       </div>
           </motion.div>
@@ -498,9 +496,6 @@ const SwipeableItem = ({
                   <span>{otherUserLabel} · {isOtherUserChecked ? "완료" : "대기"}</span>
                 </div>
               )}
-            </div>
-            <div className="shrink-0">
-              <ImportanceChip importance={item.importance} />
             </div>
           </div>
         </div>
