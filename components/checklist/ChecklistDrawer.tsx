@@ -10,14 +10,11 @@ import {
   Form,
   Input,
   Label,
-  Radio,
-  RadioGroup,
   TextField,
 } from "@heroui/react";
 import StatusButton from "@/components/animata/button/status-button";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ImportanceChip } from "@/components/ui/chip";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import {
   Drawer,
@@ -34,16 +31,6 @@ interface ChecklistDrawerProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type Importance = "high" | "normal" | "low";
-
-const importanceOptions: Array<{
-  value: Importance;
-}> = [
-  { value: "high" },
-  { value: "normal" },
-  { value: "low" },
-];
-
 const targetOptions = [
   { value: "gahyun", label: "가현쨩", initials: "G", image: "/avatars/gahyun.webp", color: "accent" as const },
   { value: "minu", label: "미누쿤", initials: "M", image: "/avatars/minu.webp", color: "success" as const },
@@ -52,7 +39,6 @@ const targetOptions = [
 export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
-  const [importance, setImportance] = useState<Importance>("normal");
   const [targets, setTargets] = useState<string[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -62,7 +48,6 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
 
   const resetForm = () => {
     setTitle("");
-    setImportance("normal");
     setTargets([]);
     setSubmitError(null);
     setSuccess(false);
@@ -84,7 +69,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
       title: string;
       type: string;
       assignees: string[];
-      importance: Importance;
+      importance: "high" | "normal" | "low";
     }) => {
       const response = await fetch("/api/checklist", {
         method: "POST",
@@ -119,7 +104,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
       title: trimmedTitle,
       type: "personal",
       assignees: targets,
-      importance,
+      importance: "normal",
     });
   };
 
@@ -167,30 +152,6 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                   />
                   <Description>짧고 알아보기 쉬운 이름이 좋아요.</Description>
                 </TextField>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <Label>중요도</Label>
-                <Description>준비 순서를 정할 때 사용해요.</Description>
-                <RadioGroup
-                  className="pt-1"
-                  isRequired
-                  name="importance"
-                  orientation="horizontal"
-                  value={importance}
-                  onChange={(value) => setImportance(value as Importance)}
-                >
-                  {importanceOptions.map((option) => (
-                    <Radio key={option.value} value={option.value}>
-                      <Radio.Content className="flex items-center gap-2">
-                        <Radio.Control>
-                          <Radio.Indicator />
-                        </Radio.Control>
-                        <ImportanceChip importance={option.value} />
-                      </Radio.Content>
-                    </Radio>
-                  ))}
-                </RadioGroup>
               </div>
 
               <div>
