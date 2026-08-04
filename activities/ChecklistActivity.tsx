@@ -519,6 +519,8 @@ export const ChecklistActivity: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
   const locallyUpdatingKeys = useRef(new Set<string>());
   const toggleEntriesRef = useRef(new Map<string, ToggleEntry>());
+  const [sortCompletedMap, setSortCompletedMap] = useState<Record<string, boolean>>({});
+  const sortTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const mergePendingUpdates = (item: PreparationItem) => {
     return Array.from(toggleEntriesRef.current.values())
@@ -717,17 +719,41 @@ export const ChecklistActivity: React.FC = () => {
     if (!entry.baseItems) entry.baseItems = currentItems;
     toggleEntriesRef.current.set(key, entry);
     triggerHapticFeedback(10);
+
+    const currentSortState = isSortCompletedFor(currentItem, targetUser);
+    setSortCompletedMap((prev) => ({
+      ...prev,
+      [key]: currentSortState,
+    }));
+
     updateOptimisticToggle(id, targetUser, entry.desired);
     scheduleToggle(key);
+
+    const existingTimer = sortTimersRef.current.get(key);
+    if (existingTimer) clearTimeout(existingTimer);
+
+    const timer = setTimeout(() => {
+      setSortCompletedMap((prev) => ({
+        ...prev,
+        [key]: nextState,
+      }));
+      sortTimersRef.current.delete(key);
+    }, prefersReducedMotion ? 0 : 480);
+    sortTimersRef.current.set(key, timer);
   };
 
   useEffect(() => {
     const entries = toggleEntriesRef.current;
+    const sortTimers = sortTimersRef.current;
     return () => {
       for (const entry of entries.values()) {
         if (entry.timer) clearTimeout(entry.timer);
       }
       entries.clear();
+      for (const timer of sortTimers.values()) {
+        clearTimeout(timer);
+      }
+      sortTimers.clear();
     };
   }, []);
 
@@ -811,14 +837,22 @@ export const ChecklistActivity: React.FC = () => {
   const isCompletedFor = (item: PreparationItem, targetUser: string) =>
     item.completed_by.includes(targetUser) || item.completed_by.includes("all");
 
+  const isSortCompletedFor = (item: PreparationItem, targetUser: string) => {
+    const key = `${targetUser}:${item.id}`;
+    if (key in sortCompletedMap) {
+      return sortCompletedMap[key];
+    }
+    return isCompletedFor(item, targetUser);
+  };
+
   const renderList = (list: PreparationItem[], targetUser: string) => {
     if (list.length === 0) {
       return <div className="text-sm text-gray-400 py-4 text-center">등록된 항목이 없습니다.</div>;
     }
 
     const sortedList = [
-      ...list.filter((item) => !isCompletedFor(item, targetUser)),
-      ...list.filter((item) => isCompletedFor(item, targetUser)),
+      ...list.filter((item) => !isSortCompletedFor(item, targetUser)),
+      ...list.filter((item) => isSortCompletedFor(item, targetUser)),
     ];
 
     return (
