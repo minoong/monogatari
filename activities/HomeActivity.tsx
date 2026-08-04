@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import NumberFlow from "@number-flow/react";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
@@ -196,95 +197,95 @@ const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }>
   const automaticRoll = useAutomaticRoll(ACCOMMODATIONS.length + 1);
 
   return (
-  <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white p-4 shadow-sm">
-    <div className="mb-3 flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2">
-        <span className="flex size-8 items-center justify-center rounded-xl bg-gray-100 text-gray-600"><Hotel size={17} /></span>
-        <div>
-          <p className="text-sm font-bold text-gray-900">HP!</p>
-          <p className="text-[11px] text-gray-400">8/29–9/1 · 3곳</p>
+    <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="flex size-8 items-center justify-center rounded-xl bg-gray-100 text-gray-600"><Hotel size={17} /></span>
+          <div>
+            <p className="text-sm font-bold text-gray-900">HP!</p>
+            <p className="text-[11px] text-gray-400">8/29–9/1 · 3곳</p>
+          </div>
         </div>
+        <DotLottieReact
+          src="/reservation-heart.lottie"
+          autoplay
+          loop
+          aria-hidden="true"
+          className="size-11 shrink-0"
+        />
       </div>
-      <DotLottieReact
-        src="/reservation-heart.lottie"
-        autoplay
-        loop
-        aria-hidden="true"
-        className="size-11 shrink-0"
+
+      <MinimalCardExpand
+        className="h-[300px]"
+        onExpandedClick={(id) => onOpen(id === "stay-summary" ? "all" : id as Accommodation["id"])}
+        items={[
+          {
+            id: ACCOMMODATIONS[0].id,
+            title: ACCOMMODATIONS[0].city,
+            value: `${ACCOMMODATIONS[0].date} · ${ACCOMMODATIONS[0].checkIn}`,
+            colorClassName: "bg-slate-800",
+            imageUrl: ACCOMMODATIONS[0].imageUrl,
+            expandedActions: {
+              primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[0].name}</span>,
+              secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[0].checkOut}</span>,
+            },
+          },
+          {
+            id: ACCOMMODATIONS[1].id,
+            title: ACCOMMODATIONS[1].city,
+            value: `${ACCOMMODATIONS[1].date} · ${ACCOMMODATIONS[1].checkIn}`,
+            colorClassName: "bg-slate-800",
+            imageUrl: ACCOMMODATIONS[1].imageUrl,
+            expandedActions: {
+              primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[1].name}</span>,
+              secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[1].checkOut}</span>,
+            },
+          },
+          {
+            id: ACCOMMODATIONS[2].id,
+            title: ACCOMMODATIONS[2].city,
+            value: `${ACCOMMODATIONS[2].date} · ${ACCOMMODATIONS[2].checkIn}`,
+            colorClassName: "bg-slate-800",
+            imageUrl: ACCOMMODATIONS[2].imageUrl,
+            expandedActions: {
+              primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[2].name}</span>,
+              secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[2].checkOut}</span>,
+            },
+          },
+          {
+            id: "stay-summary",
+            title: "숙소 전체",
+            value: "3곳 예약 완료",
+            icon: <Hotel size={24} aria-hidden="true" />,
+            colorClassName: "bg-indigo-600",
+            imageUrl: "/accommodation-overview.jpg",
+            expandedActions: {
+              primary: <span className="text-sm font-semibold">8월 29일 – 9월 1일</span>,
+              secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">3박 4일</span>,
+            },
+          },
+        ]}
       />
-    </div>
 
-    <MinimalCardExpand
-      className="h-[300px]"
-      onExpandedClick={(id) => onOpen(id === "stay-summary" ? "all" : id as Accommodation["id"])}
-      items={[
-        {
-          id: ACCOMMODATIONS[0].id,
-          title: ACCOMMODATIONS[0].city,
-          value: `${ACCOMMODATIONS[0].date} · ${ACCOMMODATIONS[0].checkIn}`,
-          colorClassName: "bg-slate-800",
-          imageUrl: ACCOMMODATIONS[0].imageUrl,
-          expandedActions: {
-            primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[0].name}</span>,
-            secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[0].checkOut}</span>,
-          },
-        },
-        {
-          id: ACCOMMODATIONS[1].id,
-          title: ACCOMMODATIONS[1].city,
-          value: `${ACCOMMODATIONS[1].date} · ${ACCOMMODATIONS[1].checkIn}`,
-          colorClassName: "bg-slate-800",
-          imageUrl: ACCOMMODATIONS[1].imageUrl,
-          expandedActions: {
-            primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[1].name}</span>,
-            secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[1].checkOut}</span>,
-          },
-        },
-        {
-          id: ACCOMMODATIONS[2].id,
-          title: ACCOMMODATIONS[2].city,
-          value: `${ACCOMMODATIONS[2].date} · ${ACCOMMODATIONS[2].checkIn}`,
-          colorClassName: "bg-slate-800",
-          imageUrl: ACCOMMODATIONS[2].imageUrl,
-          expandedActions: {
-            primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[2].name}</span>,
-            secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[2].checkOut}</span>,
-          },
-        },
-        {
-          id: "stay-summary",
-          title: "숙소 전체",
-          value: "3곳 예약 완료",
-          icon: <Hotel size={24} aria-hidden="true" />,
-          colorClassName: "bg-indigo-600",
-          imageUrl: "/accommodation-overview.jpg",
-          expandedActions: {
-            primary: <span className="text-sm font-semibold">8월 29일 – 9월 1일</span>,
-            secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">3박 4일</span>,
-          },
-        },
-      ]}
-    />
-
-    <div className="group relative mt-3">
-      <div aria-hidden="true" className="relative flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-sm font-bold text-white transition-transform duration-150 ease-out group-active:scale-[0.98]">
-        <AutoImageRoll imageUrls={["/accommodation-overview.jpg", ...ACCOMMODATIONS.map((stay) => stay.imageUrl)]} {...automaticRoll} />
-        <span className="relative z-10 flex w-64 max-w-[calc(100%-1rem)] items-center gap-1 drop-shadow-sm">
-          <AutoTextRoll labels={["HP! 위치 찾기!", ...ACCOMMODATIONS.map((stay) => stay.name)]} {...automaticRoll} />
-          <ChevronRight size={17} className="shrink-0" />
-        </span>
+      <div className="group relative mt-3">
+        <div aria-hidden="true" className="relative flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-sm font-bold text-white transition-transform duration-150 ease-out group-active:scale-[0.98]">
+          <AutoImageRoll imageUrls={["/accommodation-overview.jpg", ...ACCOMMODATIONS.map((stay) => stay.imageUrl)]} {...automaticRoll} />
+          <span className="relative z-10 flex w-64 max-w-[calc(100%-1rem)] items-center gap-1 drop-shadow-sm">
+            <AutoTextRoll labels={["HP! 위치 찾기!", ...ACCOMMODATIONS.map((stay) => stay.name)]} {...automaticRoll} />
+            <ChevronRight size={17} className="shrink-0" />
+          </span>
+        </div>
+        <NativeHapticSwitch
+          ariaLabel="HP! 위치 찾기"
+          checked={false}
+          onClick={() => {
+            triggerHapticFeedback(15);
+            onOpen("all");
+          }}
+          onChange={() => undefined}
+        />
       </div>
-      <NativeHapticSwitch
-        ariaLabel="HP! 위치 찾기"
-        checked={false}
-        onClick={() => {
-          triggerHapticFeedback(15);
-          onOpen("all");
-        }}
-        onChange={() => undefined}
-      />
-    </div>
-  </section>
+    </section>
   );
 };
 
@@ -306,54 +307,16 @@ const BangkokDepartureCard: React.FC = () => {
   }, []);
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-blue-200/50 bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 p-5 text-white shadow-xl dark:border-white/10">
-      {/* Ambient background glow */}
-      <div className="pointer-events-none absolute -right-10 -top-10 size-48 rounded-full bg-blue-500/20 blur-3xl" />
-      <div className="pointer-events-none absolute -left-10 -bottom-10 size-48 rounded-full bg-indigo-500/20 blur-3xl" />
-
-      <div className="relative z-10 flex flex-col gap-4">
-        {/* Top Header Row */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-white/10 backdrop-blur-md text-xl">
-              ✈️
-            </span>
-            <div>
-              <h2 className="text-base font-bold text-white tracking-tight">방콕 출발까지</h2>
-              <p className="text-xs text-blue-200/80">2026.08.29 인천 (ICN) → 방콕 (BKK)</p>
-            </div>
-          </div>
-          <span className="rounded-full bg-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-300 border border-blue-400/30">
-            D-DAY
-          </span>
-        </div>
-
-        {/* Skiper37 Style Large D-N Counter */}
-        <div className="my-1 flex items-baseline justify-between border-y border-white/10 py-3">
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-black text-cyan-400 tracking-tight">D-</span>
-            <div
-              className="text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-blue-400"
-              style={{ fontFamily: "var(--font-geist-mono)" }}
-            >
-              <SlidingNumber value={Math.abs(diffDays)} />
-            </div>
-          </div>
-          <div className="text-right">
-            <span className="text-xs text-slate-300 font-medium">8월 29일 토요일 10:40</span>
-            <p className="text-[11px] text-cyan-300/80 font-semibold">대한항공 KE657</p>
-          </div>
-        </div>
-
-        {/* Bottom Status bar */}
-        <div className="flex items-center justify-between text-xs text-slate-300">
-          <span className="flex items-center gap-1.5 font-medium">
-            <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-            가현쨩 & 미누쿤 커플 여행 준비 중
-          </span>
-          <span className="font-semibold text-blue-200">3박 4일 일정</span>
-        </div>
+    <section className="relative overflow-hidden rounded-3xl border border-gray-200/80 bg-[#f5f4f3] p-6 text-black shadow-sm dark:border-white/10 dark:bg-[#1C1C1E] dark:text-white flex flex-col items-center justify-center text-center">
+      <span className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1">
+        방콕 출발까지
+      </span>
+      <div className="font-bold text-6xl tracking-tight my-2">
+        <NumberFlow value={Math.abs(diffDays)} prefix="D-" />
       </div>
+      <span className="text-xs text-gray-500 font-medium">
+        2026.08.29 (토) 10:40 · 인천 (ICN) → 방콕 (BKK)
+      </span>
     </section>
   );
 };
@@ -423,7 +386,7 @@ export const HomeActivity: React.FC = () => {
                   <span className="font-semibold">태국어 회화</span>
                 </button>
               </div>
-              
+
               <button onClick={() => push("ExchangeActivity", {})} className="p-4 bg-green-50 dark:bg-green-900/30 rounded-2xl border border-green-200 dark:border-green-800 flex justify-between items-center active:scale-95 transition-transform">
                 <div>
                   <h3 className="font-bold">빠른 환율 계산</h3>
