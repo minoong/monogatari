@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { Button } from "@heroui/react";
 import { Trash2 } from "lucide-react";
 import { triggerHapticFeedback } from "@/components/BottomNav";
@@ -47,8 +48,17 @@ export function ChecklistDeleteDrawer({
             </DrawerDescription>
           </DrawerHeader>
 
-          <DrawerPanel className="px-6 py-4">
-            <p className="text-xs text-gray-500">
+          <DrawerPanel className="flex flex-col items-center justify-center px-6 py-3">
+            <div className="relative h-44 w-full max-w-[280px] overflow-hidden rounded-2xl border border-gray-100 shadow-sm my-1">
+              <Image
+                src="/nino-delete.png"
+                alt="삭제 확인 이미지"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 280px, 280px"
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2 text-center">
               삭제된 준비물은 목록에서 제거되며, 다시 복구할 수 없습니다.
             </p>
           </DrawerPanel>
