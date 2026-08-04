@@ -116,12 +116,11 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerPopup id="checklist-drawer" variant="inset" showBar>
+      <DrawerPopup id="checklist-drawer" variant="inset" showBar data-theme="light">
         <Form
           ref={formRef}
           aria-label="준비물 추가"
           className="flex min-h-0 w-full flex-1 flex-col"
-          data-theme="light"
           onSubmit={handleSubmit}
           validationBehavior="native"
         >
@@ -194,7 +193,10 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
             </DrawerPanel>
 
             <div>
-              <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
+              <DrawerFooter
+                variant="bare"
+                className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4"
+              >
                 <Button
                   fullWidth
                   className="h-12 rounded-2xl text-base"
