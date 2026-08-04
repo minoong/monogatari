@@ -34,8 +34,8 @@ export function ChecklistDeleteDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerPopup id="checklist-delete-drawer" variant="inset" showBar data-theme="light">
-        <div className="flex min-h-0 w-full flex-1 flex-col bg-popover">
+      <DrawerPopup id="checklist-delete-drawer" variant="inset" showBar data-theme="light" className="overflow-hidden rounded-2xl">
+        <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-b-2xl bg-popover">
           <DrawerHeader className="px-6 pb-1 pt-6 text-center">
             <DrawerTitle className="text-xl font-bold text-gray-900">
               준비물 삭제
@@ -62,7 +62,7 @@ export function ChecklistDeleteDrawer({
 
           <DrawerFooter
             variant="bare"
-            className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4"
+            className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 rounded-b-2xl"
           >
             <Button
               fullWidth
