@@ -313,33 +313,38 @@ const BangkokDepartureCard: React.FC = () => {
   }, []);
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-gray-200/80 bg-[#f5f4f3] p-6 text-black shadow-sm dark:border-white/10 dark:bg-[#1C1C1E] dark:text-white flex flex-col items-center justify-center text-center">
-      <span className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1">
-        방콕 출발까지
-      </span>
-
-      {/* Live Skiper37 NumberFlow Countdown */}
-      <div className="flex items-center justify-center gap-1 font-bold text-3xl sm:text-4xl tracking-tight my-2">
-        <span className="text-gray-400 font-extrabold mr-0.5">D-</span>
-        <NumberFlow value={timeLeft.days} format={{ minimumIntegerDigits: 2 }} />
-        <span className="text-[#ff3828] text-xl sm:text-2xl font-extrabold mx-0.5 animate-pulse">:</span>
-        <NumberFlow value={timeLeft.hours} format={{ minimumIntegerDigits: 2 }} />
-        <span className="text-[#ff3828] text-xl sm:text-2xl font-extrabold mx-0.5 animate-pulse">:</span>
-        <NumberFlow value={timeLeft.minutes} format={{ minimumIntegerDigits: 2 }} />
-        <span className="text-[#ff3828] text-xl sm:text-2xl font-extrabold mx-0.5 animate-pulse">:</span>
-        <NumberFlow value={timeLeft.seconds} format={{ minimumIntegerDigits: 2 }} />
+    <section className="relative overflow-hidden rounded-3xl border border-gray-200/80 bg-[#f5f4f3] p-7 text-black shadow-sm dark:border-white/10 dark:bg-[#1C1C1E] dark:text-white flex flex-col items-center justify-center text-center">
+      {/* Skiper37 Top Label & Vertical Accent Line */}
+      <div className="flex flex-col items-center gap-1.5 mb-1">
+        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
+          Bangkok Departure
+        </span>
+        <div className="h-5 w-px bg-gradient-to-b from-gray-300 to-gray-400 dark:from-white/20 dark:to-white/40" aria-hidden="true" />
       </div>
 
-      <div className="flex items-center justify-center gap-5 text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2.5">
-        <span>일</span>
-        <span>시간</span>
-        <span>분</span>
-        <span>초</span>
+      {/* Massive Skiper37 D-Day Hero Typography */}
+      <div className="font-extrabold text-7xl sm:text-8xl tracking-tighter text-black dark:text-white my-1 leading-none">
+        <NumberFlow value={timeLeft.days} prefix="D-" />
       </div>
 
-      <span className="text-xs text-gray-500 font-medium">
+      {/* Separated Live Time Clock Pill */}
+      <div className="mt-4 flex items-center justify-center gap-3 rounded-2xl bg-white/80 backdrop-blur-md px-5 py-2.5 shadow-sm border border-gray-200/60 dark:bg-white/10 dark:border-white/10">
+        <div className="flex items-center gap-1 font-mono text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+          <NumberFlow value={timeLeft.hours} format={{ minimumIntegerDigits: 2 }} />
+          <span className="text-[#ff3828] font-extrabold animate-pulse">:</span>
+          <NumberFlow value={timeLeft.minutes} format={{ minimumIntegerDigits: 2 }} />
+          <span className="text-[#ff3828] text-xl sm:text-2xl font-extrabold animate-pulse">:</span>
+          <NumberFlow value={timeLeft.seconds} format={{ minimumIntegerDigits: 2 }} />
+        </div>
+        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 border-l border-gray-300/60 pl-3 dark:border-white/20">
+          남은 시간
+        </span>
+      </div>
+
+      {/* Footer Schedule */}
+      <div className="mt-4 text-xs font-semibold text-gray-500 dark:text-gray-400">
         2026.08.29 (토) 10:40 · 인천 (ICN) → 방콕 (BKK)
-      </span>
+      </div>
     </section>
   );
 };
