@@ -440,7 +440,7 @@ const SwipeableItem = ({
               src="/shinobu-gauge.png"
               alt="시노부 게이지"
               fill
-              className="object-cover opacity-90 contrast-105"
+              className="object-cover object-[right_75%] opacity-90 contrast-105"
               sizes="400px"
               priority
             />
