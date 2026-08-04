@@ -293,14 +293,90 @@ const SwipeableItem = ({
   const prefersReducedMotion = useReducedMotion();
   const [willDelete, setWillDelete] = useState(false);
   const [willNudge, setWillNudge] = useState(false);
+  const [pressProgress, setPressProgress] = useState(0);
+  const [isPressing, setIsPressing] = useState(false);
   const didDragRef = useRef(false);
   const x = useMotionValue(0);
   const rightBackgroundOpacity = useTransform(x, [0, -20], [0, 1]);
   const leftBackgroundOpacity = useTransform(x, [0, 20], [0, 1]);
   const itemRef = useRef<HTMLDivElement>(null);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const pressStartTimeRef = useRef<number | null>(null);
 
   const isNudgeAllowed = !isChecked && item.type === "personal";
   const dragElastic = { left: 0.5, right: isNudgeAllowed ? 0.5 : 0 };
+
+  const cancelHold = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    setIsPressing(false);
+    setPressProgress(0);
+    startPosRef.current = null;
+    pressStartTimeRef.current = null;
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (didDragRef.current) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("button, a, input")) return;
+
+    cancelHold();
+    setIsPressing(true);
+    startPosRef.current = { x: e.clientX, y: e.clientY };
+    pressStartTimeRef.current = performance.now();
+
+    const HOLD_DURATION = 400;
+
+    const updateProgress = () => {
+      if (!pressStartTimeRef.current) return;
+      const elapsed = performance.now() - pressStartTimeRef.current;
+      const progress = Math.min(elapsed / HOLD_DURATION, 1);
+      setPressProgress(progress);
+
+      if (progress < 1) {
+        animationFrameRef.current = requestAnimationFrame(updateProgress);
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(updateProgress);
+
+    holdTimerRef.current = setTimeout(() => {
+      triggerHapticFeedback(18);
+      onToggleCheck(item.id, targetUser);
+      cancelHold();
+    }, HOLD_DURATION);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!startPosRef.current || !isPressing) return;
+    const dx = Math.abs(e.clientX - startPosRef.current.x);
+    const dy = Math.abs(e.clientY - startPosRef.current.y);
+
+    if (dx > 8 || dy > 8) {
+      cancelHold();
+    }
+  };
+
+  const handlePointerUp = () => {
+    if (!isPressing) return;
+    const elapsed = pressStartTimeRef.current ? performance.now() - pressStartTimeRef.current : 0;
+    cancelHold();
+
+    if (elapsed < 350 && !didDragRef.current) {
+      triggerHapticFeedback(5);
+      toast("꾹 누르고 있으면 체크가 돼요!", {
+        duration: 1500,
+      });
+    }
+  };
 
   useEffect(() => {
     const el = itemRef.current;
@@ -316,7 +392,10 @@ const SwipeableItem = ({
       { threshold: 0.3 }
     );
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      cancelHold();
+    };
   }, []);
 
   return (
@@ -364,8 +443,14 @@ const SwipeableItem = ({
         style={{ x }}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={dragElastic}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={cancelHold}
+        onPointerLeave={cancelHold}
         onDrag={(e, info) => {
           didDragRef.current = true;
+          cancelHold();
           // Left drag (delete)
           if (info.offset.x < -80 && !willDelete) {
             setWillDelete(true);
@@ -413,16 +498,24 @@ const SwipeableItem = ({
             didDragRef.current = false;
           }, prefersReducedMotion ? 0 : 120);
         }}
-        onClick={(event) => {
-          if (didDragRef.current) return;
-          const target = event.target as HTMLElement;
-          if (target.closest("button, label, a, input")) return;
-          onToggleCheck(item.id, targetUser);
-        }}
         className={`relative z-10 flex min-h-16 select-none items-center justify-between gap-3 px-4 py-3 touch-pan-y bg-white dark:bg-[#1C1C1E] transition-colors hover:bg-gray-50 active:bg-gray-100 dark:hover:bg-white/5 dark:active:bg-white/10 ${
           isHighlighted ? "bg-yellow-50 dark:bg-yellow-900/20" : ""
         }`}
       >
+        {/* Background Hold Progress Gauge */}
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-0 bg-blue-500/15 dark:bg-blue-400/20 z-0"
+          initial={false}
+          animate={{
+            width: `${pressProgress * 100}%`,
+            opacity: pressProgress > 0 ? 1 : 0,
+          }}
+          transition={{
+            width: { duration: isPressing ? 0.04 : 0.2, ease: "linear" },
+            opacity: { duration: 0.15 },
+          }}
+        />
         <div className="relative size-5 shrink-0">
           <Checkbox
             variant="default"
