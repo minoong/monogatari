@@ -49,10 +49,10 @@ export function ChecklistDeleteDrawer({
               />
             </div>
             <p className="mt-3 text-center text-base font-medium text-gray-800">
-              <span className="font-bold text-gray-900">‘{itemTitle || "선택한 항목"}’</span> 준비물을 정말 삭제하시겠습니까?
+              정말 <span className="font-bold text-gray-900">‘{itemTitle || "선택한 항목"}’</span>(을)를 지워버릴 셈이야?
             </p>
-            <p className="mt-1 text-center text-xs text-gray-400">
-              삭제된 준비물은 목록에서 제거되며, 다시 복구할 수 없습니다.
+            <p className="mt-1 text-center text-xs text-gray-500">
+              한 번 지우면 절대 안 되돌려줄 거거든? 나중에 딴소리하기 없기야!
             </p>
           </DrawerPanel>
 
