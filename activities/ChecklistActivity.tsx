@@ -196,81 +196,6 @@ interface SwipeableItemProps {
   onNudge: (target: string) => void;
 }
 
-const SwipeHint = () => {
-  const prefersReducedMotion = useReducedMotion();
-  const [isOpen, setIsOpen] = useState(true);
-
-  return (
-    <section
-      aria-label="할 일 스와이프 사용 안내"
-      className="mb-5 overflow-hidden rounded-2xl border border-gray-200 bg-gray-50/80 p-3 dark:border-white/10 dark:bg-white/[0.04]"
-    >
-      <button
-        type="button"
-        aria-controls="checklist-swipe-hint-content"
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((open) => !open)}
-        className="flex w-full items-center justify-between gap-3 rounded-lg px-1 py-0.5 text-left text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-      >
-        <div className="flex min-w-0 items-center gap-2 font-semibold text-gray-700 dark:text-gray-200">
-          <span aria-hidden="true" className="text-base">↔</span>
-          <span className="truncate">할 일을 좌우로 밀어보세요</span>
-        </div>
-        <div className="flex shrink-0 items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
-          <span>삭제 · 알림</span>
-          <motion.span
-            aria-hidden="true"
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
-          >
-            <ChevronDown size={15} />
-          </motion.span>
-        </div>
-      </button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            id="checklist-swipe-hint-content"
-            initial={{ height: 0, opacity: 0, marginTop: 0 }}
-            animate={{ height: "auto", opacity: 1, marginTop: 8 }}
-            exit={{ height: 0, opacity: 0, marginTop: 0 }}
-            transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: "easeOut" }}
-            className="relative overflow-hidden"
-          >
-      <div className="relative h-14 overflow-hidden rounded-xl bg-gray-200/70 dark:bg-white/10">
-        <div className="absolute inset-0 flex items-center justify-between text-white" aria-hidden="true">
-          <div className="flex h-full w-1/2 items-center gap-1.5 bg-amber-500 px-3 text-xs font-semibold">
-            <Bell size={14} />
-            <span>알림</span>
-          </div>
-          <div className="flex h-full w-1/2 items-center justify-end gap-1.5 bg-red-500 px-3 text-xs font-semibold">
-            <span>삭제</span>
-            <Trash2 size={14} />
-          </div>
-        </div>
-
-        <motion.div
-          aria-hidden="true"
-          animate={prefersReducedMotion ? { x: 0 } : { x: [0, -64, 0, 64, 0] }}
-          transition={
-            prefersReducedMotion
-              ? { duration: 0 }
-              : { duration: 5.2, delay: 0.4, repeat: Infinity, repeatDelay: 1.4, ease: "easeInOut" }
-          }
-          className="absolute inset-y-0 left-0 flex w-full items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 shadow-sm dark:border-white/10 dark:bg-[#1C1C1E]"
-        >
-          <span className="flex size-5 shrink-0 items-center justify-center rounded-md border-2 border-gray-300 dark:border-gray-600" />
-          <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-800 dark:text-gray-100">여행용 충전기</span>
-        </motion.div>
-      </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
-  );
-};
-
 const SwipeableItem = ({
   item,
   targetUser,
@@ -331,7 +256,7 @@ const SwipeableItem = ({
     startPosRef.current = { x: e.clientX, y: e.clientY };
     pressStartTimeRef.current = performance.now();
 
-    const HOLD_DURATION = 400;
+    const HOLD_DURATION = 650;
 
     const updateProgress = () => {
       if (!pressStartTimeRef.current) return;
@@ -368,7 +293,7 @@ const SwipeableItem = ({
     const elapsed = pressStartTimeRef.current ? performance.now() - pressStartTimeRef.current : 0;
     cancelHold();
 
-    if (elapsed < 350 && !didDragRef.current) {
+    if (elapsed < 550 && !didDragRef.current) {
       triggerHapticFeedback(5);
       toast("꾹 누르고 있으면 체크가 돼요!", {
         duration: 1500,
@@ -975,15 +900,6 @@ export const ChecklistActivity: React.FC = () => {
         <div className="flex-1 overflow-y-auto p-4 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))]">
           {loading ? (
             <div className="flex flex-col gap-4 animate-pulse">
-              {/* Swipe Hint Skeleton */}
-              <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50/80 p-3.5 dark:border-white/10 dark:bg-white/[0.04]">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="size-5 rounded-md" />
-                  <Skeleton className="h-4 w-36 rounded-md" />
-                </div>
-                <Skeleton className="h-4 w-16 rounded-md" />
-              </div>
-
               {/* Tabs Skeleton */}
               <div className="mt-1 grid h-14 w-full grid-cols-2 gap-1 rounded-2xl bg-slate-100 p-1 dark:bg-slate-900">
                 <div className="flex items-center gap-2 rounded-xl bg-white p-2 shadow-sm dark:bg-slate-700">
@@ -1021,7 +937,6 @@ export const ChecklistActivity: React.FC = () => {
             </div>
           ) : (
             <>
-              <SwipeHint />
               <HeroTabs
                 selectedKey={packingTab}
                 onSelectionChange={(key) => setPackingTab(String(key))}
