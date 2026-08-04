@@ -288,6 +288,76 @@ const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }>
   );
 };
 
+const BangkokDepartureCard: React.FC = () => {
+  const DEPARTURE_DATE = "2026-08-29";
+  const [diffDays, setDiffDays] = useState(0);
+
+  React.useEffect(() => {
+    const calculateDiff = () => {
+      const now = dayjs().tz("Asia/Seoul").startOf("day");
+      const departure = dayjs(DEPARTURE_DATE).tz("Asia/Seoul").startOf("day");
+      const days = departure.diff(now, "day");
+      setDiffDays(days);
+    };
+
+    calculateDiff();
+    const interval = setInterval(calculateDiff, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <section className="relative overflow-hidden rounded-3xl border border-blue-200/50 bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 p-5 text-white shadow-xl dark:border-white/10">
+      {/* Ambient background glow */}
+      <div className="pointer-events-none absolute -right-10 -top-10 size-48 rounded-full bg-blue-500/20 blur-3xl" />
+      <div className="pointer-events-none absolute -left-10 -bottom-10 size-48 rounded-full bg-indigo-500/20 blur-3xl" />
+
+      <div className="relative z-10 flex flex-col gap-4">
+        {/* Top Header Row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-white/10 backdrop-blur-md text-xl">
+              ✈️
+            </span>
+            <div>
+              <h2 className="text-base font-bold text-white tracking-tight">방콕 출발까지</h2>
+              <p className="text-xs text-blue-200/80">2026.08.29 인천 (ICN) → 방콕 (BKK)</p>
+            </div>
+          </div>
+          <span className="rounded-full bg-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-300 border border-blue-400/30">
+            D-DAY
+          </span>
+        </div>
+
+        {/* Skiper37 Style Large D-N Counter */}
+        <div className="my-1 flex items-baseline justify-between border-y border-white/10 py-3">
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-black text-cyan-400 tracking-tight">D-</span>
+            <div
+              className="text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-blue-400"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              <SlidingNumber value={Math.abs(diffDays)} />
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-xs text-slate-300 font-medium">8월 29일 토요일 10:40</span>
+            <p className="text-[11px] text-cyan-300/80 font-semibold">대한항공 KE657</p>
+          </div>
+        </div>
+
+        {/* Bottom Status bar */}
+        <div className="flex items-center justify-between text-xs text-slate-300">
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+            가현쨩 & 미누쿤 커플 여행 준비 중
+          </span>
+          <span className="font-semibold text-blue-200">3박 4일 일정</span>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export const HomeActivity: React.FC = () => {
   const { push, replace } = useFlow();
   const [tripState, setTripState] = useState<"before" | "during" | "after">("before");
@@ -306,10 +376,7 @@ export const HomeActivity: React.FC = () => {
         <div className="flex flex-col gap-6 p-4">
           {tripState === "before" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-              <div className="bg-blue-100 dark:bg-blue-900 rounded-2xl p-6 text-center">
-                <h2 className="text-xl font-bold mb-1">방콕 출발까지</h2>
-                <p className="text-4xl font-extrabold text-blue-600 dark:text-blue-400">D-14</p>
-              </div>
+              <BangkokDepartureCard />
 
               <div className="grid grid-cols-2 gap-3">
                 <button onClick={() => replace("ChecklistActivity", {}, { animate: false })} className="p-4 bg-white dark:bg-gray-800 rounded-2xl border shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform">
