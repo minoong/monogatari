@@ -145,10 +145,10 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                   />
                 </div>
                 <p className="mt-2 text-center text-sm font-medium text-gray-800">
-                  절대 방심하면 안 되니까요! 무엇을 누가 챙길지 확실히 기록해 둘게요!
+                  증거로 다 기록하고 있으니까, 챙길 물건을 확실하게 적어둬요!
                 </p>
-                <p className="mt-0.5 text-center text-xs text-gray-400">
-                  제 가슴의 두근거림을 멈출 수 없을 테니까요! 💕
+                <p className="mt-0.5 text-center text-xs text-gray-500">
+                  나중에 깜빡했다고 거짓말해도 소용없다고요!
                 </p>
               </div>
 
