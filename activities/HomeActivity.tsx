@@ -313,7 +313,7 @@ const BangkokDepartureCard: React.FC = () => {
   }, []);
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-[#F8FAFC] text-slate-900 shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-white">
+    <section style={{ fontFamily: "var(--font-korean-air)" }} className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-[#F8FAFC] text-slate-900 shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-white">
       {/* Side Ticket Cutouts */}
       <div className="absolute -left-3 top-1/2 size-6 -translate-y-1/2 rounded-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 z-10" aria-hidden="true" />
       <div className="absolute -right-3 top-1/2 size-6 -translate-y-1/2 rounded-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 z-10" aria-hidden="true" />
@@ -353,7 +353,7 @@ const BangkokDepartureCard: React.FC = () => {
           </span>
           <div
             className="font-black text-6xl tracking-tighter text-[#00256C] dark:text-cyan-400"
-            style={{ fontFamily: "var(--font-geist-mono)" }}
+            style={{ fontFamily: "var(--font-korean-air)" }}
           >
             <NumberFlow value={timeLeft.days} prefix="D-" />
           </div>
