@@ -425,16 +425,28 @@ const SwipeableItem = ({
           isHighlighted ? "bg-yellow-50 dark:bg-yellow-900/20" : ""
         }`}
       >
-        {/* Background Hold Progress Gauge */}
+        {/* Background Shinobu Hold Progress Gauge */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 bg-blue-500/20 dark:bg-blue-400/25 z-0"
+          className="pointer-events-none absolute inset-y-0 left-0 z-0 overflow-hidden rounded-2xl border-r-2 border-amber-400/80 shadow-md"
           style={{
             width: `${pressProgress * 100}%`,
             opacity: pressProgress > 0 ? 1 : 0,
             transition: isPressing ? "none" : "width 0.15s ease-out, opacity 0.15s ease-out",
           }}
-        />
+        >
+          <div className="relative h-full w-[360px] min-w-full">
+            <Image
+              src="/shinobu-gauge.png"
+              alt="시노부 게이지"
+              fill
+              className="object-cover opacity-90 contrast-105"
+              sizes="400px"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-black/50 mix-blend-multiply" />
+          </div>
+        </div>
         <div className="flex min-w-0 flex-1 items-center gap-3 py-1 z-10">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <div className="flex min-w-0 flex-1 flex-col items-start">
