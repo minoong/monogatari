@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
-import { Plus, Bell, ChevronDown, Trash2 } from "lucide-react";
+import { Bell, ChevronDown, Trash2 } from "lucide-react";
 import { ChecklistDrawer } from "../components/checklist/ChecklistDrawer";
 import { ChecklistDeleteDrawer } from "../components/checklist/ChecklistDeleteDrawer";
 import { toast } from "sonner";
@@ -1041,7 +1042,7 @@ export const ChecklistActivity: React.FC = () => {
             type="button"
             intent="primary"
             tabIndex={-1}
-            className="pointer-events-none h-14 w-14 !rounded-full !p-0 flex items-center justify-center shadow-xl overflow-hidden"
+            className="pointer-events-none h-14 w-14 !rounded-full !p-0 flex items-center justify-center shadow-xl overflow-hidden border-2 border-white dark:border-gray-800"
           >
             <motion.div
               animate={{ rotate: rotation }}
@@ -1051,9 +1052,15 @@ export const ChecklistActivity: React.FC = () => {
                 setIsOpeningDrawer(false);
                 setDrawerOpen(true);
               }}
-              className="flex items-center justify-center pointer-events-none"
+              className="relative h-full w-full pointer-events-none overflow-hidden rounded-full flex items-center justify-center"
             >
-              <Plus size={24} />
+              <Image
+                src="/fab-sagiri.jpg"
+                alt="준비물 추가"
+                fill
+                className="object-cover"
+                sizes="56px"
+              />
             </motion.div>
           </NeumorphButton>
           <NativeHapticSwitch
