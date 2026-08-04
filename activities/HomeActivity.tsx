@@ -290,19 +290,25 @@ const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }>
 };
 
 const BangkokDepartureCard: React.FC = () => {
-  const DEPARTURE_DATE = "2026-08-29";
-  const [diffDays, setDiffDays] = useState(0);
+  const DEPARTURE_TIME = "2026-08-29 10:40:00";
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   React.useEffect(() => {
-    const calculateDiff = () => {
-      const now = dayjs().tz("Asia/Seoul").startOf("day");
-      const departure = dayjs(DEPARTURE_DATE).tz("Asia/Seoul").startOf("day");
-      const days = departure.diff(now, "day");
-      setDiffDays(days);
+    const updateCountdown = () => {
+      const now = dayjs().tz("Asia/Seoul");
+      const target = dayjs.tz(DEPARTURE_TIME, "Asia/Seoul");
+      const diffSec = Math.max(0, target.diff(now, "second"));
+
+      const days = Math.floor(diffSec / (24 * 3600));
+      const hours = Math.floor((diffSec % (24 * 3600)) / 3600);
+      const minutes = Math.floor((diffSec % 3600) / 60);
+      const seconds = diffSec % 60;
+
+      setTimeLeft({ days, hours, minutes, seconds });
     };
 
-    calculateDiff();
-    const interval = setInterval(calculateDiff, 60000);
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -311,9 +317,26 @@ const BangkokDepartureCard: React.FC = () => {
       <span className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1">
         방콕 출발까지
       </span>
-      <div className="font-bold text-6xl tracking-tight my-2">
-        <NumberFlow value={Math.abs(diffDays)} prefix="D-" />
+
+      {/* Live Skiper37 NumberFlow Countdown */}
+      <div className="flex items-center justify-center gap-1 font-bold text-3xl sm:text-4xl tracking-tight my-2">
+        <span className="text-gray-400 font-extrabold mr-0.5">D-</span>
+        <NumberFlow value={timeLeft.days} format={{ minimumIntegerDigits: 2 }} />
+        <span className="text-[#ff3828] text-xl sm:text-2xl font-extrabold mx-0.5 animate-pulse">:</span>
+        <NumberFlow value={timeLeft.hours} format={{ minimumIntegerDigits: 2 }} />
+        <span className="text-[#ff3828] text-xl sm:text-2xl font-extrabold mx-0.5 animate-pulse">:</span>
+        <NumberFlow value={timeLeft.minutes} format={{ minimumIntegerDigits: 2 }} />
+        <span className="text-[#ff3828] text-xl sm:text-2xl font-extrabold mx-0.5 animate-pulse">:</span>
+        <NumberFlow value={timeLeft.seconds} format={{ minimumIntegerDigits: 2 }} />
       </div>
+
+      <div className="flex items-center justify-center gap-5 text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2.5">
+        <span>일</span>
+        <span>시간</span>
+        <span>분</span>
+        <span>초</span>
+      </div>
+
       <span className="text-xs text-gray-500 font-medium">
         2026.08.29 (토) 10:40 · 인천 (ICN) → 방콕 (BKK)
       </span>
