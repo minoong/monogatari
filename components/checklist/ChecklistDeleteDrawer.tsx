@@ -53,7 +53,7 @@ export function ChecklistDeleteDrawer({
               />
             </div>
             <p className="mt-3 text-center text-base font-medium text-gray-800">
-              정말 <span className="font-bold text-gray-900">‘{targetTitle}’</span>{particle} 지워버릴 셈이야?
+              정말 <span className="font-bold text-gray-900">「{targetTitle}」</span>{particle} 지워버릴 셈이야?
             </p>
             <p className="mt-1 text-center text-xs text-gray-500">
               한 번 지우면 절대 안 되돌려줄 거거든? 나중에 딴소리하기 없기야!
