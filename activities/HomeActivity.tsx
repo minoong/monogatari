@@ -383,17 +383,29 @@ const BangkokDepartureCard: React.FC = () => {
 
           {/* Ticket Barcode Graphic */}
           <div className="flex flex-col items-end gap-1">
-            <div className="flex h-6 items-center gap-0.5" aria-hidden="true">
-              {[2, 1, 3, 1, 2, 4, 1, 2, 1, 3, 1, 2, 1, 4, 2, 1, 3, 1, 2].map((w, i) => (
-                <div
-                  key={i}
-                  className="h-full bg-slate-800 dark:bg-slate-300"
-                  style={{ width: `${w * 1.5}px` }}
-                />
+            <div className="flex h-7 items-center gap-[1.5px]" aria-hidden="true">
+              <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
+              <div className="h-full w-[1px] bg-transparent" />
+              <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
+              <div className="h-full w-[2px] bg-transparent" />
+              {[1, 0, 3, 1, 0, 5, 2, 7, 0, 8, 3, 1].map((digit, idx) => (
+                <React.Fragment key={idx}>
+                  <div
+                    className="h-full bg-slate-800 dark:bg-slate-200"
+                    style={{ width: `${Math.max(1.5, ((digit % 4) + 1) * 1.5)}px` }}
+                  />
+                  <div
+                    className="h-full bg-transparent"
+                    style={{ width: `${((idx % 3) + 1) * 1.2}px` }}
+                  />
+                </React.Fragment>
               ))}
+              <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
+              <div className="h-full w-[1px] bg-transparent" />
+              <div className="h-full w-[2px] bg-slate-800 dark:bg-slate-200" />
             </div>
-            <span className="font-mono text-[9px] text-slate-400 tracking-wider">
-              KE 657 BKK 20260829
+            <span className="font-mono text-[9.5px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.18em]">
+              1031 · 0527 · 0831
             </span>
           </div>
         </div>
