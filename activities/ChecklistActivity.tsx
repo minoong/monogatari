@@ -719,12 +719,6 @@ export const ChecklistActivity: React.FC = () => {
     triggerHapticFeedback(10);
     updateOptimisticToggle(id, targetUser, entry.desired);
     scheduleToggle(key);
-
-    if (nextState) {
-      toast.success(`'${currentItem.title}' 준비 완료! 🎉`, { duration: 2000 });
-    } else {
-      toast(`'${currentItem.title}' 완료 취소`, { duration: 2000 });
-    }
   };
 
   useEffect(() => {
