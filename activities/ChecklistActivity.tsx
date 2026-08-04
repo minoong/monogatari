@@ -320,8 +320,13 @@ const SwipeableItem = ({
   return (
     <motion.div
       ref={itemRef}
+      layout
       exit={{ opacity: 0, height: 0 }}
-      transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: "easeOut" }}
+      transition={{
+        layout: { type: "spring", stiffness: 350, damping: 30 },
+        opacity: { duration: prefersReducedMotion ? 0 : 0.2 },
+        height: { duration: prefersReducedMotion ? 0 : 0.25, ease: "easeOut" }
+      }}
       style={{ overflow: "hidden" }}
       className="checklist-item relative border-b border-gray-200 dark:border-white/10 last:border-b-0"
     >
@@ -707,12 +712,19 @@ export const ChecklistActivity: React.FC = () => {
       baseItems: currentItems,
       inFlight: false,
     };
-    entry.desired = requestedState ?? !currentItem.completed_by.includes(targetUser);
+    const nextState = requestedState ?? !currentItem.completed_by.includes(targetUser);
+    entry.desired = nextState;
     if (!entry.baseItems) entry.baseItems = currentItems;
     toggleEntriesRef.current.set(key, entry);
     triggerHapticFeedback(10);
     updateOptimisticToggle(id, targetUser, entry.desired);
     scheduleToggle(key);
+
+    if (nextState) {
+      toast.success(`'${currentItem.title}' 준비 완료! 🎉`, { duration: 2000 });
+    } else {
+      toast(`'${currentItem.title}' 완료 취소`, { duration: 2000 });
+    }
   };
 
   useEffect(() => {
