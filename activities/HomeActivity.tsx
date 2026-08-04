@@ -354,8 +354,8 @@ const BangkokDepartureCard: React.FC = () => {
         {/* Center Main D-Day Hero */}
         <AnimatedContent distance={30} direction="vertical" duration={0.7} delay={0.25}>
           <div className="flex flex-col items-center justify-center py-2">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-              카운트다운
+            <span className="text-[11px] font-bold uppercase tracking-widest text-[#00256C] dark:text-cyan-400 mb-1">
+              &ldquo;좋아한다고 했잖아! 둔탱아!&rdquo;
             </span>
             <div
               className="font-black text-6xl tracking-tighter text-[#00256C] dark:text-cyan-400"
@@ -371,7 +371,7 @@ const BangkokDepartureCard: React.FC = () => {
               <NumberFlow value={timeLeft.minutes} format={{ minimumIntegerDigits: 2 }} />
               <span className="text-blue-600 dark:text-cyan-400 font-extrabold animate-pulse">:</span>
               <NumberFlow value={timeLeft.seconds} format={{ minimumIntegerDigits: 2 }} />
-              <span className="ml-1 text-[10px] font-sans font-semibold text-slate-500 dark:text-slate-400">남음</span>
+              <span className="ml-1 text-[10px] font-sans font-bold text-[#00256C] dark:text-cyan-400">남았으니까, 딱 기다려!</span>
             </div>
           </div>
         </AnimatedContent>
