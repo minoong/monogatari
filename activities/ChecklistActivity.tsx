@@ -551,7 +551,7 @@ export const ChecklistActivity: React.FC = () => {
           if (payload.eventType === 'INSERT') {
             const insertedItem = payload.new as PreparationItem;
             queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
-              old.some((item) => item.id === insertedItem.id) ? old : [...old, insertedItem],
+              old.some((item) => item.id === insertedItem.id) ? old : [insertedItem, ...old],
             );
             toast("새로운 준비물이 등록되었습니다.", {
               action: {
