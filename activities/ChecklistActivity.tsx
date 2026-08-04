@@ -510,9 +510,7 @@ const SwipeableItem = ({
 export const ChecklistActivity: React.FC = () => {
   const queryClient = useQueryClient();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isOpeningDrawer, setIsOpeningDrawer] = useState(false);
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
-  const [rotation, setRotation] = useState(0);
   const [packingTab, setPackingTab] = useState("gahyun");
   const prefersReducedMotion = useReducedMotion();
   const locallyUpdatingKeys = useRef(new Set<string>());
@@ -1042,16 +1040,13 @@ export const ChecklistActivity: React.FC = () => {
             type="button"
             intent="primary"
             tabIndex={-1}
+            whileTap={{ scale: 0.85 }}
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
             className="pointer-events-none h-14 w-14 !rounded-full !p-0 flex items-center justify-center shadow-xl overflow-hidden border-2 border-white dark:border-gray-800"
           >
             <motion.div
-              animate={{ rotate: rotation }}
-              transition={{ duration: prefersReducedMotion ? 0 : 0.3, ease: "easeInOut" }}
-              onUpdate={(latest) => {
-                if (!isOpeningDrawer || Number(latest.rotate) < 45) return;
-                setIsOpeningDrawer(false);
-                setDrawerOpen(true);
-              }}
+              whileTap={{ scale: 0.85 }}
               className="relative h-14 w-14 shrink-0 pointer-events-none overflow-hidden rounded-full"
             >
               <Image
@@ -1066,23 +1061,19 @@ export const ChecklistActivity: React.FC = () => {
           </NeumorphButton>
           <NativeHapticSwitch
             ariaLabel="준비물 추가"
-            checked={drawerOpen || isOpeningDrawer}
-            disabled={drawerOpen || isOpeningDrawer}
+            checked={drawerOpen}
+            disabled={drawerOpen}
             onChange={() => {
-              if (drawerOpen || isOpeningDrawer) return;
+              if (drawerOpen) return;
               triggerHapticFeedback(15);
-              setIsOpeningDrawer(true);
-              setRotation((prev) => prev + 90);
+              setDrawerOpen(true);
             }}
           />
         </div>
 
-          <ChecklistDrawer
+        <ChecklistDrawer
           open={drawerOpen}
           onOpenChange={(open) => {
-            if (!open && drawerOpen) {
-              setRotation((prev) => prev - 90);
-            }
             setDrawerOpen(open);
           }}
         />
