@@ -111,6 +111,7 @@ const NeumorphButton: React.FC<NeumorphButtonProps> = ({
     >
       {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
       <motion.span
+        className="flex size-full items-center justify-center"
         initial={{ opacity: 1 }}
         animate={{ opacity: loading ? 0.7 : 1 }}
         transition={{ duration: 0.2 }}

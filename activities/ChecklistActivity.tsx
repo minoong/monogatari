@@ -1052,14 +1052,15 @@ export const ChecklistActivity: React.FC = () => {
                 setIsOpeningDrawer(false);
                 setDrawerOpen(true);
               }}
-              className="relative h-full w-full pointer-events-none overflow-hidden rounded-full flex items-center justify-center"
+              className="relative h-14 w-14 shrink-0 pointer-events-none overflow-hidden rounded-full"
             >
               <Image
                 src="/fab-sagiri.jpg"
                 alt="준비물 추가"
                 fill
-                className="object-cover"
+                className="object-cover rounded-full"
                 sizes="56px"
+                priority
               />
             </motion.div>
           </NeumorphButton>
