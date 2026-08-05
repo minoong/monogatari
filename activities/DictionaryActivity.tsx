@@ -40,6 +40,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { GooeyInput } from "@/components/ui/gooey-input";
+import { Card } from "@/components/ui/card";
 import {
   MorphingDialog,
   MorphingDialogClose,
@@ -193,10 +194,9 @@ function DictionaryPhraseDialog({
 
   return (
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
-      <article
+      <Card
         data-dictionary-entry
-        className="group relative flex min-h-24 items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm transition-all hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
-        role="listitem"
+        className="group relative flex min-h-24 flex-row items-center gap-3.5 rounded-3xl border border-slate-200/90 bg-white p-4 shadow-sm ring-1 ring-slate-100/60 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md active:scale-[0.985] dark:border-slate-800 dark:bg-slate-900 dark:ring-slate-800 dark:hover:border-blue-700"
       >
         <PhraseThumbnail id={item.id} />
         <div className="min-w-0 flex-1" onClickCapture={onOpen}>
@@ -223,12 +223,12 @@ function DictionaryPhraseDialog({
             variant="secondary"
             aria-label="발음 듣기"
             onPress={(event) => onPlayAudio(item.th, event)}
-            className="size-8 rounded-xl text-slate-500 dark:text-slate-400"
+            className="size-9 rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-blue-50 hover:text-blue-600 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             <Volume2 className="size-4" />
           </Button>
         </div>
-      </article>
+      </Card>
 
       <MorphingDialogContainer>
         <MorphingDialogContent className="relative mx-4 flex h-[82dvh] w-[calc(100%-2rem)] max-w-md flex-col overflow-hidden rounded-[30px] border border-slate-200 bg-white p-5 text-slate-900 shadow-[0_32px_90px_-28px_rgba(15,23,42,0.28)]">
