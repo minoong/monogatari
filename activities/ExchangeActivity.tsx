@@ -323,21 +323,19 @@ export const ExchangeActivity: React.FC = () => {
             </motion.div>
 
             {/* 하단 실시간 환율 안내 */}
-            {!isFocused && (
-              <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-1 flex items-center justify-between px-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex size-2">
-                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-                  </span>
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">실시간 환율</span>
-                  <span className="text-xs font-medium text-slate-400 dark:text-slate-500">1 THB = {rates.THB}원</span>
-                </div>
-                {lastUpdatedTime && (
-                  <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-500">{lastUpdatedTime}</span>
-                )}
-              </motion.div>
-            )}
+            <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-1 flex items-center justify-between px-2.5">
+              <div className="flex items-center gap-2">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                </span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">실시간 환율</span>
+                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">1 THB = {rates.THB}원</span>
+              </div>
+              {lastUpdatedTime && (
+                <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-500">{lastUpdatedTime}</span>
+              )}
+            </motion.div>
             
           </div>
           </LayoutGroup>
