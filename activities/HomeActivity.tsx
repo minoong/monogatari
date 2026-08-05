@@ -291,7 +291,7 @@ const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }>
 };
 
 const BangkokDepartureCard: React.FC = () => {
-  const DEPARTURE_TIME = "2026-08-29 10:40:00";
+  const DEPARTURE_TIME = "2026-08-29 09:45:00";
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   React.useEffect(() => {
@@ -342,7 +342,7 @@ const BangkokDepartureCard: React.FC = () => {
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-b border-slate-200/60 pb-3 dark:border-slate-800">
             <div>
               <p className="text-[10px] uppercase font-bold text-slate-400">출발일시</p>
-              <p className="font-semibold text-slate-800 dark:text-slate-200">2026.08.29 (토) 10:40</p>
+              <p className="font-semibold text-slate-800 dark:text-slate-200">2026.08.29 (토) 09:45</p>
             </div>
             <div className="text-right">
               <p className="text-[10px] uppercase font-bold text-slate-400">항공편</p>
