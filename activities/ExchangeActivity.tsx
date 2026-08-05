@@ -17,12 +17,6 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(Flip, useGSAP);
 }
 
-interface ExchangeRate {
-  currency: string;
-  rate_to_krw: number;
-  source: string;
-  updated_at: string;
-}
 
 export const ExchangeActivity: React.FC = () => {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -56,9 +50,42 @@ export const ExchangeActivity: React.FC = () => {
     }
   }, { dependencies: [isFocused] });
 
+  const [lastUpdatedTime, setLastUpdatedTime] = useState<string | null>(null);
+
+  const updateDBRate = React.useCallback(async (currency: string, rate: number, source: string) => {
+    await supabase.from("exchange_rates").upsert({
+      currency,
+      rate_to_krw: rate,
+      source,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'currency' });
+  }, []);
+
   const fetchRatesFromDB = React.useCallback(async () => {
     try {
       setLoading(true);
+      // 1. 실시간 외환 시장 라이브 API 조회 (Open Exchange Rates API)
+      const res = await fetch("https://open.er-api.com/v6/latest/THB");
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.result === "success" && json?.rates?.KRW) {
+          const thbRate = Number(json.rates.KRW.toFixed(2));
+          const usdRate = Number((json.rates.KRW / json.rates.USD).toFixed(2));
+          setRates({ THB: thbRate, USD: usdRate });
+          if (json.time_last_update_utc) {
+            const dateObj = new Date(json.time_last_update_utc);
+            setLastUpdatedTime(`${dateObj.getMonth() + 1}/${dateObj.getDate()} ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')} 기준`);
+          } else {
+            setLastUpdatedTime("실시간 라이브 API");
+          }
+          // Supabase 캐시 업데이트
+          updateDBRate("THB", thbRate, "open-er-api");
+          updateDBRate("USD", usdRate, "open-er-api");
+          return;
+        }
+      }
+
+      // 2. API 실패 시 Supabase 캐시 조회
       const { data, error } = await supabase
         .from('exchange_rates')
         .select('*')
@@ -67,7 +94,7 @@ export const ExchangeActivity: React.FC = () => {
       if (error) throw error;
       
       if (data && data.length > 0) {
-        const newRates = { ...rates };
+        const newRates = { THB: 38.5, USD: 1380 };
         data.forEach(rate => {
           if (rate.currency === 'THB') newRates.THB = rate.rate_to_krw;
           if (rate.currency === 'USD') newRates.USD = rate.rate_to_krw;
@@ -79,21 +106,12 @@ export const ExchangeActivity: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [updateDBRate]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRatesFromDB();
   }, [fetchRatesFromDB]);
-
-  const updateDBRate = async (currency: string, rate: number, source: string) => {
-    await supabase.from("exchange_rates").upsert({
-      currency,
-      rate_to_krw: rate,
-      source,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'currency' });
-  };
 
   const handleManualSave = async (currency: 'THB' | 'USD', valStr: string) => {
     const val = parseFloat(valStr);
@@ -140,7 +158,21 @@ export const ExchangeActivity: React.FC = () => {
     <AppScreen appBar={{ title: "환율 계산기... 바가지 쓰지 마!" }}>
       <div className="flex flex-col min-h-full w-full bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 dark:from-slate-950 dark:via-gray-950 dark:to-indigo-950/30 text-gray-900 dark:text-white pb-12 overflow-x-hidden">
         
-        <motion.div layout className={`flex flex-col px-4 pb-4 gap-3 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-6'}`}>
+        <motion.div layout className={`flex flex-col px-4 pb-4 gap-3 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-4'}`}>
+          {!isFocused && (
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                </span>
+                <span>실시간 라이브 환율 (1 THB = {rates.THB}원)</span>
+              </div>
+              {lastUpdatedTime && (
+                <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">{lastUpdatedTime}</span>
+              )}
+            </div>
+          )}
           <LayoutGroup id="exchange-currency-cards">
           
           {/* 메인 입력 (THB) 카드 */}
