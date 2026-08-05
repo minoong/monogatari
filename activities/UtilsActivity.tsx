@@ -31,8 +31,8 @@ export const UtilsActivity: React.FC = () => {
       <div className="flex min-h-full w-full flex-col overflow-y-auto bg-slate-50 px-4 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] pt-5 dark:bg-slate-950">
         <div className="mx-auto flex w-full max-w-lg flex-col gap-5">
           <header>
-            <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">방콕에서 바가지 쓰거나 당황하지 말라고!</p>
-            <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-[#00256C] dark:text-cyan-400">방콕에서 바가지 쓰거나 당황하지 말라고!</p>
+            <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-[#00256C] dark:text-white" style={{ fontFamily: "var(--font-korean-air)" }}>
               필요한 거 있으면 얼른 골라, 미누쿤!
             </h1>
           </header>
@@ -47,7 +47,7 @@ export const UtilsActivity: React.FC = () => {
                     triggerHapticFeedback();
                     push(card.activity, {});
                   }}
-                  className="group w-full rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-100 transition-transform active:scale-[0.985] dark:bg-slate-900 dark:ring-slate-800"
+                  className="group w-full rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-200/80 transition-transform active:scale-[0.985] dark:bg-slate-900 dark:ring-slate-800"
                 >
                   <div className="flex items-start gap-4">
                     <span className={`flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${card.accent} text-2xl shadow-md text-white`}>
@@ -56,12 +56,12 @@ export const UtilsActivity: React.FC = () => {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <h2 className="font-bold text-slate-900 dark:text-white">{card.title}</h2>
-                          <p className="mt-0.5 text-xs font-semibold text-blue-600 dark:text-cyan-400">{card.meta}</p>
+                          <h2 className="text-base font-bold text-[#00256C] dark:text-cyan-300">{card.title}</h2>
+                          <p className="mt-0.5 text-xs font-bold text-cyan-600 dark:text-cyan-400">{card.meta}</p>
                         </div>
                         <ArrowRight aria-hidden="true" className="size-5 text-slate-400 transition-transform group-hover:translate-x-0.5" />
                       </div>
-                      <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{card.description}</p>
+                      <p className="mt-3 text-sm leading-6 font-medium text-slate-700 dark:text-slate-200">{card.description}</p>
                     </div>
                   </div>
                 </button>
