@@ -32,7 +32,9 @@ export const UtilsActivity: React.FC = () => {
       <div className="flex min-h-full w-full flex-col overflow-y-auto bg-slate-50 px-4 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] pt-5 dark:bg-slate-950">
         <div className="mx-auto flex w-full max-w-lg flex-col gap-5">
           <header>
-            <p className="text-xs font-extrabold uppercase tracking-wider text-[#00256C] dark:text-cyan-400">방콕에서 바가지 쓰거나 당황하지 말라고!</p>
+            <p className="text-base sm:text-lg font-black tracking-tight text-[#00256C] dark:text-cyan-400" style={{ fontFamily: "var(--font-korean-air)" }}>
+              방콕에서 바가지 쓰거나 당황하지 말라고!
+            </p>
           </header>
 
           <div className="flex flex-col gap-4">
