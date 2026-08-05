@@ -5,6 +5,7 @@ import { useFlow } from "@stackflow/react";
 import { ArrowRight } from "lucide-react";
 import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
 import { AnimatedContent } from "@/components/ui/animated-content";
+import { TextLoop } from "@/components/core/text-loop";
 
 const utilityCards = [
   {
@@ -62,9 +63,6 @@ export const UtilsActivity: React.FC = () => {
           <div className="flex flex-col gap-4">
             {utilityCards.map((card) => {
               const base = card.baseDelay;
-              const metaText = card.activity === "ExchangeActivity"
-                ? `฿1 ≈ ₩${Math.round(thbRate).toLocaleString()} · ฿10 ≈ ₩${Math.round(thbRate * 10).toLocaleString()} · ฿100 ≈ ₩${Math.round(thbRate * 100).toLocaleString()}`
-                : card.meta;
 
               return (
                 <AnimatedContent
@@ -117,15 +115,46 @@ export const UtilsActivity: React.FC = () => {
                               <h2 className="text-base font-bold text-[#00256C] dark:text-cyan-300">{card.title}</h2>
                             </AnimatedContent>
 
-                            <AnimatedContent
-                              distance={12}
-                              direction="vertical"
-                              duration={0.45}
-                              ease="power3.out"
-                              delay={base + 0.18}
-                            >
-                              <p className="mt-0.5 text-xs font-bold text-cyan-600 dark:text-cyan-400">{metaText}</p>
-                            </AnimatedContent>
+                              {card.activity === "ExchangeActivity" ? (
+                                <div className="mt-0.5 text-xs font-bold text-cyan-600 dark:text-cyan-400">
+                                  <TextLoop
+                                    className="overflow-y-clip"
+                                    interval={2.5}
+                                    transition={{
+                                      type: "spring",
+                                      stiffness: 900,
+                                      damping: 80,
+                                      mass: 10,
+                                    }}
+                                    variants={{
+                                      initial: {
+                                        y: 20,
+                                        rotateX: 90,
+                                        opacity: 0,
+                                        filter: "blur(4px)",
+                                      },
+                                      animate: {
+                                        y: 0,
+                                        rotateX: 0,
+                                        opacity: 1,
+                                        filter: "blur(0px)",
+                                      },
+                                      exit: {
+                                        y: -20,
+                                        rotateX: -90,
+                                        opacity: 0,
+                                        filter: "blur(4px)",
+                                      },
+                                    }}
+                                  >
+                                    <span>실시간 · ฿1 ≈ ₩{Math.round(thbRate).toLocaleString()}</span>
+                                    <span>실시간 · ฿10 ≈ ₩{Math.round(thbRate * 10).toLocaleString()}</span>
+                                    <span>실시간 · ฿100 ≈ ₩{Math.round(thbRate * 100).toLocaleString()}</span>
+                                  </TextLoop>
+                                </div>
+                              ) : (
+                                <p className="mt-0.5 text-xs font-bold text-cyan-600 dark:text-cyan-400">{card.meta}</p>
+                              )}
                           </div>
 
                           <AnimatedContent
