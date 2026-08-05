@@ -277,7 +277,7 @@ export const ExchangeActivity: React.FC = () => {
                     <span className="text-slate-400 dark:text-slate-500 text-2xl font-semibold mt-0.5">{isKrwInput ? "฿" : "₩"}</span>
                     <NumberFlow 
                       value={isKrwInput ? thbValue : krwValue}
-                      format={{ notation: 'standard', maximumFractionDigits: isKrwInput ? 2 : 0 }}
+                      format={{ notation: 'standard', minimumFractionDigits: 0, maximumFractionDigits: 2 }}
                       className={`text-slate-800 dark:text-slate-100 ${loading ? "opacity-50" : ""}`}
                     />
                   </div>
