@@ -52,15 +52,6 @@ export const ExchangeActivity: React.FC = () => {
 
   const [lastUpdatedTime, setLastUpdatedTime] = useState<string | null>(null);
 
-  const updateDBRate = React.useCallback(async (currency: string, rate: number, source: string) => {
-    await supabase.from("exchange_rates").upsert({
-      currency,
-      rate_to_krw: rate,
-      source,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'currency' });
-  }, []);
-
   const fetchRatesFromDB = React.useCallback(async () => {
     try {
       setLoading(true);
@@ -78,9 +69,6 @@ export const ExchangeActivity: React.FC = () => {
           } else {
             setLastUpdatedTime("실시간 라이브 API");
           }
-          // Supabase 캐시 업데이트
-          updateDBRate("THB", thbRate, "open-er-api");
-          updateDBRate("USD", usdRate, "open-er-api");
           return;
         }
       }
@@ -106,19 +94,18 @@ export const ExchangeActivity: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [updateDBRate]);
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRatesFromDB();
   }, [fetchRatesFromDB]);
 
-  const handleManualSave = async (currency: 'THB' | 'USD', valStr: string) => {
+  const handleManualSave = (currency: 'THB' | 'USD', valStr: string) => {
     const val = parseFloat(valStr);
     if (!isNaN(val) && val > 0) {
-      await updateDBRate(currency, val, "manual");
-      await fetchRatesFromDB();
-      alert(`${currency} 환율이 저장되었습니다!`);
+      setRates((prev) => ({ ...prev, [currency]: val }));
+      alert(`${currency} 환율이 수동 변경되었습니다! (${val}원)`);
     }
   };
 
