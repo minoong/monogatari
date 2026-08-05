@@ -103,28 +103,18 @@ export const ExchangeActivity: React.FC = () => {
         
         <motion.div layout className={`flex flex-col px-4 pb-4 gap-3 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-4'}`}>
           {!isFocused && (
-            <div className="flex items-center justify-center pt-1 pb-0.5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/70 px-3.5 py-1.5 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)] backdrop-blur-xl">
+            <div className="flex items-center justify-between px-2.5 pt-1 pb-0.5">
+              <div className="flex items-center gap-2">
                 <span className="relative flex size-2">
                   <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
                 </span>
-                <span className="text-[10px] font-black tracking-wider text-emerald-600 dark:text-emerald-400">
-                  LIVE
-                </span>
-                <span className="h-3 w-px bg-slate-200/80 dark:bg-slate-800" aria-hidden="true" />
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                  1 THB ≈ <span className="font-extrabold text-indigo-600 dark:text-indigo-400">₩{rates.THB}</span>
-                </span>
-                {lastUpdatedTime && (
-                  <>
-                    <span className="h-3 w-px bg-slate-200/80 dark:bg-slate-800" aria-hidden="true" />
-                    <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
-                      {lastUpdatedTime}
-                    </span>
-                  </>
-                )}
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">실시간 환율</span>
+                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">1 THB = {rates.THB}원</span>
               </div>
+              {lastUpdatedTime && (
+                <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-500">{lastUpdatedTime}</span>
+              )}
             </div>
           )}
           <LayoutGroup id="exchange-currency-cards">
