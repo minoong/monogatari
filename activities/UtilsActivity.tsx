@@ -33,7 +33,7 @@ export const UtilsActivity: React.FC = () => {
           <header>
             <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">방콕에서 바가지 쓰거나 당황하지 말라고!</p>
             <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white">
-              필요한 거 있으면 얼른 골라, 둔탱아!
+              필요한 거 있으면 얼른 골라, 미누쿤!
             </h1>
           </header>
 
