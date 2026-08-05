@@ -195,7 +195,7 @@ function DictionaryPhraseDialog({
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
       <article
         data-dictionary-entry
-        className="group relative flex min-h-24 items-center gap-3 px-5 py-3 transition-colors hover:bg-slate-100/70 active:bg-slate-200/70 dark:hover:bg-white/5 dark:active:bg-white/10"
+        className="group relative flex min-h-24 items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm transition-all hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
         role="listitem"
       >
         <PhraseThumbnail id={item.id} />
@@ -506,10 +506,23 @@ export const DictionaryActivity: React.FC = () => {
             )}
           </div>
 
-          <div className="rounded-3xl bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 px-5 py-5 text-white shadow-lg shadow-violet-500/20">
-            <span className="text-2xl">💬</span>
-            <h1 className="mt-3 text-xl font-extrabold">태국 회화 사전</h1>
-            <p className="mt-1 text-sm font-medium text-white/80">여행에서 바로 꺼내 쓰는 태국어 표현</p>
+          <div className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-[#F8FAFC] text-slate-900 shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-white" style={{ fontFamily: "var(--font-korean-air)" }}>
+            <div className="bg-[#00256C] px-5 py-3 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-black tracking-widest uppercase text-cyan-300">
+                  NINO&apos;S THAI DICTIONARY
+                </span>
+              </div>
+              <span className="text-xs font-bold text-cyan-200">🗣️ 현지 필수 표현</span>
+            </div>
+            <div className="p-5 flex flex-col gap-1">
+              <h1 className="text-xl font-extrabold text-[#00256C] dark:text-cyan-400">
+                버벅이지 마! 태국어 회화 사전
+              </h1>
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                &ldquo;말 안 통한다고 버벅이지 말고, 여기서 발음 들려주거나 화면 크게 보여줘!&rdquo;
+              </p>
+            </div>
           </div>
 
           {recentSearches.length > 0 && (
@@ -546,7 +559,7 @@ export const DictionaryActivity: React.FC = () => {
             </div>
           )}
 
-          <div className="-mx-5 divide-y divide-slate-200 dark:divide-slate-800" role="list">
+          <div className="flex flex-col gap-3.5" role="list">
             {filteredPhrases.length === 0 ? (
               <div className="flex min-h-52 flex-col items-center justify-center px-6 text-center">
                 <span className="grid size-12 place-items-center rounded-2xl bg-slate-100 text-xl dark:bg-slate-800">🔎</span>
