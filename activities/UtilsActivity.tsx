@@ -116,7 +116,8 @@ export const UtilsActivity: React.FC = () => {
                             </AnimatedContent>
 
                               {card.activity === "ExchangeActivity" ? (
-                                <div className="mt-0.5 text-xs font-bold text-cyan-600 dark:text-cyan-400">
+                                <div className="mt-0.5 inline-flex items-center gap-1 text-xs font-bold text-cyan-600 dark:text-cyan-400">
+                                  <span>실시간 ·</span>
                                   <TextLoop
                                     className="overflow-y-clip"
                                     interval={2.5}
@@ -147,9 +148,9 @@ export const UtilsActivity: React.FC = () => {
                                       },
                                     }}
                                   >
-                                    <span>실시간 · ฿1 ≈ ₩{Math.round(thbRate).toLocaleString()}</span>
-                                    <span>실시간 · ฿10 ≈ ₩{Math.round(thbRate * 10).toLocaleString()}</span>
-                                    <span>실시간 · ฿100 ≈ ₩{Math.round(thbRate * 100).toLocaleString()}</span>
+                                    <span>฿1 ≈ ₩{Math.round(thbRate).toLocaleString()}</span>
+                                    <span>฿10 ≈ ₩{Math.round(thbRate * 10).toLocaleString()}</span>
+                                    <span>฿100 ≈ ₩{Math.round(thbRate * 100).toLocaleString()}</span>
                                   </TextLoop>
                                 </div>
                               ) : (
