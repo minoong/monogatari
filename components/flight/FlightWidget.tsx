@@ -164,19 +164,14 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
                   </div>
                   <span className="text-xs font-bold text-[#0b3478]">가현짱 · 미누쿤 티켓</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  {FLIGHT_PASSENGERS.map((item) => (
-                    <Button
-                      key={item.id}
-                      variant="ghost"
-                      size="sm"
-                      className="!h-6 !min-h-0 !px-2 text-xs font-bold text-[#135ba9] hover:bg-sky-50 hover:text-[#0b3478]"
-                      onPress={() => onOpen(item.id)}
-                    >
-                      {item.name} <ArrowUpRight className="size-3.5" aria-hidden="true" />
-                    </Button>
-                  ))}
-                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="!h-6 !min-h-0 !px-2 text-xs font-bold text-[#135ba9] hover:bg-sky-50 hover:text-[#0b3478]"
+                  onPress={() => onOpen("gahyun")}
+                >
+                  티켓 상세 보기 <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                </Button>
               </div>
             </Tabs.Panel>
           </Tabs>
