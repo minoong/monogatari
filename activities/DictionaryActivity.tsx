@@ -40,15 +40,6 @@ import { motion, useReducedMotion } from "motion/react";
 import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { GooeyInput } from "@/components/ui/gooey-input";
-import {
-  MorphingDialog,
-  MorphingDialogClose,
-  MorphingDialogContainer,
-  MorphingDialogContent,
-  MorphingDialogDescription,
-  MorphingDialogTitle,
-  MorphingDialogTrigger,
-} from "@/components/motion-primitives/morphing-dialog";
 import { cn } from "@/lib/utils";
 
 const RECENT_SEARCHES_KEY = "monogatari_recent_phrase_searches";
@@ -176,139 +167,149 @@ function PhraseThumbnail({ id }: { id: number }) {
   );
 }
 
-function DictionaryPhraseDialog({
+function DictionaryPhraseRow({
   item,
   meta,
-  prefersReducedMotion,
-  onOpen,
+  onSelect,
   onPlayAudio,
 }: {
   item: PhraseItem;
   meta: (typeof CATEGORY_META)[PhraseItem["category"]];
-  prefersReducedMotion: boolean | null;
-  onOpen: () => void;
+  onSelect: (item: PhraseItem) => void;
   onPlayAudio: (text: string, event?: React.MouseEvent | unknown) => void;
+}) {
+  return (
+    <article
+      data-dictionary-entry
+      className="group relative flex min-h-20 cursor-pointer items-center gap-3.5 px-5 py-3.5 transition-colors hover:bg-slate-100/60 active:bg-slate-200/60 dark:hover:bg-white/5 dark:active:bg-white/10"
+      role="listitem"
+      onClick={() => onSelect(item)}
+    >
+      <PhraseThumbnail id={item.id} />
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-start justify-between gap-2">
+          <span className="block truncate text-sm font-bold text-slate-900 dark:text-white">{item.ko}</span>
+          <span className="shrink-0 text-[11px] font-semibold text-slate-400">{meta.label}</span>
+        </div>
+        <span className="mt-1 block truncate font-thai text-base font-semibold leading-tight text-slate-700 dark:text-slate-200">{item.th}</span>
+        <span className="mt-1 block truncate text-xs text-slate-500 dark:text-slate-400">🗣️ {item.pron}</span>
+      </div>
+      <div className="flex shrink-0 flex-col gap-1">
+        <Button
+          isIconOnly
+          size="sm"
+          variant="secondary"
+          aria-label="발음 듣기"
+          onPress={(event) => onPlayAudio(item.th, event)}
+          className="size-8 rounded-xl text-slate-500 dark:text-slate-400"
+        >
+          <Volume2 className="size-4" />
+        </Button>
+      </div>
+    </article>
+  );
+}
+
+function DictionaryDetailModal({
+  item,
+  onClose,
+  onPlayAudio,
+  prefersReducedMotion,
+}: {
+  item: PhraseItem | null;
+  onClose: () => void;
+  onPlayAudio: (text: string) => void;
+  prefersReducedMotion: boolean | null;
 }) {
   const [isRotated, setIsRotated] = useState(true);
 
+  if (!item) return null;
+  const meta = CATEGORY_META[item.category];
+
   return (
-    <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
-      <article
-        data-dictionary-entry
-        className="group relative flex min-h-20 items-center gap-3.5 px-5 py-3.5 transition-colors hover:bg-slate-100/60 active:bg-slate-200/60 dark:hover:bg-white/5 dark:active:bg-white/10"
-        role="listitem"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: "spring", bounce: 0.08, duration: 0.35 }}
+        className="relative z-10 flex h-[82dvh] w-full max-w-md flex-col overflow-hidden rounded-[30px] border border-slate-200 bg-white p-5 text-slate-900 shadow-2xl dark:border-slate-800 dark:bg-slate-900 dark:text-white"
       >
-        <PhraseThumbnail id={item.id} />
-        <div className="min-w-0 flex-1" onClickCapture={onOpen}>
-          <MorphingDialogTrigger
-            ariaLabel={`${item.ko} 현지인에게 크게 보여주기`}
-            className="block w-full text-left outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-orange-400"
-          >
-            <div className="flex min-w-0 items-start justify-between gap-2">
-              <MorphingDialogTitle className="min-w-0">
-                <span className="block truncate text-sm font-bold text-slate-900 dark:text-white">{item.ko}</span>
-              </MorphingDialogTitle>
-              <span className="shrink-0 text-[11px] font-semibold text-slate-400">{meta.label}</span>
-            </div>
-            <MorphingDialogDescription disableLayoutAnimation className="block">
-              <span className="mt-1 block truncate font-thai text-base font-semibold leading-tight text-slate-700 dark:text-slate-200">{item.th}</span>
-              <span className="mt-1 block truncate text-xs text-slate-500 dark:text-slate-400">🗣️ {item.pron}</span>
-            </MorphingDialogDescription>
-          </MorphingDialogTrigger>
-        </div>
-        <div className="flex shrink-0 flex-col gap-1">
-          <Button
-            isIconOnly
-            size="sm"
-            variant="secondary"
-            aria-label="발음 듣기"
-            onPress={(event) => onPlayAudio(item.th, event)}
-            className="size-8 rounded-xl text-slate-500 dark:text-slate-400"
-          >
-            <Volume2 className="size-4" />
-          </Button>
-        </div>
-      </article>
-
-      <MorphingDialogContainer>
-        <MorphingDialogContent className="relative mx-4 flex h-[82dvh] w-[calc(100%-2rem)] max-w-md flex-col overflow-hidden rounded-[30px] border border-slate-200 bg-white p-5 text-slate-900 shadow-[0_32px_90px_-28px_rgba(15,23,42,0.28)]">
-          <motion.div
-            className="flex items-center justify-between border-b border-slate-100 pb-3"
-            initial={prefersReducedMotion ? false : { opacity: 0, y: -14, scaleX: 0.96 }}
-            animate={{ opacity: 1, y: 0, scaleX: 1 }}
-            transition={{ delay: prefersReducedMotion ? 0 : 0.12, duration: prefersReducedMotion ? 0 : 0.24, ease: "easeOut" }}
-            style={{ transformOrigin: "center top" }}
-          >
-            <div className="flex items-center gap-2">
-              <div>
-                <span className="block text-[10px] font-black tracking-[0.16em] text-slate-400">SHOW LOCALLY</span>
-                <span className="text-sm font-extrabold text-slate-900">현지인에게 보여주기</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHapticFeedback(12);
-                  setIsRotated((prev) => !prev);
-                }}
-                className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-100"
-              >
-                <ArrowLeftRight className="size-3.5 text-blue-600 dark:text-blue-400" />
-                <span>{isRotated ? "180° 회전됨" : "정방향"}</span>
-              </button>
-              <MorphingDialogClose ariaLabel="닫기" className="static flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700">
-                <X className="size-4" />
-              </MorphingDialogClose>
-            </div>
-          </motion.div>
-
-          <div className="my-auto flex w-full flex-col items-center justify-center gap-6 py-6 text-center">
-            <div className="relative w-full overflow-hidden rounded-[28px] border border-slate-200 bg-slate-50 px-5 py-10 text-slate-900 shadow-sm">
-              <div className={cn("absolute left-0 top-0 h-full w-1", meta.stripClass)} />
-              <motion.h2
-                className={cn("font-thai break-words text-center leading-relaxed tracking-wide text-slate-950", getDynamicThaiFontSize(item.th))}
-                animate={{ rotate: isRotated ? 180 : 0 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.35, ease: "easeInOut" }}
-              >
-                {item.th}
-              </motion.h2>
-            </div>
-
-            <div className="flex flex-col items-center justify-center gap-2 px-2">
-              <span className={cn("rounded-full px-2 py-1 text-[10px] font-black", meta.railClass)}>{meta.label}</span>
-              <MorphingDialogTitle>
-                <p className="text-2xl font-extrabold tracking-tight text-slate-900">{item.ko}</p>
-              </MorphingDialogTitle>
-              <MorphingDialogDescription disableLayoutAnimation className="inline-flex items-center gap-1 rounded-full border border-orange-200/80 bg-orange-50 px-3.5 py-1 text-xs font-bold text-orange-700 dark:border-orange-800/40 dark:bg-orange-950/60 dark:text-orange-300">
-                <span>🗣️ 발음:</span>
-                <span>{item.pron}</span>
-              </MorphingDialogDescription>
-            </div>
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+          <div>
+            <span className="block text-[10px] font-black tracking-[0.16em] text-slate-400">SHOW LOCALLY</span>
+            <span className="text-sm font-extrabold text-slate-900 dark:text-white">현지인에게 보여주기</span>
           </div>
-
-          <motion.div
-            className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4"
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 14, scaleX: 0.96 }}
-            animate={{ opacity: 1, y: 0, scaleX: 1 }}
-            transition={{ delay: prefersReducedMotion ? 0 : 0.18, duration: prefersReducedMotion ? 0 : 0.24, ease: "easeOut" }}
-            style={{ transformOrigin: "center bottom" }}
-          >
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
-              onClick={() => onPlayAudio(item.th)}
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#ff6f4e] to-[#ff9b42] font-extrabold text-white shadow-md shadow-orange-500/20 transition hover:from-[#f05f3e] hover:to-[#f28b34] active:scale-95"
+              onClick={() => {
+                triggerHapticFeedback(12);
+                setIsRotated((prev) => !prev);
+              }}
+              className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200"
             >
-              <Volume2 className="size-5" />
-              <span>태국어 발음 듣기</span>
+              <ArrowLeftRight className="size-3.5 text-blue-600 dark:text-blue-400" />
+              <span>{isRotated ? "180° 회전됨" : "정방향"}</span>
             </button>
-            <MorphingDialogClose ariaLabel="다이얼로그 닫기" className="static flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 px-6 font-bold text-slate-700 transition hover:bg-slate-200">
-              닫기
-            </MorphingDialogClose>
-          </motion.div>
-        </MorphingDialogContent>
-      </MorphingDialogContainer>
-    </MorphingDialog>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="my-auto flex w-full flex-col items-center justify-center gap-6 py-6 text-center">
+          <div className="relative w-full overflow-hidden rounded-[28px] border border-slate-200 bg-slate-50 px-5 py-10 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-white">
+            <div className={cn("absolute left-0 top-0 h-full w-1", meta.stripClass)} />
+            <motion.h2
+              className={cn("font-thai break-words text-center leading-relaxed tracking-wide text-slate-950 dark:text-white", getDynamicThaiFontSize(item.th))}
+              animate={{ rotate: isRotated ? 180 : 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.35, ease: "easeInOut" }}
+            >
+              {item.th}
+            </motion.h2>
+          </div>
+
+          <div className="flex flex-col items-center justify-center gap-2 px-2">
+            <span className={cn("rounded-full px-2.5 py-1 text-[10px] font-black", meta.railClass)}>{meta.label}</span>
+            <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">{item.ko}</p>
+            <span className="inline-flex items-center gap-1 rounded-full border border-orange-200/80 bg-orange-50 px-3.5 py-1 text-xs font-bold text-orange-700 dark:border-orange-800/40 dark:bg-orange-950/60 dark:text-orange-300">
+              <span>🗣️ 발음:</span>
+              <span>{item.pron}</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+          <button
+            type="button"
+            onClick={() => onPlayAudio(item.th)}
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#ff6f4e] to-[#ff9b42] font-extrabold text-white shadow-md shadow-orange-500/20 transition hover:from-[#f05f3e] hover:to-[#f28b34] active:scale-95"
+          >
+            <Volume2 className="size-5" />
+            <span>태국어 발음 듣기</span>
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 px-6 font-bold text-slate-700 transition hover:bg-slate-200 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200"
+          >
+            닫기
+          </button>
+        </div>
+      </motion.div>
+    </div>
   );
 }
 
@@ -316,6 +317,7 @@ export const DictionaryActivity: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("전체");
+  const [selectedPhrase, setSelectedPhrase] = useState<PhraseItem | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -551,13 +553,15 @@ export const DictionaryActivity: React.FC = () => {
               </div>
             ) : (
               filteredPhrases.map((item) => (
-                <DictionaryPhraseDialog
+                <DictionaryPhraseRow
                   key={item.id}
                   item={item}
                   meta={CATEGORY_META[item.category]}
-                  onOpen={handlePhraseOpen}
+                  onSelect={(selected) => {
+                    handlePhraseOpen();
+                    setSelectedPhrase(selected);
+                  }}
                   onPlayAudio={playAudio}
-                  prefersReducedMotion={prefersReducedMotion}
                 />
               ))
             )}
@@ -583,6 +587,12 @@ export const DictionaryActivity: React.FC = () => {
           />
         </div>
       </main>
+      <DictionaryDetailModal
+        item={selectedPhrase}
+        onClose={() => setSelectedPhrase(null)}
+        onPlayAudio={(text) => playAudio(text)}
+        prefersReducedMotion={prefersReducedMotion}
+      />
     </AppScreen>
   );
 };
