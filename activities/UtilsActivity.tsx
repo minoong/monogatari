@@ -109,36 +109,7 @@ export const UtilsActivity: React.FC = () => {
                               {card.activity === "ExchangeActivity" ? (
                                 <div className="mt-0.5 inline-flex items-center gap-1 text-xs font-bold text-cyan-600 dark:text-cyan-400">
                                   <span>실시간 ·</span>
-                                  <TextLoop
-                                    className="overflow-y-clip"
-                                    interval={2.5}
-                                    transition={{
-                                      type: "spring",
-                                      stiffness: 900,
-                                      damping: 80,
-                                      mass: 10,
-                                    }}
-                                    variants={{
-                                      initial: {
-                                        y: 20,
-                                        rotateX: 90,
-                                        opacity: 0,
-                                        filter: "blur(4px)",
-                                      },
-                                      animate: {
-                                        y: 0,
-                                        rotateX: 0,
-                                        opacity: 1,
-                                        filter: "blur(0px)",
-                                      },
-                                      exit: {
-                                        y: -20,
-                                        rotateX: -90,
-                                        opacity: 0,
-                                        filter: "blur(4px)",
-                                      },
-                                    }}
-                                  >
+                                  <TextLoop className="overflow-y-clip" interval={2.5}>
                                     <span>฿1 ≈ ₩{Math.round(thbRate).toLocaleString()}</span>
                                     <span>฿10 ≈ ₩{Math.round(thbRate * 10).toLocaleString()}</span>
                                     <span>฿100 ≈ ₩{Math.round(thbRate * 100).toLocaleString()}</span>

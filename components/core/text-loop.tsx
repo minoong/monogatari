@@ -19,9 +19,9 @@ export function TextLoop({
   interval = 2.5,
   transition = {
     type: 'spring',
-    stiffness: 900,
-    damping: 80,
-    mass: 10,
+    stiffness: 350,
+    damping: 20,
+    mass: 0.8,
   },
   variants,
   onIndexChange,
@@ -46,22 +46,16 @@ export function TextLoop({
 
   const motionVariants: Variants = variants || {
     initial: {
-      y: 20,
-      rotateX: 90,
+      y: 16,
       opacity: 0,
-      filter: 'blur(4px)',
     },
     animate: {
       y: 0,
-      rotateX: 0,
       opacity: 1,
-      filter: 'blur(0px)',
     },
     exit: {
-      y: -20,
-      rotateX: -90,
+      y: -16,
       opacity: 0,
-      filter: 'blur(4px)',
     },
   };
 
