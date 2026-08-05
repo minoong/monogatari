@@ -1,7 +1,7 @@
 import React from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useFlow } from "@stackflow/react";
-import { ArrowRight, Calculator, Languages } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
 
 const utilityCards = [
@@ -10,16 +10,16 @@ const utilityCards = [
     title: "실수하지 마! 환율 계산기",
     description: "태국 바트 바가지 쓰지 않도록 원화랑 달러로 똑바로 확인해!",
     meta: "바가지 방지 · ฿100 ≈ ₩3,850",
-    icon: Calculator,
-    color: "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300",
+    iconEmoji: "🧮",
+    accent: "from-[#00256C] to-blue-600",
   },
   {
     activity: "DictionaryActivity" as const,
     title: "당황 금지! 현지 태국어 사전",
     description: "말 안 통한다고 버벅이지 말고, 발음 듣거나 현지인한테 크게 보여줘!",
     meta: "버벅임 방지 · 검색 · 발음 · 크게 보기",
-    icon: Languages,
-    color: "bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-300",
+    iconEmoji: "🗣️",
+    accent: "from-violet-600 to-purple-600",
   },
 ] as const;
 
@@ -37,10 +37,8 @@ export const UtilsActivity: React.FC = () => {
             </h1>
           </header>
 
-          <div className="grid gap-3">
+          <div className="flex flex-col gap-4">
             {utilityCards.map((card) => {
-              const Icon = card.icon;
-
               return (
                 <button
                   key={card.activity}
@@ -49,22 +47,22 @@ export const UtilsActivity: React.FC = () => {
                     triggerHapticFeedback();
                     push(card.activity, {});
                   }}
-                  className="group flex min-h-40 w-full flex-col justify-between rounded-3xl border border-slate-200 bg-white p-5 text-left shadow-sm outline-none transition-colors hover:border-blue-200 focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-800"
+                  className="group w-full rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-100 transition-transform active:scale-[0.985] dark:bg-slate-900 dark:ring-slate-800"
                 >
-                  <div className="flex w-full items-start justify-between gap-4">
-                    <span className={`flex size-12 items-center justify-center rounded-2xl ${card.color}`}>
-                      <Icon size={24} aria-hidden="true" />
+                  <div className="flex items-start gap-4">
+                    <span className={`flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${card.accent} text-2xl shadow-md text-white`}>
+                      {card.iconEmoji}
                     </span>
-                    <ArrowRight
-                      size={20}
-                      aria-hidden="true"
-                      className="mt-1 text-slate-300 transition-transform group-hover:translate-x-1 dark:text-slate-600"
-                    />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-950 dark:text-white">{card.title}</h2>
-                    <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">{card.description}</p>
-                    <p className="mt-3 text-xs font-semibold text-slate-400 dark:text-slate-500">{card.meta}</p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <h2 className="font-bold text-slate-900 dark:text-white">{card.title}</h2>
+                          <p className="mt-0.5 text-xs font-semibold text-blue-600 dark:text-cyan-400">{card.meta}</p>
+                        </div>
+                        <ArrowRight aria-hidden="true" className="size-5 text-slate-400 transition-transform group-hover:translate-x-0.5" />
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{card.description}</p>
+                    </div>
                   </div>
                 </button>
               );
