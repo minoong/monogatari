@@ -506,24 +506,7 @@ export const DictionaryActivity: React.FC = () => {
             )}
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-[#F8FAFC] text-slate-900 shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-white" style={{ fontFamily: "var(--font-korean-air)" }}>
-            <div className="bg-[#00256C] px-5 py-3 text-white flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-black tracking-widest uppercase text-cyan-300">
-                  NINO&apos;S THAI DICTIONARY
-                </span>
-              </div>
-              <span className="text-xs font-bold text-cyan-200">🗣️ 현지 필수 표현</span>
-            </div>
-            <div className="p-5 flex flex-col gap-1">
-              <h1 className="text-xl font-extrabold text-[#00256C] dark:text-cyan-400">
-                버벅이지 마! 태국어 회화 사전
-              </h1>
-              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                &ldquo;말 안 통한다고 버벅이지 말고, 여기서 발음 들려주거나 화면 크게 보여줘!&rdquo;
-              </p>
-            </div>
-          </div>
+
 
           {recentSearches.length > 0 && (
             <div className="flex flex-col gap-1.5 px-1">
