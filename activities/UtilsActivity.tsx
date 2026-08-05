@@ -27,6 +27,18 @@ const utilityCards = [
 
 export const UtilsActivity: React.FC = () => {
   const { push } = useFlow();
+  const [thbRate, setThbRate] = React.useState<number>(42.8);
+
+  React.useEffect(() => {
+    fetch("https://open.er-api.com/v6/latest/THB")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json?.result === "success" && json?.rates?.KRW) {
+          setThbRate(Number(json.rates.KRW.toFixed(2)));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <AppScreen appBar={{ title: "유틸 도구... 실수하지 마!" }}>
@@ -50,6 +62,10 @@ export const UtilsActivity: React.FC = () => {
           <div className="flex flex-col gap-4">
             {utilityCards.map((card) => {
               const base = card.baseDelay;
+              const metaText = card.activity === "ExchangeActivity"
+                ? `바가지 방지 · ฿100 ≈ ₩${Math.round(thbRate * 100).toLocaleString()}`
+                : card.meta;
+
               return (
                 <AnimatedContent
                   key={card.activity}
@@ -108,7 +124,7 @@ export const UtilsActivity: React.FC = () => {
                               ease="power3.out"
                               delay={base + 0.18}
                             >
-                              <p className="mt-0.5 text-xs font-bold text-cyan-600 dark:text-cyan-400">{card.meta}</p>
+                              <p className="mt-0.5 text-xs font-bold text-cyan-600 dark:text-cyan-400">{metaText}</p>
                             </AnimatedContent>
                           </div>
 
