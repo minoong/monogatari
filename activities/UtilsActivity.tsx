@@ -33,9 +33,6 @@ export const UtilsActivity: React.FC = () => {
         <div className="mx-auto flex w-full max-w-lg flex-col gap-5">
           <header>
             <p className="text-xs font-extrabold uppercase tracking-wider text-[#00256C] dark:text-cyan-400">방콕에서 바가지 쓰거나 당황하지 말라고!</p>
-            <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-[#00256C] dark:text-white" style={{ fontFamily: "var(--font-korean-air)" }}>
-              필요한 거 있으면 얼른 골라, 미누쿤!
-            </h1>
           </header>
 
           <div className="flex flex-col gap-4">
