@@ -10,6 +10,7 @@ import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { GooeyInput } from "@/components/ui/gooey-input";
 import { triggerHapticFeedback } from "@/components/BottomNav";
+import { TextLoop } from "@/components/core/text-loop";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -178,35 +179,40 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
               )}
 
               {/* Result Count & Clear Status */}
-              <div className="flex items-center justify-between px-1 text-xs text-slate-500 dark:text-slate-400">
-                <div className="flex items-center gap-1.5 font-medium">
-                  <span>
-                    {searchQuery || selectedCategories.length > 0 ? "검색/필터 결과" : "전체"}
+              <div className="flex items-center justify-between gap-2 px-1 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex min-w-0 items-center gap-1.5 font-medium">
+                  <span className="shrink-0 font-bold text-slate-800 dark:text-slate-200">
+                    최근
                   </span>
+                  <span className="shrink-0 text-slate-300 dark:text-slate-700">·</span>
+                  <TextLoop className="overflow-y-clip font-medium text-slate-600 dark:text-slate-300" interval={2.8}>
+                    {wishes.slice(0, 5).map((w) => (
+                      <span key={w.id} className="inline-block max-w-[150px] truncate sm:max-w-[220px]">
+                        {w.title}{w.target_price_thb ? ` (${formatThaiBaht(w.target_price_thb)})` : ""}
+                      </span>
+                    ))}
+                  </TextLoop>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-1.5 font-medium">
                   <span className="font-extrabold text-slate-900 dark:text-white tabular-nums">
                     {filteredWishes.length}건
                   </span>
                   {(searchQuery || selectedCategories.length > 0) && (
-                    <span className="text-[11px] text-slate-400">
-                      (총 {wishes.length}건)
-                    </span>
+                    <button
+                      onClick={() => {
+                        triggerHapticFeedback(10);
+                        setSearchQuery("");
+                        setSelectedCategories([]);
+                      }}
+                      type="button"
+                      className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      <RotateCcw className="size-3" />
+                      초기화
+                    </button>
                   )}
                 </div>
-
-                {(searchQuery || selectedCategories.length > 0) && (
-                  <button
-                    onClick={() => {
-                      triggerHapticFeedback(10);
-                      setSearchQuery("");
-                      setSelectedCategories([]);
-                    }}
-                    type="button"
-                    className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
-                  >
-                    <RotateCcw className="size-3" />
-                    필터 초기화
-                  </button>
-                )}
               </div>
             </div>
           )}
