@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { supabase } from "../lib/supabase";
 import { Save, X } from "lucide-react";
 import NumberFlow from "@number-flow/react";
 import { NumberFlowInput } from "@daformat/react-number-flow-input";
@@ -13,21 +12,29 @@ import { Flip } from "gsap/Flip";
 import { useGSAP } from "@gsap/react";
 import { StateTextRoll } from "@/components/core/state-text-roll";
 
+import { useExchangeRates } from "@/lib/exchange-rates";
+
 if (typeof window !== "undefined") {
   gsap.registerPlugin(Flip, useGSAP);
 }
 
-
 export const ExchangeActivity: React.FC = () => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
-  const [rates, setRates] = useState<{ THB: number; USD: number }>({ THB: 38.5, USD: 1380 });
+  const { data: exchangeData, isLoading: loading } = useExchangeRates();
+  const [customRates, setCustomRates] = useState<{ THB?: number; USD?: number }>({});
+
+  const rates = {
+    THB: customRates.THB ?? exchangeData?.THB ?? 42.8,
+    USD: customRates.USD ?? exchangeData?.USD ?? 1380,
+  };
+  const lastUpdatedTime = exchangeData?.lastUpdatedText ?? null;
+
   const [thb, setThb] = useState<number | undefined>(0);
   const [inputCurrency, setInputCurrency] = useState<"THB" | "KRW">("THB");
   const [previousInputCurrency, setPreviousInputCurrency] = useState<"THB" | "KRW">("THB");
   const [currencyTransitionKey, setCurrencyTransitionKey] = useState(0);
   const isClearing = useRef(false);
-  const [loading, setLoading] = useState(true);
   const [inputKey, setInputKey] = useState(0);
 
   const flipState = useRef<Flip.FlipState | null>(null);
@@ -50,61 +57,10 @@ export const ExchangeActivity: React.FC = () => {
     }
   }, { dependencies: [isFocused] });
 
-  const [lastUpdatedTime, setLastUpdatedTime] = useState<string | null>(null);
-
-  const fetchRatesFromDB = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      // 1. 실시간 외환 시장 라이브 API 조회 (Open Exchange Rates API)
-      const res = await fetch("https://open.er-api.com/v6/latest/THB");
-      if (res.ok) {
-        const json = await res.json();
-        if (json?.result === "success" && json?.rates?.KRW) {
-          const thbRate = Number(json.rates.KRW.toFixed(2));
-          const usdRate = Number((json.rates.KRW / json.rates.USD).toFixed(2));
-          setRates({ THB: thbRate, USD: usdRate });
-          if (json.time_last_update_utc) {
-            const dateObj = new Date(json.time_last_update_utc);
-            setLastUpdatedTime(`${dateObj.getMonth() + 1}/${dateObj.getDate()} ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')} 기준`);
-          } else {
-            setLastUpdatedTime("실시간 라이브 API");
-          }
-          return;
-        }
-      }
-
-      // 2. API 실패 시 Supabase 캐시 조회
-      const { data, error } = await supabase
-        .from('exchange_rates')
-        .select('*')
-        .in('currency', ['THB', 'USD']);
-      
-      if (error) throw error;
-      
-      if (data && data.length > 0) {
-        const newRates = { THB: 38.5, USD: 1380 };
-        data.forEach(rate => {
-          if (rate.currency === 'THB') newRates.THB = rate.rate_to_krw;
-          if (rate.currency === 'USD') newRates.USD = rate.rate_to_krw;
-        });
-        setRates(newRates);
-      }
-    } catch (err) {
-      console.error("Failed to load rates:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchRatesFromDB();
-  }, [fetchRatesFromDB]);
-
   const handleManualSave = (currency: 'THB' | 'USD', valStr: string) => {
     const val = parseFloat(valStr);
     if (!isNaN(val) && val > 0) {
-      setRates((prev) => ({ ...prev, [currency]: val }));
+      setCustomRates((prev) => ({ ...prev, [currency]: val }));
       alert(`${currency} 환율이 수동 변경되었습니다! (${val}원)`);
     }
   };
@@ -335,7 +291,7 @@ export const ExchangeActivity: React.FC = () => {
                       <input 
                         className="w-12 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-md px-1.5 py-1 text-right text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 transition-all" 
                         value={rates.THB}
-                        onChange={(e) => setRates({...rates, THB: parseFloat(e.target.value) || 0})}
+                        onChange={(e) => setCustomRates((prev) => ({ ...prev, THB: parseFloat(e.target.value) || 0 }))}
                       />
                       <button onClick={() => handleManualSave('THB', rates.THB.toString())} className="hover:text-indigo-500 transition ml-0.5 p-1">
                         <Save className="w-3.5 h-3.5"/>
@@ -371,7 +327,7 @@ export const ExchangeActivity: React.FC = () => {
                       <input 
                         className="w-14 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-md px-1.5 py-1 text-right text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 transition-all" 
                         value={rates.USD}
-                        onChange={(e) => setRates({...rates, USD: parseFloat(e.target.value) || 0})}
+                        onChange={(e) => setCustomRates((prev) => ({ ...prev, USD: parseFloat(e.target.value) || 0 }))}
                       />
                       <span>KRW</span>
                       <button onClick={() => handleManualSave('USD', rates.USD.toString())} className="hover:text-indigo-500 transition ml-0.5 p-1">

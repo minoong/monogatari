@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
 import { AnimatedContent } from "@/components/ui/animated-content";
 import { TextLoop } from "@/components/core/text-loop";
+import { useExchangeRates } from "@/lib/exchange-rates";
 
 const utilityCards = [
   {
@@ -28,18 +29,8 @@ const utilityCards = [
 
 export const UtilsActivity: React.FC = () => {
   const { push } = useFlow();
-  const [thbRate, setThbRate] = React.useState<number>(42.8);
-
-  React.useEffect(() => {
-    fetch("https://open.er-api.com/v6/latest/THB")
-      .then((res) => res.json())
-      .then((json) => {
-        if (json?.result === "success" && json?.rates?.KRW) {
-          setThbRate(Number(json.rates.KRW.toFixed(2)));
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const { data: exchangeData } = useExchangeRates();
+  const thbRate = exchangeData?.THB ?? 42.8;
 
   return (
     <AppScreen appBar={{ title: "유틸 도구... 실수하지 마!" }}>
