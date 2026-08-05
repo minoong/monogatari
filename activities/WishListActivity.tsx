@@ -142,7 +142,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
               onOpenChange={setSearchOpen}
               onValueChange={setSearchQuery}
               open={searchOpen}
-              placeholder={`${meta.title.replace(" 정보", "")} 검색`}
+              placeholder=""
               value={searchQuery}
             />
           </div>
