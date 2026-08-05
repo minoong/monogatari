@@ -43,7 +43,7 @@ const PassengerTicket: React.FC<{ flight: FlightSegment }> = ({ flight }) => {
             </Avatar>
           ))}
         </div>
-        <p className="text-sm font-black">OH GA HYUN · LEE MINWOO</p>
+        <p className="text-sm font-black">OH GAHYUN · LEE MINWOO</p>
       </div>
       <Ticket className="size-5 text-[#8ac7f0]" aria-hidden="true" />
     </div>
