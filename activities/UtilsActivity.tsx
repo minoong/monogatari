@@ -63,7 +63,7 @@ export const UtilsActivity: React.FC = () => {
             {utilityCards.map((card) => {
               const base = card.baseDelay;
               const metaText = card.activity === "ExchangeActivity"
-                ? `바가지 방지 · ฿100 ≈ ₩${Math.round(thbRate * 100).toLocaleString()}`
+                ? `฿1 ≈ ₩${Math.round(thbRate).toLocaleString()} · ฿10 ≈ ₩${Math.round(thbRate * 10).toLocaleString()} · ฿100 ≈ ₩${Math.round(thbRate * 100).toLocaleString()}`
                 : card.meta;
 
               return (
