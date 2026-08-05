@@ -7,17 +7,17 @@ import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
 const utilityCards = [
   {
     activity: "ExchangeActivity" as const,
-    title: "환율 계산기",
-    description: "태국 바트 금액을 원화와 달러로 빠르게 확인해요.",
-    meta: "฿100 ≈ ₩3,850",
+    title: "실수하지 마! 환율 계산기",
+    description: "태국 바트 바가지 쓰지 않도록 원화랑 달러로 똑바로 확인해!",
+    meta: "바가지 방지 · ฿100 ≈ ₩3,850",
     icon: Calculator,
     color: "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300",
   },
   {
     activity: "DictionaryActivity" as const,
-    title: "현지 필수 태국어 사전",
-    description: "필수 표현을 찾고 발음을 듣거나 현지인에게 보여주세요.",
-    meta: "검색 · 발음 · 크게 보기",
+    title: "당황 금지! 현지 태국어 사전",
+    description: "말 안 통한다고 버벅이지 말고, 발음 듣거나 현지인한테 크게 보여줘!",
+    meta: "버벅임 방지 · 검색 · 발음 · 크게 보기",
     icon: Languages,
     color: "bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-300",
   },
@@ -27,13 +27,13 @@ export const UtilsActivity: React.FC = () => {
   const { push } = useFlow();
 
   return (
-    <AppScreen appBar={{ title: "유틸" }}>
+    <AppScreen appBar={{ title: "유틸 도구... 실수하지 마!" }}>
       <div className="flex min-h-full w-full flex-col overflow-y-auto bg-slate-50 px-4 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] pt-5 dark:bg-slate-950">
         <div className="mx-auto flex w-full max-w-lg flex-col gap-5">
           <header>
-            <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">여행 중 바로 꺼내 쓰는 도구</p>
+            <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">방콕에서 바가지 쓰거나 당황하지 말라고!</p>
             <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white">
-              필요한 기능을 선택하세요
+              필요한 거 있으면 얼른 골라, 둔탱아!
             </h1>
           </header>
 

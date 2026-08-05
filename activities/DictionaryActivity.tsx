@@ -442,7 +442,7 @@ export const DictionaryActivity: React.FC = () => {
   };
 
   return (
-    <AppScreen className="dictionary-screen" appBar={{ title: "회화 사전" }}>
+    <AppScreen className="dictionary-screen" appBar={{ title: "태국어 사전... 당황하지 말라고!" }}>
       <main ref={mainRef} className="relative flex h-[calc(100svh-56px)] w-full flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
         <div
           ref={scrollRef}
