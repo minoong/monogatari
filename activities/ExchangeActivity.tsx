@@ -101,22 +101,7 @@ export const ExchangeActivity: React.FC = () => {
     <AppScreen appBar={{ title: "환율 계산기... 바가지 쓰지 마!" }}>
       <div className="flex flex-col min-h-full w-full bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 dark:from-slate-950 dark:via-gray-950 dark:to-indigo-950/30 text-gray-900 dark:text-white pb-12 overflow-x-hidden">
         
-        <motion.div layout className={`flex flex-col px-4 pb-4 gap-3 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-4'}`}>
-          {!isFocused && (
-            <div className="flex items-center justify-between px-2.5 pt-1 pb-0.5">
-              <div className="flex items-center gap-2">
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-                </span>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">실시간 환율</span>
-                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">1 THB = {rates.THB}원</span>
-              </div>
-              {lastUpdatedTime && (
-                <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-500">{lastUpdatedTime}</span>
-              )}
-            </div>
-          )}
+        <motion.div layout className={`flex flex-col px-4 pb-4 gap-3 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-6'}`}>
           <LayoutGroup id="exchange-currency-cards">
           
           {/* 메인 입력 (THB) 카드 */}
@@ -336,6 +321,23 @@ export const ExchangeActivity: React.FC = () => {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* 하단 실시간 환율 안내 */}
+            {!isFocused && (
+              <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-1 flex items-center justify-between px-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex size-2">
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                  </span>
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">실시간 환율</span>
+                  <span className="text-xs font-medium text-slate-400 dark:text-slate-500">1 THB = {rates.THB}원</span>
+                </div>
+                {lastUpdatedTime && (
+                  <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-500">{lastUpdatedTime}</span>
+                )}
+              </motion.div>
+            )}
             
           </div>
           </LayoutGroup>
