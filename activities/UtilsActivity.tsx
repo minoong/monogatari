@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useFlow } from "@stackflow/react";
 import { ArrowRight } from "lucide-react";
@@ -10,7 +11,7 @@ const utilityCards = [
     title: "실수하지 마! 환율 계산기",
     description: "태국 바트 바가지 쓰지 않도록 원화랑 달러로 똑바로 확인해!",
     meta: "바가지 방지 · ฿100 ≈ ₩3,850",
-    iconEmoji: "🧮",
+    imageSrc: "/card-exchange-ruka.jpg",
     accent: "from-[#00256C] to-blue-600",
   },
   {
@@ -18,7 +19,7 @@ const utilityCards = [
     title: "당황 금지! 현지 태국어 사전",
     description: "말 안 통한다고 버벅이지 말고, 발음 듣거나 현지인한테 크게 보여줘!",
     meta: "버벅임 방지 · 검색 · 발음 · 크게 보기",
-    iconEmoji: "🗣️",
+    imageSrc: "/card-dictionary-echidna.png",
     accent: "from-violet-600 to-purple-600",
   },
 ] as const;
@@ -50,9 +51,15 @@ export const UtilsActivity: React.FC = () => {
                   className="group w-full rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-200/80 transition-transform active:scale-[0.985] dark:bg-slate-900 dark:ring-slate-800"
                 >
                   <div className="flex items-start gap-4">
-                    <span className={`flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${card.accent} text-2xl shadow-md text-white`}>
-                      {card.iconEmoji}
-                    </span>
+                    <div className="relative flex size-14 shrink-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-md dark:border-slate-800">
+                      <Image
+                        src={card.imageSrc}
+                        alt={card.title}
+                        fill
+                        sizes="56px"
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
                         <div>
