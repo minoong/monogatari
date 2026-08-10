@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isGoogleMapsUrl, isTimeValue, isTripDate, type ScheduleImage, type ScheduleItem } from "@/lib/schedule";
+import { isGoogleMapsUrl, isScheduleDate, isTimeValue, type ScheduleImage, type ScheduleItem } from "@/lib/schedule";
 import { supabase } from "@/lib/supabase";
 
 const IMAGE_PATH = /^schedule\/[0-9a-f-]+\.(?:jpe?g|png|webp)$/i;
@@ -24,7 +24,7 @@ function parseInput(body: unknown) {
   const normalizedTitle = typeof title === "string" ? title.trim() : "";
   const normalizedSubtitle = typeof subtitle === "string" && subtitle.trim() ? subtitle.trim() : null;
   const normalizedMap = typeof google_maps_url === "string" && google_maps_url.trim() ? google_maps_url.trim() : null;
-  if (!isTripDate(schedule_date) || !isTimeValue(start_time) || !normalizedTitle || normalizedTitle.length > 100) return { error: "Invalid date, time, or title" } as const;
+  if (!isScheduleDate(schedule_date) || !isTimeValue(start_time) || !normalizedTitle || normalizedTitle.length > 100) return { error: "Invalid date, time, or title" } as const;
   if (normalizedSubtitle && normalizedSubtitle.length > 500) return { error: "Subtitle is too long" } as const;
   if (normalizedMap && !isGoogleMapsUrl(normalizedMap)) return { error: "Google Maps URL is invalid" } as const;
   if (!Array.isArray(image_paths) || image_paths.length > 5 || image_paths.some((path) => typeof path !== "string" || !IMAGE_PATH.test(path))) return { error: "Invalid image paths" } as const;

@@ -16,7 +16,6 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import {
-  isTripDate,
   TRIP_END_DATE,
   TRIP_START_DATE,
   type TripDate,
@@ -162,7 +161,7 @@ export function TripDateCalendarSheet({
             </span>
           </div>
           <DrawerDescription className="pl-12">
-            여행 일정이 있는 날짜만 선택할 수 있어요.
+            원하는 날짜를 선택해 일정을 등록할 수 있어요.
           </DrawerDescription>
         </DrawerHeader>
 
@@ -284,11 +283,10 @@ function VirtualMonthList({
                 locale={ko}
                 showOutsideDays={false}
                 selected={selected ? dateFromValue(selected) : undefined}
-                disabled={(date) => !isTripDate(formatDateValue(date))}
                 onSelect={(date) => {
                   if (!date) return;
                   const nextValue = formatDateValue(date);
-                  if (isTripDate(nextValue)) onSelect(nextValue);
+                  onSelect(nextValue);
                 }}
                 className="mx-auto w-full [--cell-size:2.5rem]"
                 classNames={{

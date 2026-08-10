@@ -1,6 +1,6 @@
 export const TRIP_DATES = ["2026-08-29", "2026-08-30", "2026-08-31", "2026-09-01"] as const;
 
-export type TripDate = (typeof TRIP_DATES)[number];
+export type TripDate = string;
 
 export const TRIP_START_DATE: TripDate = TRIP_DATES[0];
 export const TRIP_END_DATE: TripDate = TRIP_DATES[TRIP_DATES.length - 1];
@@ -25,7 +25,10 @@ export interface ScheduleItem {
 }
 
 export const isTripDate = (value: unknown): value is TripDate =>
-  typeof value === "string" && TRIP_DATES.includes(value as TripDate);
+  typeof value === "string" && TRIP_DATES.some((date) => date === value);
+
+export const isScheduleDate = (value: unknown): value is TripDate =>
+  typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T12:00:00Z`).getTime());
 
 export const isTimeValue = (value: unknown): value is string =>
   typeof value === "string" && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);

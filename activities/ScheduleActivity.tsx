@@ -4,16 +4,17 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
+import { Tabs } from "@heroui/react";
 import { CalendarDays, ChevronLeft, MapPin, Pencil, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import { BottomNav, triggerHapticFeedback } from "@/components/BottomNav";
 import { ScheduleDrawer } from "@/components/schedule/ScheduleDrawer";
 import { AlertDialog, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatLongTripDate, formatTripDate, isTripDate, TRIP_DATES, type ScheduleItem, type TripDate } from "@/lib/schedule";
+import { formatLongTripDate, formatTripDate, isTripDate, type ScheduleItem, type TripDate } from "@/lib/schedule";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
-type Filter = "all" | TripDate;
+type Filter = TripDate | null;
 
 const fetchSchedule = async (): Promise<ScheduleItem[]> => {
   const response = await fetch("/api/schedule");
@@ -31,7 +32,7 @@ export const ScheduleActivity: React.FC = () => {
   const client = useQueryClient();
   const now = bangkokParts();
   const today = `${now.year}-${now.month}-${now.day}`;
-  const [filter, setFilter] = useState<Filter>(isTripDate(today) ? today : "all");
+  const [filter, setFilter] = useState<Filter>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<ScheduleItem | null>(null);
   const [deleting, setDeleting] = useState<ScheduleItem | null>(null);
@@ -39,6 +40,9 @@ export const ScheduleActivity: React.FC = () => {
   const activeRef = useRef<HTMLDivElement>(null);
   const didScroll = useRef(false);
   const { data: items = [], isLoading, isError, refetch } = useQuery({ queryKey: ["schedule"], queryFn: fetchSchedule });
+
+  const tabDates = useMemo(() => Array.from(new Set(items.map((item) => item.schedule_date))).sort(), [items]);
+  const activeDate = filter && tabDates.includes(filter) ? filter : tabDates.find((date) => date === today) ?? tabDates[0] ?? null;
 
   useEffect(() => {
     const channel = supabase.channel("schedule_items_changes")
@@ -62,8 +66,8 @@ export const ScheduleActivity: React.FC = () => {
   }, [currentKeys]);
 
   const grouped = useMemo(
-    () => TRIP_DATES.map((date) => ({ date, items: items.filter((item) => item.schedule_date === date) })).filter((group) => filter === "all" || group.date === filter),
-    [filter, items],
+    () => (activeDate ? [{ date: activeDate, items: items.filter((item) => item.schedule_date === activeDate) }] : []),
+    [activeDate, items],
   );
   const remove = useMutation({
     mutationFn: async (id: string) => {
@@ -79,10 +83,23 @@ export const ScheduleActivity: React.FC = () => {
     <AppScreen appBar={{ title: "4일간의 일정표", renderLeft: () => <button type="button" aria-label="홈으로 돌아가기" className="grid size-10 place-items-center rounded-full transition active:bg-slate-100 dark:active:bg-slate-800" onClick={() => replace("HomeActivity", {}, { animate: false })}><ChevronLeft className="size-5" /></button> }}>
       <main className="min-h-full bg-slate-50 pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
         <div className="sticky top-0 z-30 border-b border-slate-200/70 bg-slate-50/90 px-4 pt-3 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
-          <div className="flex gap-2 overflow-x-auto pb-3 no-scrollbar">
-            <Tab active={filter === "all"} onClick={() => setFilter("all")}>전체</Tab>
-            {TRIP_DATES.map((date) => <Tab key={date} active={filter === date} onClick={() => setFilter(date)}>{formatTripDate(date)}</Tab>)}
-          </div>
+          <Tabs
+            aria-label="일정 날짜"
+            selectedKey={activeDate ?? undefined}
+            onSelectionChange={(key) => setFilter(String(key))}
+            className="w-full"
+          >
+            <Tabs.ListContainer>
+              <Tabs.List className="w-max min-w-full justify-start gap-1">
+                {tabDates.map((date) => (
+                  <Tabs.Tab key={date} id={date} className="min-w-20 px-4 py-2 text-sm font-bold text-slate-500 data-[selected=true]:text-white">
+                    {formatTripDate(date)}
+                    <Tabs.Indicator className="rounded-full bg-slate-900 dark:bg-white" />
+                  </Tabs.Tab>
+                ))}
+              </Tabs.List>
+            </Tabs.ListContainer>
+          </Tabs>
         </div>
         <section className="mx-auto w-full max-w-lg px-4 py-5">
           {isLoading && <TimelineSkeleton />}
@@ -100,7 +117,6 @@ export const ScheduleActivity: React.FC = () => {
   );
 };
 
-function Tab({ active, children, onClick }: { active: boolean; children: React.ReactNode; onClick: () => void }) { return <button className={cn("shrink-0 rounded-full px-4 py-2 text-sm font-bold transition", active ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "bg-white text-slate-500 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800")} onClick={onClick}>{children}</button>; }
 function ScheduleCard({ item, current, cardRef, onDetail, onEdit, onDelete }: { item: ScheduleItem; current: boolean; cardRef?: React.Ref<HTMLDivElement>; onDetail: () => void; onEdit: () => void; onDelete: () => void }) { return <div ref={cardRef} className="relative grid grid-cols-[44px_1fr] gap-3"><div className="relative pt-3 text-right text-xs font-extrabold tabular-nums text-slate-500">{item.start_time}<span className={cn("absolute right-[-19px] top-4 size-3 rounded-full border-[3px] border-slate-50 dark:border-slate-950", current ? "bg-blue-500 motion-safe:animate-ping" : "bg-slate-300 dark:bg-slate-700")} /><span className="absolute right-[-15px] top-4 size-1 rounded-full bg-white dark:bg-slate-950" /></div><article className={cn("group relative overflow-hidden rounded-2xl border bg-white p-4 shadow-sm transition dark:bg-slate-900", current ? "border-blue-400 ring-2 ring-blue-100 dark:border-blue-400 dark:ring-blue-500/20" : "border-slate-200 dark:border-slate-800")}><button className="absolute inset-0 z-0" aria-label={`${item.title} 자세히 보기`} onClick={onDetail} /><div className="relative z-10 flex gap-3 pointer-events-none"><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><h2 className="truncate font-extrabold text-slate-900 dark:text-white">{item.title}</h2>{current && <span className="rounded-full bg-blue-500 px-2 py-0.5 text-[10px] font-extrabold text-white">지금</span>}</div>{item.subtitle && <p className="mt-1 whitespace-pre-wrap text-sm leading-5 text-slate-500 dark:text-slate-400">{item.subtitle}</p>}</div>{item.images[0] && <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-slate-100" style={{ backgroundImage: `url(${item.images[0].url})`, backgroundSize: "cover", backgroundPosition: "center" }}>{item.images.length > 1 && <span className="absolute bottom-1 right-1 rounded-full bg-black/65 px-1.5 py-0.5 text-[10px] font-bold text-white">+{item.images.length - 1}</span>}</div>}</div><div className="relative z-10 mt-3 flex items-center justify-end gap-1 border-t border-slate-100 pt-2 dark:border-slate-800"><button className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800" onClick={onEdit} aria-label={`${item.title} 편집`}><Pencil className="size-3.5" /></button>{item.google_maps_url && <a className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800" href={item.google_maps_url} target="_blank" rel="noreferrer" aria-label={`${item.title} Google Maps 열기`}><MapPin className="size-3.5" /></a>}<button className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10" onClick={onDelete} aria-label={`${item.title} 삭제`}><Trash2 className="size-3.5" /></button></div></article></div>; }
 function ScheduleDetail({ item, onClose, onEdit }: { item: ScheduleItem | null; onClose: () => void; onEdit: () => void }) { if (!item) return null; return <div className="fixed inset-0 z-50 flex items-end bg-black/40 p-4 backdrop-blur-sm sm:items-center sm:justify-center" role="dialog" aria-modal="true" aria-label={`${item.title} 상세`}><section className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-bold text-blue-600">{item.start_time}</p><h2 className="mt-1 text-xl font-extrabold">{item.title}</h2></div><button onClick={onClose} className="rounded-full bg-slate-100 p-2 dark:bg-slate-800" aria-label="닫기"><X className="size-4" /></button></div>{item.subtitle && <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600 dark:text-slate-300">{item.subtitle}</p>}{item.images.length > 0 && <div className="mt-4 grid grid-cols-2 gap-2">{item.images.map((image, index) => <div key={image.id} aria-label={`${item.title} 사진 ${index + 1}`} className="aspect-square rounded-2xl bg-slate-100" style={{ backgroundImage: `url(${image.url})`, backgroundSize: "cover", backgroundPosition: "center" }} />)}</div>}<div className="mt-5 flex gap-2"><button className="flex-1 rounded-xl bg-slate-100 py-3 font-bold dark:bg-slate-800" onClick={onClose}>닫기</button><button className="flex-1 rounded-xl bg-slate-900 py-3 font-bold text-white dark:bg-white dark:text-slate-900" onClick={onEdit}>수정</button></div></section></div>; }
 function TimelineSkeleton() { return <div className="ml-12 space-y-5 animate-pulse">{Array.from({ length: 5 }).map((_, index) => <div key={index} className="h-24 rounded-2xl bg-slate-200 dark:bg-slate-800" />)}</div>; }
