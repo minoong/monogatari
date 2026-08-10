@@ -1,36 +1,212 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
+import { Picker } from "@gfazioli/mantine-picker";
+import { MantineProvider } from "@mantine/core";
 import imageCompression from "browser-image-compression";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Input, Label, TextArea } from "@heroui/react";
 import { CalendarDays, ChevronRight, Clock3, Link2 } from "lucide-react";
 import { TripDateCalendarSheet } from "@/components/schedule/TripDateCalendarSheet";
-import { Drawer, DrawerDescription, DrawerFooter, DrawerHeader, DrawerPanel, DrawerPopup, DrawerTitle } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { WishImagePicker, type WishImageDraft } from "@/components/wish/WishImagePicker";
-import { WheelPicker, WheelPickerWrapper } from "@/components/wheel-picker";
-import { formatLongTripDate, isGoogleMapsUrl, normalizeExternalUrl, TRIP_DATES, type ScheduleItem, type TripDate } from "@/lib/schedule";
+import {
+  formatLongTripDate,
+  isGoogleMapsUrl,
+  normalizeExternalUrl,
+  TRIP_DATES,
+  type ScheduleItem,
+  type TripDate,
+} from "@/lib/schedule";
 
-const hours = Array.from({ length: 24 }, (_, value) => ({ value: String(value).padStart(2, "0"), label: String(value).padStart(2, "0") }));
-const minutes = Array.from({ length: 12 }, (_, value) => ({ value: String(value * 5).padStart(2, "0"), label: String(value * 5).padStart(2, "0") }));
-const compression = { maxSizeMB: 1, maxWidthOrHeight: 1920, preserveExif: false, useWebWorker: true, fileType: "image/jpeg" };
+const hours = Array.from({ length: 24 }, (_, value) =>
+  String(value).padStart(2, "0"),
+);
+const minutes = Array.from({ length: 12 }, (_, value) =>
+  String(value * 5).padStart(2, "0"),
+);
+const compression = {
+  maxSizeMB: 1,
+  maxWidthOrHeight: 1920,
+  preserveExif: false,
+  useWebWorker: true,
+  fileType: "image/jpeg",
+};
 
-export function ScheduleDrawer({ open, onOpenChange, item = null }: { open: boolean; onOpenChange: (open: boolean) => void; item?: ScheduleItem | null }) {
-  const client = useQueryClient(); const editing = Boolean(item);
+export function ScheduleDrawer({
+  open,
+  onOpenChange,
+  item = null,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  item?: ScheduleItem | null;
+}) {
+  const client = useQueryClient();
+  const editing = Boolean(item);
   const [date, setDate] = useState<TripDate>(item?.schedule_date ?? TRIP_DATES[0]);
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [hour, setHour] = useState(item?.start_time.slice(0, 2) ?? "09"); const [minute, setMinute] = useState(item?.start_time.slice(3, 5) ?? "00");
-  const [title, setTitle] = useState(item?.title ?? ""); const [subtitle, setSubtitle] = useState(item?.subtitle ?? ""); const [mapUrl, setMapUrl] = useState(item?.google_maps_url ?? "");
-  const [images, setImages] = useState<WishImageDraft[]>(() => item?.images.map((image) => ({ id: image.id, path: image.path, url: image.url })) ?? []);
-  const [error, setError] = useState<string | null>(null); const [compressing, setCompressing] = useState(false); const formRef = useRef<HTMLFormElement>(null);
-  const save = useMutation({ mutationFn: async () => {
-    const uploaded: string[] = []; const paths: string[] = [];
-    try { for (const image of images) { if (image.path) { paths.push(image.path); continue; } if (!image.file) continue; setCompressing(true); const file = await imageCompression(image.file, compression); const form = new FormData(); form.append("image", file); const response = await fetch("/api/schedule/image", { method: "POST", body: form }); const payload = await response.json(); if (!response.ok) throw new Error(payload.error ?? "사진을 업로드하지 못했어요."); uploaded.push(payload.data.path); paths.push(payload.data.path); } }
-    catch (cause) { if (uploaded.length) await fetch("/api/schedule/image", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paths: uploaded }) }); throw cause; }
-    finally { setCompressing(false); }
-    const response = await fetch(item ? `/api/schedule?id=${item.id}` : "/api/schedule", { method: item ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ schedule_date: date, start_time: `${hour}:${minute}`, title, subtitle, google_maps_url: mapUrl.trim() ? normalizeExternalUrl(mapUrl.trim()) : null, image_paths: paths }) });
-    const payload = await response.json(); if (!response.ok) { if (uploaded.length) await fetch("/api/schedule/image", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paths: uploaded }) }); throw new Error(payload.error ?? "일정을 저장하지 못했어요."); } return payload.data as ScheduleItem;
-  }, onSuccess: async () => { await client.invalidateQueries({ queryKey: ["schedule"] }); onOpenChange(false); }, onError: (cause) => setError(cause instanceof Error ? cause.message : "잠시 후 다시 시도해 주세요.") });
-  const submit = (event: FormEvent) => { event.preventDefault(); const normalized = mapUrl.trim() ? normalizeExternalUrl(mapUrl.trim()) : ""; if (!title.trim()) return setError("일정 제목을 입력해 주세요."); if (normalized && !isGoogleMapsUrl(normalized)) return setError("Google Maps 링크를 입력해 주세요."); setError(null); save.mutate(); };
-  return <Drawer open={open} onOpenChange={onOpenChange}><DrawerPopup variant="inset" showBar><form ref={formRef} className="flex min-h-0 flex-1 flex-col" onSubmit={submit}><DrawerHeader className="px-6 pb-3"><DrawerTitle>{editing ? "일정 수정" : "일정 등록"}</DrawerTitle><DrawerDescription>시간과 장소 사진을 함께 기록해 두세요.</DrawerDescription></DrawerHeader><DrawerPanel className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-6 py-4"><section><Label className="mb-2 flex items-center gap-2"><CalendarDays className="size-4" /> 날짜</Label><button type="button" className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-slate-300 active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900" onClick={() => setCalendarOpen(true)}><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300"><CalendarDays className="size-5" /></span><span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-400">여행 날짜</span><span className="mt-0.5 block font-extrabold text-slate-900 dark:text-white">{formatLongTripDate(date)}</span></span><ChevronRight className="size-4 shrink-0 text-slate-400" /></button></section><section><Label className="mb-2 flex items-center gap-2"><Clock3 className="size-4" /> 시간</Label><WheelPickerWrapper className="w-full justify-center"><WheelPicker options={hours} value={hour} onValueChange={setHour} visibleCount={12} /><span className="font-bold">:</span><WheelPicker options={minutes} value={minute} onValueChange={setMinute} visibleCount={12} /></WheelPickerWrapper></section><div className="grid gap-2"><Label htmlFor="schedule-title">제목</Label><Input id="schedule-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={100} placeholder="예: 호텔 체크인" /></div><div className="grid gap-2"><Label htmlFor="schedule-subtitle">서브타이틀</Label><TextArea id="schedule-subtitle" value={subtitle} onChange={(event) => setSubtitle(event.target.value)} maxLength={500} placeholder="메모나 이동 정보" /></div><div className="grid gap-2"><Label htmlFor="schedule-map" className="flex items-center gap-2"><Link2 className="size-4" /> Google Maps 링크</Label><Input id="schedule-map" value={mapUrl} onChange={(event) => setMapUrl(event.target.value)} placeholder="https://maps.app.goo.gl/..." /></div><WishImagePicker images={images} onChange={setImages} />{error && <p className="text-sm font-medium text-red-500">{error}</p>}</DrawerPanel><DrawerFooter className="px-6"><Button className="w-full" type="submit" isPending={save.isPending || compressing}>{compressing ? "사진 압축 중…" : save.isPending ? "저장 중…" : editing ? "수정 저장" : "일정 등록"}</Button></DrawerFooter></form></DrawerPopup><TripDateCalendarSheet open={calendarOpen} value={date} mode="editor" onConfirm={(value) => { if (value) setDate(value); }} onOpenChange={setCalendarOpen} /></Drawer>;
+  const [hour, setHour] = useState(item?.start_time.slice(0, 2) ?? "09");
+  const [minute, setMinute] = useState(item?.start_time.slice(3, 5) ?? "00");
+  const [title, setTitle] = useState(item?.title ?? "");
+  const [subtitle, setSubtitle] = useState(item?.subtitle ?? "");
+  const [mapUrl, setMapUrl] = useState(item?.google_maps_url ?? "");
+  const [images, setImages] = useState<WishImageDraft[]>(
+    () => item?.images.map((image) => ({ id: image.id, path: image.path, url: image.url })) ?? [],
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [compressing, setCompressing] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const uploaded: string[] = [];
+      const paths: string[] = [];
+
+      try {
+        for (const image of images) {
+          if (image.path) {
+            paths.push(image.path);
+            continue;
+          }
+          if (!image.file) continue;
+
+          setCompressing(true);
+          const file = await imageCompression(image.file, compression);
+          const form = new FormData();
+          form.append("image", file);
+          const response = await fetch("/api/schedule/image", { method: "POST", body: form });
+          const payload = await response.json();
+          if (!response.ok) throw new Error(payload.error ?? "사진을 업로드하지 못했어요.");
+          uploaded.push(payload.data.path);
+          paths.push(payload.data.path);
+        }
+      } catch (cause) {
+        if (uploaded.length) {
+          await fetch("/api/schedule/image", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paths: uploaded }),
+          });
+        }
+        throw cause;
+      } finally {
+        setCompressing(false);
+      }
+
+      const response = await fetch(item ? `/api/schedule?id=${item.id}` : "/api/schedule", {
+        method: item ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          schedule_date: date,
+          start_time: `${hour}:${minute}`,
+          title,
+          subtitle,
+          google_maps_url: mapUrl.trim() ? normalizeExternalUrl(mapUrl.trim()) : null,
+          image_paths: paths,
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        if (uploaded.length) {
+          await fetch("/api/schedule/image", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paths: uploaded }),
+          });
+        }
+        throw new Error(payload.error ?? "일정을 저장하지 못했어요.");
+      }
+      return payload.data as ScheduleItem;
+    },
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ["schedule"] });
+      onOpenChange(false);
+    },
+    onError: (cause) =>
+      setError(cause instanceof Error ? cause.message : "잠시 후 다시 시도해 주세요."),
+  });
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const normalized = mapUrl.trim() ? normalizeExternalUrl(mapUrl.trim()) : "";
+    if (!title.trim()) return setError("일정 제목을 입력해 주세요.");
+    if (normalized && !isGoogleMapsUrl(normalized)) return setError("Google Maps 링크를 입력해 주세요.");
+    setError(null);
+    save.mutate();
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerPopup variant="inset" showBar>
+        <form ref={formRef} className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
+          <DrawerHeader className="px-6 pb-3">
+            <DrawerTitle>{editing ? "일정 수정" : "일정 등록"}</DrawerTitle>
+            <DrawerDescription>시간과 장소 사진을 함께 기록해 두세요.</DrawerDescription>
+          </DrawerHeader>
+          <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-6 py-4">
+            <section>
+              <Label className="mb-2 flex items-center gap-2"><CalendarDays className="size-4" /> 날짜</Label>
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-slate-300 active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900"
+                onClick={() => setCalendarOpen(true)}
+              >
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300"><CalendarDays className="size-5" /></span>
+                <span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-400">여행 날짜</span><span className="mt-0.5 block font-extrabold text-slate-900 dark:text-white">{formatLongTripDate(date)}</span></span>
+                <ChevronRight className="size-4 shrink-0 text-slate-400" />
+              </button>
+            </section>
+
+            <section>
+              <Label className="mb-2 flex items-center gap-2"><Clock3 className="size-4" /> 시간</Label>
+              <MantineProvider>
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                  <Picker
+                  value={hour}
+                  data={hours}
+                  onChange={(value) => setHour(String(value))}
+                  visibleItems={5}
+                  itemHeight={36}
+                  loop={false}
+                  hapticFeedback
+                  label="시"
+                  className="min-w-0"
+                  />
+                  <span aria-hidden className="text-lg font-extrabold text-slate-400">:</span>
+                  <Picker
+                  value={minute}
+                  data={minutes}
+                  onChange={(value) => setMinute(String(value))}
+                  visibleItems={5}
+                  itemHeight={36}
+                  loop={false}
+                  hapticFeedback
+                  label="분"
+                  className="min-w-0"
+                  />
+                </div>
+              </MantineProvider>
+            </section>
+
+            <div className="grid gap-2"><Label htmlFor="schedule-title">제목</Label><Input id="schedule-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={100} placeholder="예: 호텔 체크인" /></div>
+            <div className="grid gap-2"><Label htmlFor="schedule-subtitle">서브타이틀</Label><TextArea id="schedule-subtitle" value={subtitle} onChange={(event) => setSubtitle(event.target.value)} maxLength={500} placeholder="메모나 이동 정보" /></div>
+            <div className="grid gap-2"><Label htmlFor="schedule-map" className="flex items-center gap-2"><Link2 className="size-4" /> Google Maps 링크</Label><Input id="schedule-map" value={mapUrl} onChange={(event) => setMapUrl(event.target.value)} placeholder="https://maps.app.goo.gl/..." /></div>
+            <WishImagePicker images={images} onChange={setImages} />
+            {error && <p className="text-sm font-medium text-red-500">{error}</p>}
+          </DrawerPanel>
+          <DrawerFooter className="px-6"><Button className="w-full" type="submit" isPending={save.isPending || compressing}>{compressing ? "사진 압축 중…" : save.isPending ? "저장 중…" : editing ? "수정 저장" : "일정 등록"}</Button></DrawerFooter>
+        </form>
+      </DrawerPopup>
+      <TripDateCalendarSheet open={calendarOpen} value={date} mode="editor" onConfirm={(value) => { if (value) setDate(value); }} onOpenChange={setCalendarOpen} />
+    </Drawer>
+  );
 }
