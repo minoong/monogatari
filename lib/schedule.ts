@@ -2,6 +2,9 @@ export const TRIP_DATES = ["2026-08-29", "2026-08-30", "2026-08-31", "2026-09-01
 
 export type TripDate = (typeof TRIP_DATES)[number];
 
+export const TRIP_START_DATE: TripDate = TRIP_DATES[0];
+export const TRIP_END_DATE: TripDate = TRIP_DATES[TRIP_DATES.length - 1];
+
 export interface ScheduleImage {
   id: string;
   path: string;
