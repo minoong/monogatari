@@ -169,7 +169,10 @@ export function ScheduleDrawer({
             <section>
               <Label className="mb-2 flex items-center gap-2"><Clock3 className="size-4" /> 시간</Label>
               <MantineProvider>
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/45 px-3 py-3 shadow-sm dark:border-blue-900/50 dark:bg-blue-950/20">
+                <div
+                  data-base-ui-swipe-ignore
+                  className="touch-none grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/45 px-3 py-3 shadow-sm dark:border-blue-900/50 dark:bg-blue-950/20"
+                >
                   <Picker
                   value={hour}
                   data={hours}
