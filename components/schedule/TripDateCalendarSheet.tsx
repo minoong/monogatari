@@ -180,12 +180,12 @@ export function TripDateCalendarSheet({
           )}
         </DrawerPanel>
 
-        <DrawerFooter className="shrink-0 gap-3 px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 sm:flex-row">
+        <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-1 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
           {mode === "filter" && (
             <Button
               type="button"
               variant="outline"
-              className="h-12 flex-1"
+              className="h-12 w-full rounded-2xl text-base"
               onClick={() => confirm(null)}
             >
               <List className="size-4" />
@@ -194,7 +194,7 @@ export function TripDateCalendarSheet({
           )}
           <Button
             type="button"
-            className="h-12 flex-1"
+            className="h-12 w-full rounded-2xl text-base"
             disabled={!draft}
             onClick={() => confirm()}
           >

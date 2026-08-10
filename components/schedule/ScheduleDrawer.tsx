@@ -169,13 +169,7 @@ export function ScheduleDrawer({
             <section>
               <Label className="mb-2 flex items-center gap-2"><Clock3 className="size-4" /> 시간</Label>
               <MantineProvider>
-                <div
-                  className="touch-none select-none grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/45 px-3 py-3 shadow-sm dark:border-blue-900/50 dark:bg-blue-950/20"
-                  onPointerDown={(event) => event.stopPropagation()}
-                  onPointerMove={(event) => event.stopPropagation()}
-                  onTouchStart={(event) => event.stopPropagation()}
-                  onTouchMove={(event) => event.stopPropagation()}
-                >
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/45 px-3 py-3 shadow-sm dark:border-blue-900/50 dark:bg-blue-950/20">
                   <Picker
                   value={hour}
                   data={hours}
@@ -220,8 +214,8 @@ export function ScheduleDrawer({
             {error && <p className="text-sm font-medium text-red-500">{error}</p>}
           </DrawerPanel>
           <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
-            <Button className="h-12 rounded-2xl text-base" isDisabled={save.isPending || compressing} onPress={() => onOpenChange(false)} size="lg" type="button" variant="secondary">취소</Button>
-            <Button className="h-12 rounded-2xl text-base" isDisabled={!title.trim() || save.isPending || compressing} size="lg" type="submit">{compressing ? "사진 압축 중…" : save.isPending ? "저장 중…" : editing ? "변경 저장" : "등록하기"}</Button>
+            <Button fullWidth className="h-12 rounded-2xl text-base" isDisabled={save.isPending || compressing} onPress={() => onOpenChange(false)} size="lg" type="button" variant="secondary">취소</Button>
+            <Button fullWidth className="h-12 rounded-2xl text-base" isDisabled={!title.trim() || save.isPending || compressing} size="lg" type="submit">{compressing ? "사진 압축 중…" : save.isPending ? "저장 중…" : editing ? "변경 저장" : "등록하기"}</Button>
           </DrawerFooter>
         </form>
       </DrawerPopup>
