@@ -67,8 +67,8 @@ const differenceInMonths = (start: Date, end: Date) =>
 const TRIP_MONTH = dateFromValue(TRIP_START_DATE);
 const FIRST_MONTH = addMonths(TRIP_MONTH, -12);
 const LAST_MONTH = addMonths(dateFromValue(TRIP_END_DATE), 12);
-const SCHEDULE_HIGHLIGHT_START = dateFromValue("2026-08-29");
-const SCHEDULE_HIGHLIGHT_END = dateFromValue("2026-09-02");
+const SCHEDULE_HIGHLIGHT_START = "2026-08-29";
+const SCHEDULE_HIGHLIGHT_END = "2026-09-02";
 const MONTHS = Array.from(
   { length: differenceInMonths(FIRST_MONTH, LAST_MONTH) + 1 },
   (_, index) => addMonths(FIRST_MONTH, index),
@@ -315,8 +315,8 @@ function VirtualMonthList({
                 selected={selected ? dateFromValue(selected) : undefined}
                 modifiers={{
                   tripSchedule: (date) =>
-                    date >= SCHEDULE_HIGHLIGHT_START &&
-                    date <= SCHEDULE_HIGHLIGHT_END,
+                    formatDateValue(date) >= SCHEDULE_HIGHLIGHT_START &&
+                    formatDateValue(date) <= SCHEDULE_HIGHLIGHT_END,
                 }}
                 modifiersClassNames={{
                   selected:
