@@ -166,15 +166,14 @@ export function TripDateCalendarSheet({
             <Button
               type="button"
               size="sm"
-              variant="outline"
-              className="rounded-full"
+              className="h-8 rounded-full px-3 text-sm"
               onClick={selectToday}
             >
               오늘
             </Button>
             <span
               aria-live="polite"
-              className="shrink-0 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary"
+              className="inline-flex h-8 shrink-0 items-center rounded-full border border-border bg-muted px-3 text-sm font-bold text-foreground"
             >
               {formatMonth(visibleMonth)}
             </span>
@@ -205,7 +204,7 @@ export function TripDateCalendarSheet({
             <Button
               type="button"
               variant="outline"
-              className="h-12 w-full rounded-2xl text-base"
+              className="h-12 w-full rounded-full text-base"
               onClick={() => confirm(null)}
             >
               <List className="size-4" />
@@ -214,7 +213,7 @@ export function TripDateCalendarSheet({
           )}
           <Button
             type="button"
-            className="h-12 w-full rounded-2xl text-base"
+            className="h-12 w-full rounded-full text-base"
             disabled={!draft}
             onClick={() => confirm()}
           >
@@ -320,8 +319,10 @@ function VirtualMonthList({
                     date <= SCHEDULE_HIGHLIGHT_END,
                 }}
                 modifiersClassNames={{
+                  selected:
+                    "[&>button]:!bg-[#ec4899] [&>button]:!text-white [&>button]:after:bg-white",
                   tripSchedule:
-                    "[&>button]:!font-extrabold [&>button]:!text-pink-600 dark:[&>button]:!text-pink-400 [&[data-selected]>button]:!bg-pink-500 [&[data-selected]>button]:!text-white",
+                    "[&>button]:!font-extrabold [&>button]:!text-[#ec4899] [&>button]:after:absolute [&>button]:after:bottom-1 [&>button]:after:start-1/2 [&>button]:after:size-1 [&>button]:after:-translate-x-1/2 [&>button]:after:rounded-full [&>button]:after:bg-[#ec4899] [&>button]:after:content-[''] dark:[&>button]:!text-[#f472b6] [&[data-selected]>button]:!bg-[#ec4899] [&[data-selected]>button]:!text-white [&[data-selected]>button]:after:bg-white",
                 }}
                 onSelect={(date) => {
                   if (!date) return;
