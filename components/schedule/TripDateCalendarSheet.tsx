@@ -67,6 +67,8 @@ const differenceInMonths = (start: Date, end: Date) =>
 const TRIP_MONTH = dateFromValue(TRIP_START_DATE);
 const FIRST_MONTH = addMonths(TRIP_MONTH, -12);
 const LAST_MONTH = addMonths(dateFromValue(TRIP_END_DATE), 12);
+const SCHEDULE_HIGHLIGHT_START = dateFromValue("2026-08-29");
+const SCHEDULE_HIGHLIGHT_END = dateFromValue("2026-09-02");
 const MONTHS = Array.from(
   { length: differenceInMonths(FIRST_MONTH, LAST_MONTH) + 1 },
   (_, index) => addMonths(FIRST_MONTH, index),
@@ -108,6 +110,7 @@ export function TripDateCalendarSheet({
   const [visibleMonth, setVisibleMonth] = useState(
     MONTHS[getMonthIndex(value)],
   );
+  const [todayJumpRequest, setTodayJumpRequest] = useState(0);
   const openerRef = useRef<HTMLElement | null>(null);
   const wasOpenRef = useRef(false);
 
@@ -135,6 +138,13 @@ export function TripDateCalendarSheet({
     onOpenChange(false);
   };
 
+  const selectToday = () => {
+    const today = formatDateValue(new Date());
+    setDraft(today);
+    setVisibleMonth(MONTHS[getMonthIndex(today)]);
+    setTodayJumpRequest((request) => request + 1);
+  };
+
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerPopup
@@ -153,6 +163,15 @@ export function TripDateCalendarSheet({
               <ChevronLeft className="size-5" />
             </button>
             <DrawerTitle className="min-w-0 flex-1">날짜 선택</DrawerTitle>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="rounded-full"
+              onClick={selectToday}
+            >
+              오늘
+            </Button>
             <span
               aria-live="polite"
               className="shrink-0 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary"
@@ -174,6 +193,7 @@ export function TripDateCalendarSheet({
               key={value ?? "all"}
               selected={draft}
               initialValue={value}
+              todayJumpRequest={todayJumpRequest}
               onSelect={setDraft}
               onVisibleMonthChange={setVisibleMonth}
             />
@@ -219,11 +239,13 @@ export function TripDateCalendarSheet({
 function VirtualMonthList({
   selected,
   initialValue,
+  todayJumpRequest,
   onSelect,
   onVisibleMonthChange,
 }: {
   selected: TripDate | null;
   initialValue: TripDate | null;
+  todayJumpRequest: number;
   onSelect: (value: TripDate) => void;
   onVisibleMonthChange: (month: Date) => void;
 }) {
@@ -244,6 +266,15 @@ function VirtualMonthList({
     virtualMonths.find(
       (item) => item.end > (virtualizer.scrollOffset ?? 0) + 80,
     )?.index ?? initialMonthIndex;
+
+  useEffect(() => {
+    if (!todayJumpRequest) return;
+    const today = formatDateValue(new Date());
+    virtualizer.scrollToIndex(getMonthIndex(today), {
+      align: "start",
+      behavior: "smooth",
+    });
+  }, [todayJumpRequest, virtualizer]);
 
   useEffect(() => {
     onVisibleMonthChange(MONTHS[visibleMonthIndex]);
@@ -283,6 +314,15 @@ function VirtualMonthList({
                 locale={ko}
                 showOutsideDays={false}
                 selected={selected ? dateFromValue(selected) : undefined}
+                modifiers={{
+                  tripSchedule: (date) =>
+                    date >= SCHEDULE_HIGHLIGHT_START &&
+                    date <= SCHEDULE_HIGHLIGHT_END,
+                }}
+                modifiersClassNames={{
+                  tripSchedule:
+                    "[&>button]:!font-extrabold [&>button]:!text-pink-600 dark:[&>button]:!text-pink-400 [&[data-selected]>button]:!bg-pink-500 [&[data-selected]>button]:!text-white",
+                }}
                 onSelect={(date) => {
                   if (!date) return;
                   const nextValue = formatDateValue(date);
