@@ -6,9 +6,9 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import type { WishImage } from "@/lib/wishes";
+type GalleryImage = { id: string; url: string };
 
-export function WishImageGallery({ images, title, onImagePress }: { images: WishImage[]; title: string; onImagePress: (index: number) => void }) {
+export function WishImageGallery({ images, title, onImagePress }: { images: GalleryImage[]; title: string; onImagePress: (index: number) => void }) {
   if (!images.length) return <div className="flex h-40 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400"><span aria-hidden="true">🖼️</span></div>;
   if (images.length === 1) return <button className="block h-56 w-full" onClick={() => onImagePress(0)} type="button"><Image alt={`${title} 이미지`} className="h-56 w-full object-cover" height={448} width={768} src={images[0].url} unoptimized /></button>;
 
