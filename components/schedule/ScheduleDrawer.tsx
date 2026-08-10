@@ -27,12 +27,24 @@ import {
   type TripDate,
 } from "@/lib/schedule";
 
-const hours = Array.from({ length: 24 }, (_, value) =>
+const hours = Array.from({ length: 12 }, (_, value) =>
+  String(value + 1).padStart(2, "0"),
+);
+const minutes = Array.from({ length: 60 }, (_, value) =>
   String(value).padStart(2, "0"),
 );
-const minutes = Array.from({ length: 12 }, (_, value) =>
-  String(value * 5).padStart(2, "0"),
-);
+const timePickerProps = {
+  w: 50,
+  withDividers: false,
+  withHighlight: false,
+  loop: true,
+  maxRotation: 90,
+  itemHeight: 30,
+  visibleItems: 5,
+  withMask: false,
+  preventPageScroll: true,
+  hapticFeedback: true,
+} as const;
 const compression = {
   maxSizeMB: 1,
   maxWidthOrHeight: 1920,
@@ -54,8 +66,10 @@ export function ScheduleDrawer({
   const editing = Boolean(item);
   const [date, setDate] = useState<TripDate>(item?.schedule_date ?? TRIP_DATES[0]);
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [hour, setHour] = useState(item?.start_time.slice(0, 2) ?? "09");
+  const initialHour = Number(item?.start_time.slice(0, 2) ?? "09");
+  const [hour, setHour] = useState(String(initialHour % 12 || 12).padStart(2, "0"));
   const [minute, setMinute] = useState(item?.start_time.slice(3, 5) ?? "00");
+  const [amPm, setAmPm] = useState<"am" | "pm">(initialHour >= 12 ? "pm" : "am");
   const [title, setTitle] = useState(item?.title ?? "");
   const [subtitle, setSubtitle] = useState(item?.subtitle ?? "");
   const [mapUrl, setMapUrl] = useState(item?.google_maps_url ?? "");
@@ -107,7 +121,7 @@ export function ScheduleDrawer({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           schedule_date: date,
-          start_time: `${hour}:${minute}`,
+          start_time: `${String((Number(hour) % 12) + (amPm === "pm" ? 12 : 0)).padStart(2, "0")}:${minute}`,
           title,
           subtitle,
           google_maps_url: mapUrl.trim() ? normalizeExternalUrl(mapUrl.trim()) : null,
@@ -171,41 +185,38 @@ export function ScheduleDrawer({
               <MantineProvider>
                 <div
                   data-base-ui-swipe-ignore
-                  className="touch-none grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/45 px-3 py-3 shadow-sm dark:border-blue-900/50 dark:bg-blue-950/20"
+                  className="touch-none rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
                 >
-                  <Picker
-                  value={hour}
-                  data={hours}
-                  onChange={(value) => setHour(String(value))}
-                  visibleItems={5}
-                  itemHeight={36}
-                  loop={false}
-                  hapticFeedback
-                  label="시"
-                  preventPageScroll
-                  withMask
-                  maxBlurAmount={1}
-                  minItemOpacity={0.25}
-                  minItemScale={0.84}
-                  className="min-w-0"
-                  />
-                  <span aria-hidden className="text-lg font-extrabold text-slate-400">:</span>
-                  <Picker
-                  value={minute}
-                  data={minutes}
-                  onChange={(value) => setMinute(String(value))}
-                  visibleItems={5}
-                  itemHeight={36}
-                  loop={false}
-                  hapticFeedback
-                  label="분"
-                  preventPageScroll
-                  withMask
-                  maxBlurAmount={1}
-                  minItemOpacity={0.25}
-                  minItemScale={0.84}
-                  className="min-w-0"
-                  />
+                  <div className="flex items-center justify-center gap-0">
+                    <span aria-hidden className="mr-1 text-lg">🕑</span>
+                    <Picker
+                      {...timePickerProps}
+                      rotateY={-10}
+                      value={hour}
+                      data={hours}
+                      onChange={(value) => setHour(String(value))}
+                      label="시"
+                    />
+                    <span aria-hidden className="text-lg font-extrabold text-slate-400">:</span>
+                    <Picker
+                      {...timePickerProps}
+                      rotateY={10}
+                      value={minute}
+                      data={minutes}
+                      onChange={(value) => setMinute(String(value))}
+                      label="분"
+                    />
+                    <Picker
+                      {...timePickerProps}
+                      rotateY={10}
+                      data={["am", "pm"]}
+                      loop={false}
+                      value={amPm}
+                      onChange={(value) => setAmPm(value as "am" | "pm")}
+                      label="오전 또는 오후"
+                    />
+                  </div>
+                  <p aria-live="polite" className="mt-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">선택한 시간 <span className="ml-1 font-extrabold tabular-nums text-slate-900 dark:text-white">{hour}:{minute} {amPm.toUpperCase()}</span></p>
                 </div>
               </MantineProvider>
             </section>
