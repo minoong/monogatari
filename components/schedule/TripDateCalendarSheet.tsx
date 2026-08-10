@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { CalendarDays, Check, ChevronLeft, List } from "lucide-react";
+import { Button as HeroButton } from "@heroui/react";
+import { ChevronLeft } from "lucide-react";
 import { ko } from "react-day-picker/locale";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -46,15 +47,6 @@ const formatMonth = (date: Date) =>
     year: "numeric",
     month: "long",
   }).format(date);
-
-const formatSelectedDate = (value: TripDate | null) => {
-  if (!value) return "날짜를 선택해 주세요";
-  return new Intl.DateTimeFormat("ko-KR", {
-    month: "long",
-    day: "numeric",
-    weekday: "short",
-  }).format(dateFromValue(value));
-};
 
 const addMonths = (date: Date, amount: number) =>
   new Date(date.getFullYear(), date.getMonth() + amount, 1, 12);
@@ -199,36 +191,27 @@ export function TripDateCalendarSheet({
           )}
         </DrawerPanel>
 
-        <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-1 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
-          {mode === "filter" && (
-            <Button
-              type="button"
-              variant="outline"
-              className="h-12 w-full rounded-full text-base"
-              onClick={() => confirm(null)}
-            >
-              <List className="size-4" />
-              전체 일정 보기
-            </Button>
-          )}
-          <Button
+        <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
+          <HeroButton
+            fullWidth
+            className="h-12 rounded-2xl text-base"
+            onPress={() => mode === "filter" ? confirm(null) : handleOpenChange(false)}
+            size="lg"
             type="button"
-            className="h-12 w-full rounded-full text-base"
-            disabled={!draft}
-            onClick={() => confirm()}
+            variant="secondary"
           >
-            {draft ? (
-              <>
-                <Check className="size-4" />
-                {formatSelectedDate(draft)} 선택
-              </>
-            ) : (
-              <>
-                <CalendarDays className="size-4" />
-                날짜를 선택해 주세요
-              </>
-            )}
-          </Button>
+            {mode === "filter" ? "전체 일정 보기" : "취소"}
+          </HeroButton>
+          <HeroButton
+            fullWidth
+            className="h-12 rounded-2xl text-base"
+            isDisabled={!draft}
+            onPress={() => confirm()}
+            size="lg"
+            type="button"
+          >
+            선택하기
+          </HeroButton>
         </DrawerFooter>
       </DrawerPopup>
     </Drawer>
