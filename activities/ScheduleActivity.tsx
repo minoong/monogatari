@@ -34,6 +34,7 @@ export const ScheduleActivity: React.FC = () => {
   const today = `${now.year}-${now.month}-${now.day}`;
   const [filter, setFilter] = useState<Filter>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerSession, setDrawerSession] = useState(0);
   const [editing, setEditing] = useState<ScheduleItem | null>(null);
   const [deleting, setDeleting] = useState<ScheduleItem | null>(null);
   const [detail, setDetail] = useState<ScheduleItem | null>(null);
@@ -77,7 +78,8 @@ export const ScheduleActivity: React.FC = () => {
     },
     onSuccess: async () => { setDeleting(null); await client.invalidateQueries({ queryKey: ["schedule"] }); },
   });
-  const openCreate = () => { setEditing(null); setDrawerOpen(true); };
+  const openCreate = () => { setEditing(null); setDrawerSession((current) => current + 1); setDrawerOpen(true); };
+  const openEdit = (item: ScheduleItem) => { setEditing(item); setDrawerSession((current) => current + 1); setDrawerOpen(true); };
 
   return (
     <AppScreen appBar={{ title: "4일간의 일정표", renderLeft: () => <button type="button" aria-label="홈으로 돌아가기" className="grid size-10 place-items-center rounded-full transition active:bg-slate-100 dark:active:bg-slate-800" onClick={() => replace("HomeActivity", {}, { animate: false })}><ChevronLeft className="size-5" /></button> }}>
@@ -105,12 +107,12 @@ export const ScheduleActivity: React.FC = () => {
           {isLoading && <TimelineSkeleton />}
           {isError && <div className="rounded-3xl bg-white p-8 text-center shadow-sm dark:bg-slate-900"><p className="font-bold">일정을 불러오지 못했어요.</p><button className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white" onClick={() => refetch()}><RefreshCw className="size-4" /> 다시 시도</button></div>}
           {!isLoading && !isError && items.length === 0 && <div className="rounded-3xl border border-dashed p-10 text-center"><CalendarDays className="mx-auto size-8 text-slate-400" /><p className="mt-3 font-bold">아직 일정이 없어요</p><button className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white" onClick={openCreate}>첫 일정 등록</button></div>}
-          {!isLoading && !isError && <div className="relative"><aside aria-label="가현짱과 미누쿤의 여행 타임라인" className="pointer-events-none absolute bottom-0 left-0 top-0 w-11"><div className="sticky top-5 flex -space-x-2"><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="가현짱" src="/avatars/gahyun.webp" /><AvatarFallback>가</AvatarFallback></Avatar><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="미누쿤" src="/avatars/minu.webp" /><AvatarFallback>미</AvatarFallback></Avatar></div></aside><div className="ml-12 space-y-8">{grouped.map((group) => <section key={group.date}><div className="mb-4 flex items-center gap-2"><span className="text-sm font-extrabold text-slate-900 dark:text-white">{formatLongTripDate(group.date)}</span>{group.date === today && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">오늘</span>}</div><div className="space-y-3">{group.items.map((item) => <ScheduleCard key={item.id} item={item} current={currentKeys.has(item.id)} cardRef={currentKeys.has(item.id) ? activeRef : undefined} onDetail={() => setDetail(item)} onEdit={() => { setEditing(item); setDrawerOpen(true); }} onDelete={() => setDeleting(item)} />)}</div></section>)}</div></div>}
+          {!isLoading && !isError && <div className="relative"><aside aria-label="가현짱과 미누쿤의 여행 타임라인" className="pointer-events-none absolute bottom-0 left-0 top-0 w-11"><div className="sticky top-5 flex -space-x-2"><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="가현짱" src="/avatars/gahyun.webp" /><AvatarFallback>가</AvatarFallback></Avatar><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="미누쿤" src="/avatars/minu.webp" /><AvatarFallback>미</AvatarFallback></Avatar></div></aside><div className="ml-12 space-y-8">{grouped.map((group) => <section key={group.date}><div className="mb-4 flex items-center gap-2"><span className="text-sm font-extrabold text-slate-900 dark:text-white">{formatLongTripDate(group.date)}</span>{group.date === today && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">오늘</span>}</div><div className="space-y-3">{group.items.map((item) => <ScheduleCard key={item.id} item={item} current={currentKeys.has(item.id)} cardRef={currentKeys.has(item.id) ? activeRef : undefined} onDetail={() => setDetail(item)} onEdit={() => openEdit(item)} onDelete={() => setDeleting(item)} />)}</div></section>)}</div></div>}
         </section>
       </main>
       <button aria-label="일정 등록" className="fixed bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),12px))] right-5 z-40 flex h-14 items-center gap-2 rounded-full bg-slate-900 px-5 font-bold text-white shadow-xl active:scale-95 dark:bg-white dark:text-slate-900" onClick={() => { triggerHapticFeedback(10); openCreate(); }}><Plus className="size-5" /> 등록</button>
-      <ScheduleDrawer key={`${drawerOpen}-${editing?.id ?? "new"}`} open={drawerOpen} onOpenChange={(open) => { setDrawerOpen(open); if (!open) setEditing(null); }} item={editing} />
-      <ScheduleDetail item={detail} onClose={() => setDetail(null)} onEdit={() => { if (detail) { setEditing(detail); setDrawerOpen(true); setDetail(null); } }} />
+      <ScheduleDrawer key={drawerSession} open={drawerOpen} onOpenChange={(open) => { setDrawerOpen(open); if (!open) setEditing(null); }} item={editing} />
+      <ScheduleDetail item={detail} onClose={() => setDetail(null)} onEdit={() => { if (detail) { openEdit(detail); setDetail(null); } }} />
       <AlertDialog open={Boolean(deleting)} onOpenChange={(open) => !open && !remove.isPending && setDeleting(null)}><AlertDialogPopup><AlertDialogHeader><AlertDialogTitle>일정을 삭제할까요?</AlertDialogTitle><AlertDialogDescription><strong>{deleting?.title}</strong> 일정과 연결된 사진도 함께 삭제됩니다.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter className="grid grid-cols-2"><button className="h-11 rounded-xl bg-slate-100 font-bold" disabled={remove.isPending} onClick={() => setDeleting(null)}>취소</button><button className="h-11 rounded-xl bg-red-500 font-bold text-white" disabled={!deleting || remove.isPending} onClick={() => deleting && remove.mutate(deleting.id)}>{remove.isPending ? "삭제 중…" : "삭제"}</button></AlertDialogFooter></AlertDialogPopup></AlertDialog>
       <BottomNav active="schedule" />
     </AppScreen>
