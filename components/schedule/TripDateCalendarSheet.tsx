@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { CalendarDays, Check, ChevronLeft, List } from "lucide-react";
-import { ko } from "react-day-picker/locale";
+import { Picker } from "@gfazioli/mantine-picker";
+import { MantineProvider } from "@mantine/core";
+import { Check, ChevronLeft, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Drawer,
   DrawerDescription,
@@ -15,11 +14,7 @@ import {
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import {
-  TRIP_END_DATE,
-  TRIP_START_DATE,
-  type TripDate,
-} from "@/lib/schedule";
+import { TRIP_START_DATE, type TripDate } from "@/lib/schedule";
 
 type TripDateCalendarSheetProps = {
   open: boolean;
@@ -29,73 +24,63 @@ type TripDateCalendarSheetProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const dateFromValue = (value: string) => {
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, month - 1, day, 12);
+type DateParts = {
+  year: string;
+  month: string;
+  day: string;
 };
 
-const formatDateValue = (date: Date) =>
-  [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, "0"),
-    String(date.getDate()).padStart(2, "0"),
-  ].join("-");
+const MONTHS = Array.from({ length: 12 }, (_, index) =>
+  String(index + 1).padStart(2, "0"),
+);
+const YEARS = Array.from({ length: 61 }, (_, index) => String(1970 + index));
 
-const formatMonth = (date: Date) =>
-  new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "long",
-  }).format(date);
+const pickerProps = {
+  withDividers: false,
+  withHighlight: false,
+  loop: true,
+  maxRotation: 90,
+  itemHeight: 38,
+  visibleItems: 5,
+  withMask: false,
+  cylinderRadius: 3,
+  preventPageScroll: true,
+  hapticFeedback: true,
+} as const;
 
-const formatSelectedDate = (value: TripDate | null) => {
-  if (!value) return "날짜를 선택해 주세요";
+const datePartsFromValue = (value: TripDate | null): DateParts => {
+  const fallback = TRIP_START_DATE;
+  const [year = "2026", month = "08", day = "29"] = (value ?? fallback).split("-");
+  return { year, month, day };
+};
+
+const daysInMonth = (year: string, month: string) =>
+  new Date(Number(year), Number(month), 0).getDate();
+
+const daysFor = (year: string, month: string) =>
+  Array.from({ length: daysInMonth(year, month) }, (_, index) =>
+    String(index + 1).padStart(2, "0"),
+  );
+
+const formatSelectedDate = (parts: DateParts) => {
+  const date = new Date(Number(parts.year), Number(parts.month) - 1, Number(parts.day), 12);
   return new Intl.DateTimeFormat("ko-KR", {
     month: "long",
     day: "numeric",
     weekday: "short",
-  }).format(dateFromValue(value));
+  }).format(date);
 };
 
-const addMonths = (date: Date, amount: number) =>
-  new Date(date.getFullYear(), date.getMonth() + amount, 1, 12);
+const dateValue = (parts: DateParts): TripDate =>
+  `${parts.year}-${parts.month}-${parts.day}`;
 
-const differenceInMonths = (start: Date, end: Date) =>
-  (end.getFullYear() - start.getFullYear()) * 12 +
-  end.getMonth() -
-  start.getMonth();
-
-const TRIP_MONTH = dateFromValue(TRIP_START_DATE);
-const FIRST_MONTH = addMonths(TRIP_MONTH, -12);
-const LAST_MONTH = addMonths(dateFromValue(TRIP_END_DATE), 12);
-const MONTHS = Array.from(
-  { length: differenceInMonths(FIRST_MONTH, LAST_MONTH) + 1 },
-  (_, index) => addMonths(FIRST_MONTH, index),
-);
-
-const getMonthIndex = (value: TripDate | null) => {
-  const month = value ? dateFromValue(value) : TRIP_MONTH;
-  return Math.max(
-    0,
-    Math.min(MONTHS.length - 1, differenceInMonths(FIRST_MONTH, month)),
-  );
+const clampDay = (parts: DateParts, changes: Partial<DateParts>): DateParts => {
+  const next = { ...parts, ...changes };
+  return {
+    ...next,
+    day: String(Math.min(Number(next.day), daysInMonth(next.year, next.month))).padStart(2, "0"),
+  };
 };
-
-const getMonthSize = (index: number) => {
-  const month = MONTHS[index];
-  const days = new Date(
-    month.getFullYear(),
-    month.getMonth() + 1,
-    0,
-  ).getDate();
-  const weeks = Math.ceil((month.getDay() + days) / 7);
-  return 152 + weeks * 40;
-};
-
-const getMonthOffset = (index: number) =>
-  MONTHS.slice(0, index).reduce(
-    (offset, _month, monthIndex) => offset + getMonthSize(monthIndex),
-    0,
-  );
 
 export function TripDateCalendarSheet({
   open,
@@ -104,18 +89,17 @@ export function TripDateCalendarSheet({
   onConfirm,
   onOpenChange,
 }: TripDateCalendarSheetProps) {
-  const [draft, setDraft] = useState<TripDate | null>(value);
-  const [visibleMonth, setVisibleMonth] = useState(
-    MONTHS[getMonthIndex(value)],
-  );
+  const [draft, setDraft] = useState<DateParts>(() => datePartsFromValue(value));
   const openerRef = useRef<HTMLElement | null>(null);
   const wasOpenRef = useRef(false);
+  const yearOptions = YEARS.includes(draft.year)
+    ? YEARS
+    : [...YEARS, draft.year].sort((a, b) => Number(a) - Number(b));
 
   useEffect(() => {
     if (open && !wasOpenRef.current) {
       openerRef.current = document.activeElement as HTMLElement | null;
-      setDraft(value);
-      setVisibleMonth(MONTHS[getMonthIndex(value)]);
+      setDraft(datePartsFromValue(value));
     }
 
     if (!open && wasOpenRef.current) {
@@ -126,11 +110,11 @@ export function TripDateCalendarSheet({
   }, [open, value]);
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) setDraft(value);
+    if (!nextOpen) setDraft(datePartsFromValue(value));
     onOpenChange(nextOpen);
   };
 
-  const confirm = (nextValue: TripDate | null = draft) => {
+  const confirm = (nextValue: TripDate | null = dateValue(draft)) => {
     onConfirm(nextValue);
     onOpenChange(false);
   };
@@ -153,153 +137,68 @@ export function TripDateCalendarSheet({
               <ChevronLeft className="size-5" />
             </button>
             <DrawerTitle className="min-w-0 flex-1">날짜 선택</DrawerTitle>
-            <span
-              aria-live="polite"
-              className="shrink-0 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary"
-            >
-              {formatMonth(visibleMonth)}
-            </span>
           </div>
           <DrawerDescription className="pl-12">
             원하는 날짜를 선택해 일정을 등록할 수 있어요.
           </DrawerDescription>
         </DrawerHeader>
 
-        <DrawerPanel
-          scrollable={false}
-          className="min-h-0 flex-1 overflow-hidden p-0"
-        >
-          {open && (
-            <VirtualMonthList
-              key={value ?? "all"}
-              selected={draft}
-              initialValue={value}
-              onSelect={setDraft}
-              onVisibleMonthChange={setVisibleMonth}
-            />
-          )}
+        <DrawerPanel scrollable={false} className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-5 py-8">
+          <MantineProvider>
+            <div
+              data-base-ui-swipe-ignore
+              className="touch-none rounded-2xl border border-slate-200 bg-white px-4 py-5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+            >
+              <div className="flex items-center justify-center gap-0" aria-label="날짜 휠 선택기">
+                <Picker
+                  {...pickerProps}
+                  w={62}
+                  rotateY={-10}
+                  value={draft.day}
+                  data={daysFor(draft.year, draft.month)}
+                  onChange={(day) => setDraft((current) => ({ ...current, day: String(day) }))}
+                  label="일"
+                  size="lg"
+                />
+                <Picker
+                  {...pickerProps}
+                  w={76}
+                  value={draft.month}
+                  data={MONTHS}
+                  renderItem={(month) => `${Number(month)}월`}
+                  onChange={(month) => setDraft((current) => clampDay(current, { month: String(month) }))}
+                  label="월"
+                  size="lg"
+                />
+                <Picker
+                  {...pickerProps}
+                  w={72}
+                  rotateY={10}
+                  value={draft.year}
+                  data={yearOptions}
+                  renderItem={(year) => `${year}년`}
+                  onChange={(year) => setDraft((current) => clampDay(current, { year: String(year) }))}
+                  label="연도"
+                  size="lg"
+                />
+              </div>
+            </div>
+          </MantineProvider>
         </DrawerPanel>
 
         <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-1 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
           {mode === "filter" && (
-            <Button
-              type="button"
-              variant="outline"
-              className="h-12 w-full rounded-2xl text-base"
-              onClick={() => confirm(null)}
-            >
+            <Button type="button" variant="outline" className="h-12 w-full rounded-2xl text-base" onClick={() => confirm(null)}>
               <List className="size-4" />
               전체 일정 보기
             </Button>
           )}
-          <Button
-            type="button"
-            className="h-12 w-full rounded-2xl text-base"
-            disabled={!draft}
-            onClick={() => confirm()}
-          >
-            {draft ? (
-              <>
-                <Check className="size-4" />
-                {formatSelectedDate(draft)} 선택
-              </>
-            ) : (
-              <>
-                <CalendarDays className="size-4" />
-                날짜를 선택해 주세요
-              </>
-            )}
+          <Button type="button" className="h-12 w-full rounded-2xl text-base" onClick={() => confirm()}>
+            <Check className="size-4" />
+            {formatSelectedDate(draft)} 선택
           </Button>
         </DrawerFooter>
       </DrawerPopup>
     </Drawer>
-  );
-}
-
-function VirtualMonthList({
-  selected,
-  initialValue,
-  onSelect,
-  onVisibleMonthChange,
-}: {
-  selected: TripDate | null;
-  initialValue: TripDate | null;
-  onSelect: (value: TripDate) => void;
-  onVisibleMonthChange: (month: Date) => void;
-}) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const initialMonthIndex = getMonthIndex(initialValue);
-  // TanStack Virtual exposes imperative functions by design; React Compiler
-  // correctly leaves this component un-memoized.
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const virtualizer = useVirtualizer({
-    count: MONTHS.length,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: getMonthSize,
-    initialOffset: getMonthOffset(initialMonthIndex),
-    overscan: 2,
-  });
-  const virtualMonths = virtualizer.getVirtualItems();
-  const visibleMonthIndex =
-    virtualMonths.find(
-      (item) => item.end > (virtualizer.scrollOffset ?? 0) + 80,
-    )?.index ?? initialMonthIndex;
-
-  useEffect(() => {
-    onVisibleMonthChange(MONTHS[visibleMonthIndex]);
-  }, [onVisibleMonthChange, visibleMonthIndex]);
-
-  return (
-    <div
-      ref={scrollRef}
-      className="h-full touch-pan-y overflow-y-auto overscroll-contain px-4"
-      aria-label="여행 날짜 월별 목록"
-    >
-      <div
-        className="relative w-full"
-        style={{ height: virtualizer.getTotalSize() }}
-      >
-        {virtualMonths.map((virtualMonth) => {
-          const month = MONTHS[virtualMonth.index];
-          return (
-            <section
-              key={`${month.getFullYear()}-${month.getMonth()}`}
-              className="absolute left-0 top-0 w-full pb-10 pt-7"
-              style={{ transform: `translateY(${virtualMonth.start}px)` }}
-              aria-labelledby={`trip-month-${virtualMonth.index}`}
-            >
-              <h3
-                id={`trip-month-${virtualMonth.index}`}
-                className="mb-4 px-2 text-lg font-extrabold text-foreground"
-              >
-                {formatMonth(month)}
-              </h3>
-              <Calendar
-                mode="single"
-                month={month}
-                startMonth={month}
-                endMonth={month}
-                hideNavigation
-                locale={ko}
-                showOutsideDays={false}
-                selected={selected ? dateFromValue(selected) : undefined}
-                onSelect={(date) => {
-                  if (!date) return;
-                  const nextValue = formatDateValue(date);
-                  onSelect(nextValue);
-                }}
-                className="mx-auto w-full [--cell-size:2.5rem]"
-                classNames={{
-                  month_caption: "hidden",
-                  nav: "hidden",
-                  months: "w-full",
-                  month: "mx-auto w-fit",
-                }}
-              />
-            </section>
-          );
-        })}
-      </div>
-    </div>
   );
 }
