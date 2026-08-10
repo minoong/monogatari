@@ -320,7 +320,7 @@ function VirtualMonthList({
                 }}
                 modifiersClassNames={{
                   selected:
-                    "[&>button]:!bg-[#ec4899] [&>button]:!text-white [&>button]:after:bg-white",
+                    "[&>button]:!bg-[#ec4899] [&>button]:!text-white [&>button]:after:absolute [&>button]:after:bottom-1 [&>button]:after:start-1/2 [&>button]:after:size-1.5 [&>button]:after:-translate-x-1/2 [&>button]:after:rounded-full [&>button]:after:bg-white [&>button]:after:content-['']",
                   tripSchedule:
                     "[&>button]:!font-extrabold [&>button]:!text-[#ec4899] [&>button]:after:absolute [&>button]:after:bottom-1 [&>button]:after:start-1/2 [&>button]:after:size-1 [&>button]:after:-translate-x-1/2 [&>button]:after:rounded-full [&>button]:after:bg-[#ec4899] [&>button]:after:content-[''] dark:[&>button]:!text-[#f472b6] [&[data-selected]>button]:!bg-[#ec4899] [&[data-selected]>button]:!text-white [&[data-selected]>button]:after:bg-white",
                 }}
