@@ -34,12 +34,12 @@ const minutes = Array.from({ length: 60 }, (_, value) =>
   String(value).padStart(2, "0"),
 );
 const timePickerProps = {
-  w: 50,
+  w: 58,
   withDividers: false,
   withHighlight: false,
   loop: true,
   maxRotation: 90,
-  itemHeight: 30,
+  itemHeight: 38,
   visibleItems: 5,
   withMask: false,
   preventPageScroll: true,
@@ -188,7 +188,6 @@ export function ScheduleDrawer({
                   className="touch-none rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
                 >
                   <div className="flex items-center justify-center gap-0">
-                    <span aria-hidden className="mr-1 text-lg">🕑</span>
                     <Picker
                       {...timePickerProps}
                       rotateY={-10}
@@ -196,6 +195,7 @@ export function ScheduleDrawer({
                       data={hours}
                       onChange={(value) => setHour(String(value))}
                       label="시"
+                      size="lg"
                     />
                     <span aria-hidden className="text-lg font-extrabold text-slate-400">:</span>
                     <Picker
@@ -205,6 +205,7 @@ export function ScheduleDrawer({
                       data={minutes}
                       onChange={(value) => setMinute(String(value))}
                       label="분"
+                      size="lg"
                     />
                     <Picker
                       {...timePickerProps}
@@ -214,9 +215,9 @@ export function ScheduleDrawer({
                       value={amPm}
                       onChange={(value) => setAmPm(value as "am" | "pm")}
                       label="오전 또는 오후"
+                      size="lg"
                     />
                   </div>
-                  <p aria-live="polite" className="mt-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">선택한 시간 <span className="ml-1 font-extrabold tabular-nums text-slate-900 dark:text-white">{hour}:{minute} {amPm.toUpperCase()}</span></p>
                 </div>
               </MantineProvider>
             </section>
