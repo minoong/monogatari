@@ -1,4 +1,4 @@
-export const TRIP_DATES = ["2026-08-29", "2026-08-30", "2026-08-31", "2026-09-01"] as const;
+export const TRIP_DATES = ["2026-08-29", "2026-08-30", "2026-08-31", "2026-09-01", "2026-09-02"] as const;
 
 export type TripDate = string;
 
