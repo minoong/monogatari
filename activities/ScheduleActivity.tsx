@@ -9,6 +9,7 @@ import { ArrowUpRight, CalendarDays, ChevronLeft, MapPin, Pencil, Plus, RefreshC
 import { BottomNav, triggerHapticFeedback } from "@/components/BottomNav";
 import { ScheduleDrawer } from "@/components/schedule/ScheduleDrawer";
 import { Timeline, type TimelineEntry } from "@/components/ui/timeline";
+import { MapPinIcon } from "@/components/ui/map-pin-icon";
 import { WishImageGallery } from "@/components/wish/WishImageGallery";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { AlertDialog, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -131,7 +132,7 @@ function ScheduleCard({ item, current, cardRef, onEdit, onDelete }: { item: Sche
         <MorphingDialogTrigger ariaLabel={`${item.title} 자세히 보기`} className="group block w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
           <div className="flex min-w-0 gap-3 transition group-hover:bg-slate-50 group-active:bg-slate-100 dark:group-hover:bg-slate-800"><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><MorphingDialogTitle className="min-w-0 flex-1"><h2 className="truncate font-extrabold text-slate-900 dark:text-white">{item.title}</h2></MorphingDialogTitle>{current && <span className="shrink-0 rounded-full bg-blue-500 px-2 py-0.5 text-[10px] font-extrabold text-white">지금</span>}</div>{item.subtitle && <ScheduleSubtitle subtitle={item.subtitle} />}</div>{item.images[0] && <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">{<MorphingDialogImage alt="" className="size-full object-cover" src={item.images[0].url} />}{item.images.length > 1 && <span className="absolute bottom-1 right-1 rounded-full bg-black/65 px-1.5 py-0.5 text-[10px] font-bold text-white">+{item.images.length - 1}</span>}</div>}</div>
         </MorphingDialogTrigger>
-        {item.google_maps_url && <div className="mt-2 flex h-5 items-center justify-end"><a aria-label={`${item.title} Google Maps 열기`} href={item.google_maps_url} target="_blank" rel="noreferrer" className="inline-flex size-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-200"><MapPin className="size-4" /></a></div>}
+        {item.google_maps_url && <div className="mt-2 flex h-5 items-center justify-end"><a aria-label={`${item.title} Google Maps 열기`} href={item.google_maps_url} target="_blank" rel="noreferrer" className="inline-flex size-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-200"><MapPinIcon size={18} /></a></div>}
       </article>
 
       <MorphingDialogContainer>
