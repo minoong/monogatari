@@ -74,7 +74,7 @@ export function Timeline({
 
   return (
     <section ref={containerRef} className="relative w-full min-w-0 overflow-x-clip font-sans" aria-label="일정 타임라인">
-      {railContent && <aside className="pointer-events-none absolute inset-y-0 left-0 z-20 w-12" aria-label="가현짱과 미누쿤의 여행 타임라인"><div className="sticky top-24 flex -space-x-2">{railContent}</div></aside>}
+      {railContent && <aside className="pointer-events-none absolute inset-y-0 left-0 z-20 w-12" aria-label="가현짱과 미누쿤의 여행 타임라인"><div className="sticky top-24 flex -space-x-2 transform-gpu [will-change:transform]">{railContent}</div></aside>}
       <div ref={contentRef} className="relative min-w-0 pb-8">
         {data.map((item) => (
           <div key={item.id} className="relative grid min-w-0 grid-cols-[3rem_minmax(0,1fr)] gap-5 pb-4 pt-1">
@@ -87,8 +87,8 @@ export function Timeline({
         ))}
         <div style={{ height }} className="pointer-events-none absolute left-[3.62rem] top-0 w-[2px] overflow-visible rounded-full bg-slate-200/90 dark:bg-slate-700/90">
           <motion.div style={{ height: heightTransform, opacity: opacityTransform }} className="absolute inset-x-0 top-0 rounded-full bg-gradient-to-b from-sky-300 via-blue-500 to-indigo-500 shadow-[0_0_10px_2px_rgba(59,130,246,0.45)]" />
-          <motion.span style={{ top: headYTransform, opacity: opacityTransform }} className="absolute -left-[5px] size-3 rounded-full bg-blue-400/80 blur-[2px]" />
-          <motion.span style={{ top: headYTransform, opacity: opacityTransform }} className="absolute -left-[2px] mt-[3px] size-[6px] rounded-full bg-white shadow-[0_0_8px_3px_rgba(96,165,250,0.95)]" />
+          <motion.span style={{ y: headYTransform, opacity: opacityTransform }} className="absolute -left-[5px] top-0 size-3 transform-gpu rounded-full bg-blue-400/80 blur-[2px] [will-change:transform]" />
+          <motion.span style={{ y: headYTransform, opacity: opacityTransform }} className="absolute -left-[2px] top-[3px] size-[6px] transform-gpu rounded-full bg-white shadow-[0_0_8px_3px_rgba(96,165,250,0.95)] [will-change:transform]" />
         </div>
       </div>
     </section>
