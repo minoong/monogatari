@@ -8,6 +8,7 @@ import { Tabs } from "@heroui/react";
 import { ArrowUpRight, CalendarDays, ChevronLeft, MapPin, Pencil, Plus, RefreshCw, Trash2, ZoomIn } from "lucide-react";
 import { BottomNav, triggerHapticFeedback } from "@/components/BottomNav";
 import { ScheduleDrawer } from "@/components/schedule/ScheduleDrawer";
+import { Timeline, type TimelineEntry } from "@/components/ui/timeline";
 import { WishImageGallery } from "@/components/wish/WishImageGallery";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { AlertDialog, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -85,7 +86,7 @@ export const ScheduleActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "4일간의 일정표", renderLeft: () => <button type="button" aria-label="홈으로 돌아가기" className="grid size-10 place-items-center rounded-full transition active:bg-slate-100 dark:active:bg-slate-800" onClick={() => replace("HomeActivity", {}, { animate: false })}><ChevronLeft className="size-5" /></button> }}>
-      <main className="min-h-full bg-slate-50 pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
+      <main className="min-h-full overflow-x-clip bg-slate-50 pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
         <div className="sticky top-0 z-30 border-b border-slate-200/70 bg-slate-50/90 px-4 pt-3 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
           <Tabs
             aria-label="일정 날짜"
@@ -93,8 +94,8 @@ export const ScheduleActivity: React.FC = () => {
             onSelectionChange={(key) => setFilter(String(key))}
             className="w-full"
           >
-            <Tabs.ListContainer>
-              <Tabs.List className="w-max min-w-full justify-start gap-1">
+            <Tabs.ListContainer className="overflow-x-auto no-scrollbar">
+              <Tabs.List className="min-w-max justify-start gap-1">
                 {tabDates.map((date) => (
                   <Tabs.Tab key={date} id={date} className="min-w-20 px-4 py-2 text-sm font-bold text-slate-500 data-[selected=true]:text-white">
                     {formatTripDate(date)}
@@ -105,11 +106,11 @@ export const ScheduleActivity: React.FC = () => {
             </Tabs.ListContainer>
           </Tabs>
         </div>
-        <section className="mx-auto w-full max-w-lg px-4 py-5">
+        <section className="mx-auto w-full max-w-lg overflow-x-clip px-4 py-5">
           {isLoading && <TimelineSkeleton />}
           {isError && <div className="rounded-3xl bg-white p-8 text-center shadow-sm dark:bg-slate-900"><p className="font-bold">일정을 불러오지 못했어요.</p><button className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white" onClick={() => refetch()}><RefreshCw className="size-4" /> 다시 시도</button></div>}
           {!isLoading && !isError && items.length === 0 && <div className="rounded-3xl border border-dashed p-10 text-center"><CalendarDays className="mx-auto size-8 text-slate-400" /><p className="mt-3 font-bold">아직 일정이 없어요</p><button className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white" onClick={openCreate}>첫 일정 등록</button></div>}
-          {!isLoading && !isError && <div className="relative"><aside aria-label="가현짱과 미누쿤의 여행 타임라인" className="pointer-events-none absolute bottom-0 left-0 top-0 w-11"><div className="sticky top-5 flex -space-x-2"><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="가현짱" src="/avatars/gahyun.webp" /><AvatarFallback>가</AvatarFallback></Avatar><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="미누쿤" src="/avatars/minu.webp" /><AvatarFallback>미</AvatarFallback></Avatar></div></aside><div className="ml-12 space-y-8">{grouped.map((group) => <section key={group.date}><div className="mb-4 flex items-center gap-2"><span className="text-sm font-extrabold text-slate-900 dark:text-white">{formatLongTripDate(group.date)}</span>{group.date === today && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">오늘</span>}</div><div className="space-y-3">{group.items.map((item) => <ScheduleCard key={item.id} item={item} current={currentKeys.has(item.id)} cardRef={currentKeys.has(item.id) ? activeRef : undefined} onEdit={() => openEdit(item)} onDelete={() => setDeleting(item)} />)}</div></section>)}</div></div>}
+          {!isLoading && !isError && grouped.map((group) => <section key={group.date}><div className="mb-4 flex items-center gap-2"><span className="text-sm font-extrabold text-slate-900 dark:text-white">{formatLongTripDate(group.date)}</span>{group.date === today && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">오늘</span>}</div><Timeline railContent={<><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="가현짱" src="/avatars/gahyun.webp" /><AvatarFallback>가</AvatarFallback></Avatar><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="미누쿤" src="/avatars/minu.webp" /><AvatarFallback>미</AvatarFallback></Avatar></>} data={group.items.map((item): TimelineEntry => ({ id: item.id, title: item.start_time, current: currentKeys.has(item.id), content: <ScheduleCard item={item} current={currentKeys.has(item.id)} cardRef={currentKeys.has(item.id) ? activeRef : undefined} onEdit={() => openEdit(item)} onDelete={() => setDeleting(item)} /> }))} /></section>)}
         </section>
       </main>
       <button aria-label="일정 등록" className="fixed bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),12px))] right-5 z-40 flex h-14 items-center gap-2 rounded-full bg-slate-900 px-5 font-bold text-white shadow-xl active:scale-95 dark:bg-white dark:text-slate-900" onClick={() => { triggerHapticFeedback(10); openCreate(); }}><Plus className="size-5" /> 등록</button>
@@ -124,12 +125,11 @@ function ScheduleCard({ item, current, cardRef, onEdit, onDelete }: { item: Sche
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
   const [zoomImageIndex, setZoomImageIndex] = useState(0);
 
-  return <div ref={cardRef} className="relative grid grid-cols-[44px_1fr] gap-3">
-    <div className="relative pt-3 text-right text-xs font-extrabold tabular-nums text-slate-500">{item.start_time}<span className={cn("absolute right-[-19px] top-4 size-3 rounded-full border-[3px] border-slate-50 dark:border-slate-950", current ? "bg-blue-500 motion-safe:animate-ping" : "bg-slate-300 dark:bg-slate-700")} /><span className="absolute right-[-15px] top-4 size-1 rounded-full bg-white dark:bg-slate-950" /></div>
+  return <div ref={cardRef} className="min-w-0">
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
       <MorphingDialogTrigger ariaLabel={`${item.title} 자세히 보기`} className="group block w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
         <article className={cn("relative overflow-hidden rounded-2xl border bg-white p-4 shadow-sm transition group-hover:bg-slate-50 group-active:bg-slate-100 dark:bg-slate-900 dark:group-hover:bg-slate-800", current ? "border-blue-400 ring-2 ring-blue-100 dark:border-blue-400 dark:ring-blue-500/20" : "border-slate-200 dark:border-slate-800")}>
-          <div className="flex gap-3"><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><MorphingDialogTitle className="min-w-0"><h2 className="truncate font-extrabold text-slate-900 dark:text-white">{item.title}</h2></MorphingDialogTitle>{current && <span className="rounded-full bg-blue-500 px-2 py-0.5 text-[10px] font-extrabold text-white">지금</span>}</div>{item.subtitle && <p className="mt-1 whitespace-pre-wrap text-sm leading-5 text-slate-500 dark:text-slate-400">{item.subtitle}</p>}</div>{item.images[0] && <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">{<MorphingDialogImage alt="" className="size-full object-cover" src={item.images[0].url} />}{item.images.length > 1 && <span className="absolute bottom-1 right-1 rounded-full bg-black/65 px-1.5 py-0.5 text-[10px] font-bold text-white">+{item.images.length - 1}</span>}</div>}</div>
+          <div className="flex min-w-0 gap-3"><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><MorphingDialogTitle className="min-w-0 flex-1"><h2 className="truncate font-extrabold text-slate-900 dark:text-white">{item.title}</h2></MorphingDialogTitle>{current && <span className="shrink-0 rounded-full bg-blue-500 px-2 py-0.5 text-[10px] font-extrabold text-white">지금</span>}</div>{item.subtitle && <p className="mt-1 break-words whitespace-pre-wrap text-sm leading-5 text-slate-500 dark:text-slate-400">{item.subtitle}</p>}</div>{item.images[0] && <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">{<MorphingDialogImage alt="" className="size-full object-cover" src={item.images[0].url} />}{item.images.length > 1 && <span className="absolute bottom-1 right-1 rounded-full bg-black/65 px-1.5 py-0.5 text-[10px] font-bold text-white">+{item.images.length - 1}</span>}</div>}</div>
         </article>
       </MorphingDialogTrigger>
 
