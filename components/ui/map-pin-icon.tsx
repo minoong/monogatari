@@ -3,7 +3,7 @@
 import type { Variants } from "motion/react";
 import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes, PointerEvent } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 export interface MapPinIconHandle {
@@ -13,6 +13,7 @@ export interface MapPinIconHandle {
 
 interface MapPinIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
+  animateOnMount?: boolean;
 }
 
 const SVG_VARIANTS: Variants = {
@@ -31,7 +32,7 @@ const CIRCLE_VARIANTS: Variants = {
 };
 
 const MapPinIcon = forwardRef<MapPinIconHandle, MapPinIconProps>(
-  ({ onMouseEnter, onMouseLeave, onPointerDown, className, size = 28, ...props }, ref) => {
+  ({ onMouseEnter, onMouseLeave, onPointerDown, className, size = 28, animateOnMount = false, ...props }, ref) => {
     const controls = useAnimation();
     const isControlledRef = useRef(false);
 
@@ -56,6 +57,13 @@ const MapPinIcon = forwardRef<MapPinIconHandle, MapPinIconProps>(
       if (isControlledRef.current || event.pointerType === "mouse") return;
       void controls.start("animate").then(() => controls.start("normal"));
     }, [controls, onPointerDown]);
+
+    useEffect(() => {
+      if (!animateOnMount || isControlledRef.current) return;
+      let active = true;
+      void controls.start("animate").then(() => active && controls.start("normal"));
+      return () => { active = false; };
+    }, [animateOnMount, controls]);
 
     return <div className={cn(className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onPointerDown={handlePointerDown} {...props}>
       <motion.svg animate={controls} fill="none" height={size} initial="normal" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" variants={SVG_VARIANTS} viewBox="0 0 24 24" width={size} xmlns="http://www.w3.org/2000/svg">
