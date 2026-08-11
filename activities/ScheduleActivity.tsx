@@ -4,13 +4,14 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { Tabs } from "@heroui/react";
+import { Button, Tabs } from "@heroui/react";
 import { ArrowUpRight, CalendarDays, ChevronLeft, Pencil, Plus, RefreshCw, Trash2, ZoomIn } from "lucide-react";
-import { BottomNav, triggerHapticFeedback } from "@/components/BottomNav";
+import { BottomNav } from "@/components/BottomNav";
 import { ScheduleDrawer } from "@/components/schedule/ScheduleDrawer";
 import { Timeline, type TimelineEntry } from "@/components/ui/timeline";
 import { ClockIcon } from "@/components/ui/clock-icon";
 import { MapPinIcon } from "@/components/ui/map-pin-icon";
+import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { WishImageGallery } from "@/components/wish/WishImageGallery";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { AlertDialog, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -110,7 +111,10 @@ export const ScheduleActivity: React.FC = () => {
           {!isLoading && !isError && grouped.map((group) => <section key={group.date}><div className="mb-4 flex items-center gap-2"><span className="text-sm font-extrabold text-slate-900 dark:text-white">{formatLongTripDate(group.date)}</span>{group.date === today && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">오늘</span>}</div><Timeline railContent={<><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="가현짱" src="/avatars/gahyun.webp" /><AvatarFallback>가</AvatarFallback></Avatar><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="미누쿤" src="/avatars/minu.webp" /><AvatarFallback>미</AvatarFallback></Avatar></>} data={group.items.map((item): TimelineEntry => ({ id: item.id, title: item.start_time, current: currentKeys.has(item.id), content: <ScheduleCard item={item} current={currentKeys.has(item.id)} cardRef={currentKeys.has(item.id) ? activeRef : undefined} onEdit={() => openEdit(item)} onDelete={() => setDeleting(item)} /> }))} /></section>)}
         </section>
       </main>
-      <button aria-label="일정 등록" className="fixed bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),12px))] right-5 z-40 flex h-14 items-center gap-2 rounded-full bg-slate-900 px-5 font-bold text-white shadow-xl active:scale-95 dark:bg-white dark:text-slate-900" onClick={() => { triggerHapticFeedback(10); openCreate(); }}><Plus className="size-5" /> 등록</button>
+      <div className="fixed bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),12px))] right-5 z-40 h-14 min-w-14">
+        <Button aria-label="일정 등록" className="h-full w-full rounded-full px-5 shadow-xl" onPress={openCreate}><Plus className="size-5" /><span className="font-bold">등록</span></Button>
+        <NativeHapticSwitch ariaLabel="일정 등록" checked={drawerOpen} onChange={openCreate} />
+      </div>
       <ScheduleDrawer key={drawerSession} open={drawerOpen} onOpenChange={(open) => { setDrawerOpen(open); if (!open) setEditing(null); }} item={editing} />
       <AlertDialog open={Boolean(deleting)} onOpenChange={(open) => !open && !remove.isPending && setDeleting(null)}><AlertDialogPopup><AlertDialogHeader><AlertDialogTitle>일정을 삭제할까요?</AlertDialogTitle><AlertDialogDescription><strong>{deleting?.title}</strong> 일정과 연결된 사진도 함께 삭제됩니다.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter className="grid grid-cols-2"><button className="h-11 rounded-xl bg-slate-100 font-bold" disabled={remove.isPending} onClick={() => setDeleting(null)}>취소</button><button className="h-11 rounded-xl bg-red-500 font-bold text-white" disabled={!deleting || remove.isPending} onClick={() => deleting && remove.mutate(deleting.id)}>{remove.isPending ? "삭제 중…" : "삭제"}</button></AlertDialogFooter></AlertDialogPopup></AlertDialog>
       <BottomNav active="schedule" />
