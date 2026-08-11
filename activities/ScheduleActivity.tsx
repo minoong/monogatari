@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Tabs } from "@heroui/react";
-import { ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, MapPin, Pencil, Plus, RefreshCw, Trash2, ZoomIn } from "lucide-react";
+import { ArrowUpRight, CalendarDays, ChevronLeft, MapPin, Pencil, Plus, RefreshCw, Trash2, ZoomIn } from "lucide-react";
 import { BottomNav, triggerHapticFeedback } from "@/components/BottomNav";
 import { ScheduleDrawer } from "@/components/schedule/ScheduleDrawer";
 import { Timeline, type TimelineEntry } from "@/components/ui/timeline";
@@ -145,19 +145,6 @@ function ScheduleCard({ item, current, cardRef, onEdit, onDelete }: { item: Sche
   </div>;
 }
 function ScheduleSubtitle({ subtitle }: { subtitle: string }) {
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const [isTruncated, setIsTruncated] = useState(false);
-
-  useEffect(() => {
-    const element = subtitleRef.current;
-    if (!element) return;
-    const update = () => setIsTruncated(element.scrollHeight > element.clientHeight + 1);
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [subtitle]);
-
-  return <div className="relative mt-1"><p ref={subtitleRef} className="line-clamp-3 break-words whitespace-pre-wrap text-sm leading-5 text-slate-500 dark:text-slate-400">{subtitle}</p>{isTruncated && <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-10 items-end justify-center bg-gradient-to-b from-white/0 via-white/90 to-white dark:via-slate-900/90 dark:to-slate-900"><span className="mb-0.5 inline-flex items-center gap-0.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">더 보기<ChevronRight className="size-3.5" /></span></div>}</div>;
+  return <p className="mt-1 line-clamp-3 break-words whitespace-pre-wrap text-sm leading-5 text-slate-500 dark:text-slate-400">{subtitle}</p>;
 }
 function TimelineSkeleton() { return <div className="ml-12 space-y-5 animate-pulse">{Array.from({ length: 5 }).map((_, index) => <div key={index} className="h-24 rounded-2xl bg-slate-200 dark:bg-slate-800" />)}</div>; }
