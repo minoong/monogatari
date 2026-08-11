@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useSpring, useTransform } from "motion/react";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export type TimelineEntry = {
@@ -29,11 +29,46 @@ export function Timeline({
     return () => observer.disconnect();
   }, []);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start 20%", "end 55%"],
-  });
-  const smoothProgress = useSpring(scrollYProgress, { stiffness: 180, damping: 28, mass: 0.35 });
+  const scrollProgress = useMotionValue(0);
+
+  useEffect(() => {
+    const timeline = containerRef.current;
+    if (!timeline) return;
+
+    let ancestor = timeline.parentElement;
+    while (ancestor) {
+      const overflowY = window.getComputedStyle(ancestor).overflowY;
+      if (/(auto|scroll)/.test(overflowY) && ancestor.scrollHeight > ancestor.clientHeight) break;
+      ancestor = ancestor.parentElement;
+    }
+    const scrollContainer: HTMLElement | Window = ancestor ?? window;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const timelineRect = timeline.getBoundingClientRect();
+      const isWindow = scrollContainer === window;
+      const viewportTop = isWindow ? 0 : (scrollContainer as HTMLElement).getBoundingClientRect().top;
+      const viewportHeight = isWindow ? window.innerHeight : (scrollContainer as HTMLElement).clientHeight;
+      const beamStart = viewportTop + viewportHeight * 0.68;
+      const beamEnd = viewportTop + viewportHeight * 0.28;
+      const distance = timelineRect.height + beamStart - beamEnd;
+      scrollProgress.set(Math.max(0, Math.min(1, (beamStart - timelineRect.top) / distance)));
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    update();
+    scrollContainer.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      scrollContainer.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [scrollProgress]);
+
+  const smoothProgress = useSpring(scrollProgress, { stiffness: 180, damping: 28, mass: 0.35 });
   const heightTransform = useTransform(smoothProgress, [0, 1], [0, height]);
   const headYTransform = useTransform(smoothProgress, [0, 1], [0, Math.max(height - 8, 0)]);
   const opacityTransform = useTransform(smoothProgress, [0, 0.04], [0, 1]);
