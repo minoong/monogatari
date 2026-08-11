@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Tabs } from "@heroui/react";
-import { ArrowUpRight, CalendarDays, ChevronLeft, MapPin, Pencil, Plus, RefreshCw, Trash2, ZoomIn } from "lucide-react";
+import { ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, MapPin, Pencil, Plus, RefreshCw, Trash2, ZoomIn } from "lucide-react";
 import { BottomNav, triggerHapticFeedback } from "@/components/BottomNav";
 import { ScheduleDrawer } from "@/components/schedule/ScheduleDrawer";
 import { Timeline, type TimelineEntry } from "@/components/ui/timeline";
@@ -48,6 +48,10 @@ export const ScheduleActivity: React.FC = () => {
 
   const tabDates = useMemo(() => Array.from(new Set(items.map((item) => item.schedule_date))).sort(), [items]);
   const activeDate = filter && tabDates.includes(filter) ? filter : tabDates.find((date) => date === today) ?? tabDates[0] ?? null;
+  const activeDateIndex = activeDate ? tabDates.indexOf(activeDate) : -1;
+  const previousDate = activeDateIndex > 0 ? tabDates[activeDateIndex - 1] : null;
+  const nextDate = activeDateIndex >= 0 && activeDateIndex < tabDates.length - 1 ? tabDates[activeDateIndex + 1] : null;
+  const selectDate = (date: TripDate) => { triggerHapticFeedback(8); setFilter(date); };
 
   useEffect(() => {
     const channel = supabase.channel("schedule_items_changes")
@@ -89,12 +93,12 @@ export const ScheduleActivity: React.FC = () => {
     <AppScreen appBar={{ title: "4일간의 일정표", renderLeft: () => <button type="button" aria-label="홈으로 돌아가기" className="grid size-10 place-items-center rounded-full transition active:bg-slate-100 dark:active:bg-slate-800" onClick={() => replace("HomeActivity", {}, { animate: false })}><ChevronLeft className="size-5" /></button> }}>
       <main className="min-h-full overflow-x-clip bg-slate-50 pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
         <div className="sticky top-0 z-30 px-4 pt-3">
-          <Tabs
-            aria-label="일정 날짜"
-            selectedKey={activeDate ?? undefined}
-            onSelectionChange={(key) => setFilter(String(key))}
-            className="w-full"
-          >
+          <nav aria-label="일정 날짜" className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center md:hidden">
+            {previousDate ? <button type="button" aria-label={`${formatTripDate(previousDate)} 일정 보기`} className="grid size-11 place-items-center rounded-full text-slate-700 transition active:scale-95 dark:text-slate-200" onClick={() => selectDate(previousDate)}><ChevronLeft className="size-6" /></button> : <span />}
+            <span className="justify-self-center rounded-full bg-slate-100 px-8 py-2.5 text-lg font-extrabold tabular-nums text-slate-500 dark:bg-slate-900 dark:text-slate-300">{activeDate ? formatTripDate(activeDate) : "일정"}</span>
+            {nextDate ? <button type="button" aria-label={`${formatTripDate(nextDate)} 일정 보기`} className="grid size-11 place-items-center rounded-full text-slate-700 transition active:scale-95 dark:text-slate-200" onClick={() => selectDate(nextDate)}><ChevronRight className="size-6" /></button> : <span />}
+          </nav>
+          <div className="hidden md:block"><Tabs aria-label="일정 날짜" selectedKey={activeDate ?? undefined} onSelectionChange={(key) => selectDate(String(key) as TripDate)} className="w-full">
             <Tabs.ListContainer className="overflow-x-auto bg-transparent no-scrollbar">
               <Tabs.List className="min-w-max justify-start gap-1 rounded-full !bg-slate-100 p-1 shadow-none dark:!bg-slate-900">
                 {tabDates.map((date) => (
@@ -105,7 +109,7 @@ export const ScheduleActivity: React.FC = () => {
                 ))}
               </Tabs.List>
             </Tabs.ListContainer>
-          </Tabs>
+          </Tabs></div>
         </div>
         <section className="mx-auto w-full max-w-lg overflow-x-clip px-4 py-5">
           {isLoading && <TimelineSkeleton />}
