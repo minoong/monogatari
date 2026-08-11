@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import { motion, useMotionValue, useTransform } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export type TimelineEntry = {
@@ -47,12 +47,12 @@ export function Timeline({
       frame = 0;
       const timelineRect = timeline.getBoundingClientRect();
       const isWindow = scrollContainer === window;
+      const scrollTop = isWindow ? window.scrollY : (scrollContainer as HTMLElement).scrollTop;
       const viewportTop = isWindow ? 0 : (scrollContainer as HTMLElement).getBoundingClientRect().top;
       const viewportHeight = isWindow ? window.innerHeight : (scrollContainer as HTMLElement).clientHeight;
-      const beamStart = viewportTop + viewportHeight * 0.68;
-      const beamEnd = viewportTop + viewportHeight * 0.28;
-      const distance = timelineRect.height + beamStart - beamEnd;
-      scrollProgress.set(Math.max(0, Math.min(1, (beamStart - timelineRect.top) / distance)));
+      const timelineTop = timelineRect.top - viewportTop + scrollTop;
+      const focusLine = scrollTop + viewportHeight * 0.48;
+      scrollProgress.set(Math.max(0, Math.min(1, (focusLine - timelineTop) / timelineRect.height)));
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -68,10 +68,9 @@ export function Timeline({
     };
   }, [scrollProgress]);
 
-  const smoothProgress = useSpring(scrollProgress, { stiffness: 180, damping: 28, mass: 0.35 });
-  const heightTransform = useTransform(smoothProgress, [0, 1], [0, height]);
-  const headYTransform = useTransform(smoothProgress, [0, 1], [0, Math.max(height - 8, 0)]);
-  const opacityTransform = useTransform(smoothProgress, [0, 0.04], [0, 1]);
+  const heightTransform = useTransform(scrollProgress, [0, 1], [0, height]);
+  const headYTransform = useTransform(scrollProgress, [0, 1], [0, Math.max(height - 8, 0)]);
+  const opacityTransform = useTransform(scrollProgress, [0, 0.04], [0, 1]);
 
   return (
     <section ref={containerRef} className="relative w-full min-w-0 overflow-x-clip font-sans" aria-label="일정 타임라인">
