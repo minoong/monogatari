@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Tabs } from "@heroui/react";
-import { ArrowUpRight, CalendarDays, ChevronLeft, MapPin, Pencil, Plus, RefreshCw, Trash2, ZoomIn } from "lucide-react";
+import { ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, MapPin, Pencil, Plus, RefreshCw, Trash2, ZoomIn } from "lucide-react";
 import { BottomNav, triggerHapticFeedback } from "@/components/BottomNav";
 import { ScheduleDrawer } from "@/components/schedule/ScheduleDrawer";
 import { Timeline, type TimelineEntry } from "@/components/ui/timeline";
@@ -87,15 +87,15 @@ export const ScheduleActivity: React.FC = () => {
   return (
     <AppScreen appBar={{ title: "4일간의 일정표", renderLeft: () => <button type="button" aria-label="홈으로 돌아가기" className="grid size-10 place-items-center rounded-full transition active:bg-slate-100 dark:active:bg-slate-800" onClick={() => replace("HomeActivity", {}, { animate: false })}><ChevronLeft className="size-5" /></button> }}>
       <main className="min-h-full overflow-x-clip bg-slate-50 pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
-        <div className="sticky top-0 z-30 border-b border-slate-200/70 bg-slate-50/90 px-4 pt-3 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
+        <div className="sticky top-0 z-30 border-b border-slate-200/70 px-4 pt-3 dark:border-slate-800">
           <Tabs
             aria-label="일정 날짜"
             selectedKey={activeDate ?? undefined}
             onSelectionChange={(key) => setFilter(String(key))}
             className="w-full"
           >
-            <Tabs.ListContainer className="overflow-x-auto no-scrollbar">
-              <Tabs.List className="min-w-max justify-start gap-1">
+            <Tabs.ListContainer className="overflow-x-auto bg-transparent shadow-none no-scrollbar">
+              <Tabs.List className="min-w-max justify-start gap-1 !bg-transparent shadow-none">
                 {tabDates.map((date) => (
                   <Tabs.Tab key={date} id={date} className="min-w-20 px-4 py-2 text-sm font-bold text-slate-500 data-[selected=true]:text-white">
                     {formatTripDate(date)}
@@ -129,7 +129,7 @@ function ScheduleCard({ item, current, cardRef, onEdit, onDelete }: { item: Sche
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
       <MorphingDialogTrigger ariaLabel={`${item.title} 자세히 보기`} className="group block w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
         <article className={cn("relative overflow-hidden rounded-2xl border bg-white p-4 shadow-sm transition group-hover:bg-slate-50 group-active:bg-slate-100 dark:bg-slate-900 dark:group-hover:bg-slate-800", current ? "border-blue-400 ring-2 ring-blue-100 dark:border-blue-400 dark:ring-blue-500/20" : "border-slate-200 dark:border-slate-800")}>
-          <div className="flex min-w-0 gap-3"><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><MorphingDialogTitle className="min-w-0 flex-1"><h2 className="truncate font-extrabold text-slate-900 dark:text-white">{item.title}</h2></MorphingDialogTitle>{current && <span className="shrink-0 rounded-full bg-blue-500 px-2 py-0.5 text-[10px] font-extrabold text-white">지금</span>}</div>{item.subtitle && <p className="mt-1 break-words whitespace-pre-wrap text-sm leading-5 text-slate-500 dark:text-slate-400">{item.subtitle}</p>}</div>{item.images[0] && <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">{<MorphingDialogImage alt="" className="size-full object-cover" src={item.images[0].url} />}{item.images.length > 1 && <span className="absolute bottom-1 right-1 rounded-full bg-black/65 px-1.5 py-0.5 text-[10px] font-bold text-white">+{item.images.length - 1}</span>}</div>}</div>
+          <div className="flex min-w-0 gap-3"><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><MorphingDialogTitle className="min-w-0 flex-1"><h2 className="truncate font-extrabold text-slate-900 dark:text-white">{item.title}</h2></MorphingDialogTitle>{current && <span className="shrink-0 rounded-full bg-blue-500 px-2 py-0.5 text-[10px] font-extrabold text-white">지금</span>}</div>{item.subtitle && <ScheduleSubtitle subtitle={item.subtitle} />}</div>{item.images[0] && <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">{<MorphingDialogImage alt="" className="size-full object-cover" src={item.images[0].url} />}{item.images.length > 1 && <span className="absolute bottom-1 right-1 rounded-full bg-black/65 px-1.5 py-0.5 text-[10px] font-bold text-white">+{item.images.length - 1}</span>}</div>}</div>{item.google_maps_url && <div className="mt-3 flex justify-end border-t border-slate-100 pt-2 dark:border-slate-800"><span aria-label="Google Maps 링크 있음" className="inline-flex size-7 items-center justify-center rounded-full text-slate-400 dark:text-slate-500"><MapPin className="size-4" /></span></div>}
         </article>
       </MorphingDialogTrigger>
 
@@ -143,5 +143,21 @@ function ScheduleCard({ item, current, cardRef, onEdit, onDelete }: { item: Sche
       {item.images[zoomImageIndex] && <ImageZoomModal isOpen={zoomModalOpen} onClose={() => setZoomModalOpen(false)} src={item.images[zoomImageIndex].url} title={item.title} />}
     </MorphingDialog>
   </div>;
+}
+function ScheduleSubtitle({ subtitle }: { subtitle: string }) {
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  useEffect(() => {
+    const element = subtitleRef.current;
+    if (!element) return;
+    const update = () => setIsTruncated(element.scrollHeight > element.clientHeight + 1);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [subtitle]);
+
+  return <div className="relative mt-1"><p ref={subtitleRef} className="line-clamp-3 break-words whitespace-pre-wrap text-sm leading-5 text-slate-500 dark:text-slate-400">{subtitle}</p>{isTruncated && <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-7 items-end justify-end bg-gradient-to-r from-transparent via-white/90 to-white dark:via-slate-900/90 dark:to-slate-900"><span className="inline-flex items-center gap-0.5 text-xs font-bold text-slate-600 dark:text-slate-300">더 보기<ChevronRight className="size-3.5" /></span></div>}</div>;
 }
 function TimelineSkeleton() { return <div className="ml-12 space-y-5 animate-pulse">{Array.from({ length: 5 }).map((_, index) => <div key={index} className="h-24 rounded-2xl bg-slate-200 dark:bg-slate-800" />)}</div>; }
