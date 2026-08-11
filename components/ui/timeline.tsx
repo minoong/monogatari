@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export type TimelineEntry = {
@@ -33,8 +33,10 @@ export function Timeline({
     target: containerRef,
     offset: ["start 20%", "end 55%"],
   });
-  const heightTransform = useTransform(scrollYProgress, [0, 1], [0, height]);
-  const opacityTransform = useTransform(scrollYProgress, [0, 0.08], [0, 1]);
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 180, damping: 28, mass: 0.35 });
+  const heightTransform = useTransform(smoothProgress, [0, 1], [0, height]);
+  const headYTransform = useTransform(smoothProgress, [0, 1], [0, Math.max(height - 8, 0)]);
+  const opacityTransform = useTransform(smoothProgress, [0, 0.04], [0, 1]);
 
   return (
     <section ref={containerRef} className="relative w-full min-w-0 overflow-x-clip font-sans" aria-label="일정 타임라인">
@@ -49,8 +51,10 @@ export function Timeline({
             <div className="min-w-0">{item.content}</div>
           </div>
         ))}
-        <div style={{ height }} className="pointer-events-none absolute left-[3.62rem] top-0 w-px overflow-hidden bg-gradient-to-b from-transparent via-slate-200 to-transparent [mask-image:linear-gradient(to_bottom,transparent_0%,black_4%,black_96%,transparent_100%)] dark:via-slate-700">
-          <motion.div style={{ height: heightTransform, opacity: opacityTransform }} className="absolute inset-x-0 top-0 bg-gradient-to-b from-pink-400 via-blue-500 to-transparent" />
+        <div style={{ height }} className="pointer-events-none absolute left-[3.62rem] top-0 w-[2px] overflow-visible rounded-full bg-slate-200/90 dark:bg-slate-700/90">
+          <motion.div style={{ height: heightTransform, opacity: opacityTransform }} className="absolute inset-x-0 top-0 rounded-full bg-gradient-to-b from-sky-300 via-blue-500 to-indigo-500 shadow-[0_0_10px_2px_rgba(59,130,246,0.45)]" />
+          <motion.span style={{ top: headYTransform, opacity: opacityTransform }} className="absolute -left-[5px] size-3 rounded-full bg-blue-400/80 blur-[2px]" />
+          <motion.span style={{ top: headYTransform, opacity: opacityTransform }} className="absolute -left-[2px] mt-[3px] size-[6px] rounded-full bg-white shadow-[0_0_8px_3px_rgba(96,165,250,0.95)]" />
         </div>
       </div>
     </section>
