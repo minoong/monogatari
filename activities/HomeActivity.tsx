@@ -5,7 +5,7 @@ import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
 import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
-import NeumorphButton from "../components/ui/neumorph-button";
+import { Tabs } from "@heroui/react";
 import { ChevronRight, Hotel } from "lucide-react";
 import { MinimalCardExpand } from "../components/ui/minimal-card-expand";
 import { ACCOMMODATIONS, type Accommodation } from "../lib/accommodations";
@@ -433,15 +433,32 @@ export const HomeActivity: React.FC = () => {
     <AppScreen appBar={{ title: "태국 여행 2026" }}>
       <div className="flex flex-col min-h-full w-full pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] overflow-y-auto">
         <WorldClockCard />
-        {/* State Toggle for Mockup */}
-        <div className="flex justify-center gap-2 p-4 bg-muted/30 border-b">
-          <NeumorphButton intent={tripState === "before" ? "primary" : "secondary"} size="small" onClick={() => setTripState("before")}>여행 전</NeumorphButton>
-          <NeumorphButton intent={tripState === "during" ? "primary" : "secondary"} size="small" onClick={() => setTripState("during")}>여행 중</NeumorphButton>
-          <NeumorphButton intent={tripState === "after" ? "primary" : "secondary"} size="small" onClick={() => setTripState("after")}>여행 후</NeumorphButton>
-        </div>
+        <Tabs
+          className="w-full"
+          onSelectionChange={(key) => setTripState(String(key) as typeof tripState)}
+          selectedKey={tripState}
+        >
+          <Tabs.ListContainer className="border-b bg-muted/30 px-4 py-3">
+            <Tabs.List aria-label="여행 단계" className="mx-auto grid h-11 w-full max-w-sm grid-cols-3 rounded-full bg-slate-100 p-1 shadow-none dark:bg-slate-900">
+              {[
+                ["before", "여행 전"],
+                ["during", "여행 중"],
+                ["after", "여행 후"],
+              ].map(([id, label]) => (
+                <Tabs.Tab
+                  className="relative z-0 rounded-full text-sm font-bold text-slate-500 data-[selected=true]:text-white dark:data-[selected=true]:text-slate-900"
+                  id={id}
+                  key={id}
+                >
+                  {label}
+                  <Tabs.Indicator className="-z-10 rounded-full bg-slate-900 dark:bg-white" />
+                </Tabs.Tab>
+              ))}
+            </Tabs.List>
+          </Tabs.ListContainer>
 
-        <div className="flex flex-col gap-6 p-4">
-          {tripState === "before" && (
+          <div className="flex flex-col gap-6 p-4">
+            <Tabs.Panel className="!p-0" id="before">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
               <BangkokDepartureCard />
 
@@ -459,15 +476,10 @@ export const HomeActivity: React.FC = () => {
               <FlightWidget onOpen={(passengerId) => push("FlightActivity", { passengerId })} />
 
               <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
-
-              <button onClick={() => push("DiscoverActivity", {})} className="p-4 bg-orange-50 dark:bg-orange-900/30 rounded-2xl border border-orange-200 dark:border-orange-800 text-left active:scale-95 transition-transform">
-                <h3 className="font-bold text-lg">태국 맛집 & 쇼핑 추천 🇹🇭</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">세븐일레븐 필수 간식부터 야시장 맛집까지</p>
-              </button>
             </motion.div>
-          )}
+            </Tabs.Panel>
 
-          {tripState === "during" && (
+            <Tabs.Panel className="!p-0" id="during">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
               <div className="bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl p-6 text-white">
                 <div className="flex justify-between items-center">
@@ -503,9 +515,9 @@ export const HomeActivity: React.FC = () => {
 
               <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
             </motion.div>
-          )}
+            </Tabs.Panel>
 
-          {tripState === "after" && (
+            <Tabs.Panel className="!p-0" id="after">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
               <div className="bg-purple-100 dark:bg-purple-900 rounded-2xl p-6 text-center">
                 <span className="text-4xl">✈️</span>
@@ -521,8 +533,9 @@ export const HomeActivity: React.FC = () => {
                 <span className="text-2xl">🛍️</span>
               </button>
             </motion.div>
-          )}
-        </div>
+            </Tabs.Panel>
+          </div>
+        </Tabs>
       </div>
       <BottomNav active="home" />
     </AppScreen>
