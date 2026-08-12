@@ -1,23 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Inter, Kanit } from "next/font/google";
+import { Geist_Mono, Kanit } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
 
-const interHeading = Inter({subsets:['latin'],variable:'--font-heading'});
-
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const koreanAirSans = localFont({
+  src: [
+    {
+      path: "../public/fonts/KoreanAirSansKR_W_Rg.woff2",
+      weight: "400 600",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/KoreanAirSansKR_W_Bd.woff2",
+      weight: "700 900",
+      style: "normal",
+    },
+  ],
+  variable: "--font-korean-air-local",
+  display: "swap",
+});
 
 const kanit = Kanit({
   weight: ["400", "600", "700", "800", "900"],
   subsets: ["thai", "latin"],
   variable: "--font-kanit",
-});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
@@ -57,7 +66,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={cn("h-[100svh] w-full overflow-hidden overscroll-none", "antialiased", geistSans.variable, geistMono.variable, kanit.variable, "font-sans", inter.variable, interHeading.variable)}
+      className={cn("h-[100svh] w-full overflow-hidden overscroll-none", "antialiased", koreanAirSans.variable, geistMono.variable, kanit.variable, "font-sans")}
     >
       <body className="h-[100svh] w-full overflow-hidden overscroll-none isolate flex flex-col relative">
         <QueryProvider>

@@ -6,22 +6,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@font-face {
-  font-family: "Korean Air Sans KR";
-  src: url("/fonts/KoreanAirSansKR_W_Rg.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Korean Air Sans KR";
-  src: url("/fonts/KoreanAirSansKR_W_Bd.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 700 900;
-  font-display: swap;
-}
-
 @custom-variant dark (&:is(.dark *));
 
 @custom-variant data-starting-style {
@@ -41,11 +25,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-korean-air-local), sans-serif;
   --font-mono: var(--font-mono);
-  --font-heading: var(--font-heading);
+  --font-heading: var(--font-korean-air-local), sans-serif;
   --font-thai: var(--font-kanit), sans-serif;
-  --font-korean-air: "Korean Air Sans KR", sans-serif;
+  --font-korean-air: var(--font-korean-air-local), sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -348,7 +332,15 @@ body {
   }
 
   html {
-    @apply font-mono;
+    @apply font-sans;
+  }
+
+  body,
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font-korean-air-local), sans-serif;
   }
 
   code,
@@ -357,6 +349,24 @@ body {
   pre {
     font-family: var(--font-mono);
   }
+}
+
+html,
+body,
+body * {
+  font-family: var(--font-korean-air-local), sans-serif;
+}
+
+.font-thai {
+  font-family: var(--font-kanit), sans-serif;
+}
+
+.font-mono,
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-geist-mono), monospace;
 }
 
 /* Checklist scroll reveal - CSS only, no React re-render jitter */
