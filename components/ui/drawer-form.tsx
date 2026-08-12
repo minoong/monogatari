@@ -26,7 +26,7 @@ export function DrawerIntro({ open, image, alt, title, description }: { open: bo
 
 export function DrawerFieldLabel({ icon: Icon, children, className }: { icon: LucideIcon; children: ReactNode; className?: string }) {
   const reduceMotion = useReducedMotion();
-  return <span className={cn("flex items-center gap-2 text-sm font-bold text-slate-900", className)}>
+  return <span className={cn("inline-flex items-center gap-2 text-sm font-bold text-slate-900", className)}>
     <motion.span initial={reduceMotion ? false : { opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.22, ease: "easeOut" }} className="text-blue-500"><Icon className="size-4" /></motion.span>
     {children}
   </span>;
