@@ -14,6 +14,7 @@ import {
   TextField,
 } from "@heroui/react";
 import StatusButton from "@/components/animata/button/status-button";
+import { TextEffect } from "@/components/core/text-effect";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
@@ -148,12 +149,12 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                     sizes="(max-width: 768px) 280px, 280px"
                   />
                 </div>
-                <p className="mt-2 text-center text-sm font-medium text-gray-800">
+                <TextEffect as="p" per="char" preset="fade" trigger={open} className="mt-2 text-center text-sm font-medium text-gray-800">
                   증거로 다 기록하고 있으니까, 챙길 물건을 확실하게 적어둬요!
-                </p>
-                <p className="mt-0.5 text-center text-xs text-gray-500">
+                </TextEffect>
+                <TextEffect as="p" per="char" preset="fade" trigger={open} delay={0.15} className="mt-0.5 text-center text-xs text-gray-500">
                   나중에 깜빡했다고 거짓말해도 소용없다고요!
-                </p>
+                </TextEffect>
               </div>
 
               <div className="space-y-4 pt-1">

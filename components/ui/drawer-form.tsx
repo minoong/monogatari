@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, type ForwardRefExoticComponent, type HTMLAttributes, type ReactNode, type RefAttributes } from "react";
 import { useReducedMotion } from "motion/react";
-import { ActivityIcon, type ActivityIconHandle } from "@/components/ui/activity";
+import { TextEffect } from "@/components/core/text-effect";
 import { LinkIcon, type LinkIconHandle } from "@/components/ui/link";
 import { MapPinIcon, type MapPinIconHandle } from "@/components/ui/map-pin";
 import { cn } from "@/lib/utils";
@@ -13,19 +13,12 @@ export const drawerPrimaryButtonClass = "h-12 rounded-2xl bg-blue-500 text-base 
 export const drawerDangerButtonClass = "h-12 rounded-2xl bg-red-500 text-base font-bold text-white shadow-sm hover:bg-red-600 active:bg-red-700 disabled:bg-red-200 disabled:text-white/80 disabled:shadow-none";
 
 export function DrawerIntro({ open, image, alt, title, description }: { open: boolean; image: string; alt: string; title?: string; description?: string }) {
-  const iconRef = useRef<ActivityIconHandle>(null);
-  const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (open && !reduceMotion) iconRef.current?.startAnimation();
-  }, [open, reduceMotion]);
-
   return <div className="flex flex-col items-center justify-center">
     <div className="relative my-1 h-32 w-full max-w-[280px] overflow-hidden rounded-2xl border border-slate-100 shadow-sm">
       <Image src={image} alt={alt} fill className="object-cover" sizes="280px" />
     </div>
-    {title && <p className="mt-2 flex items-center gap-1.5 text-center text-sm font-medium text-slate-800"><ActivityIcon ref={iconRef} aria-hidden="true" size={16} />{title}</p>}
-    {description && <p className="mt-0.5 text-center text-xs text-slate-500">{description}</p>}
+    {title && <TextEffect as="p" per="char" preset="fade" trigger={open} className="mt-2 text-center text-sm font-medium text-slate-800">{title}</TextEffect>}
+    {description && <TextEffect as="p" per="char" preset="fade" trigger={open} delay={0.15} className="mt-0.5 text-center text-xs text-slate-500">{description}</TextEffect>}
   </div>;
 }
 
