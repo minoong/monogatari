@@ -160,8 +160,8 @@ export function ScheduleDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerPopup id="schedule-drawer" variant="inset" showBar>
-        <form ref={formRef} className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
+      <DrawerPopup id="schedule-drawer" variant="inset" showBar className="overflow-hidden">
+        <form ref={formRef} className="flex min-h-0 w-full flex-1 flex-col overflow-hidden" onSubmit={submit}>
           <DrawerHeader className="px-6 pb-1 pt-6 text-center">
             <DrawerTitle>{editing ? "일정 수정" : "일정 등록"}</DrawerTitle>
           </DrawerHeader>

@@ -262,8 +262,8 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
-      <DrawerPopup id="wish-drawer" variant="inset" showBar>
-        <Form ref={formRef} aria-label={isEditing ? "위시 편집" : "위시 등록"} className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit} validationBehavior="native">
+      <DrawerPopup id="wish-drawer" variant="inset" showBar className="overflow-hidden">
+        <Form ref={formRef} aria-label={isEditing ? "위시 편집" : "위시 등록"} className="flex min-h-0 w-full flex-1 flex-col overflow-hidden" onSubmit={handleSubmit} validationBehavior="native">
           <DrawerHeader className="px-6 pb-1 pt-6 text-center">
             <DrawerTitle>{isEditing ? "위시 편집" : "위시 등록"}</DrawerTitle>
           </DrawerHeader>
