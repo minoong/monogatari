@@ -593,7 +593,7 @@ function MultiValueField({
   placeholder,
 }: MultiValueFieldProps) {
   return (
-    <div className="flex flex-col gap-3">
+    <div data-drawer-multi-field className="flex flex-col gap-3">
       <div>
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
           {icon}

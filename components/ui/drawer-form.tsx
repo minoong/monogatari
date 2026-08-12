@@ -42,17 +42,24 @@ export function DrawerFieldLabel({ icon: Icon, active, children, className }: { 
     else iconRef.current?.stopAnimation();
   }, [active, fieldFocused, reduceMotion]);
   useEffect(() => {
-    const updateFocus = () => {
+    const isRelatedTarget = (target: EventTarget | null) => {
       const label = labelContentRef.current?.closest("label");
-      setFieldFocused(Boolean(label?.control && label.control === document.activeElement));
+      const control = label?.control;
+      return Boolean(target instanceof Node && (label?.contains(target) || control === target || control?.contains(target)));
+    };
+    const updateFocus = () => setFieldFocused(isRelatedTarget(document.activeElement));
+    const replayOnPress = (event: PointerEvent) => {
+      if (isRelatedTarget(event.target) && !reduceMotion) iconRef.current?.startAnimation();
     };
     document.addEventListener("focusin", updateFocus);
     document.addEventListener("focusout", updateFocus);
+    document.addEventListener("pointerdown", replayOnPress);
     return () => {
       document.removeEventListener("focusin", updateFocus);
       document.removeEventListener("focusout", updateFocus);
+      document.removeEventListener("pointerdown", replayOnPress);
     };
-  }, []);
+  }, [reduceMotion]);
   return <span ref={labelContentRef} className={cn("inline-flex items-center gap-2 text-sm font-bold text-slate-900", className)}>
     <Icon ref={iconRef} aria-hidden="true" size={16} />
     {children}
@@ -61,6 +68,7 @@ export function DrawerFieldLabel({ icon: Icon, active, children, className }: { 
 
 export function DrawerMapPinIcon({ active }: { active: boolean }) {
   const iconRef = useRef<MapPinIconHandle>(null);
+  const hostRef = useRef<HTMLSpanElement>(null);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -68,11 +76,25 @@ export function DrawerMapPinIcon({ active }: { active: boolean }) {
     else iconRef.current?.stopAnimation();
   }, [active, reduceMotion]);
 
-  return <MapPinIcon ref={iconRef} aria-hidden="true" size={16} />;
+  useEffect(() => {
+    const replay = (event: Event) => {
+      const field = hostRef.current?.closest("[data-drawer-multi-field]");
+      if (field?.contains(event.target as Node) && !reduceMotion) iconRef.current?.startAnimation();
+    };
+    document.addEventListener("focusin", replay);
+    document.addEventListener("pointerdown", replay);
+    return () => {
+      document.removeEventListener("focusin", replay);
+      document.removeEventListener("pointerdown", replay);
+    };
+  }, [reduceMotion]);
+
+  return <span ref={hostRef}><MapPinIcon ref={iconRef} aria-hidden="true" size={16} /></span>;
 }
 
 export function DrawerLinkIcon({ active }: { active: boolean }) {
   const iconRef = useRef<LinkIconHandle>(null);
+  const hostRef = useRef<HTMLSpanElement>(null);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -80,5 +102,18 @@ export function DrawerLinkIcon({ active }: { active: boolean }) {
     else iconRef.current?.stopAnimation();
   }, [active, reduceMotion]);
 
-  return <LinkIcon ref={iconRef} aria-hidden="true" size={16} />;
+  useEffect(() => {
+    const replay = (event: Event) => {
+      const field = hostRef.current?.closest("[data-drawer-multi-field]");
+      if (field?.contains(event.target as Node) && !reduceMotion) iconRef.current?.startAnimation();
+    };
+    document.addEventListener("focusin", replay);
+    document.addEventListener("pointerdown", replay);
+    return () => {
+      document.removeEventListener("focusin", replay);
+      document.removeEventListener("pointerdown", replay);
+    };
+  }, [reduceMotion]);
+
+  return <span ref={hostRef}><LinkIcon ref={iconRef} aria-hidden="true" size={16} /></span>;
 }
