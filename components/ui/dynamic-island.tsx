@@ -10,7 +10,7 @@ import React, {
   useRef,
   useState,
 } from "react"
-import { AnimatePresence, motion, useWillChange, type HTMLMotionProps } from "motion/react"
+import { AnimatePresence, motion, useWillChange } from "motion/react"
 
 const stiffness = 400
 const damping = 30
@@ -312,7 +312,7 @@ const DynamicIsland = ({
 }: {
   children: ReactNode
   id: string
-} & Omit<HTMLMotionProps<"div">, "children" | "id">) => {
+}) => {
   const willChange = useWillChange()
   const [screenSize, setScreenSize] = useState("desktop")
 
