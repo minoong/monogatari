@@ -17,6 +17,8 @@ import StatusButton from "@/components/animata/button/status-button";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
+import { DrawerFieldLabel } from "@/components/ui/drawer-form";
+import { PackageCheck, UsersRound } from "lucide-react";
 import {
   Drawer,
   DrawerFooter,
@@ -160,7 +162,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                   value={title}
                   onChange={setTitle}
                 >
-                  <Label className="text-sm font-bold text-gray-900">준비물 이름</Label>
+                  <Label><DrawerFieldLabel icon={PackageCheck}>준비물 이름</DrawerFieldLabel></Label>
                   <Input
                     ref={inputRef}
                     autoComplete="off"
@@ -176,7 +178,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                   value={targets}
                   onChange={setTargets}
                 >
-                  <Label className="text-sm font-bold text-gray-900">담당자</Label>
+                  <Label><DrawerFieldLabel icon={UsersRound}>담당자</DrawerFieldLabel></Label>
                   <Description className="text-xs text-gray-500">한 명 이상 선택해 주세요.</Description>
                   <div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">
                     {targetOptions.map((target) => (

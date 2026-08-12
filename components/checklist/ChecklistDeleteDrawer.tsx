@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { Button } from "@heroui/react";
+import { Trash2 } from "lucide-react";
 import { josa } from "es-hangul";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import {
@@ -37,8 +38,8 @@ export function ChecklistDeleteDrawer({
       <DrawerPopup id="checklist-delete-drawer" variant="inset" showBar data-theme="light" className="overflow-hidden rounded-2xl">
         <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-b-2xl bg-popover">
           <DrawerHeader className="px-6 pb-1 pt-6 text-center">
-            <DrawerTitle className="text-xl font-bold text-gray-900">
-              준비물 삭제
+            <DrawerTitle className="flex items-center justify-center gap-2 text-xl font-bold text-gray-900">
+              <Trash2 className="size-5 text-red-500" /> 준비물 삭제
             </DrawerTitle>
           </DrawerHeader>
 

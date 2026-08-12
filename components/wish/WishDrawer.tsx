@@ -19,14 +19,14 @@ import {
   TextField,
   type Key,
 } from "@heroui/react";
-import { Link2, MapPin, Plus, X } from "lucide-react";
+import { ImageIcon, Link2, MapPin, Package, Plus, Store, TagIcon, Text, WalletCards, X } from "lucide-react";
 import { toast } from "sonner";
 import StatusButton from "@/components/animata/button/status-button";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
+import { DrawerFieldLabel, DrawerIntro } from "@/components/ui/drawer-form";
 import {
   Drawer,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerPanel,
@@ -264,16 +264,14 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
     <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerPopup id="wish-drawer" variant="inset" showBar>
         <Form ref={formRef} aria-label={isEditing ? "위시 편집" : "위시 등록"} className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit} validationBehavior="native">
-          <DrawerHeader className="px-6 pb-4 text-left">
+          <DrawerHeader className="px-6 pb-1 pt-6 text-center">
             <DrawerTitle>{isEditing ? "위시 편집" : "위시 등록"}</DrawerTitle>
-            <DrawerDescription>
-              {isEditing ? "저장한 정보와 이미지를 필요한 만큼 수정하세요." : "여행 중 사고 싶거나 먹고 싶은 것을 가볍게 담아 두세요."}
-            </DrawerDescription>
           </DrawerHeader>
 
-          <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-4">
+          <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
+            <DrawerIntro open={open} image="/drawer-wish-intro.gif" alt="위시 목록을 기록하는 캐릭터" title={isEditing ? "저장한 위시를 마음껏 다듬어 봐요!" : "마음에 든 건 바로 위시에 담아 둬요!"} description="나중에 다시 찾기 쉽게 정보와 사진을 기록해요." />
             <div className="flex flex-col gap-2">
-              <Label>종류</Label>
+              <Label><DrawerFieldLabel icon={Package}>종류</DrawerFieldLabel></Label>
               <ListBox
                 aria-label="위시 종류"
                 className="w-full"
@@ -311,7 +309,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             </div>
 
             <TextField isRequired name="title" value={title} onChange={setTitle}>
-              <Label>{type === "restaurant" ? "식당 이름" : type === "menu" ? "메뉴 이름" : "이름"}</Label>
+              <Label><DrawerFieldLabel icon={Text}>{type === "restaurant" ? "식당 이름" : type === "menu" ? "메뉴 이름" : "이름"}</DrawerFieldLabel></Label>
               <Input autoComplete="off" placeholder={type === "shopping" ? "예: 야돔" : type === "snack" ? "예: 망고 쥬스" : type === "menu" ? "예: 팟타이" : "예: 팁싸마이"} />
               <FieldError />
             </TextField>
@@ -319,7 +317,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             <div className="flex flex-col gap-3">
               <div className="flex items-end gap-2">
                 <TextField className="min-w-0 flex-1" name="categoryDraft" value={categoryDraft} onChange={setCategoryDraft}>
-                  <Label>카테고리 태그</Label>
+                  <Label><DrawerFieldLabel icon={TagIcon}>카테고리 태그</DrawerFieldLabel></Label>
                   <Input
                     autoComplete="off"
                     maxLength={14}
@@ -383,7 +381,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             {!isDiningType(type) && (
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="wish-target-price">현지 적정 가격</Label>
+                  <Label htmlFor="wish-target-price"><DrawerFieldLabel icon={WalletCards}>현지 적정 가격</DrawerFieldLabel></Label>
                   <InputGroup className="h-12 rounded-2xl">
                     <InputGroupAddon>
                       <InputGroupText className="text-base font-bold text-slate-500">฿</InputGroupText>
@@ -424,7 +422,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             )}
 
             <TextField name="vendor" value={vendor} onChange={setVendor}>
-              <Label>{isDiningType(type) ? "식당 또는 지점" : "판매점"}</Label>
+              <Label><DrawerFieldLabel icon={Store}>{isDiningType(type) ? "식당 또는 지점" : "판매점"}</DrawerFieldLabel></Label>
               <Input onFocus={handleInputFocus} autoComplete="off" placeholder={isDiningType(type) ? "예: 팁싸마이 프라투피" : "예: 세븐일레븐, 짜뚜짝 시장"} />
             </TextField>
 
@@ -459,10 +457,10 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
               />
             </div>
 
-            <WishImagePicker images={images} onChange={setImages} />
+            <div className="space-y-2"><DrawerFieldLabel icon={ImageIcon}>사진</DrawerFieldLabel><WishImagePicker images={images} onChange={setImages} /></div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="wish-memo">메모</Label>
+              <Label htmlFor="wish-memo"><DrawerFieldLabel icon={Text}>메모</DrawerFieldLabel></Label>
               <TextArea
                 id="wish-memo"
                 className="min-h-24"

@@ -7,6 +7,7 @@ import { ChevronLeft } from "lucide-react";
 import { ko } from "react-day-picker/locale";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { DrawerIntro } from "@/components/ui/drawer-form";
 import {
   Drawer,
   DrawerDescription,
@@ -173,6 +174,9 @@ export function TripDateCalendarSheet({
           <DrawerDescription className="pl-12">
             원하는 날짜를 선택해 일정을 등록할 수 있어요.
           </DrawerDescription>
+          <div className="mt-3 px-1">
+            <DrawerIntro open={open} image="/drawer-calendar-intro.jpg" alt="달력을 확인하는 두 사람" title="여행 날짜를 골라 봐요!" description="원하는 날짜를 선택해 일정에 바로 담을 수 있어요." />
+          </div>
         </DrawerHeader>
 
         <DrawerPanel

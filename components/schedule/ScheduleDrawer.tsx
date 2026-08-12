@@ -6,11 +6,10 @@ import { MantineProvider } from "@mantine/core";
 import imageCompression from "browser-image-compression";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Input, Label, TextArea } from "@heroui/react";
-import { CalendarDays, ChevronRight, Clock3, Link2 } from "lucide-react";
+import { CalendarDays, ChevronRight, Clock3, ImageIcon, Link2, Text, Type } from "lucide-react";
 import { TripDateCalendarSheet } from "@/components/schedule/TripDateCalendarSheet";
 import {
   Drawer,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerPanel,
@@ -18,6 +17,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { WishImagePicker, type WishImageDraft } from "@/components/wish/WishImagePicker";
+import { DrawerFieldLabel, DrawerIntro } from "@/components/ui/drawer-form";
 import {
   formatLongTripDate,
   isGoogleMapsUrl,
@@ -162,13 +162,13 @@ export function ScheduleDrawer({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerPopup id="schedule-drawer" variant="inset" showBar>
         <form ref={formRef} className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
-          <DrawerHeader className="px-6 pb-3">
+          <DrawerHeader className="px-6 pb-1 pt-6 text-center">
             <DrawerTitle>{editing ? "일정 수정" : "일정 등록"}</DrawerTitle>
-            <DrawerDescription>시간과 장소 사진을 함께 기록해 두세요.</DrawerDescription>
           </DrawerHeader>
-          <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-6 py-4">
+          <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
+            <DrawerIntro open={open} image="/drawer-schedule-intro.jpg" alt="여행 일정을 정리하는 모습" title="시간과 장소를 한눈에 정리해 둬요!" description="사진과 지도 링크까지 함께 남길 수 있어요." />
             <section>
-              <Label className="mb-2 flex items-center gap-2"><CalendarDays className="size-4" /> 날짜</Label>
+              <Label className="mb-2"><DrawerFieldLabel icon={CalendarDays}>날짜</DrawerFieldLabel></Label>
               <button
                 type="button"
                 className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-slate-300 active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900"
@@ -181,7 +181,7 @@ export function ScheduleDrawer({
             </section>
 
             <section>
-              <Label className="mb-2 flex items-center gap-2"><Clock3 className="size-4" /> 시간</Label>
+              <Label className="mb-2"><DrawerFieldLabel icon={Clock3}>시간</DrawerFieldLabel></Label>
               <MantineProvider>
                 <div
                   data-base-ui-swipe-ignore
@@ -222,9 +222,10 @@ export function ScheduleDrawer({
               </MantineProvider>
             </section>
 
-            <div className="grid gap-2"><Label htmlFor="schedule-title">제목</Label><Input id="schedule-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={100} placeholder="예: 호텔 체크인" /></div>
-            <div className="grid gap-2"><Label htmlFor="schedule-subtitle">서브타이틀</Label><TextArea id="schedule-subtitle" value={subtitle} onChange={(event) => setSubtitle(event.target.value)} maxLength={500} placeholder="메모나 이동 정보" /></div>
-            <div className="grid gap-2"><Label htmlFor="schedule-map" className="flex items-center gap-2"><Link2 className="size-4" /> Google Maps 링크</Label><Input id="schedule-map" value={mapUrl} onChange={(event) => setMapUrl(event.target.value)} placeholder="https://maps.app.goo.gl/..." /></div>
+            <div className="grid gap-2"><Label htmlFor="schedule-title"><DrawerFieldLabel icon={Type}>제목</DrawerFieldLabel></Label><Input id="schedule-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={100} placeholder="예: 호텔 체크인" /></div>
+            <div className="grid gap-2"><Label htmlFor="schedule-subtitle"><DrawerFieldLabel icon={Text}>서브타이틀</DrawerFieldLabel></Label><TextArea id="schedule-subtitle" value={subtitle} onChange={(event) => setSubtitle(event.target.value)} maxLength={500} placeholder="메모나 이동 정보" /></div>
+            <div className="grid gap-2"><Label htmlFor="schedule-map"><DrawerFieldLabel icon={Link2}>Google Maps 링크</DrawerFieldLabel></Label><Input id="schedule-map" value={mapUrl} onChange={(event) => setMapUrl(event.target.value)} placeholder="https://maps.app.goo.gl/..." /></div>
+            <DrawerFieldLabel icon={ImageIcon}>사진</DrawerFieldLabel>
             <WishImagePicker images={images} onChange={setImages} />
             {error && <p className="text-sm font-medium text-red-500">{error}</p>}
           </DrawerPanel>
