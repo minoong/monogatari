@@ -69,7 +69,6 @@ export function Timeline({
   }, [scrollProgress]);
 
   const heightTransform = useTransform(scrollProgress, [0, 1], [0, height]);
-  const headYTransform = useTransform(scrollProgress, [0, 1], [0, Math.max(height - 8, 0)]);
   const opacityTransform = useTransform(scrollProgress, [0, 0.04], [0, 1]);
 
   return (
@@ -86,9 +85,7 @@ export function Timeline({
           </div>
         ))}
         <div style={{ height }} className="pointer-events-none absolute left-[3.62rem] top-0 w-[2px] overflow-visible rounded-full bg-slate-200/90 dark:bg-slate-700/90">
-          <motion.div style={{ height: heightTransform, opacity: opacityTransform }} className="absolute inset-x-0 top-0 rounded-full bg-gradient-to-b from-sky-300 via-blue-500 to-indigo-500 shadow-[0_0_10px_2px_rgba(59,130,246,0.45)]" />
-          <motion.span style={{ y: headYTransform, opacity: opacityTransform }} className="absolute -left-[5px] top-0 size-3 transform-gpu rounded-full bg-blue-400/80 blur-[2px] [will-change:transform]" />
-          <motion.span style={{ y: headYTransform, opacity: opacityTransform }} className="absolute -left-[2px] top-[3px] size-[6px] transform-gpu rounded-full bg-white shadow-[0_0_8px_3px_rgba(96,165,250,0.95)] [will-change:transform]" />
+          <motion.div style={{ height: heightTransform, opacity: opacityTransform }} className="absolute inset-x-0 top-0 rounded-full bg-blue-500" />
         </div>
       </div>
     </section>
