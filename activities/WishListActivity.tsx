@@ -9,6 +9,7 @@ import { WishImageGallery } from "@/components/wish/WishImageGallery";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { GooeyInput } from "@/components/ui/gooey-input";
+import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { cn } from "@/lib/utils";
 import {
@@ -51,6 +52,13 @@ const fetchWishes = async (type: WishType): Promise<WishItem[]> => {
   return payload.data;
 };
 
+const WISH_LOADING_MESSAGES: Record<WishType, readonly string[]> = {
+  shopping: ["쇼핑 목록을 정리하고 있어…", "사고 싶은 걸 모아 보는 중이야…", "장바구니를 다시 확인할게…"],
+  restaurant: ["맛집 목록을 확인하고 있어…", "먹고 싶은 곳을 찾는 중이야…", "맛집 기록을 펼쳐 볼게…"],
+  menu: ["먹을 메뉴를 확인하고 있어…", "메뉴를 하나씩 살펴보는 중이야…", "뭘 먹을지 다시 확인할게…"],
+  snack: ["간식 목록을 확인하고 있어…", "달콤한 걸 모아 보는 중이야…", "간식 기록을 펼쳐 볼게…"],
+};
+
 export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) => {
   const queryClient = useQueryClient();
   const type = isWishType(params.type) ? params.type : "shopping";
@@ -63,6 +71,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes", type], queryFn: () => fetchWishes(type) });
+  const showInitialLoader = useMinimumInitialLoading(isLoading);
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const availableCategories = useMemo(() => {
@@ -129,7 +138,9 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
   return (
     <AppScreen appBar={{ title: meta.activityTitle }}>
       <main className="min-h-full w-full bg-slate-50 pb-12 dark:bg-slate-950">
-        <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
+        {showInitialLoader ? (
+          <ActivityFetchLoader messages={WISH_LOADING_MESSAGES[type]} />
+        ) : <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
           <div
             aria-label={`${meta.title} 검색 및 필터`}
             className="sticky top-0 z-30 -mx-2 flex min-h-14 items-center justify-center px-2 py-2"
@@ -217,19 +228,6 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
             <p className="mt-1 text-sm text-white/80">{meta.description}</p>
           </header>
 
-          {isLoading && (
-            <div className="-mx-5 divide-y divide-slate-200 dark:divide-slate-800">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="flex h-24 animate-pulse items-center gap-3 px-5">
-                  <div className="size-16 rounded-xl bg-slate-100 dark:bg-slate-800" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-2/3 rounded bg-slate-100 dark:bg-slate-800" />
-                    <div className="h-3 w-1/2 rounded bg-slate-100 dark:bg-slate-800" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
           {isError && <div className="rounded-3xl border border-red-100 bg-white px-5 py-8 text-center shadow-sm dark:border-red-900/60 dark:bg-slate-900"><p className="font-semibold text-slate-800 dark:text-slate-100">위시를 불러오지 못했어요.</p><p className="mt-1 text-sm text-slate-500">데이터베이스 설정과 네트워크를 확인해 주세요.</p><Button className="mt-4" variant="secondary" onPress={() => refetch()}><RefreshCw className="size-4" /> 다시 시도</Button></div>}
           {!isLoading && !isError && wishes.length === 0 && <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white px-6 text-center dark:border-slate-700 dark:bg-slate-900"><span className="text-4xl" aria-hidden="true">{meta.icon}</span><h2 className="mt-3 font-bold text-slate-800 dark:text-slate-100">아직 담긴 항목이 없어요</h2><p className="mt-1 text-sm leading-6 text-slate-500">{meta.emptyMessage}</p><Button className="mt-5" onPress={openCreateDrawer}><Plus className="size-4" /> 등록하기</Button></div>}
           {!isLoading && !isError && wishes.length > 0 && filteredWishes.length === 0 && (
@@ -261,7 +259,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
               ))}
             </div>
           )}
-        </section>
+        </section>}
         <div className="fixed bottom-6 right-5 z-40 h-14 min-w-14">
           <Button aria-label={`${meta.title} 등록`} className="h-full w-full rounded-full px-5 shadow-xl" onPress={openCreateDrawer}><Plus className="size-5" /><span className="font-bold">등록</span></Button>
           <NativeHapticSwitch

@@ -12,6 +12,7 @@ import { Timeline, type TimelineEntry } from "@/components/ui/timeline";
 import { ClockIcon } from "@/components/ui/clock-icon";
 import { MapPinIcon } from "@/components/ui/map-pin-icon";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
+import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
 import { WishImageGallery } from "@/components/wish/WishImageGallery";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { AlertDialog, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -47,6 +48,7 @@ export const ScheduleActivity: React.FC = () => {
   const activeRef = useRef<HTMLDivElement>(null);
   const didScroll = useRef(false);
   const { data: items = [], isLoading, isError, refetch } = useQuery({ queryKey: ["schedule"], queryFn: fetchSchedule });
+  const showInitialLoader = useMinimumInitialLoading(isLoading);
 
   const tabDates = useMemo(() => Array.from(new Set(items.map((item) => item.schedule_date))).sort(), [items]);
   const activeDate = filter && tabDates.includes(filter) ? filter : tabDates.find((date) => date === today) ?? tabDates[0] ?? null;
@@ -90,7 +92,7 @@ export const ScheduleActivity: React.FC = () => {
   return (
     <AppScreen appBar={{ title: "일정, 제대로 따라와!", renderLeft: () => <button type="button" aria-label="홈으로 돌아가기" className="grid size-10 place-items-center rounded-full transition active:bg-slate-100 dark:active:bg-slate-800" onClick={() => replace("HomeActivity", {}, { animate: false })}><ChevronLeft className="size-5" /></button> }}>
       <main className="min-h-full overflow-x-clip bg-slate-50 pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
-        <div className="sticky top-0 z-30 px-4 pt-3">
+        {!showInitialLoader && <div className="sticky top-0 z-30 px-4 pt-3">
           <Tabs aria-label="일정 날짜" selectedKey={activeDate ?? undefined} onSelectionChange={(key) => setFilter(String(key) as TripDate)} className="w-full">
             <Tabs.ListContainer className="overflow-x-auto bg-transparent no-scrollbar">
               <Tabs.List className="mx-auto w-fit min-w-max justify-start gap-1 rounded-full !bg-slate-100 p-1 shadow-none dark:!bg-slate-900">
@@ -103,13 +105,14 @@ export const ScheduleActivity: React.FC = () => {
               </Tabs.List>
             </Tabs.ListContainer>
           </Tabs>
-        </div>
-        <section className="mx-auto w-full max-w-lg overflow-x-clip px-4 py-5">
-          {isLoading && <TimelineSkeleton />}
+        </div>}
+        {showInitialLoader ? (
+          <ActivityFetchLoader messages={["일정을 확인하고 있어…", "시간표를 맞춰 보는 중이야…", "빠진 일정은 없는지 살펴볼게…"]} />
+        ) : <section className="mx-auto w-full max-w-lg overflow-x-clip px-4 py-5">
           {isError && <div className="rounded-3xl bg-white p-8 text-center shadow-sm dark:bg-slate-900"><p className="font-bold">일정을 불러오지 못했어요.</p><button className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white" onClick={() => refetch()}><RefreshCw className="size-4" /> 다시 시도</button></div>}
           {!isLoading && !isError && items.length === 0 && <div className="rounded-3xl border border-dashed p-10 text-center"><CalendarDays className="mx-auto size-8 text-slate-400" /><p className="mt-3 font-bold">아직 일정이 없어요</p><button className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white" onClick={openCreate}>첫 일정 등록</button></div>}
           {!isLoading && !isError && grouped.map((group) => <section key={group.date}><div className="mb-4 flex items-center gap-2"><span className="text-sm font-extrabold text-slate-900 dark:text-white">{formatLongTripDate(group.date)}</span>{group.date === today && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">오늘</span>}</div><Timeline railContent={<><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="가현짱" src="/avatars/gahyun.webp" /><AvatarFallback>가</AvatarFallback></Avatar><Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="미누쿤" src="/avatars/minu.webp" /><AvatarFallback>미</AvatarFallback></Avatar></>} data={group.items.map((item): TimelineEntry => ({ id: item.id, title: item.start_time, current: currentKeys.has(item.id), content: <ScheduleCard item={item} current={currentKeys.has(item.id)} cardRef={currentKeys.has(item.id) ? activeRef : undefined} onEdit={() => openEdit(item)} onDelete={() => setDeleting(item)} /> }))} /></section>)}
-        </section>
+        </section>}
       </main>
       <div className="fixed bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),12px))] right-5 z-40 h-14 min-w-14">
         <Button aria-label="일정 등록" className="h-full w-full rounded-full px-5 shadow-xl" onPress={openCreate}><Plus className="size-5" /><span className="font-bold">등록</span></Button>
@@ -149,4 +152,3 @@ function ScheduleCard({ item, current, cardRef, onEdit, onDelete }: { item: Sche
 function ScheduleSubtitle({ subtitle }: { subtitle: string }) {
   return <p className="mt-1 line-clamp-3 break-words whitespace-pre-wrap text-sm leading-5 text-slate-500 dark:text-slate-400">{subtitle}</p>;
 }
-function TimelineSkeleton() { return <div className="ml-12 space-y-5 animate-pulse">{Array.from({ length: 5 }).map((_, index) => <div key={index} className="h-24 rounded-2xl bg-slate-200 dark:bg-slate-800" />)}</div>; }

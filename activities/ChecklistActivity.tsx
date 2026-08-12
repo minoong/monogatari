@@ -8,7 +8,7 @@ import { ChecklistDeleteDrawer } from "../components/checklist/ChecklistDeleteDr
 import { toast } from "sonner";
 import { supabase } from "../lib/supabase";
 import NumberFlow from "@number-flow/react";
-import { Skeleton } from "../components/ui/skeleton";
+import { ActivityFetchLoader, useMinimumInitialLoading } from "../components/ui/activity-fetch-loader";
 import NeumorphButton from "../components/ui/neumorph-button";
 import {
   Tabs as AnimateTabs,
@@ -536,6 +536,7 @@ export const ChecklistActivity: React.FC = () => {
       return json.data || [];
     },
   });
+  const showInitialLoader = useMinimumInitialLoading(loading);
 
   useEffect(() => {
     const channel = supabase
@@ -910,43 +911,11 @@ export const ChecklistActivity: React.FC = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))]">
-          {loading ? (
-            <div className="flex flex-col gap-4 animate-pulse">
-              {/* Tabs Skeleton */}
-              <div className="mt-1 grid h-14 w-full grid-cols-2 gap-1 rounded-2xl bg-slate-100 p-1 dark:bg-slate-900">
-                <div className="flex items-center gap-2 rounded-xl bg-white p-2 shadow-sm dark:bg-slate-700">
-                  <Skeleton className="size-6 rounded-full" />
-                  <Skeleton className="h-4 w-14 rounded-md" />
-                  <Skeleton className="ml-auto h-5 w-10 rounded-full" />
-                </div>
-                <div className="flex items-center gap-2 rounded-xl px-2">
-                  <Skeleton className="size-6 rounded-full opacity-50" />
-                  <Skeleton className="h-4 w-14 rounded-md opacity-50" />
-                  <Skeleton className="ml-auto h-5 w-10 rounded-full opacity-50" />
-                </div>
-              </div>
-
-              {/* Checklist Items Container Skeleton */}
-              <div className="mt-2 overflow-hidden rounded-3xl border border-gray-100 bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="flex min-h-16 items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 dark:border-white/10 last:border-b-0"
-                  >
-                    <Skeleton className="size-5 shrink-0 rounded-md" />
-                    <div className="flex flex-1 flex-col gap-2">
-                      <Skeleton className={`h-4 rounded-md ${i % 2 === 0 ? "w-3/5" : i % 3 === 0 ? "w-4/5" : "w-2/5"}`} />
-                      {i % 2 === 0 && (
-                        <div className="flex items-center gap-1.5 pt-0.5">
-                          <Skeleton className="size-4 rounded-full" />
-                          <Skeleton className="h-3 w-20 rounded-full" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {showInitialLoader ? (
+            <ActivityFetchLoader
+              className="min-h-[calc(100dvh-15rem)]"
+              messages={["준비물을 확인하고 있어…", "빠뜨린 건 없는지 살펴볼게…", "챙길 목록을 다시 맞추는 중이야…"]}
+            />
           ) : (
             <>
               <HeroTabs
