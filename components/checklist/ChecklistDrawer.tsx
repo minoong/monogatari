@@ -17,7 +17,7 @@ import StatusButton from "@/components/animata/button/status-button";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
-import { DrawerFieldLabel } from "@/components/ui/drawer-form";
+import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import { PackageCheck, UsersRound } from "lucide-react";
 import {
   Drawer,
@@ -216,7 +216,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
               >
                 <Button
                   fullWidth
-                  className="h-12 rounded-2xl bg-gray-100 text-base font-bold text-gray-800 hover:bg-gray-200 active:bg-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+                  className={drawerCancelButtonClass}
                   isDisabled={addMutation.isPending}
                   size="lg"
                   type="button"
@@ -230,7 +230,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                 <div className="relative h-12 min-w-0">
                   <StatusButton
                     aria-hidden="true"
-                    className="pointer-events-none h-12 rounded-2xl text-base font-bold"
+                    className={`pointer-events-none ${drawerPrimaryButtonClass}`}
                     fullWidth
                     isDisabled={!canSubmit || success}
                     idleText="추가하기"

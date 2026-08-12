@@ -17,7 +17,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { WishImagePicker, type WishImageDraft } from "@/components/wish/WishImagePicker";
-import { DrawerFieldLabel, DrawerIntro } from "@/components/ui/drawer-form";
+import { DrawerFieldLabel, DrawerIntro, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import {
   formatLongTripDate,
   isGoogleMapsUrl,
@@ -230,8 +230,8 @@ export function ScheduleDrawer({
             {error && <p className="text-sm font-medium text-red-500">{error}</p>}
           </DrawerPanel>
           <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
-            <Button fullWidth className="h-12 rounded-2xl text-base" isDisabled={save.isPending || compressing} onPress={() => onOpenChange(false)} size="lg" type="button" variant="secondary">취소</Button>
-            <Button fullWidth className="h-12 rounded-2xl text-base" isDisabled={!title.trim() || save.isPending || compressing} size="lg" type="submit">{compressing ? "사진 압축 중…" : save.isPending ? "저장 중…" : editing ? "변경 저장" : "등록하기"}</Button>
+            <Button fullWidth className={drawerCancelButtonClass} isDisabled={save.isPending || compressing} onPress={() => onOpenChange(false)} size="lg" type="button">취소</Button>
+            <Button fullWidth className={drawerPrimaryButtonClass} isDisabled={!title.trim() || save.isPending || compressing} size="lg" type="submit">{compressing ? "사진 압축 중…" : save.isPending ? "저장 중…" : editing ? "변경 저장" : "등록하기"}</Button>
           </DrawerFooter>
         </form>
       </DrawerPopup>

@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import StatusButton from "@/components/animata/button/status-button";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
-import { DrawerFieldLabel, DrawerIntro } from "@/components/ui/drawer-form";
+import { DrawerFieldLabel, DrawerIntro, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import {
   Drawer,
   DrawerFooter,
@@ -479,7 +479,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
           <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
             <Button
               fullWidth
-              className="h-12 rounded-2xl text-base"
+              className={drawerCancelButtonClass}
               isDisabled={saveMutation.isPending}
               onPress={() => handleOpenChange(false)}
               size="lg"
@@ -491,7 +491,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             <div className="relative h-12 min-w-0">
               <StatusButton
                 aria-hidden="true"
-                className="pointer-events-none h-12 rounded-2xl text-base"
+                className={`pointer-events-none ${drawerPrimaryButtonClass}`}
                 fullWidth
                 idleText={isEditing ? "변경 저장" : "등록하기"}
                 isDisabled={!title.trim() || success}

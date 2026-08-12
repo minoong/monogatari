@@ -7,7 +7,7 @@ import { ChevronLeft } from "lucide-react";
 import { ko } from "react-day-picker/locale";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { DrawerIntro } from "@/components/ui/drawer-form";
+import { DrawerIntro, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import {
   Drawer,
   DrawerDescription,
@@ -198,17 +198,16 @@ export function TripDateCalendarSheet({
         <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
           <HeroButton
             fullWidth
-            className="h-12 rounded-2xl text-base"
+            className={drawerCancelButtonClass}
             onPress={() => mode === "filter" ? confirm(null) : handleOpenChange(false)}
             size="lg"
             type="button"
-            variant="secondary"
           >
             {mode === "filter" ? "전체 일정 보기" : "취소"}
           </HeroButton>
           <HeroButton
             fullWidth
-            className="h-12 rounded-2xl text-base"
+            className={drawerPrimaryButtonClass}
             isDisabled={!draft}
             onPress={() => confirm()}
             size="lg"

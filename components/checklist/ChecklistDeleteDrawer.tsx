@@ -6,6 +6,7 @@ import { Button } from "@heroui/react";
 import { Trash2 } from "lucide-react";
 import { josa } from "es-hangul";
 import { triggerHapticFeedback } from "@/components/BottomNav";
+import { drawerCancelButtonClass, drawerDangerButtonClass } from "@/components/ui/drawer-form";
 import {
   Drawer,
   DrawerFooter,
@@ -67,7 +68,7 @@ export function ChecklistDeleteDrawer({
           >
             <Button
               fullWidth
-              className="h-12 rounded-2xl bg-gray-100 text-base font-bold text-gray-800 hover:bg-gray-200 active:bg-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+              className={drawerCancelButtonClass}
               isDisabled={isDeleting}
               size="lg"
               onPress={() => {
@@ -79,7 +80,7 @@ export function ChecklistDeleteDrawer({
             </Button>
             <Button
               fullWidth
-              className="h-12 rounded-2xl bg-red-500 text-base font-bold text-white hover:bg-red-600 active:bg-red-700 shadow-sm"
+              className={drawerDangerButtonClass}
               isDisabled={isDeleting}
               size="lg"
               onPress={() => {
