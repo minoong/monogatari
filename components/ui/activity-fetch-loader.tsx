@@ -142,7 +142,7 @@ export function ActivityFetchLoader({
   );
 }
 
-export function useMinimumInitialLoading(isLoading: boolean, minimumMs = 800) {
+export function useMinimumInitialLoading(isLoading: boolean, minimumMs = 1500) {
   const [initiallyLoading] = useState(isLoading);
   const [minimumElapsed, setMinimumElapsed] = useState(false);
 
