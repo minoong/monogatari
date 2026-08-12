@@ -175,7 +175,7 @@ export function ScheduleDrawer({
           </DrawerHeader>
           <DrawerPanel scrollable={false} className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
             <DrawerIntro open={open} image="/drawer-schedule-intro.jpg" alt="여행 일정을 정리하는 모습" title="저기… 일정, 제가 정해도 괜찮을까요?" />
-            <section data-drawer-interactive-field onPointerDownCapture={() => setDateInteraction((value) => value + 1)}>
+            <section>
               <Label className="mb-2"><DrawerFieldLabel icon={CalendarDaysIcon} active={open} interactionSignal={dateInteraction}>날짜</DrawerFieldLabel></Label>
               <button
                 type="button"
@@ -188,7 +188,7 @@ export function ScheduleDrawer({
               </button>
             </section>
 
-            <section data-drawer-interactive-field onPointerDownCapture={() => setTimeInteraction((value) => value + 1)}>
+            <section>
               <Label className="mb-2"><DrawerFieldLabel icon={ClockIcon} active={open} interactionSignal={timeInteraction}>시간</DrawerFieldLabel></Label>
               <MantineProvider>
                 <div
@@ -201,7 +201,11 @@ export function ScheduleDrawer({
                       rotateY={-10}
                       value={hour}
                       data={hours}
-                      onChange={(value) => setHour(String(value))}
+                      onChange={(value) => {
+                        const nextHour = String(value);
+                        if (nextHour !== hour) setTimeInteraction((count) => count + 1);
+                        setHour(nextHour);
+                      }}
                       label="시"
                       size="lg"
                     />
@@ -211,7 +215,11 @@ export function ScheduleDrawer({
                       rotateY={10}
                       value={minute}
                       data={minutes}
-                      onChange={(value) => setMinute(String(value))}
+                      onChange={(value) => {
+                        const nextMinute = String(value);
+                        if (nextMinute !== minute) setTimeInteraction((count) => count + 1);
+                        setMinute(nextMinute);
+                      }}
                       label="분"
                       size="lg"
                     />
@@ -221,7 +229,11 @@ export function ScheduleDrawer({
                       data={["am", "pm"]}
                       loop={false}
                       value={amPm}
-                      onChange={(value) => setAmPm(value as "am" | "pm")}
+                      onChange={(value) => {
+                        const nextAmPm = value as "am" | "pm";
+                        if (nextAmPm !== amPm) setTimeInteraction((count) => count + 1);
+                        setAmPm(nextAmPm);
+                      }}
                       label="오전 또는 오후"
                       size="lg"
                     />
@@ -243,7 +255,11 @@ export function ScheduleDrawer({
           </DrawerFooter>
         </form>
       </DrawerPopup>
-      <TripDateCalendarSheet open={calendarOpen} value={date} mode="editor" onConfirm={(value) => { if (value) setDate(value); }} onOpenChange={setCalendarOpen} />
+      <TripDateCalendarSheet open={calendarOpen} value={date} mode="editor" onConfirm={(value) => {
+        if (!value) return;
+        if (value !== date) setDateInteraction((count) => count + 1);
+        setDate(value);
+      }} onOpenChange={setCalendarOpen} />
     </Drawer>
   );
 }
