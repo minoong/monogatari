@@ -1,6 +1,7 @@
 "use client";
 
 import NumberFlow from "@number-flow/react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { josa } from "es-hangul";
 import { Crown, RotateCcw, Trophy } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -197,13 +198,20 @@ const DuelMeter = ({ stats, prefersReducedMotion }: {
           animate={{ width: prefersReducedMotion ? `${100 - finalShare}%` : rightKeyframes.map((value) => `${value}%`) }}
           transition={{ duration: prefersReducedMotion ? 0 : 1.38, times: [0, 0.25, 0.5, 0.75, 1], ease: "easeInOut" }}
         />
-        <motion.span
-          className="absolute top-1/2 z-10 size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-amber-300 shadow-[0_0_14px_rgba(251,146,60,0.7)]"
+        <motion.div
+          className="pointer-events-none absolute top-1/2 z-10 size-9 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_9px_rgba(244,63,94,0.55)]"
           initial={false}
           animate={{ left: prefersReducedMotion ? `${finalShare}%` : leftKeyframes.map((value) => `${value}%`) }}
           transition={{ duration: prefersReducedMotion ? 0 : 1.38, times: [0, 0.25, 0.5, 0.75, 1], ease: "easeInOut" }}
           aria-hidden="true"
-        />
+        >
+          <DotLottieReact
+            src="/checklist-battle-love.lottie"
+            autoplay={!prefersReducedMotion}
+            loop={!prefersReducedMotion}
+            className="size-full"
+          />
+        </motion.div>
       </div>
     </div>
   );
