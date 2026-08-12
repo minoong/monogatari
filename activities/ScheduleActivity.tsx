@@ -93,7 +93,7 @@ export const ScheduleActivity: React.FC = () => {
         <div className="sticky top-0 z-30 px-4 pt-3">
           <Tabs aria-label="일정 날짜" selectedKey={activeDate ?? undefined} onSelectionChange={(key) => setFilter(String(key) as TripDate)} className="w-full">
             <Tabs.ListContainer className="overflow-x-auto bg-transparent no-scrollbar">
-              <Tabs.List className="min-w-max justify-start gap-1 rounded-full !bg-slate-100 p-1 shadow-none dark:!bg-slate-900">
+              <Tabs.List className="mx-auto w-fit min-w-max justify-start gap-1 rounded-full !bg-slate-100 p-1 shadow-none dark:!bg-slate-900">
                 {tabDates.map((date) => (
                   <Tabs.Tab key={date} id={date} className="min-w-20 px-4 py-2 text-sm font-bold text-slate-500 data-[selected=true]:text-white">
                     {formatTripDate(date)}
