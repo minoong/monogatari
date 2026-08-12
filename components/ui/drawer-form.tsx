@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, type ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { useEffect, useRef, type ForwardRefExoticComponent, type HTMLAttributes, type ReactNode, type RefAttributes } from "react";
+import { useReducedMotion } from "motion/react";
 import { ActivityIcon, type ActivityIconHandle } from "@/components/ui/activity";
+import { LinkIcon, type LinkIconHandle } from "@/components/ui/link";
+import { MapPinIcon, type MapPinIconHandle } from "@/components/ui/map-pin";
 import { cn } from "@/lib/utils";
 
 export const drawerCancelButtonClass = "h-12 rounded-2xl bg-slate-100 text-base font-bold text-slate-800 hover:bg-slate-200 active:bg-slate-300 disabled:bg-slate-100 disabled:text-slate-400";
@@ -23,15 +24,47 @@ export function DrawerIntro({ open, image, alt, title, description }: { open: bo
     <div className="relative my-1 h-32 w-full max-w-[280px] overflow-hidden rounded-2xl border border-slate-100 shadow-sm">
       <Image src={image} alt={alt} fill className="object-cover" sizes="280px" />
     </div>
-    <p className="mt-2 flex items-center gap-1.5 text-center text-sm font-medium text-slate-800"><ActivityIcon ref={iconRef} aria-hidden="true" className="text-blue-500" size={16} />{title}</p>
+    <p className="mt-2 flex items-center gap-1.5 text-center text-sm font-medium text-slate-800"><ActivityIcon ref={iconRef} aria-hidden="true" size={16} />{title}</p>
     <p className="mt-0.5 text-center text-xs text-slate-500">{description}</p>
   </div>;
 }
 
-export function DrawerFieldLabel({ icon: Icon, children, className }: { icon: LucideIcon; children: ReactNode; className?: string }) {
+export interface DrawerAnimatedIconHandle { startAnimation: () => void; stopAnimation: () => void }
+export type DrawerAnimatedIconComponent = ForwardRefExoticComponent<HTMLAttributes<HTMLDivElement> & { size?: number } & RefAttributes<DrawerAnimatedIconHandle>>;
+
+export function DrawerFieldLabel({ icon: Icon, active, children, className }: { icon: DrawerAnimatedIconComponent; active: boolean; children: ReactNode; className?: string }) {
+  const iconRef = useRef<DrawerAnimatedIconHandle>(null);
   const reduceMotion = useReducedMotion();
+  useEffect(() => {
+    if (active && !reduceMotion) iconRef.current?.startAnimation();
+    else iconRef.current?.stopAnimation();
+  }, [active, reduceMotion]);
   return <span className={cn("inline-flex items-center gap-2 text-sm font-bold text-slate-900", className)}>
-    <motion.span initial={reduceMotion ? false : { opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.22, ease: "easeOut" }} className="text-blue-500"><Icon className="size-4" /></motion.span>
+    <Icon ref={iconRef} aria-hidden="true" size={16} />
     {children}
   </span>;
+}
+
+export function DrawerMapPinIcon({ active }: { active: boolean }) {
+  const iconRef = useRef<MapPinIconHandle>(null);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (active && !reduceMotion) iconRef.current?.startAnimation();
+    else iconRef.current?.stopAnimation();
+  }, [active, reduceMotion]);
+
+  return <MapPinIcon ref={iconRef} aria-hidden="true" size={16} />;
+}
+
+export function DrawerLinkIcon({ active }: { active: boolean }) {
+  const iconRef = useRef<LinkIconHandle>(null);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (active && !reduceMotion) iconRef.current?.startAnimation();
+    else iconRef.current?.stopAnimation();
+  }, [active, reduceMotion]);
+
+  return <LinkIcon ref={iconRef} aria-hidden="true" size={16} />;
 }

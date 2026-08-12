@@ -6,7 +6,13 @@ import { MantineProvider } from "@mantine/core";
 import imageCompression from "browser-image-compression";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Input, Label, TextArea } from "@heroui/react";
-import { CalendarDays, ChevronRight, Clock3, ImageIcon, Link2, Text, Type } from "lucide-react";
+import { CalendarDays, ChevronRight } from "lucide-react";
+import { CalendarDaysIcon } from "@/components/ui/calendar-days";
+import { ClockIcon } from "@/components/ui/clock";
+import { FileTextIcon } from "@/components/ui/file-text";
+import { GalleryThumbnailsIcon } from "@/components/ui/gallery-thumbnails";
+import { LinkIcon } from "@/components/ui/link";
+import { ScanTextIcon } from "@/components/ui/scan-text";
 import { TripDateCalendarSheet } from "@/components/schedule/TripDateCalendarSheet";
 import {
   Drawer,
@@ -168,7 +174,7 @@ export function ScheduleDrawer({
           <DrawerPanel scrollable={false} className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
             <DrawerIntro open={open} image="/drawer-schedule-intro.jpg" alt="여행 일정을 정리하는 모습" title="저기… 일정, 제가 정해도 괜찮을까요?" description="시간과 장소를 적어 주시면… 꼭 기억해 둘게요." />
             <section>
-              <Label className="mb-2"><DrawerFieldLabel icon={CalendarDays}>날짜</DrawerFieldLabel></Label>
+              <Label className="mb-2"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>날짜</DrawerFieldLabel></Label>
               <button
                 type="button"
                 className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-slate-300 active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900"
@@ -181,7 +187,7 @@ export function ScheduleDrawer({
             </section>
 
             <section>
-              <Label className="mb-2"><DrawerFieldLabel icon={Clock3}>시간</DrawerFieldLabel></Label>
+              <Label className="mb-2"><DrawerFieldLabel icon={ClockIcon} active={open}>시간</DrawerFieldLabel></Label>
               <MantineProvider>
                 <div
                   data-base-ui-swipe-ignore
@@ -222,10 +228,10 @@ export function ScheduleDrawer({
               </MantineProvider>
             </section>
 
-            <div className="grid gap-2"><Label htmlFor="schedule-title"><DrawerFieldLabel icon={Type}>제목</DrawerFieldLabel></Label><Input id="schedule-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={100} placeholder="예: 호텔 체크인" /></div>
-            <div className="grid gap-2"><Label htmlFor="schedule-subtitle"><DrawerFieldLabel icon={Text}>서브타이틀</DrawerFieldLabel></Label><TextArea id="schedule-subtitle" value={subtitle} onChange={(event) => setSubtitle(event.target.value)} maxLength={500} placeholder="메모나 이동 정보" /></div>
-            <div className="grid gap-2"><Label htmlFor="schedule-map"><DrawerFieldLabel icon={Link2}>Google Maps 링크</DrawerFieldLabel></Label><Input id="schedule-map" value={mapUrl} onChange={(event) => setMapUrl(event.target.value)} placeholder="https://maps.app.goo.gl/..." /></div>
-            <DrawerFieldLabel icon={ImageIcon}>사진</DrawerFieldLabel>
+            <div className="grid gap-2"><Label htmlFor="schedule-title"><DrawerFieldLabel icon={ScanTextIcon} active={open}>제목</DrawerFieldLabel></Label><Input id="schedule-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={100} placeholder="예: 호텔 체크인" /></div>
+            <div className="grid gap-2"><Label htmlFor="schedule-subtitle"><DrawerFieldLabel icon={FileTextIcon} active={open}>서브타이틀</DrawerFieldLabel></Label><TextArea id="schedule-subtitle" value={subtitle} onChange={(event) => setSubtitle(event.target.value)} maxLength={500} placeholder="메모나 이동 정보" /></div>
+            <div className="grid gap-2"><Label htmlFor="schedule-map"><DrawerFieldLabel icon={LinkIcon} active={open}>Google Maps 링크</DrawerFieldLabel></Label><Input id="schedule-map" value={mapUrl} onChange={(event) => setMapUrl(event.target.value)} placeholder="https://maps.app.goo.gl/..." /></div>
+            <DrawerFieldLabel icon={GalleryThumbnailsIcon} active={open}>사진</DrawerFieldLabel>
             <WishImagePicker images={images} onChange={setImages} />
             {error && <p className="text-sm font-medium text-red-500">{error}</p>}
           </DrawerPanel>

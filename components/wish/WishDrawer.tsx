@@ -19,12 +19,19 @@ import {
   TextField,
   type Key,
 } from "@heroui/react";
-import { ImageIcon, Link2, MapPin, Package, Plus, Store, TagIcon, Text, WalletCards, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
+import { BoxIcon } from "@/components/ui/box";
+import { FileTextIcon } from "@/components/ui/file-text";
+import { GalleryThumbnailsIcon } from "@/components/ui/gallery-thumbnails";
+import { HomeIcon } from "@/components/ui/home";
+import { LayersIcon } from "@/components/ui/layers";
+import { ScanTextIcon } from "@/components/ui/scan-text";
+import { WalletIcon } from "@/components/ui/wallet";
 import { toast } from "sonner";
 import StatusButton from "@/components/animata/button/status-button";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
-import { DrawerFieldLabel, DrawerIntro, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
+import { DrawerFieldLabel, DrawerIntro, DrawerLinkIcon, DrawerMapPinIcon, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import {
   Drawer,
   DrawerFooter,
@@ -271,7 +278,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
           <DrawerPanel scrollable={false} className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
             <DrawerIntro open={open} image="/drawer-wish-intro.gif" alt="위시 목록을 기록하는 캐릭터" title={isEditing ? "이 위시는 아직 완성되지 않았다… 다듬어라!" : "이 맛은… 위시에 등록해야만 하는 맛이다!"} description="가격과 위치까지 적어라! 이것이 나의 「기록」이다!" />
             <div className="flex flex-col gap-2">
-              <Label><DrawerFieldLabel icon={Package}>종류</DrawerFieldLabel></Label>
+              <Label><DrawerFieldLabel icon={BoxIcon} active={open}>종류</DrawerFieldLabel></Label>
               <ListBox
                 aria-label="위시 종류"
                 className="w-full"
@@ -309,7 +316,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             </div>
 
             <TextField isRequired name="title" value={title} onChange={setTitle}>
-              <Label><DrawerFieldLabel icon={Text}>{type === "restaurant" ? "식당 이름" : type === "menu" ? "메뉴 이름" : "이름"}</DrawerFieldLabel></Label>
+              <Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>{type === "restaurant" ? "식당 이름" : type === "menu" ? "메뉴 이름" : "이름"}</DrawerFieldLabel></Label>
               <Input autoComplete="off" placeholder={type === "shopping" ? "예: 야돔" : type === "snack" ? "예: 망고 쥬스" : type === "menu" ? "예: 팟타이" : "예: 팁싸마이"} />
               <FieldError />
             </TextField>
@@ -317,7 +324,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             <div className="flex flex-col gap-3">
               <div className="flex items-end gap-2">
                 <TextField className="min-w-0 flex-1" name="categoryDraft" value={categoryDraft} onChange={setCategoryDraft}>
-                  <Label><DrawerFieldLabel icon={TagIcon}>카테고리 태그</DrawerFieldLabel></Label>
+                  <Label><DrawerFieldLabel icon={LayersIcon} active={open}>카테고리 태그</DrawerFieldLabel></Label>
                   <Input
                     autoComplete="off"
                     maxLength={14}
@@ -381,7 +388,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             {!isDiningType(type) && (
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="wish-target-price"><DrawerFieldLabel icon={WalletCards}>현지 적정 가격</DrawerFieldLabel></Label>
+                  <Label htmlFor="wish-target-price"><DrawerFieldLabel icon={WalletIcon} active={open}>현지 적정 가격</DrawerFieldLabel></Label>
                   <InputGroup className="h-12 rounded-2xl">
                     <InputGroupAddon>
                       <InputGroupText className="text-base font-bold text-slate-500">฿</InputGroupText>
@@ -422,7 +429,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             )}
 
             <TextField name="vendor" value={vendor} onChange={setVendor}>
-              <Label><DrawerFieldLabel icon={Store}>{isDiningType(type) ? "식당 또는 지점" : "판매점"}</DrawerFieldLabel></Label>
+              <Label><DrawerFieldLabel icon={HomeIcon} active={open}>{isDiningType(type) ? "식당 또는 지점" : "판매점"}</DrawerFieldLabel></Label>
               <Input onFocus={handleInputFocus} autoComplete="off" placeholder={isDiningType(type) ? "예: 팁싸마이 프라투피" : "예: 세븐일레븐, 짜뚜짝 시장"} />
             </TextField>
 
@@ -431,7 +438,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                 description="코노 바쇼와… 성지다! 좌표를 확보하라구, 오이!"
                 draft={locationDraft}
                 error={locationError}
-                icon={<MapPin className="size-4" />}
+                icon={<DrawerMapPinIcon active={open} />}
                 items={locations}
                 label="위치"
                 maxLength={2048}
@@ -446,7 +453,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
               <MultiValueField
                 description="공식 링크를 놓치다니, 소레와 오타쿠 실격이라구!"
                 draft={linkDraft}
-                icon={<Link2 className="size-4" />}
+                icon={<DrawerLinkIcon active={open} />}
                 items={links}
                 label="관련 링크"
                 maxLength={500}
@@ -457,10 +464,10 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
               />
             </div>
 
-            <div className="space-y-2"><DrawerFieldLabel icon={ImageIcon}>사진</DrawerFieldLabel><WishImagePicker images={images} onChange={setImages} /></div>
+            <div className="space-y-2"><DrawerFieldLabel icon={GalleryThumbnailsIcon} active={open}>사진</DrawerFieldLabel><WishImagePicker images={images} onChange={setImages} /></div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="wish-memo"><DrawerFieldLabel icon={Text}>메모</DrawerFieldLabel></Label>
+              <Label htmlFor="wish-memo"><DrawerFieldLabel icon={FileTextIcon} active={open}>메모</DrawerFieldLabel></Label>
               <TextArea
                 id="wish-memo"
                 className="min-h-24"

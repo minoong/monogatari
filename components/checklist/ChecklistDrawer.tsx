@@ -18,7 +18,8 @@ import { triggerHapticFeedback } from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
-import { PackageCheck, UsersRound } from "lucide-react";
+import { BoxIcon } from "@/components/ui/box";
+import { UsersRoundIcon } from "@/components/ui/users-round";
 import {
   Drawer,
   DrawerFooter,
@@ -162,7 +163,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                   value={title}
                   onChange={setTitle}
                 >
-                  <Label><DrawerFieldLabel icon={PackageCheck}>준비물 이름</DrawerFieldLabel></Label>
+                  <Label><DrawerFieldLabel icon={BoxIcon} active={open}>준비물 이름</DrawerFieldLabel></Label>
                   <Input
                     ref={inputRef}
                     autoComplete="off"
@@ -178,7 +179,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                   value={targets}
                   onChange={setTargets}
                 >
-                  <Label><DrawerFieldLabel icon={UsersRound}>담당자</DrawerFieldLabel></Label>
+                  <Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>담당자</DrawerFieldLabel></Label>
                   <Description className="text-xs text-gray-500">한 명 이상 선택해 주세요.</Description>
                   <div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">
                     {targetOptions.map((target) => (
