@@ -269,7 +269,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
           </DrawerHeader>
 
           <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
-            <DrawerIntro open={open} image="/drawer-wish-intro.gif" alt="위시 목록을 기록하는 캐릭터" title={isEditing ? "저장한 위시를 마음껏 다듬어 봐요!" : "마음에 든 건 바로 위시에 담아 둬요!"} description="나중에 다시 찾기 쉽게 정보와 사진을 기록해요." />
+            <DrawerIntro open={open} image="/drawer-wish-intro.gif" alt="위시 목록을 기록하는 캐릭터" title={isEditing ? "이 위시의 정보를 더 완벽하게 다듬어라!" : "마음에 든 건 바로 기록해 둬야 한다!"} description="가격도 위치도, 나중에 놓치지 않게 전부 남겨 둬요." />
             <div className="flex flex-col gap-2">
               <Label><DrawerFieldLabel icon={Package}>종류</DrawerFieldLabel></Label>
               <ListBox
