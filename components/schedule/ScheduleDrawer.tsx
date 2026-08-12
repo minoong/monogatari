@@ -166,7 +166,7 @@ export function ScheduleDrawer({
             <DrawerTitle>{editing ? "일정 수정" : "일정 등록"}</DrawerTitle>
           </DrawerHeader>
           <DrawerPanel className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
-            <DrawerIntro open={open} image="/drawer-schedule-intro.jpg" alt="여행 일정을 정리하는 모습" title="자, 천천히 함께 정리해 볼까요?" description="나중에 봐도 헷갈리지 않게 시간과 장소를 남겨요." />
+            <DrawerIntro open={open} image="/drawer-schedule-intro.jpg" alt="여행 일정을 정리하는 모습" title="저기… 일정, 제가 정해도 괜찮을까요?" description="시간과 장소를 적어 주시면… 꼭 기억해 둘게요." />
             <section>
               <Label className="mb-2"><DrawerFieldLabel icon={CalendarDays}>날짜</DrawerFieldLabel></Label>
               <button
