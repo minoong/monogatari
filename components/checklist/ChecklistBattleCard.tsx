@@ -185,19 +185,21 @@ const DuelMeter = ({ stats, prefersReducedMotion }: {
         <span>가현 PUSH</span>
         <span>MINU PUSH</span>
       </div>
-      <div className="relative h-4 overflow-hidden rounded-full border-2 border-white bg-white shadow-inner">
-        <motion.div
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-400"
-          initial={false}
-          animate={{ width: prefersReducedMotion ? `${finalShare}%` : leftKeyframes.map((value) => `${value}%`) }}
-          transition={{ duration: prefersReducedMotion ? 0 : 1.38, times: [0, 0.25, 0.5, 0.75, 1], ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute inset-y-0 right-0 bg-gradient-to-l from-violet-500 via-purple-500 to-sky-400"
-          initial={false}
-          animate={{ width: prefersReducedMotion ? `${100 - finalShare}%` : rightKeyframes.map((value) => `${value}%`) }}
-          transition={{ duration: prefersReducedMotion ? 0 : 1.38, times: [0, 0.25, 0.5, 0.75, 1], ease: "easeInOut" }}
-        />
+      <div className="relative h-4">
+        <div className="absolute inset-0 overflow-hidden rounded-full border-2 border-white bg-white shadow-inner">
+          <motion.div
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-400"
+            initial={false}
+            animate={{ width: prefersReducedMotion ? `${finalShare}%` : leftKeyframes.map((value) => `${value}%`) }}
+            transition={{ duration: prefersReducedMotion ? 0 : 1.38, times: [0, 0.25, 0.5, 0.75, 1], ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute inset-y-0 right-0 bg-gradient-to-l from-violet-500 via-purple-500 to-sky-400"
+            initial={false}
+            animate={{ width: prefersReducedMotion ? `${100 - finalShare}%` : rightKeyframes.map((value) => `${value}%`) }}
+            transition={{ duration: prefersReducedMotion ? 0 : 1.38, times: [0, 0.25, 0.5, 0.75, 1], ease: "easeInOut" }}
+          />
+        </div>
         <motion.div
           className="pointer-events-none absolute top-1/2 z-10 size-9 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_9px_rgba(244,63,94,0.55)]"
           initial={false}
