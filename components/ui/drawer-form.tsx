@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, type ForwardRefExoticComponent, type HTMLAttributes, type ReactNode, type RefAttributes } from "react";
+import { useEffect, useRef, useState, type ForwardRefExoticComponent, type HTMLAttributes, type ReactNode, type RefAttributes } from "react";
 import { useReducedMotion } from "motion/react";
 import { ActivityIcon, type ActivityIconHandle } from "@/components/ui/activity";
 import { LinkIcon, type LinkIconHandle } from "@/components/ui/link";
@@ -12,7 +12,7 @@ export const drawerCancelButtonClass = "h-12 rounded-2xl bg-slate-100 text-base 
 export const drawerPrimaryButtonClass = "h-12 rounded-2xl bg-blue-500 text-base font-bold text-white shadow-sm hover:bg-blue-600 active:bg-blue-700 disabled:bg-blue-200 disabled:text-white/80 disabled:shadow-none";
 export const drawerDangerButtonClass = "h-12 rounded-2xl bg-red-500 text-base font-bold text-white shadow-sm hover:bg-red-600 active:bg-red-700 disabled:bg-red-200 disabled:text-white/80 disabled:shadow-none";
 
-export function DrawerIntro({ open, image, alt, title, description }: { open: boolean; image: string; alt: string; title: string; description: string }) {
+export function DrawerIntro({ open, image, alt, title, description }: { open: boolean; image: string; alt: string; title?: string; description?: string }) {
   const iconRef = useRef<ActivityIconHandle>(null);
   const reduceMotion = useReducedMotion();
 
@@ -24,8 +24,8 @@ export function DrawerIntro({ open, image, alt, title, description }: { open: bo
     <div className="relative my-1 h-32 w-full max-w-[280px] overflow-hidden rounded-2xl border border-slate-100 shadow-sm">
       <Image src={image} alt={alt} fill className="object-cover" sizes="280px" />
     </div>
-    <p className="mt-2 flex items-center gap-1.5 text-center text-sm font-medium text-slate-800"><ActivityIcon ref={iconRef} aria-hidden="true" size={16} />{title}</p>
-    <p className="mt-0.5 text-center text-xs text-slate-500">{description}</p>
+    {title && <p className="mt-2 flex items-center gap-1.5 text-center text-sm font-medium text-slate-800"><ActivityIcon ref={iconRef} aria-hidden="true" size={16} />{title}</p>}
+    {description && <p className="mt-0.5 text-center text-xs text-slate-500">{description}</p>}
   </div>;
 }
 
@@ -34,12 +34,26 @@ export type DrawerAnimatedIconComponent = ForwardRefExoticComponent<HTMLAttribut
 
 export function DrawerFieldLabel({ icon: Icon, active, children, className }: { icon: DrawerAnimatedIconComponent; active: boolean; children: ReactNode; className?: string }) {
   const iconRef = useRef<DrawerAnimatedIconHandle>(null);
+  const labelContentRef = useRef<HTMLSpanElement>(null);
+  const [fieldFocused, setFieldFocused] = useState(false);
   const reduceMotion = useReducedMotion();
   useEffect(() => {
-    if (active && !reduceMotion) iconRef.current?.startAnimation();
+    if ((active || fieldFocused) && !reduceMotion) iconRef.current?.startAnimation();
     else iconRef.current?.stopAnimation();
-  }, [active, reduceMotion]);
-  return <span className={cn("inline-flex items-center gap-2 text-sm font-bold text-slate-900", className)}>
+  }, [active, fieldFocused, reduceMotion]);
+  useEffect(() => {
+    const updateFocus = () => {
+      const label = labelContentRef.current?.closest("label");
+      setFieldFocused(Boolean(label?.control && label.control === document.activeElement));
+    };
+    document.addEventListener("focusin", updateFocus);
+    document.addEventListener("focusout", updateFocus);
+    return () => {
+      document.removeEventListener("focusin", updateFocus);
+      document.removeEventListener("focusout", updateFocus);
+    };
+  }, []);
+  return <span ref={labelContentRef} className={cn("inline-flex items-center gap-2 text-sm font-bold text-slate-900", className)}>
     <Icon ref={iconRef} aria-hidden="true" size={16} />
     {children}
   </span>;

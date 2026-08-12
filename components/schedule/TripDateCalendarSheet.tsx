@@ -10,7 +10,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { DrawerIntro, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import {
   Drawer,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerPanel,
@@ -171,11 +170,8 @@ export function TripDateCalendarSheet({
               {formatMonth(visibleMonth)}
             </span>
           </div>
-          <DrawerDescription className="pl-12">
-            원하는 날짜를 선택해 일정을 등록할 수 있어요.
-          </DrawerDescription>
           <div className="mt-3 px-1">
-            <DrawerIntro open={open} image="/drawer-calendar-intro.jpg" alt="달력을 확인하는 두 사람" title="날짜를 선택한다는 건… 단순한 결정이 아니다!" description="그것은 바로 『각오』다! 자아, 네 손으로 여행의 운명을 골라라!" />
+            <DrawerIntro open={open} image="/drawer-calendar-intro.jpg" alt="달력을 확인하는 두 사람" />
           </div>
         </DrawerHeader>
 
