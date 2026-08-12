@@ -17,6 +17,9 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { FlightWidget } from "../components/flight/FlightWidget";
+import { useQuery } from "@tanstack/react-query";
+import { ChecklistBattleCard } from "../components/checklist/ChecklistBattleCard";
+import { fetchChecklist, getChecklistBattleStats, type PreparationItem } from "../lib/checklist";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -428,6 +431,16 @@ const BangkokDepartureCard: React.FC = () => {
 export const HomeActivity: React.FC = () => {
   const { push, replace } = useFlow();
   const [tripState, setTripState] = useState<"before" | "during" | "after">("before");
+  const {
+    data: checklistItems = [],
+    isLoading: isChecklistLoading,
+    isError: isChecklistError,
+    refetch: refetchChecklist,
+  } = useQuery<PreparationItem[]>({
+    queryKey: ["checklist"],
+    queryFn: fetchChecklist,
+  });
+  const checklistBattleStats = getChecklistBattleStats(checklistItems);
 
   return (
     <AppScreen appBar={{ title: "태국 여행 2026" }}>
@@ -462,16 +475,13 @@ export const HomeActivity: React.FC = () => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
               <BangkokDepartureCard />
 
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={() => replace("ChecklistActivity", {}, { animate: false })} className="p-4 bg-white dark:bg-gray-800 rounded-2xl border shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform">
-                  <span className="text-2xl">📝</span>
-                  <span className="font-semibold">준비물 리스트</span>
-                </button>
-                <button onClick={() => push("ExchangeActivity", {})} className="p-4 bg-white dark:bg-gray-800 rounded-2xl border shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform">
-                  <span className="text-2xl">💱</span>
-                  <span className="font-semibold">환율 계산기</span>
-                </button>
-              </div>
+              <ChecklistBattleCard
+                stats={checklistBattleStats}
+                isLoading={isChecklistLoading}
+                isError={isChecklistError}
+                onOpen={() => replace("ChecklistActivity", {}, { animate: false })}
+                onRetry={() => void refetchChecklist()}
+              />
 
               <FlightWidget onOpen={(passengerId) => push("FlightActivity", { passengerId })} />
 

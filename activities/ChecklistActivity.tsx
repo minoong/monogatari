@@ -28,6 +28,13 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { NativeHapticSwitch } from "../components/ui/native-haptic-switch";
+import {
+  fetchChecklist,
+  getChecklistBattleStats,
+  getChecklistItemsForUser,
+  isChecklistItemCompletedFor,
+  type PreparationItem,
+} from "../lib/checklist";
 
 const avatarSources = {
   gahyun: "/avatars/gahyun.webp",
@@ -168,15 +175,6 @@ const ProgressIslandContent = ({
     </DynamicIsland>
   );
 };
-
-interface PreparationItem {
-  id: string;
-  title: string;
-  type: "master" | "personal";
-  assignees: string[];
-  completed_by: string[];
-  importance: "high" | "normal" | "low";
-}
 
 interface ToggleEntry {
   id: string;
@@ -529,12 +527,7 @@ export const ChecklistActivity: React.FC = () => {
 
   const { data: items = [], isLoading: loading } = useQuery<PreparationItem[]>({
     queryKey: ["checklist"],
-    queryFn: async () => {
-      const res = await fetch("/api/checklist");
-      if (!res.ok) throw new Error("Failed to fetch");
-      const json = await res.json();
-      return json.data || [];
-    },
+    queryFn: fetchChecklist,
   });
   const showInitialLoader = useMinimumInitialLoading(loading);
 
@@ -842,10 +835,10 @@ export const ChecklistActivity: React.FC = () => {
 
 
 
-  const gahyunItems = items.filter((i) => i.assignees.includes("gahyun") || i.type === "master" || i.assignees.includes("all"));
-  const minuItems = items.filter((i) => i.assignees.includes("minu") || i.type === "master" || i.assignees.includes("all"));
-  const isCompletedFor = (item: PreparationItem, targetUser: string) =>
-    item.completed_by.includes(targetUser) || item.completed_by.includes("all");
+  const battleStats = getChecklistBattleStats(items);
+  const gahyunItems = getChecklistItemsForUser(items, "gahyun");
+  const minuItems = getChecklistItemsForUser(items, "minu");
+  const isCompletedFor = isChecklistItemCompletedFor;
 
   const isSortCompletedFor = (item: PreparationItem, targetUser: string) => {
     const key = `${targetUser}:${item.id}`;
@@ -887,12 +880,11 @@ export const ChecklistActivity: React.FC = () => {
     );
   };
 
-  const gahyunCheckedCount = gahyunItems.filter((item) => isCompletedFor(item, "gahyun")).length;
-  const minuCheckedCount = minuItems.filter((item) => isCompletedFor(item, "minu")).length;
-
-  const gahyunProgress = gahyunItems.length === 0 ? 0 : Math.round((gahyunCheckedCount / gahyunItems.length) * 100);
-  const minuProgress = minuItems.length === 0 ? 0 : Math.round((minuCheckedCount / minuItems.length) * 100);
-  const progress = Math.round((gahyunProgress + minuProgress) / 2);
+  const gahyunCheckedCount = battleStats.gahyun.completed;
+  const minuCheckedCount = battleStats.minu.completed;
+  const gahyunProgress = battleStats.gahyun.progress;
+  const minuProgress = battleStats.minu.progress;
+  const progress = battleStats.averageProgress;
 
   const rings = [
     { progress: progress, color: "#3b82f6" }, // blue-500
