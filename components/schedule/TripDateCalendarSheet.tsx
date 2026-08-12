@@ -175,7 +175,7 @@ export function TripDateCalendarSheet({
             원하는 날짜를 선택해 일정을 등록할 수 있어요.
           </DrawerDescription>
           <div className="mt-3 px-1">
-            <DrawerIntro open={open} image="/drawer-calendar-intro.jpg" alt="달력을 확인하는 두 사람" title="그날… 저와 함께해 주실 수 있나요?" description="원하는 날짜를 골라 주세요. 모른 척하면 안 돼요?" />
+            <DrawerIntro open={open} image="/drawer-calendar-intro.jpg" alt="달력을 확인하는 두 사람" title="날짜를 고르는 순간… 운명은 이미 움직이기 시작했다!" description="각오를 정했다면 선택해라! 이것이 우리 여행의 「시작」이다!" />
           </div>
         </DrawerHeader>
 
