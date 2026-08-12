@@ -72,6 +72,8 @@ export function ScheduleDrawer({
   const editing = Boolean(item);
   const [date, setDate] = useState<TripDate>(item?.schedule_date ?? TRIP_DATES[0]);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [dateInteraction, setDateInteraction] = useState(0);
+  const [timeInteraction, setTimeInteraction] = useState(0);
   const initialHour = Number(item?.start_time.slice(0, 2) ?? "09");
   const [hour, setHour] = useState(String(initialHour % 12 || 12).padStart(2, "0"));
   const [minute, setMinute] = useState(item?.start_time.slice(3, 5) ?? "00");
@@ -173,8 +175,8 @@ export function ScheduleDrawer({
           </DrawerHeader>
           <DrawerPanel scrollable={false} className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
             <DrawerIntro open={open} image="/drawer-schedule-intro.jpg" alt="여행 일정을 정리하는 모습" title="저기… 일정, 제가 정해도 괜찮을까요?" />
-            <section>
-              <Label className="mb-2"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>날짜</DrawerFieldLabel></Label>
+            <section data-drawer-interactive-field onPointerDownCapture={() => setDateInteraction((value) => value + 1)}>
+              <Label className="mb-2"><DrawerFieldLabel icon={CalendarDaysIcon} active={open} interactionSignal={dateInteraction}>날짜</DrawerFieldLabel></Label>
               <button
                 type="button"
                 className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-slate-300 active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900"
@@ -186,8 +188,8 @@ export function ScheduleDrawer({
               </button>
             </section>
 
-            <section>
-              <Label className="mb-2"><DrawerFieldLabel icon={ClockIcon} active={open}>시간</DrawerFieldLabel></Label>
+            <section data-drawer-interactive-field onPointerDownCapture={() => setTimeInteraction((value) => value + 1)}>
+              <Label className="mb-2"><DrawerFieldLabel icon={ClockIcon} active={open} interactionSignal={timeInteraction}>시간</DrawerFieldLabel></Label>
               <MantineProvider>
                 <div
                   data-base-ui-swipe-ignore

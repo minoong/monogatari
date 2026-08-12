@@ -32,24 +32,39 @@ export function DrawerIntro({ open, image, alt, title, description }: { open: bo
 export interface DrawerAnimatedIconHandle { startAnimation: () => void; stopAnimation: () => void }
 export type DrawerAnimatedIconComponent = ForwardRefExoticComponent<HTMLAttributes<HTMLDivElement> & { size?: number } & RefAttributes<DrawerAnimatedIconHandle>>;
 
-export function DrawerFieldLabel({ icon: Icon, active, children, className }: { icon: DrawerAnimatedIconComponent; active: boolean; children: ReactNode; className?: string }) {
+function replayIcon(icon: DrawerAnimatedIconHandle | null) {
+  icon?.stopAnimation();
+  requestAnimationFrame(() => requestAnimationFrame(() => icon?.startAnimation()));
+}
+
+export function DrawerFieldLabel({ icon: Icon, active, interactionSignal, children, className }: { icon: DrawerAnimatedIconComponent; active: boolean; interactionSignal?: number; children: ReactNode; className?: string }) {
   const iconRef = useRef<DrawerAnimatedIconHandle>(null);
   const labelContentRef = useRef<HTMLSpanElement>(null);
   const [fieldFocused, setFieldFocused] = useState(false);
   const reduceMotion = useReducedMotion();
   useEffect(() => {
-    if ((active || fieldFocused) && !reduceMotion) iconRef.current?.startAnimation();
+    if (fieldFocused && !reduceMotion) replayIcon(iconRef.current);
+    else if (active && !reduceMotion) iconRef.current?.startAnimation();
     else iconRef.current?.stopAnimation();
   }, [active, fieldFocused, reduceMotion]);
+  useEffect(() => {
+    if (interactionSignal && !reduceMotion) replayIcon(iconRef.current);
+  }, [interactionSignal, reduceMotion]);
   useEffect(() => {
     const isRelatedTarget = (target: EventTarget | null) => {
       const label = labelContentRef.current?.closest("label");
       const control = label?.control;
-      return Boolean(target instanceof Node && (label?.contains(target) || control === target || control?.contains(target)));
+      const interactionScope = labelContentRef.current?.closest("[data-drawer-interactive-field]");
+      return Boolean(target instanceof Node && (
+        label?.contains(target) ||
+        control === target ||
+        control?.contains(target) ||
+        interactionScope?.contains(target)
+      ));
     };
     const updateFocus = () => setFieldFocused(isRelatedTarget(document.activeElement));
     const replayOnPress = (event: PointerEvent) => {
-      if (isRelatedTarget(event.target) && !reduceMotion) iconRef.current?.startAnimation();
+      if (isRelatedTarget(event.target) && !reduceMotion) replayIcon(iconRef.current);
     };
     document.addEventListener("focusin", updateFocus);
     document.addEventListener("focusout", updateFocus);
@@ -79,7 +94,7 @@ export function DrawerMapPinIcon({ active }: { active: boolean }) {
   useEffect(() => {
     const replay = (event: Event) => {
       const field = hostRef.current?.closest("[data-drawer-multi-field]");
-      if (field?.contains(event.target as Node) && !reduceMotion) iconRef.current?.startAnimation();
+      if (field?.contains(event.target as Node) && !reduceMotion) replayIcon(iconRef.current);
     };
     document.addEventListener("focusin", replay);
     document.addEventListener("pointerdown", replay);
@@ -105,7 +120,7 @@ export function DrawerLinkIcon({ active }: { active: boolean }) {
   useEffect(() => {
     const replay = (event: Event) => {
       const field = hostRef.current?.closest("[data-drawer-multi-field]");
-      if (field?.contains(event.target as Node) && !reduceMotion) iconRef.current?.startAnimation();
+      if (field?.contains(event.target as Node) && !reduceMotion) replayIcon(iconRef.current);
     };
     document.addEventListener("focusin", replay);
     document.addEventListener("pointerdown", replay);

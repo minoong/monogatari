@@ -105,6 +105,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   const [isCompressingImage, setIsCompressingImage] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [typeInteraction, setTypeInteraction] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
@@ -277,8 +278,8 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
 
           <DrawerPanel scrollable={false} className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
             <DrawerIntro open={open} image="/drawer-wish-intro.gif" alt="위시 목록을 기록하는 캐릭터" title={isEditing ? "이 위시는 아직 완성되지 않았다… 다듬어라!" : "이 맛은… 위시에 등록해야만 하는 맛이다!"} />
-            <div className="flex flex-col gap-2">
-              <Label><DrawerFieldLabel icon={BoxIcon} active={open}>종류</DrawerFieldLabel></Label>
+            <div data-drawer-interactive-field className="flex flex-col gap-2" onPointerDownCapture={() => setTypeInteraction((value) => value + 1)}>
+              <Label><DrawerFieldLabel icon={BoxIcon} active={open} interactionSignal={typeInteraction}>종류</DrawerFieldLabel></Label>
               <ListBox
                 aria-label="위시 종류"
                 className="w-full"

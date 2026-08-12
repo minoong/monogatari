@@ -45,6 +45,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
   const [targets, setTargets] = useState<string[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [targetInteraction, setTargetInteraction] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -173,13 +174,15 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
                 </TextField>
 
                 <CheckboxGroup
+                  data-drawer-interactive-field
                   className="gap-2"
                   isRequired
                   name="targets"
                   value={targets}
-                  onChange={setTargets}
+                  onChange={(value) => { setTargets(value); setTargetInteraction((count) => count + 1); }}
+                  onPointerDownCapture={() => setTargetInteraction((count) => count + 1)}
                 >
-                  <Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>담당자</DrawerFieldLabel></Label>
+                  <Label><DrawerFieldLabel icon={UsersRoundIcon} active={open} interactionSignal={targetInteraction}>담당자</DrawerFieldLabel></Label>
                   <Description className="text-xs text-gray-500">한 명 이상 선택해 주세요.</Description>
                   <div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">
                     {targetOptions.map((target) => (
