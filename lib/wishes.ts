@@ -26,6 +26,7 @@ export interface WishImage {
 
 export const WISH_TYPE_META: Record<WishType, {
   title: string;
+  activityTitle: string;
   description: string;
   icon: string;
   accent: string;
@@ -33,31 +34,35 @@ export const WISH_TYPE_META: Record<WishType, {
 }> = {
   shopping: {
     title: "쇼핑 리스트",
-    description: "태국에서 꼭 사고 싶은 물건",
+    activityTitle: "쇼핑, 아무거나 담지 마!",
+    description: "정말 갖고 싶은 것만 골라. 충동구매하고 후회하면 가만 안 둬.",
     icon: "🛍️",
     accent: "from-violet-500 to-purple-600",
-    emptyMessage: "사고 싶은 물건을 첫 번째로 담아 보세요.",
+    emptyMessage: "살 게 없다니 말이 돼? 필요한 것부터 하나씩 제대로 담아.",
   },
   restaurant: {
     title: "맛집",
-    description: "이번 여행에서 들르고 싶은 식당",
+    activityTitle: "맛집, 제대로 골라!",
+    description: "아무 데나 들어갈 생각은 하지 마. 맛있는 곳만 확실히 골라 둬.",
     icon: "🍜",
     accent: "from-rose-500 to-orange-500",
-    emptyMessage: "가 보고 싶은 맛집을 첫 번째로 담아 보세요.",
+    emptyMessage: "배고파진 뒤에 찾지 말고, 가고 싶은 식당부터 얼른 등록해.",
   },
   menu: {
     title: "메뉴",
-    description: "여행 중 꼭 먹어 보고 싶은 메뉴",
+    activityTitle: "먹을 메뉴, 빼먹지 마!",
+    description: "가서 고민하지 말고 먹고 싶은 건 미리 정해. 내가 두 번 말하게 하지 마.",
     icon: "🍽️",
     accent: "from-orange-500 to-amber-500",
-    emptyMessage: "먹어 보고 싶은 메뉴를 첫 번째로 담아 보세요.",
+    emptyMessage: "먹고 싶은 게 하나도 없다고? 솔직하게 첫 메뉴부터 적어 봐.",
   },
   snack: {
     title: "간식/디저트",
-    description: "여행 중 먹어 볼 간식과 디저트",
+    activityTitle: "간식도 빼먹으면 안 돼!",
+    description: "디저트는 별도니까 참지 마. 먹고 싶은 건 눈치 보지 말고 담아.",
     icon: "🥭",
     accent: "from-amber-400 to-orange-500",
-    emptyMessage: "먹어 보고 싶은 간식이나 디저트를 담아 보세요.",
+    emptyMessage: "간식 칸이 비어 있잖아. 달콤한 것부터 하나 골라 봐.",
   },
 };
 

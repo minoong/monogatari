@@ -88,7 +88,7 @@ export const ScheduleActivity: React.FC = () => {
   const openEdit = (item: ScheduleItem) => { setEditing(item); setDrawerSession((current) => current + 1); setDrawerOpen(true); };
 
   return (
-    <AppScreen appBar={{ title: "4일간의 일정표", renderLeft: () => <button type="button" aria-label="홈으로 돌아가기" className="grid size-10 place-items-center rounded-full transition active:bg-slate-100 dark:active:bg-slate-800" onClick={() => replace("HomeActivity", {}, { animate: false })}><ChevronLeft className="size-5" /></button> }}>
+    <AppScreen appBar={{ title: "일정, 제대로 따라와!", renderLeft: () => <button type="button" aria-label="홈으로 돌아가기" className="grid size-10 place-items-center rounded-full transition active:bg-slate-100 dark:active:bg-slate-800" onClick={() => replace("HomeActivity", {}, { animate: false })}><ChevronLeft className="size-5" /></button> }}>
       <main className="min-h-full overflow-x-clip bg-slate-50 pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
         <div className="sticky top-0 z-30 px-4 pt-3">
           <Tabs aria-label="일정 날짜" selectedKey={activeDate ?? undefined} onSelectionChange={(key) => setFilter(String(key) as TripDate)} className="w-full">

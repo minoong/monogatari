@@ -127,7 +127,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
   };
 
   return (
-    <AppScreen appBar={{ title: meta.title }}>
+    <AppScreen appBar={{ title: meta.activityTitle }}>
       <main className="min-h-full w-full bg-slate-50 pb-12 dark:bg-slate-950">
         <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
           <div
@@ -213,7 +213,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
 
           <header className={`rounded-3xl bg-gradient-to-br ${meta.accent} px-5 py-5 text-white shadow-lg shadow-slate-200/70 dark:shadow-none`}>
             <p className="text-2xl" aria-hidden="true">{meta.icon}</p>
-            <h1 className="mt-2 text-xl font-extrabold">{meta.title}</h1>
+            <h1 className="mt-2 text-xl font-extrabold">{meta.activityTitle}</h1>
             <p className="mt-1 text-sm text-white/80">{meta.description}</p>
           </header>
 
