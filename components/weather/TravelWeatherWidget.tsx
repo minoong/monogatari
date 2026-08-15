@@ -90,7 +90,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
           <div className="flex size-8 items-center justify-center">
             {isRefreshing ? <RefreshCw size={14} className="animate-spin text-sky-500" aria-label="날씨 갱신 중" /> : <WeatherIcon icon={weather.icon} size={32} className="text-sky-500" aria-label={weather.label} />}
           </div>
-          <div className="rounded-lg border px-2 py-1 text-right" style={{ borderColor: needsUmbrella ? "#7dd3fc" : "#e2e8f0" }}>
+          <div className="rounded-lg px-2 py-1 text-right">
             <p className="flex items-center justify-end gap-1 text-[10px] font-bold text-slate-500"><Droplets size={11} aria-hidden="true" />6시간 내 비</p>
             <p className="mt-0.5 text-base font-bold">{city.nextSixHourPrecipitationProbability}%</p>
           </div>
@@ -104,11 +104,11 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
           <p className="text-xs font-bold">시간대별 예보</p>
           <p className="text-[10px] font-medium text-slate-400">다음 6시간</p>
         </div>
-        <div className="-mx-1 flex snap-x snap-mandatory gap-1 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
+        <div className="grid grid-cols-6 gap-1">
           {city.hourlyForecast.map((forecast) => {
             const forecastWeather = getWeatherPresentation(forecast.weatherCode, forecast.isDay);
             return (
-              <div key={forecast.time} className="min-w-[54px] snap-start rounded-lg border border-slate-100 px-1 py-1 text-center">
+              <div key={forecast.time} className="min-w-0 rounded-lg border border-slate-100 px-1 py-1 text-center">
                 <p className="text-[10px] font-semibold text-slate-400">{formatForecastHour(forecast.time)}시</p>
                 <div className="mt-1 flex h-5 items-center justify-center"><WeatherIcon icon={forecastWeather.icon} size={20} className="text-sky-500" aria-label={forecastWeather.label} /></div>
                 <p className="mt-1 text-sm font-bold">{forecast.temperature}°</p>
@@ -120,7 +120,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
       </div>
 
       <div className="mt-2.5 border-t border-slate-100 pt-2.5">
-        <motion.div animate={{ height: isDailyExpanded ? "auto" : 48 }} transition={{ duration: 0.18, ease: "easeInOut" }} className="relative overflow-hidden rounded-lg border" style={{ borderColor: "#e2e8f0" }}>
+        <motion.div animate={{ height: isDailyExpanded ? "auto" : 48 }} transition={{ duration: 0.18, ease: "easeInOut" }} className="relative overflow-hidden rounded-lg">
           <div className={`p-1.5 transition-[filter,opacity] duration-150 ${isDailyExpanded ? "pb-10" : "pointer-events-none select-none blur-[1.5px] opacity-35"}`} aria-hidden={!isDailyExpanded}>
             <div className="mb-1 flex items-center justify-between px-1">
               <p className="text-xs font-bold">7일 예보</p>
@@ -131,7 +131,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
               const forecastWeather = getWeatherPresentation(forecast.weatherCode, true);
               const day = formatForecastDay(forecast.date, index);
               return (
-                <div key={forecast.date} className={`min-w-0 rounded-md border border-transparent px-0.5 py-1 text-center ${index === 0 ? "border-slate-100" : ""}`}>
+                <div key={forecast.date} className="min-w-0 rounded-md px-0.5 py-1 text-center">
                   <p className="text-[10px] font-bold text-slate-700">{day.weekday}</p>
                   <p className="mt-0.5 text-[9px] font-medium text-slate-400">{day.date}</p>
                   <div className="my-1.5 flex h-[19px] items-center justify-center"><WeatherIcon icon={forecastWeather.icon} size={19} className="text-sky-500" aria-label={forecastWeather.label} /></div>
