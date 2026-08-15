@@ -247,9 +247,7 @@ export function BeforeTripWeatherTicker() {
 
   if (isPending) {
     return (
-      <section className="flex h-12 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]" aria-busy="true" aria-label="태국 날씨를 불러오는 중">
-        <Skeleton className="h-3 w-14 shrink-0 rounded-full" />
-        <div className="h-4 w-px bg-slate-100" aria-hidden="true" />
+      <section className="flex h-12 items-center rounded-2xl border border-slate-200 bg-white px-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]" aria-busy="true" aria-label="여행지 날씨를 불러오는 중">
         <Skeleton className="h-4 flex-1 rounded-full" />
       </section>
     );
@@ -268,12 +266,7 @@ export function BeforeTripWeatherTicker() {
   const weather = getWeatherPresentation(city.weatherCode, city.isDay, { windSpeed: city.windSpeed, time: city.observedAt, sunrise: city.sunrise, sunset: city.sunset });
 
   return (
-    <section className="flex h-12 items-center gap-3 overflow-hidden rounded-2xl border border-slate-200 bg-white px-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]" aria-label="여행지 현재 날씨">
-      <div className="flex shrink-0 items-center gap-1.5">
-        <span className="size-1.5 rounded-full bg-sky-500 shadow-[0_0_0_3px_rgba(14,165,233,0.1)]" aria-hidden="true" />
-        <span className="text-[10px] font-bold tracking-[-0.02em] text-slate-500">태국 날씨</span>
-      </div>
-      <div className="h-4 w-px shrink-0 bg-slate-100" aria-hidden="true" />
+    <section className="flex h-12 items-center overflow-hidden rounded-2xl border border-slate-200 bg-white px-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]" aria-label="여행지 현재 날씨">
       <div className="relative h-7 min-w-0 flex-1 overflow-hidden">
         <AnimatePresence initial={false} mode="popLayout">
           <motion.div
