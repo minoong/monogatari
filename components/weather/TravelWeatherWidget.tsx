@@ -143,23 +143,23 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
               );
             })}
             </div>
-            <button type="button" onClick={() => setIsDailyExpanded(false)} className="relative mt-1.5 flex h-9 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="true">
+            <motion.button layoutId={`daily-forecast-toggle-${city.id}`} transition={{ type: "spring", stiffness: 500, damping: 36 }} type="button" onClick={() => setIsDailyExpanded(false)} className="relative mt-1.5 flex h-9 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="true">
               <span className="absolute inset-0 flex items-center justify-around px-5 opacity-20 blur-[1.5px]" aria-hidden="true">
                 {city.dailyForecast.slice(0, 4).map((forecast) => <WeatherIcon key={forecast.date} icon={getWeatherPresentation(forecast.weatherCode, true).icon} size={18} className="text-sky-500" />)}
               </span>
               <span className="relative z-10 flex items-center gap-1 rounded-full border border-slate-100 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm">7일 예보 접기<ChevronDown size={12} className="rotate-180" aria-hidden="true" /></span>
               <span className="absolute inset-0 bg-white/35" aria-hidden="true" />
-            </button>
+            </motion.button>
             </div>
           </div>
           ) : (
-          <button type="button" onClick={() => setIsDailyExpanded(true)} className="relative flex h-9 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="false" aria-label="7일 예보 전체 보기">
+          <motion.button layoutId={`daily-forecast-toggle-${city.id}`} transition={{ type: "spring", stiffness: 500, damping: 36 }} type="button" onClick={() => setIsDailyExpanded(true)} className="relative flex h-9 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="false" aria-label="7일 예보 전체 보기">
             <span className="absolute inset-0 flex items-center justify-around px-5 opacity-30 blur-[1.5px]" aria-hidden="true">
               {city.dailyForecast.slice(0, 4).map((forecast) => <WeatherIcon key={forecast.date} icon={getWeatherPresentation(forecast.weatherCode, true).icon} size={18} className="text-sky-500" />)}
             </span>
             <span className="relative z-10 flex items-center gap-1 rounded-full border border-slate-100 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm">7일 예보 더보기<ChevronDown size={12} aria-hidden="true" /></span>
             <span className="absolute inset-0 bg-white/35" aria-hidden="true" />
-          </button>
+          </motion.button>
           )}
         </motion.div>
       </div>
