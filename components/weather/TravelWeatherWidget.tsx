@@ -143,7 +143,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
             </div>
           </div>
           {!isDailyExpanded && <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/15 via-white/70 to-white" aria-hidden="true" />}
-          <motion.button layoutId={`daily-forecast-toggle-${city.id}`} transition={{ type: "spring", stiffness: 500, damping: 36 }} type="button" onClick={() => setIsDailyExpanded((expanded) => !expanded)} className={`absolute z-10 flex items-center gap-0.5 rounded-full border border-slate-100 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${isDailyExpanded ? "right-1.5 top-1" : "bottom-1 left-1/2 -translate-x-1/2"}`} aria-expanded={isDailyExpanded}>
+          <motion.button layout transition={{ type: "spring", stiffness: 500, damping: 36 }} type="button" onClick={() => setIsDailyExpanded((expanded) => !expanded)} className={`absolute z-10 flex items-center gap-0.5 rounded-full border border-slate-100 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${isDailyExpanded ? "right-1.5 top-1" : "inset-x-0 bottom-1 mx-auto w-fit"}`} aria-expanded={isDailyExpanded}>
             {isDailyExpanded ? "접기" : "7일 예보 더보기"}<ChevronDown size={12} className={isDailyExpanded ? "rotate-180" : ""} aria-hidden="true" />
           </motion.button>
         </motion.div>
