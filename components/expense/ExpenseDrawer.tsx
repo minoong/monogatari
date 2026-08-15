@@ -202,16 +202,16 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   return <Drawer open={open} onOpenChange={onOpenChange}>
     <DrawerPopup id="expense-drawer" variant="inset" showBar className="overflow-hidden">
       <form aria-label={expense ? "지출 수정" : "지출 등록"} className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col overflow-hidden" onSubmit={submit}>
-        <DrawerHeader className="px-6 pb-1 pt-6 text-center"><DrawerTitle>{expense ? "지출 수정" : "지출 등록"}</DrawerTitle></DrawerHeader>
-        <DrawerPanel scrollable={false} className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-5 overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-3">
-          <section className="grid grid-cols-1 gap-3 min-[440px]:grid-cols-2">
-            <Field className="gap-2"><Label htmlFor="expense-date"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>구매 날짜</DrawerFieldLabel></Label><input id="expense-date" aria-label="구매 날짜" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} /></Field>
-            <Field className="gap-2"><Label htmlFor="expense-time"><DrawerFieldLabel icon={ClockIcon} active={open}>태국 현지 시간</DrawerFieldLabel></Label><input id="expense-time" aria-label="구매 시간" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" onChange={(event) => setTime(event.target.value)} type="time" value={time} /></Field>
+        <DrawerHeader className="px-4 pb-1 pt-5 text-center sm:px-6 sm:pt-6"><DrawerTitle>{expense ? "지출 수정" : "지출 등록"}</DrawerTitle></DrawerHeader>
+        <DrawerPanel scrollable={false} className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-2 sm:gap-5 sm:px-6 sm:py-3">
+          <section className="grid grid-cols-2 gap-3">
+            <Field className="min-w-0 gap-2"><Label htmlFor="expense-date"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>날짜</DrawerFieldLabel></Label><input id="expense-date" aria-label="구매 날짜" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-2 text-sm dark:border-slate-700 dark:bg-slate-900" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} /></Field>
+            <Field className="min-w-0 gap-2"><Label htmlFor="expense-time"><DrawerFieldLabel icon={ClockIcon} active={open}>시간</DrawerFieldLabel></Label><input id="expense-time" aria-label="구매 시간" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-2 text-sm dark:border-slate-700 dark:bg-slate-900" onChange={(event) => setTime(event.target.value)} type="time" value={time} /></Field>
           </section>
 
           <TextField isRequired value={itemName} onChange={setItemName}><Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>품목</DrawerFieldLabel></Label><Input maxLength={100} placeholder="예: 팟타이, 볼트 택시" /><FieldError /></TextField>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             <div className="flex items-end gap-2">
               <TextField className="min-w-0 flex-1" name="categoryDraft" value={categoryDraft} onChange={setCategoryDraft}>
                 <Label><DrawerFieldLabel icon={LayersIcon} active={open}>카테고리 태그</DrawerFieldLabel></Label>
@@ -224,14 +224,14 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
             </div>
             <TagGroup key={selectedCategoryTag} aria-label="선택한 카테고리" size="sm" variant="surface"><TagGroup.List><Tag id={selectedCategoryTag} textValue={selectedCategoryTag}>{selectedCategoryTag}</Tag></TagGroup.List></TagGroup>
             <div>
-              <p className="mb-2 text-xs font-medium text-gray-500">추천 태그</p>
-              <div className="flex flex-wrap gap-2">
+              <p className="mb-1.5 text-xs font-medium text-gray-500">추천 태그</p>
+              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {categorySuggestions.map((suggestion) => {
                   const isSelected = selectedCategoryTag === suggestion;
-                  return <button className={`min-h-8 rounded-full border px-3 text-xs font-semibold transition-colors ${isSelected ? "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300" : "border-gray-200 bg-white text-gray-500 hover:border-blue-300 dark:border-gray-700 dark:bg-white/5"}`} disabled={isSelected} key={suggestion} onClick={() => selectCategoryTag(suggestion)} type="button">{isSelected ? "✓ " : "+ "}{suggestion}</button>;
+                  return <button className={`min-h-8 shrink-0 rounded-full border px-3 text-xs font-semibold transition-colors ${isSelected ? "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300" : "border-gray-200 bg-white text-gray-500 hover:border-blue-300 dark:border-gray-700 dark:bg-white/5"}`} disabled={isSelected} key={suggestion} onClick={() => selectCategoryTag(suggestion)} type="button">{isSelected ? "✓ " : "+ "}{suggestion}</button>;
                 })}
               </div>
-              <p className="mt-2 text-xs text-gray-400">하나 선택 가능 · 직접 입력은 최대 30자</p>
+              <p className="mt-1 text-xs text-gray-400">하나 선택 가능 · 직접 입력은 최대 30자</p>
             </div>
           </div>
 
@@ -255,14 +255,14 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
           {participants.length === 2 && <Field className="gap-2"><DrawerFieldLabel icon={UsersRoundIcon} active={open}>공동 지출 분담</DrawerFieldLabel><div className="flex items-center justify-between gap-2"><p className="min-w-0 text-xs text-slate-500">기본은 반반, 1사땅 잔액은 결제자 몫이에요.</p><Button className="min-h-11 shrink-0 whitespace-nowrap px-1 text-[11px] font-bold text-blue-600" onPress={() => { if (!manualSplit) { setGahyunShare(String(automaticShares.gahyun)); setMinuShare(String(automaticShares.minu)); } setManualSplit((value) => !value); }} size="sm" type="button" variant="ghost">{manualSplit ? "반반으로" : "직접 나누기"}</Button></div>{manualSplit && <div className="mt-2 grid grid-cols-2 gap-2"><ShareInput label="가현쨩" value={gahyunShare} onChange={setGahyunShare} /><ShareInput label="미누쿤" value={minuShare} onChange={setMinuShare} /></div>}</Field>}
 
           <TextField value={merchant} onChange={setMerchant}><Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>상호 · 매장 (선택)</DrawerFieldLabel></Label><Input maxLength={100} placeholder="예: Terminal 21" /></TextField>
-          <RadioGroup className="gap-2" name="expense-payment-method" value={paymentMethod} onChange={(value) => setPaymentMethod(value as ExpensePaymentMethod)}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>결제 수단</DrawerFieldLabel></Label><div className="grid grid-cols-4 gap-2">{EXPENSE_PAYMENT_METHODS.map((method) => <Radio className="min-w-0" key={method} value={method}><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected, true)}><Radio.Control><Radio.Indicator /></Radio.Control><span>{EXPENSE_PAYMENT_META[method]}</span></Radio.Content></Radio>)}</div></RadioGroup>
+          <RadioGroup className="gap-2" name="expense-payment-method" value={paymentMethod} onChange={(value) => setPaymentMethod(value as ExpensePaymentMethod)}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>결제 수단</DrawerFieldLabel></Label><div className="grid grid-cols-2 gap-2 min-[440px]:grid-cols-4">{EXPENSE_PAYMENT_METHODS.map((method) => <Radio className="min-w-0" key={method} value={method}><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected, true)}><Radio.Control><Radio.Indicator /></Radio.Control><span>{EXPENSE_PAYMENT_META[method]}</span></Radio.Content></Radio>)}</div></RadioGroup>
           {paymentMethod === "card" && <TextField value={actualKrw} onChange={setActualKrw}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>실제 카드 청구 원화 (선택)</DrawerFieldLabel></Label><Input inputMode="numeric" min="1" placeholder="승인 내역 확인 후 입력" type="number" /></TextField>}
 
           <div className="space-y-2"><DrawerFieldLabel icon={GalleryThumbnailsIcon} active={open}>영수증 사진</DrawerFieldLabel><WishImagePicker images={images} inputId="expense-images" itemLabel="영수증 사진" label="사진 첨부" description="최대 5장 · 업로드 전에 자동으로 가볍게 압축해요." onChange={setImages} /></div>
           <Field className="gap-2"><Label htmlFor="expense-memo"><DrawerFieldLabel icon={FileTextIcon} active={open}>메모 (선택)</DrawerFieldLabel></Label><textarea id="expense-memo" aria-label="지출 메모" className="min-h-24 w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900" maxLength={500} onChange={(event) => setMemo(event.target.value)} placeholder="기억할 내용을 남겨 주세요." value={memo} /></Field>
           {submitError && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600" role="alert">{submitError}</p>}
         </DrawerPanel>
-        <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
+        <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pt-4">
           <Button fullWidth className={drawerCancelButtonClass} isDisabled={mutation.isPending} onPress={() => onOpenChange(false)} size="lg" type="button">취소</Button>
           <Button fullWidth className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmount <= 0 || numericRate <= 0 || !payer} size="lg" type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
         </DrawerFooter>

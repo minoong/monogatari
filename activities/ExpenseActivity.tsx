@@ -209,8 +209,8 @@ function FilterDrawer({ open, person, category, categoryOptions, from, to, onOpe
 
   return <Drawer open={open} onOpenChange={onOpenChange}>
     <DrawerPopup variant="inset" showBar className="overflow-hidden">
-      <DrawerHeader className="px-6 pb-1 pt-6 text-center"><DrawerTitle>지출 필터</DrawerTitle></DrawerHeader>
-      <DrawerPanel scrollable={false} className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
+      <DrawerHeader className="px-4 pb-1 pt-5 text-center sm:px-6 sm:pt-6"><DrawerTitle>지출 필터</DrawerTitle></DrawerHeader>
+      <DrawerPanel scrollable={false} className="flex min-h-0 flex-1 touch-pan-y flex-col gap-4 overflow-y-auto overscroll-contain px-4 py-2 sm:gap-5 sm:px-6 sm:py-3">
         <RadioGroup className="gap-2" name="expense-filter-person" value={draftPerson} onChange={(value) => setDraftPerson(value as PersonFilter)}>
           <Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>사용자</DrawerFieldLabel></Label>
           <div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">
@@ -227,7 +227,7 @@ function FilterDrawer({ open, person, category, categoryOptions, from, to, onOpe
         </RadioGroup>
         <section className="space-y-2"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>날짜 범위</DrawerFieldLabel><div className="grid min-w-0 grid-cols-2 gap-2"><input aria-label="시작 날짜" className="h-11 min-w-0 rounded-xl border border-slate-200 bg-white px-2 text-sm dark:border-slate-700 dark:bg-slate-900" max={draftTo || undefined} onChange={(event) => setDraftFrom(event.target.value)} type="date" value={draftFrom} /><input aria-label="종료 날짜" className="h-11 min-w-0 rounded-xl border border-slate-200 bg-white px-2 text-sm dark:border-slate-700 dark:bg-slate-900" min={draftFrom || undefined} onChange={(event) => setDraftTo(event.target.value)} type="date" value={draftTo} /></div></section>
       </DrawerPanel>
-      <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4"><Button fullWidth className={drawerCancelButtonClass} onPress={resetDraft} size="lg" type="button">초기화</Button><Button fullWidth className={drawerPrimaryButtonClass} onPress={() => { onApply({ person: draftPerson, category: draftCategory, from: draftFrom, to: draftTo }); onOpenChange(false); }} size="lg" type="button">적용</Button></DrawerFooter>
+      <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pt-4"><Button fullWidth className={drawerCancelButtonClass} onPress={resetDraft} size="lg" type="button">초기화</Button><Button fullWidth className={drawerPrimaryButtonClass} onPress={() => { onApply({ person: draftPerson, category: draftCategory, from: draftFrom, to: draftTo }); onOpenChange(false); }} size="lg" type="button">적용</Button></DrawerFooter>
     </DrawerPopup>
   </Drawer>;
 }
