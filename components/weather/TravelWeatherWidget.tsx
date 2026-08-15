@@ -25,6 +25,7 @@ const weatherSurfaceStyle = {
 };
 
 type AnimatedIconHandle = { startAnimation: () => void; stopAnimation: () => void };
+const WEATHER_ICON_REPLAY_INTERVAL = 3_200;
 
 const WeatherIcon = ({ icon, size = 24, className, autoPlay = false, ...props }: Pick<WeatherPresentation, "icon"> & { size?: number; className?: string; autoPlay?: boolean }) => {
   const animationRef = useRef<AnimatedIconHandle>(null);
@@ -54,7 +55,7 @@ const WeatherIcon = ({ icon, size = 24, className, autoPlay = false, ...props }:
     };
 
     playAnimation();
-    const intervalId = window.setInterval(playAnimation, 1800);
+    const intervalId = window.setInterval(playAnimation, WEATHER_ICON_REPLAY_INTERVAL);
 
     return () => {
       window.clearInterval(intervalId);
