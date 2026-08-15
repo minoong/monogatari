@@ -13,6 +13,14 @@ export interface HourlyWeatherForecast {
   isDay: boolean;
 }
 
+export interface DailyWeatherForecast {
+  date: string;
+  temperatureMax: number;
+  temperatureMin: number;
+  weatherCode: number;
+  precipitationProbability: number;
+}
+
 export interface WeatherCity {
   id: WeatherCityId;
   city: string;
@@ -23,6 +31,7 @@ export interface WeatherCity {
   observedAt: string;
   nextSixHourPrecipitationProbability: number;
   hourlyForecast: HourlyWeatherForecast[];
+  dailyForecast: DailyWeatherForecast[];
 }
 
 export interface WeatherResponse {

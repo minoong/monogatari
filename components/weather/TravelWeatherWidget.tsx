@@ -53,6 +53,11 @@ const formatForecastHour = (value: string) => new Intl.DateTimeFormat("ko-KR", {
   hour12: false,
 }).format(new Date(value));
 
+const formatForecastDay = (value: string, index: number) => {
+  if (index === 0) return "오늘";
+  return new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Bangkok", weekday: "short" }).format(new Date(value));
+};
+
 function WeatherSkeleton() {
   return (
     <section className="overflow-hidden rounded-[28px] p-5" style={weatherSurfaceStyle} aria-label="날씨 정보를 불러오는 중">
@@ -75,6 +80,9 @@ function WeatherSkeleton() {
         <div className="flex gap-2 overflow-hidden">
           {[0, 1, 2, 3, 4].map((item) => <div key={item} className="h-24 min-w-[66px] animate-pulse rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.16)" }} />)}
         </div>
+      </div>
+      <div className="mt-4 flex gap-2 overflow-hidden">
+        {[0, 1, 2, 3, 4, 5, 6].map((item) => <div key={item} className="h-20 min-w-[56px] animate-pulse rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.13)" }} />)}
       </div>
     </section>
   );
@@ -164,6 +172,27 @@ export function TravelWeatherWidget() {
             </button>
           );
         })}
+      </div>
+
+      <div className="relative mt-4 rounded-2xl p-3" style={{ backgroundColor: "rgba(3, 34, 95, 0.2)" }}>
+        <div className="mb-2 flex items-center justify-between px-1">
+          <p className="text-xs font-bold">7일 예보</p>
+          <p className="text-[10px] font-medium text-white/70">최고 · 최저</p>
+        </div>
+        <div className="-mx-1 flex snap-x snap-mandatory gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
+          {selectedCity.dailyForecast.map((forecast, index) => {
+            const forecastWeather = getWeatherPresentation(forecast.weatherCode, true);
+            return (
+              <div key={forecast.date} className="min-w-[58px] flex-1 snap-start rounded-xl px-1 py-2 text-center" style={{ backgroundColor: index === 0 ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)" }}>
+                <p className="text-[10px] font-bold text-white/80">{formatForecastDay(forecast.date, index)}</p>
+                <WeatherIcon icon={forecastWeather.icon} size={19} className="mx-auto my-1.5" aria-label={forecastWeather.label} />
+                <p className="text-[11px] font-bold">{forecast.temperatureMax}°</p>
+                <p className="mt-0.5 text-[10px] font-medium text-cyan-100">{forecast.temperatureMin}°</p>
+                {forecast.precipitationProbability >= 40 && <p className="mt-1 text-[9px] font-bold text-sky-100">{forecast.precipitationProbability}%</p>}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
