@@ -21,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChecklistBattleCard } from "../components/checklist/ChecklistBattleCard";
 import { fetchChecklist, getChecklistBattleStats, type PreparationItem } from "../lib/checklist";
 import { BeforeTripWeatherTicker, TravelWeatherWidget } from "../components/weather/TravelWeatherWidget";
+import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -459,24 +460,16 @@ export const HomeActivity: React.FC = () => {
           onSelectionChange={(key) => setTripState(String(key) as typeof tripState)}
           selectedKey={tripState}
         >
-          <Tabs.ListContainer className="border-b bg-muted/30 px-4 py-3">
-            <Tabs.List aria-label="여행 단계" className="mx-auto grid h-11 w-full max-w-sm grid-cols-3 rounded-full bg-slate-100 p-1 shadow-none dark:bg-slate-900">
-              {[
-                ["before", "여행 전"],
-                ["during", "여행 중"],
-                ["after", "여행 후"],
-              ].map(([id, label]) => (
-                <Tabs.Tab
-                  className="relative z-0 rounded-full text-sm font-bold text-slate-500 data-[selected=true]:text-white dark:data-[selected=true]:text-slate-900"
-                  id={id}
-                  key={id}
-                >
-                  {label}
-                  <Tabs.Indicator className="-z-10 rounded-full bg-slate-900 dark:bg-white" />
-                </Tabs.Tab>
-              ))}
-            </Tabs.List>
-          </Tabs.ListContainer>
+          <CompactSegmentedTabsList
+            ariaLabel="여행 단계"
+            className="px-4 pb-3 pt-2"
+            listClassName="mx-auto max-w-sm"
+            items={[
+              { id: "before", label: "여행 전" },
+              { id: "during", label: "여행 중" },
+              { id: "after", label: "여행 후" },
+            ]}
+          />
 
           <div className="flex flex-col gap-6 p-4">
             <Tabs.Panel className="!p-0" id="before">

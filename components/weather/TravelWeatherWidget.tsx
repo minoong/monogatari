@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, Droplets, RefreshCw, Umbrella } from "lucide-react";
-import { Button, Skeleton } from "@heroui/react";
+import { Button, Skeleton, Tabs } from "@heroui/react";
 import { getWeatherPresentation, useWeather, type WeatherCity, type WeatherPresentation } from "@/lib/weather";
 import { SunIcon } from "@/components/ui/sun";
 import { MoonIcon } from "@/components/ui/moon";
@@ -15,6 +15,7 @@ import { CloudLightningIcon } from "@/components/ui/cloud-lightning";
 import { WindIcon } from "@/components/ui/wind";
 import { SunMoonIcon } from "@/components/ui/sun-moon";
 import { SunsetIcon } from "@/components/ui/sunset";
+import { CompactSegmentedTabsList } from "@/components/ui/compact-segmented-tabs";
 
 const weatherSurfaceStyle = {
   background: "#ffffff",
@@ -305,7 +306,6 @@ export function TravelWeatherWidget() {
   const { data: cities, isPending, isError, isFetching, refetch } = useWeather();
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
   const [isDailyExpanded, setIsDailyExpanded] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
 
   if (isPending) return <WeatherSkeleton />;
 
@@ -324,36 +324,27 @@ export function TravelWeatherWidget() {
   const selectedCityIndex = Math.max(0, cities.findIndex((city) => city.id === selectedCityId));
   const selectedCity = cities[selectedCityIndex];
 
-  const selectCity = (cityId: string) => setSelectedCityId(cityId);
-
   return (
     <section className="relative overflow-hidden rounded-3xl p-3" style={weatherSurfaceStyle} aria-label="여행지 실시간 날씨">
       <div className="relative">
-        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-slate-100 p-1" role="tablist" aria-label="여행지 선택">
-          {cities.map((city, index) => {
-            const isSelected = index === selectedCityIndex;
+        <Tabs selectedKey={selectedCity.id} onSelectionChange={(key) => setSelectedCityId(String(key))} className="w-full">
+          <CompactSegmentedTabsList
+            ariaLabel="여행지 선택"
+            items={cities.map((city) => {
             const cityWeather = getWeatherPresentation(city.weatherCode, city.isDay, { windSpeed: city.windSpeed, time: city.observedAt, sunrise: city.sunrise, sunset: city.sunset });
-            return (
-              <motion.button
-                key={city.id}
-                type="button"
-                onClick={() => selectCity(city.id)}
-                role="tab"
-                aria-selected={isSelected}
-                whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
-                transition={{ duration: 0.16, ease: "easeOut" }}
-                className={`relative min-w-0 rounded-lg px-1.5 py-1.5 text-center outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 ${isSelected ? "text-slate-900" : "text-slate-400"}`}
-              >
-                {isSelected && <motion.span layoutId="selected-weather-city" className="absolute inset-0 rounded-lg bg-white shadow-[0_1px_3px_rgba(15,23,42,0.12)]" transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, ease: "easeOut" }} />}
-                <span className="relative flex items-center justify-center gap-1 whitespace-nowrap">
-                  <WeatherIcon icon={cityWeather.icon} size={15} className={isSelected ? "text-sky-500" : "text-slate-400"} aria-label={cityWeather.label} />
+              return {
+                id: city.id,
+                label: (
+                  <span className="flex min-w-0 items-center justify-center gap-1 whitespace-nowrap">
+                  <WeatherIcon icon={cityWeather.icon} size={15} className="shrink-0 text-slate-400 group-data-[selected=true]:text-sky-500" aria-label={cityWeather.label} />
                   <span className="truncate text-[11px] font-semibold">{city.city}</span>
                   <span className="text-xs font-bold tracking-[-0.04em]">{city.temperature}°</span>
-                </span>
-              </motion.button>
-            );
-          })}
-        </div>
+                  </span>
+                ),
+              };
+            })}
+          />
+        </Tabs>
         <div className="mt-3">
           <WeatherDetails city={selectedCity} isRefreshing={isFetching} isDailyExpanded={isDailyExpanded} onDailyExpandedChange={setIsDailyExpanded} />
         </div>
