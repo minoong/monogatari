@@ -11,9 +11,10 @@ import { CloudSnowIcon } from "@/components/ui/cloud-snow";
 import { CloudLightningIcon } from "@/components/ui/cloud-lightning";
 
 const weatherSurfaceStyle = {
-  background: "linear-gradient(145deg, #3195e9 0%, #1768ce 54%, #0a3d98 100%)",
-  boxShadow: "0 18px 38px -22px rgba(7, 48, 128, 0.8)",
-  color: "#f8fbff",
+  background: "#ffffff",
+  border: "1px solid #e2e8f0",
+  boxShadow: "0 14px 30px -24px rgba(15, 23, 42, 0.42)",
+  color: "#0f172a",
 };
 
 type AnimatedIconHandle = { startAnimation: () => void; stopAnimation: () => void };
@@ -63,26 +64,26 @@ function WeatherSkeleton() {
     <section className="overflow-hidden rounded-[28px] p-5" style={weatherSurfaceStyle} aria-label="날씨 정보를 불러오는 중">
       <div className="flex items-start justify-between">
         <div className="space-y-2">
-          <div className="h-3 w-24 animate-pulse rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.32)" }} />
-          <div className="h-5 w-16 animate-pulse rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.22)" }} />
+          <div className="h-3 w-24 animate-pulse rounded-full" style={{ backgroundColor: "#cbd5e1" }} />
+          <div className="h-5 w-16 animate-pulse rounded-full" style={{ backgroundColor: "#e2e8f0" }} />
         </div>
-        <div className="size-12 animate-pulse rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.18)" }} />
+        <div className="size-12 animate-pulse rounded-full" style={{ backgroundColor: "#dbeafe" }} />
       </div>
       <div className="mt-6 flex items-end justify-between">
         <div className="space-y-3">
-          <div className="h-14 w-28 animate-pulse rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.3)" }} />
-          <div className="h-3 w-36 animate-pulse rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.22)" }} />
+          <div className="h-14 w-28 animate-pulse rounded-2xl" style={{ backgroundColor: "#dbeafe" }} />
+          <div className="h-3 w-36 animate-pulse rounded-full" style={{ backgroundColor: "#e2e8f0" }} />
         </div>
-        <div className="h-14 w-20 animate-pulse rounded-2xl" style={{ backgroundColor: "rgba(5,34,101,0.22)" }} />
+        <div className="h-14 w-20 animate-pulse rounded-2xl" style={{ backgroundColor: "#f1f5f9" }} />
       </div>
-      <div className="mt-6 border-t pt-4" style={{ borderColor: "rgba(255,255,255,0.2)" }}>
-        <div className="mb-3 h-3 w-20 animate-pulse rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.25)" }} />
+      <div className="mt-6 border-t pt-4" style={{ borderColor: "#e2e8f0" }}>
+        <div className="mb-3 h-3 w-20 animate-pulse rounded-full" style={{ backgroundColor: "#cbd5e1" }} />
         <div className="flex gap-2 overflow-hidden">
-          {[0, 1, 2, 3, 4].map((item) => <div key={item} className="h-24 min-w-[66px] animate-pulse rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.16)" }} />)}
+          {[0, 1, 2, 3, 4].map((item) => <div key={item} className="h-24 min-w-[66px] animate-pulse rounded-2xl" style={{ backgroundColor: "#f1f5f9" }} />)}
         </div>
       </div>
       <div className="mt-4 flex gap-2 overflow-hidden">
-        {[0, 1, 2, 3, 4, 5, 6].map((item) => <div key={item} className="h-20 min-w-[56px] animate-pulse rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.13)" }} />)}
+        {[0, 1, 2, 3, 4, 5, 6].map((item) => <div key={item} className="h-20 min-w-[56px] animate-pulse rounded-2xl" style={{ backgroundColor: "#f8fafc" }} />)}
       </div>
     </section>
   );
@@ -112,17 +113,15 @@ export function TravelWeatherWidget() {
 
   return (
     <section className="relative overflow-hidden rounded-[28px] p-5" style={weatherSurfaceStyle} aria-label="여행지 실시간 날씨">
-      <div className="pointer-events-none absolute -right-12 -top-16 size-44 rounded-full bg-white/10 blur-2xl" aria-hidden="true" />
-      <div className="pointer-events-none absolute -bottom-24 -left-10 size-48 rounded-full bg-cyan-200/15 blur-2xl" aria-hidden="true" />
       <div className="relative">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-white/70">THAILAND WEATHER</p>
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-400">THAILAND WEATHER</p>
             <h2 className="mt-1 text-xl font-bold tracking-[-0.04em]">{selectedCity.city}</h2>
-            <p className="mt-1 text-xs font-medium text-white/75">태국 기준 {formatUpdatedAt(selectedCity.observedAt)} 업데이트</p>
+            <p className="mt-1 text-xs font-medium text-slate-400">태국 기준 {formatUpdatedAt(selectedCity.observedAt)} 업데이트</p>
           </div>
           <div className="flex size-12 shrink-0 items-center justify-center">
-            {isFetching ? <RefreshCw size={16} className="animate-spin text-white/80" aria-label="날씨 갱신 중" /> : <WeatherIcon icon={weather.icon} size={48} aria-label={weather.label} />}
+            {isFetching ? <RefreshCw size={16} className="animate-spin text-sky-500" aria-label="날씨 갱신 중" /> : <WeatherIcon icon={weather.icon} size={48} className="text-sky-500" aria-label={weather.label} />}
           </div>
         </div>
 
@@ -131,10 +130,10 @@ export function TravelWeatherWidget() {
             const cityWeather = getWeatherPresentation(city.weatherCode, city.isDay);
             const isSelected = city.id === selectedCity.id;
             return (
-              <button key={city.id} type="button" onClick={() => setSelectedCityId(city.id)} aria-pressed={isSelected} className={`min-w-[106px] snap-start rounded-2xl border px-3 py-2.5 text-left backdrop-blur-md transition duration-200 active:scale-[0.97] ${isSelected ? "border-white/70 bg-white/25 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.7)]" : "border-white/15 bg-slate-950/10"}`}>
+              <button key={city.id} type="button" onClick={() => setSelectedCityId(city.id)} aria-pressed={isSelected} className="min-w-[106px] snap-start rounded-2xl border px-3 py-2.5 text-left transition duration-200 active:scale-[0.97]" style={{ backgroundColor: isSelected ? "#eff6ff" : "#f8fafc", borderColor: isSelected ? "#93c5fd" : "#e2e8f0" }}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-bold">{city.city}</span>
-                  <span className="flex size-[18px] shrink-0 items-center justify-center"><WeatherIcon icon={cityWeather.icon} size={18} aria-label={cityWeather.label} /></span>
+                  <span className="flex size-[18px] shrink-0 items-center justify-center"><WeatherIcon icon={cityWeather.icon} size={18} className="text-sky-500" aria-label={cityWeather.label} /></span>
                 </div>
                 <p className="mt-1 text-lg font-semibold tracking-[-0.05em]">{city.temperature}°</p>
               </button>
@@ -142,33 +141,33 @@ export function TravelWeatherWidget() {
           })}
         </div>
 
-        <div className="mt-5 flex items-end justify-between gap-4 border-t border-white/20 pt-5">
+        <div className="mt-5 flex items-end justify-between gap-4 border-t border-slate-100 pt-5">
           <div>
             <p className="text-6xl font-light leading-none tracking-[-0.08em]">{selectedCity.temperature}°</p>
-            <p className="mt-2 text-sm font-semibold text-white/90">{weather.label} · 체감 {selectedCity.apparentTemperature}°</p>
+            <p className="mt-2 text-sm font-semibold text-slate-500">{weather.label} · 체감 {selectedCity.apparentTemperature}°</p>
           </div>
-          <div className={`rounded-2xl border px-3 py-2 text-right backdrop-blur-md ${needsUmbrella ? "border-white/30 bg-white/20" : "border-white/15 bg-slate-950/10"}`}>
-            <p className="flex items-center justify-end gap-1 text-[11px] font-bold text-white/90"><Droplets size={13} aria-hidden="true" />6시간 내 비</p>
+          <div className="rounded-2xl border px-3 py-2 text-right" style={{ backgroundColor: needsUmbrella ? "#eff6ff" : "#f8fafc", borderColor: needsUmbrella ? "#bae6fd" : "#e2e8f0" }}>
+            <p className="flex items-center justify-end gap-1 text-[11px] font-bold text-slate-500"><Droplets size={13} aria-hidden="true" />6시간 내 비</p>
             <p className="mt-0.5 text-lg font-bold">{selectedCity.nextSixHourPrecipitationProbability}%</p>
           </div>
         </div>
 
-        {needsUmbrella && <p className="mt-4 flex items-center gap-1.5 rounded-2xl bg-slate-950/15 px-3 py-2 text-xs font-semibold text-white/95"><Umbrella size={14} aria-hidden="true" />우산을 챙기세요. 비 예보가 있어요.</p>}
+        {needsUmbrella && <p className="mt-4 flex items-center gap-1.5 rounded-2xl px-3 py-2 text-xs font-semibold text-sky-700" style={{ backgroundColor: "#f0f9ff" }}><Umbrella size={14} aria-hidden="true" />우산을 챙기세요. 비 예보가 있어요.</p>}
 
-        <div className="mt-5 border-t border-white/20 pt-4">
+        <div className="mt-5 border-t border-slate-100 pt-4">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-xs font-bold">시간대별 예보</p>
-            <p className="text-[10px] font-medium text-white/70">다음 6시간</p>
+            <p className="text-[10px] font-medium text-slate-400">다음 6시간</p>
           </div>
           <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
             {selectedCity.hourlyForecast.map((forecast) => {
               const forecastWeather = getWeatherPresentation(forecast.weatherCode, forecast.isDay);
               return (
-                <div key={forecast.time} className="min-w-[66px] snap-start rounded-2xl bg-white/12 px-2 py-2.5 text-center backdrop-blur-sm">
-                  <p className="text-[10px] font-semibold text-white/75">{formatForecastHour(forecast.time)}시</p>
-                  <div className="mt-1 flex h-5 items-center justify-center"><WeatherIcon icon={forecastWeather.icon} size={20} aria-label={forecastWeather.label} /></div>
+                <div key={forecast.time} className="min-w-[66px] snap-start rounded-2xl px-2 py-2.5 text-center" style={{ backgroundColor: "#f8fafc" }}>
+                  <p className="text-[10px] font-semibold text-slate-400">{formatForecastHour(forecast.time)}시</p>
+                  <div className="mt-1 flex h-5 items-center justify-center"><WeatherIcon icon={forecastWeather.icon} size={20} className="text-sky-500" aria-label={forecastWeather.label} /></div>
                   <p className="mt-1 text-sm font-bold">{forecast.temperature}°</p>
-                  <p className="mt-0.5 text-[10px] font-semibold text-cyan-100">{forecast.precipitationProbability}%</p>
+                  <p className="mt-0.5 text-[10px] font-semibold text-sky-500">{forecast.precipitationProbability}%</p>
                 </div>
               );
             })}
@@ -176,24 +175,24 @@ export function TravelWeatherWidget() {
         </div>
       </div>
 
-      <div className="relative mt-5 border-t border-white/20 pt-4">
-        <div className="rounded-2xl p-3" style={{ backgroundColor: "rgba(3, 34, 95, 0.2)" }}>
+      <div className="relative mt-5 border-t border-slate-100 pt-4">
+        <div className="rounded-2xl border p-3" style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}>
         <div className="mb-2 flex items-center justify-between px-1">
           <p className="text-xs font-bold">7일 예보</p>
-          <p className="text-[10px] font-medium text-white/70">최고 · 최저</p>
+          <p className="text-[10px] font-medium text-slate-400">최고 · 최저</p>
         </div>
         <div className="-mx-1 flex snap-x snap-mandatory gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
           {selectedCity.dailyForecast.map((forecast, index) => {
             const forecastWeather = getWeatherPresentation(forecast.weatherCode, true);
             const day = formatForecastDay(forecast.date, index);
             return (
-              <div key={forecast.date} className="min-w-[58px] flex-1 snap-start rounded-xl px-1 py-2 text-center" style={{ backgroundColor: index === 0 ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)" }}>
-                <p className="text-[10px] font-bold text-white/90">{day.weekday}</p>
-                <p className="mt-0.5 text-[9px] font-medium text-white/60">{day.date}</p>
-                <div className="my-1.5 flex h-[19px] items-center justify-center"><WeatherIcon icon={forecastWeather.icon} size={19} aria-label={forecastWeather.label} /></div>
+              <div key={forecast.date} className="min-w-[58px] flex-1 snap-start rounded-xl px-1 py-2 text-center" style={{ backgroundColor: index === 0 ? "#eff6ff" : "#ffffff" }}>
+                <p className="text-[10px] font-bold text-slate-700">{day.weekday}</p>
+                <p className="mt-0.5 text-[9px] font-medium text-slate-400">{day.date}</p>
+                <div className="my-1.5 flex h-[19px] items-center justify-center"><WeatherIcon icon={forecastWeather.icon} size={19} className="text-sky-500" aria-label={forecastWeather.label} /></div>
                 <p className="text-[11px] font-bold">{forecast.temperatureMax}°</p>
-                <p className="mt-0.5 text-[10px] font-medium text-cyan-100">{forecast.temperatureMin}°</p>
-                {forecast.precipitationProbability >= 40 && <p className="mt-1 text-[9px] font-bold text-sky-100">{forecast.precipitationProbability}%</p>}
+                <p className="mt-0.5 text-[10px] font-medium text-slate-400">{forecast.temperatureMin}°</p>
+                {forecast.precipitationProbability >= 40 && <p className="mt-1 text-[9px] font-bold text-sky-500">{forecast.precipitationProbability}%</p>}
               </div>
             );
           })}
