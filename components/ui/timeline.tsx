@@ -28,8 +28,8 @@ export function Timeline({
   }, []);
 
   return (
-    <section className="relative w-full min-w-0 overflow-x-clip font-sans" aria-label="일정 타임라인">
-      {railContent && <aside className="pointer-events-none absolute inset-y-0 left-0 z-20 w-12" aria-label="가현짱과 미누쿤의 여행 타임라인"><div className="sticky top-24 flex -space-x-2 transform-gpu [will-change:transform]">{railContent}</div></aside>}
+    <section className="relative w-full min-w-0 font-sans" aria-label="일정 타임라인">
+      {railContent && <aside className="pointer-events-none absolute inset-y-0 left-0 z-20 w-12" aria-label="가현짱과 미누쿤의 여행 타임라인"><div className="sticky top-24 flex -space-x-2">{railContent}</div></aside>}
       <div ref={contentRef} className="relative min-w-0 pb-8">
         {data.map((item) => (
           <div key={item.id} className="relative grid min-w-0 grid-cols-[3rem_minmax(0,1fr)] gap-5 pb-4 pt-1">

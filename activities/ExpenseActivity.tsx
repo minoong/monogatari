@@ -159,12 +159,12 @@ export const ExpenseActivity: React.FC = () => {
   const clearFilters = () => { setPerson("all"); setCategory("all"); setFrom(""); setTo(""); };
 
   return <AppScreen appBar={{ title: "여행 가계부" }}>
-    <main className="min-h-full w-full max-w-full overflow-x-clip bg-white pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
-      <Tabs aria-label="가계부 보기" selectedKey={selectedTab} onSelectionChange={(key) => setSelectedTab(String(key))} className="w-full min-w-0 max-w-full overflow-x-clip">
+    <main className="min-h-full w-full max-w-full bg-white pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
+      <Tabs aria-label="가계부 보기" selectedKey={selectedTab} onSelectionChange={(key) => setSelectedTab(String(key))} className="w-full min-w-0 max-w-full">
         <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
           <CompactSegmentedTabsList ariaLabel="가계부 내역과 통계" items={[{ id: "list", label: "내역" }, { id: "stats", label: "통계" }]} />
         </div>
-        <Tabs.Panel className="min-w-0 max-w-full overflow-x-clip !p-0" id="list">
+        <Tabs.Panel className="min-w-0 max-w-full !p-0" id="list">
           {query.isLoading ? <ExpenseSkeleton /> : initialError ? <LoadError onRetry={() => query.refetch()} /> : <section className="mx-auto w-full min-w-0 max-w-lg px-4 py-4">
             <ExpenseSummary expenses={filtered} />
             {query.isError && query.data && <div className="mt-3 flex items-center justify-between rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 dark:bg-amber-500/10 dark:text-amber-300"><span>최근 데이터를 표시 중이에요.</span><button className="min-h-8 px-2 font-bold" onClick={() => query.refetch()} type="button">다시 연결</button></div>}
@@ -175,7 +175,7 @@ export const ExpenseActivity: React.FC = () => {
             {expenses.length === 0 ? <EmptyState onCreate={openCreate} /> : filtered.length === 0 ? <div className="py-16 text-center"><p className="font-bold">조건에 맞는 지출이 없어요.</p><button className="mt-3 min-h-11 px-4 text-sm font-bold text-blue-600" onClick={clearFilters} type="button">필터 초기화</button></div> : <div className="mt-6 space-y-5">{grouped.map((group) => <section key={group.date}><ExpenseDayHeader items={group.items} /><div className="mt-2 overflow-hidden rounded-[18px] bg-white shadow-[0_10px_30px_-26px_rgba(15,23,42,0.55)] ring-1 ring-black/[0.055] dark:bg-slate-900 dark:ring-white/10">{group.items.map((expense, index) => <ExpenseRow expense={expense} key={expense.id} onDelete={() => setDeleting(expense)} onEdit={() => openEdit(expense)} showDivider={index < group.items.length - 1} />)}</div></section>)}</div>}
           </section>}
         </Tabs.Panel>
-        <Tabs.Panel className="min-w-0 max-w-full overflow-x-clip !p-0" id="stats">
+        <Tabs.Panel className="min-w-0 max-w-full !p-0" id="stats">
           {selectedTab === "stats" && (query.isLoading ? <div className="mx-auto w-full min-w-0 max-w-lg px-4 py-4"><ChartSkeleton /></div> : initialError ? <LoadError onRetry={() => query.refetch()} /> : <section className="mx-auto w-full min-w-0 max-w-lg px-4 py-4">{expenses.length ? <ExpenseCharts expenses={filtered} /> : <EmptyState onCreate={openCreate} />}</section>)}
         </Tabs.Panel>
       </Tabs>
