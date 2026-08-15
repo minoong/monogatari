@@ -120,7 +120,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
 
       <div className="mt-2.5 border-t border-slate-100 pt-2.5">
         <motion.div animate={{ height: isDailyExpanded ? "auto" : 48 }} transition={{ duration: 0.18, ease: "easeInOut" }} className="relative overflow-hidden rounded-lg border" style={{ borderColor: "#e2e8f0" }}>
-          <div className={`p-1.5 transition-[filter,opacity] duration-150 ${isDailyExpanded ? "" : "pointer-events-none select-none blur-[1.5px] opacity-35"}`} aria-hidden={!isDailyExpanded}>
+          <div className={`p-1.5 transition-[filter,opacity] duration-150 ${isDailyExpanded ? "pb-10" : "pointer-events-none select-none blur-[1.5px] opacity-35"}`} aria-hidden={!isDailyExpanded}>
             <div className="mb-1 flex items-center justify-between px-1">
               <p className="text-xs font-bold">7일 예보</p>
               <p className="text-[10px] font-medium text-slate-400">최고 · 최저</p>
@@ -143,7 +143,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
             </div>
           </div>
           {!isDailyExpanded && <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/15 via-white/70 to-white" aria-hidden="true" />}
-          <motion.button layout transition={{ type: "spring", stiffness: 500, damping: 36 }} type="button" onClick={() => setIsDailyExpanded((expanded) => !expanded)} className={`absolute z-10 flex items-center gap-0.5 rounded-full border border-slate-100 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${isDailyExpanded ? "right-1.5 top-1" : "inset-x-0 bottom-1 mx-auto w-fit"}`} aria-expanded={isDailyExpanded}>
+          <motion.button layout transition={{ type: "spring", stiffness: 500, damping: 36 }} type="button" onClick={() => setIsDailyExpanded((expanded) => !expanded)} className="absolute inset-x-0 bottom-1 z-10 mx-auto flex w-fit items-center gap-0.5 rounded-full border border-slate-100 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded={isDailyExpanded}>
             {isDailyExpanded ? "접기" : "7일 예보 더보기"}<ChevronDown size={12} className={isDailyExpanded ? "rotate-180" : ""} aria-hidden="true" />
           </motion.button>
         </motion.div>
