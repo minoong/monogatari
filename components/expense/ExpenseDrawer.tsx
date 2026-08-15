@@ -2,7 +2,7 @@
 
 import imageCompression from "browser-image-compression";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { Button, FieldError, Input, Label, TextField } from "@heroui/react";
 import { Check, RefreshCw } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -186,10 +186,10 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   };
 
   return <Drawer open={open} onOpenChange={onOpenChange}>
-    <DrawerPopup id="expense-drawer" variant="inset" showBar className="max-w-full overflow-hidden">
-      <Form aria-label={expense ? "지출 수정" : "지출 등록"} className="flex min-h-0 min-w-0 max-w-full flex-1 flex-col overflow-hidden" onSubmit={submit}>
-        <DrawerHeader className="px-6 pb-2 pt-6 text-center"><DrawerTitle>{expense ? "지출 수정" : "지출 등록"}</DrawerTitle></DrawerHeader>
-        <DrawerPanel scrollable={false} className="flex min-h-0 min-w-0 max-w-full flex-1 touch-pan-y flex-col gap-5 overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-3">
+    <DrawerPopup id="expense-drawer" variant="inset" showBar className="overflow-hidden">
+      <form aria-label={expense ? "지출 수정" : "지출 등록"} className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col overflow-hidden" onSubmit={submit}>
+        <DrawerHeader className="px-6 pb-1 pt-6 text-center"><DrawerTitle>{expense ? "지출 수정" : "지출 등록"}</DrawerTitle></DrawerHeader>
+        <DrawerPanel scrollable={false} className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-5 overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-3">
           <section className="grid grid-cols-1 gap-3 min-[440px]:grid-cols-2">
             <Field className="gap-2"><FieldLabel className="text-sm">구매 날짜</FieldLabel><input aria-label="구매 날짜" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} /></Field>
             <Field className="gap-2"><FieldLabel className="text-sm">태국 현지 시간</FieldLabel><input aria-label="구매 시간" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" onChange={(event) => setTime(event.target.value)} type="time" value={time} /></Field>
@@ -245,11 +245,11 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
           <Field className="gap-2"><FieldLabel className="text-sm">메모 (선택)</FieldLabel><textarea aria-label="지출 메모" className="min-h-24 w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900" maxLength={500} onChange={(event) => setMemo(event.target.value)} placeholder="기억할 내용을 남겨 주세요." value={memo} /></Field>
           {submitError && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600" role="alert">{submitError}</p>}
         </DrawerPanel>
-        <DrawerFooter className="grid shrink-0 grid-cols-2 gap-3 border-t bg-white px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 dark:bg-slate-950">
-          <Button className={drawerCancelButtonClass} isDisabled={mutation.isPending} onPress={() => onOpenChange(false)} type="button" variant="secondary">취소</Button>
-          <Button className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmount <= 0 || numericRate <= 0 || !payer} type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
+        <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
+          <Button fullWidth className={drawerCancelButtonClass} isDisabled={mutation.isPending} onPress={() => onOpenChange(false)} size="lg" type="button">취소</Button>
+          <Button fullWidth className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmount <= 0 || numericRate <= 0 || !payer} size="lg" type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
         </DrawerFooter>
-      </Form>
+      </form>
     </DrawerPopup>
   </Drawer>;
 }
