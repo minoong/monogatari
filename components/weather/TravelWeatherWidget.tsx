@@ -74,24 +74,25 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
 
   return (
     <div>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-bold tracking-[-0.04em]">{city.city}</h2>
-          <p className="mt-0.5 text-[11px] font-medium text-slate-400">태국 기준 {formatUpdatedAt(city.observedAt)} 업데이트</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-baseline gap-1.5">
+            <h2 className="text-base font-bold tracking-[-0.04em]">{city.city}</h2>
+            <p className="truncate text-[10px] font-medium text-slate-400">태국 기준 {formatUpdatedAt(city.observedAt)} 업데이트</p>
+          </div>
+          <div className="mt-0.5 flex items-baseline gap-1.5">
+            <p className="text-4xl font-light leading-none tracking-[-0.08em]">{city.temperature}°</p>
+            <p className="truncate text-[11px] font-semibold text-slate-500">{weather.label} · 체감 {city.apparentTemperature}°</p>
+          </div>
         </div>
-        <div className="flex size-8 shrink-0 items-center justify-center">
-          {isRefreshing ? <RefreshCw size={14} className="animate-spin text-sky-500" aria-label="날씨 갱신 중" /> : <WeatherIcon icon={weather.icon} size={32} className="text-sky-500" aria-label={weather.label} />}
-        </div>
-      </div>
-
-      <div className="mt-2.5 flex items-end justify-between gap-3 border-t border-slate-100 pt-2.5">
-        <div>
-          <p className="text-4xl font-light leading-none tracking-[-0.08em]">{city.temperature}°</p>
-          <p className="mt-1 text-[11px] font-semibold text-slate-500">{weather.label} · 체감 {city.apparentTemperature}°</p>
-        </div>
-        <div className="rounded-lg border px-2 py-1 text-right" style={{ borderColor: needsUmbrella ? "#7dd3fc" : "#e2e8f0" }}>
-          <p className="flex items-center justify-end gap-1 text-[10px] font-bold text-slate-500"><Droplets size={11} aria-hidden="true" />6시간 내 비</p>
-          <p className="mt-0.5 text-base font-bold">{city.nextSixHourPrecipitationProbability}%</p>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <div className="flex size-8 items-center justify-center">
+            {isRefreshing ? <RefreshCw size={14} className="animate-spin text-sky-500" aria-label="날씨 갱신 중" /> : <WeatherIcon icon={weather.icon} size={32} className="text-sky-500" aria-label={weather.label} />}
+          </div>
+          <div className="rounded-lg border px-2 py-1 text-right" style={{ borderColor: needsUmbrella ? "#7dd3fc" : "#e2e8f0" }}>
+            <p className="flex items-center justify-end gap-1 text-[10px] font-bold text-slate-500"><Droplets size={11} aria-hidden="true" />6시간 내 비</p>
+            <p className="mt-0.5 text-base font-bold">{city.nextSixHourPrecipitationProbability}%</p>
+          </div>
         </div>
       </div>
 
