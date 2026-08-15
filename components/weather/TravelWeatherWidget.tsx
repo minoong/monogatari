@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Droplets, RefreshCw, Umbrella } from "lucide-react";
+import { ChevronDown, Droplets, RefreshCw, Umbrella } from "lucide-react";
 import { getWeatherPresentation, useWeather, type WeatherCity, type WeatherPresentation } from "@/lib/weather";
 import { SunIcon } from "@/components/ui/sun";
 import { MoonIcon } from "@/components/ui/moon";
@@ -70,6 +70,8 @@ const cityPanelVariants = {
 function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshing: boolean }) {
   const weather = getWeatherPresentation(city.weatherCode, city.isDay);
   const needsUmbrella = city.nextSixHourPrecipitationProbability >= 40;
+  const [isDailyExpanded, setIsDailyExpanded] = useState(false);
+  const visibleDailyForecast = isDailyExpanded ? city.dailyForecast : city.dailyForecast.slice(0, 3);
 
   return (
     <div>
@@ -122,12 +124,12 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
             <p className="text-xs font-bold">7일 예보</p>
             <p className="text-[10px] font-medium text-slate-400">최고 · 최저</p>
           </div>
-          <div className="-mx-1 flex snap-x snap-mandatory gap-1 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
-            {city.dailyForecast.map((forecast, index) => {
+          <motion.div layout className={`grid gap-1 ${isDailyExpanded ? "grid-cols-7" : "grid-cols-4"}`}>
+            {visibleDailyForecast.map((forecast, index) => {
               const forecastWeather = getWeatherPresentation(forecast.weatherCode, true);
               const day = formatForecastDay(forecast.date, index);
               return (
-                <div key={forecast.date} className={`min-w-[49px] flex-1 snap-start rounded-md border border-transparent px-0.5 py-1 text-center ${index === 0 ? "border-slate-100" : ""}`}>
+                <div key={forecast.date} className={`min-w-0 rounded-md border border-transparent px-0.5 py-1 text-center ${index === 0 ? "border-slate-100" : ""}`}>
                   <p className="text-[10px] font-bold text-slate-700">{day.weekday}</p>
                   <p className="mt-0.5 text-[9px] font-medium text-slate-400">{day.date}</p>
                   <div className="my-1.5 flex h-[19px] items-center justify-center"><WeatherIcon icon={forecastWeather.icon} size={19} className="text-sky-500" aria-label={forecastWeather.label} /></div>
@@ -137,7 +139,19 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
                 </div>
               );
             })}
-          </div>
+            {!isDailyExpanded && (
+              <button type="button" onClick={() => setIsDailyExpanded(true)} className="relative min-w-0 overflow-hidden rounded-md border border-slate-100 px-0.5 py-1 text-center outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="false" aria-label="7일 예보 전체 보기">
+                <WeatherIcon icon={getWeatherPresentation(city.dailyForecast[3].weatherCode, true).icon} size={19} className="mx-auto mt-3 opacity-25 blur-[1px]" aria-hidden="true" />
+                <span className="absolute inset-x-0 bottom-1 z-10 flex items-center justify-center gap-0.5 text-[10px] font-bold text-slate-600">+4일<ChevronDown size={11} aria-hidden="true" /></span>
+                <span className="absolute inset-x-0 bottom-0 h-7 bg-gradient-to-t from-white via-white/90 to-transparent" aria-hidden="true" />
+              </button>
+            )}
+          </motion.div>
+          {isDailyExpanded && (
+            <button type="button" onClick={() => setIsDailyExpanded(false)} className="mx-auto mt-1.5 flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-semibold text-slate-400 transition-colors hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="true">
+              접기<ChevronDown size={11} className="rotate-180" aria-hidden="true" />
+            </button>
+          )}
         </div>
       </div>
     </div>
