@@ -20,6 +20,7 @@ import { FlightWidget } from "../components/flight/FlightWidget";
 import { useQuery } from "@tanstack/react-query";
 import { ChecklistBattleCard } from "../components/checklist/ChecklistBattleCard";
 import { fetchChecklist, getChecklistBattleStats, type PreparationItem } from "../lib/checklist";
+import { TravelWeatherWidget } from "../components/weather/TravelWeatherWidget";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -491,16 +492,7 @@ export const HomeActivity: React.FC = () => {
 
             <Tabs.Panel className="!p-0" id="during">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-              <div className="bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl p-6 text-white">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h2 className="text-lg font-bold">방콕 (실시간)</h2>
-                    <p className="text-3xl font-extrabold mt-1">32°C <span className="text-xl font-normal">맑음</span></p>
-                  </div>
-                  <span className="text-5xl">☀️</span>
-                </div>
-                <p className="text-sm mt-3 bg-white/20 p-2 rounded-lg">오후 3시경 소나기(스콜) 예보가 있어요! 우산을 챙기세요 ☔️</p>
-              </div>
+              <TravelWeatherWidget />
 
               <div className="grid grid-cols-2 gap-3">
                 <button onClick={() => replace("ScheduleActivity", {}, { animate: false })} className="p-4 bg-white dark:bg-gray-800 rounded-2xl border shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform">
