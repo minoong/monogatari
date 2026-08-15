@@ -11,7 +11,7 @@ export interface ClockIconHandle {
   stopAnimation: () => void;
 }
 
-interface ClockIconProps extends HTMLAttributes<HTMLDivElement> {
+interface ClockIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
   animateOnMount?: boolean;
 }
@@ -38,15 +38,15 @@ const ClockIcon = forwardRef<ClockIconHandle, ClockIconProps>(
     });
 
     const start = useCallback(() => controls.start("animate"), [controls]);
-    const handleMouseEnter = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    const handleMouseEnter = useCallback((event: React.MouseEvent<HTMLSpanElement>) => {
       if (isControlledRef.current) onMouseEnter?.(event);
       else start();
     }, [onMouseEnter, start]);
-    const handleMouseLeave = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    const handleMouseLeave = useCallback((event: React.MouseEvent<HTMLSpanElement>) => {
       if (isControlledRef.current) onMouseLeave?.(event);
       else controls.start("normal");
     }, [controls, onMouseLeave]);
-    const handlePointerDown = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    const handlePointerDown = useCallback((event: PointerEvent<HTMLSpanElement>) => {
       onPointerDown?.(event);
       if (isControlledRef.current || event.pointerType === "mouse") return;
       void start().then(() => controls.start("normal"));
@@ -59,13 +59,13 @@ const ClockIcon = forwardRef<ClockIconHandle, ClockIconProps>(
       return () => { active = false; };
     }, [animateOnMount, controls, start]);
 
-    return <div className={cn(className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onPointerDown={handlePointerDown} {...props}>
+    return <span className={cn("inline-flex shrink-0", className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onPointerDown={handlePointerDown} {...props}>
       <svg fill="none" height={size} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width={size} xmlns="http://www.w3.org/2000/svg">
         <circle cx="12" cy="12" r="10" />
         <motion.line animate={controls} initial="normal" transition={HAND_TRANSITION} variants={HAND_VARIANTS} x1="12" x2="12" y1="12" y2="6" />
         <motion.line animate={controls} initial="normal" transition={MINUTE_HAND_TRANSITION} variants={MINUTE_HAND_VARIANTS} x1="12" x2="16" y1="12" y2="12" />
       </svg>
-    </div>;
+    </span>;
   },
 );
 

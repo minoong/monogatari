@@ -11,7 +11,7 @@ export interface MapPinIconHandle {
   stopAnimation: () => void;
 }
 
-interface MapPinIconProps extends HTMLAttributes<HTMLDivElement> {
+interface MapPinIconProps extends HTMLAttributes<HTMLSpanElement> {
   size?: number;
   animateOnMount?: boolean;
 }
@@ -44,15 +44,15 @@ const MapPinIcon = forwardRef<MapPinIconHandle, MapPinIconProps>(
       };
     });
 
-    const handleMouseEnter = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    const handleMouseEnter = useCallback((event: React.MouseEvent<HTMLSpanElement>) => {
       if (isControlledRef.current) onMouseEnter?.(event);
       else controls.start("animate");
     }, [controls, onMouseEnter]);
-    const handleMouseLeave = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    const handleMouseLeave = useCallback((event: React.MouseEvent<HTMLSpanElement>) => {
       if (isControlledRef.current) onMouseLeave?.(event);
       else controls.start("normal");
     }, [controls, onMouseLeave]);
-    const handlePointerDown = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    const handlePointerDown = useCallback((event: PointerEvent<HTMLSpanElement>) => {
       onPointerDown?.(event);
       if (isControlledRef.current || event.pointerType === "mouse") return;
       void controls.start("animate").then(() => controls.start("normal"));
@@ -65,12 +65,12 @@ const MapPinIcon = forwardRef<MapPinIconHandle, MapPinIconProps>(
       return () => { active = false; };
     }, [animateOnMount, controls]);
 
-    return <div className={cn(className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onPointerDown={handlePointerDown} {...props}>
+    return <span className={cn("inline-flex shrink-0", className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onPointerDown={handlePointerDown} {...props}>
       <motion.svg animate={controls} fill="none" height={size} initial="normal" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" variants={SVG_VARIANTS} viewBox="0 0 24 24" width={size} xmlns="http://www.w3.org/2000/svg">
         <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
         <motion.circle animate={controls} cx="12" cy="10" initial="normal" r="3" variants={CIRCLE_VARIANTS} />
       </motion.svg>
-    </div>;
+    </span>;
   },
 );
 
