@@ -222,7 +222,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
               </TextField>
               <Button aria-label="카테고리 태그 적용" isDisabled={!categoryDraft.trim()} onPress={() => selectCategoryTag(categoryDraft)} type="button" variant="secondary"><Plus className="size-4" /></Button>
             </div>
-            <TagGroup aria-label="선택한 카테고리" size="sm" variant="surface"><TagGroup.List><Tag id={selectedCategoryTag} textValue={selectedCategoryTag}>{selectedCategoryTag}</Tag></TagGroup.List></TagGroup>
+            <TagGroup key={selectedCategoryTag} aria-label="선택한 카테고리" size="sm" variant="surface"><TagGroup.List><Tag id={selectedCategoryTag} textValue={selectedCategoryTag}>{selectedCategoryTag}</Tag></TagGroup.List></TagGroup>
             <div>
               <p className="mb-2 text-xs font-medium text-gray-500">추천 태그</p>
               <div className="flex flex-wrap gap-2">
