@@ -53,10 +53,10 @@ const formatForecastHour = (value: string) => new Intl.DateTimeFormat("ko-KR", {
   hour12: false,
 }).format(new Date(value));
 
-const formatForecastDay = (value: string, index: number) => {
-  if (index === 0) return "오늘";
-  return new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Bangkok", weekday: "short" }).format(new Date(value));
-};
+const formatForecastDay = (value: string, index: number) => ({
+  weekday: index === 0 ? "오늘" : new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Bangkok", weekday: "short" }).format(new Date(value)),
+  date: new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Bangkok", month: "numeric", day: "numeric" }).format(new Date(value)),
+});
 
 function WeatherSkeleton() {
   return (
@@ -124,7 +124,23 @@ export function TravelWeatherWidget() {
           {isFetching ? <RefreshCw size={16} className="animate-spin text-white/80" aria-label="날씨 갱신 중" /> : <WeatherIcon icon={weather.icon} size={48} aria-label={weather.label} />}
         </div>
 
-        <div className="mt-5 flex items-end justify-between gap-4">
+        <div className="mt-4 -mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]" aria-label="도시 선택">
+          {cities.map((city) => {
+            const cityWeather = getWeatherPresentation(city.weatherCode, city.isDay);
+            const isSelected = city.id === selectedCity.id;
+            return (
+              <button key={city.id} type="button" onClick={() => setSelectedCityId(city.id)} aria-pressed={isSelected} className={`min-w-[106px] snap-start rounded-2xl border px-3 py-2.5 text-left backdrop-blur-md transition duration-200 active:scale-[0.97] ${isSelected ? "border-white/70 bg-white/25 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.7)]" : "border-white/15 bg-slate-950/10"}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold">{city.city}</span>
+                  <WeatherIcon icon={cityWeather.icon} size={18} aria-label={cityWeather.label} />
+                </div>
+                <p className="mt-1 text-lg font-semibold tracking-[-0.05em]">{city.temperature}°</p>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-5 flex items-end justify-between gap-4 border-t border-white/20 pt-5">
           <div>
             <p className="text-6xl font-light leading-none tracking-[-0.08em]">{selectedCity.temperature}°</p>
             <p className="mt-2 text-sm font-semibold text-white/90">{weather.label} · 체감 {selectedCity.apparentTemperature}°</p>
@@ -158,23 +174,8 @@ export function TravelWeatherWidget() {
         </div>
       </div>
 
-      <div className="relative mt-4 -mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]" aria-label="도시 선택">
-        {cities.map((city) => {
-          const cityWeather = getWeatherPresentation(city.weatherCode, city.isDay);
-          const isSelected = city.id === selectedCity.id;
-          return (
-            <button key={city.id} type="button" onClick={() => setSelectedCityId(city.id)} aria-pressed={isSelected} className={`min-w-[106px] snap-start rounded-2xl border px-3 py-2.5 text-left backdrop-blur-md transition duration-200 active:scale-[0.97] ${isSelected ? "border-white/70 bg-white/25 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.7)]" : "border-white/15 bg-slate-950/10"}`}>
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold">{city.city}</span>
-                <WeatherIcon icon={cityWeather.icon} size={18} aria-label={cityWeather.label} />
-              </div>
-              <p className="mt-1 text-lg font-semibold tracking-[-0.05em]">{city.temperature}°</p>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="relative mt-4 rounded-2xl p-3" style={{ backgroundColor: "rgba(3, 34, 95, 0.2)" }}>
+      <div className="relative mt-5 border-t border-white/20 pt-4">
+        <div className="rounded-2xl p-3" style={{ backgroundColor: "rgba(3, 34, 95, 0.2)" }}>
         <div className="mb-2 flex items-center justify-between px-1">
           <p className="text-xs font-bold">7일 예보</p>
           <p className="text-[10px] font-medium text-white/70">최고 · 최저</p>
@@ -182,9 +183,11 @@ export function TravelWeatherWidget() {
         <div className="-mx-1 flex snap-x snap-mandatory gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
           {selectedCity.dailyForecast.map((forecast, index) => {
             const forecastWeather = getWeatherPresentation(forecast.weatherCode, true);
+            const day = formatForecastDay(forecast.date, index);
             return (
               <div key={forecast.date} className="min-w-[58px] flex-1 snap-start rounded-xl px-1 py-2 text-center" style={{ backgroundColor: index === 0 ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)" }}>
-                <p className="text-[10px] font-bold text-white/80">{formatForecastDay(forecast.date, index)}</p>
+                <p className="text-[10px] font-bold text-white/90">{day.weekday}</p>
+                <p className="mt-0.5 text-[9px] font-medium text-white/60">{day.date}</p>
                 <WeatherIcon icon={forecastWeather.icon} size={19} className="mx-auto my-1.5" aria-label={forecastWeather.label} />
                 <p className="text-[11px] font-bold">{forecast.temperatureMax}°</p>
                 <p className="mt-0.5 text-[10px] font-medium text-cyan-100">{forecast.temperatureMin}°</p>
@@ -192,6 +195,7 @@ export function TravelWeatherWidget() {
               </div>
             );
           })}
+        </div>
         </div>
       </div>
     </section>
