@@ -61,10 +61,9 @@ const cityPanelVariants = {
   exit: (direction: number) => ({ opacity: 0, x: direction * -10 }),
 };
 
-function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshing: boolean }) {
+function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedChange }: { city: WeatherCity; isRefreshing: boolean; isDailyExpanded: boolean; onDailyExpandedChange: (expanded: boolean) => void }) {
   const weather = getWeatherPresentation(city.weatherCode, city.isDay);
   const needsUmbrella = city.nextSixHourPrecipitationProbability >= 40;
-  const [isDailyExpanded, setIsDailyExpanded] = useState(false);
 
   return (
     <div>
@@ -87,7 +86,9 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
         </div>
       </div>
 
-      {needsUmbrella && <p className="mt-2 flex items-center gap-1 rounded-lg border border-sky-100 px-2 py-1 text-[10px] font-semibold text-sky-700"><Umbrella size={12} aria-hidden="true" />우산을 챙기세요. 비 예보가 있어요.</p>}
+      <div className="mt-2 min-h-7">
+        {needsUmbrella && <p className="flex items-center gap-1 rounded-lg border border-sky-100 px-2 py-1 text-[10px] font-semibold text-sky-700"><Umbrella size={12} aria-hidden="true" />우산을 챙기세요. 비 예보가 있어요.</p>}
+      </div>
 
       <div className="mt-2.5 border-t border-slate-100 pt-2.5">
         <div className="mb-1 flex items-center justify-between">
@@ -135,7 +136,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
           </div>
           {!isDailyExpanded && <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/15 via-white/70 to-white" aria-hidden="true" />}
           <motion.div layout transition={{ type: "spring", stiffness: 500, damping: 36 }} className="absolute inset-x-0 bottom-1 z-10 mx-auto w-fit">
-            <Button size="sm" variant="tertiary" onPress={() => setIsDailyExpanded((expanded) => !expanded)} className="!h-7 !min-h-7 rounded-full !px-2 !text-[9px] font-bold shadow-sm" aria-expanded={isDailyExpanded}>
+            <Button size="sm" variant="tertiary" onPress={() => onDailyExpandedChange(!isDailyExpanded)} className="!h-7 !min-h-7 rounded-full !px-2 !text-[9px] font-bold shadow-sm" aria-expanded={isDailyExpanded}>
               {isDailyExpanded ? "접기" : "7일 예보 더보기"}<ChevronDown size={11} className={isDailyExpanded ? "!size-3 rotate-180" : "!size-3"} aria-hidden="true" />
             </Button>
           </motion.div>
@@ -179,6 +180,7 @@ export function TravelWeatherWidget() {
   const { data: cities, isPending, isError, isFetching, refetch } = useWeather();
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
   const [transitionDirection, setTransitionDirection] = useState(1);
+  const [isDailyExpanded, setIsDailyExpanded] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
   if (isPending) return <WeatherSkeleton />;
@@ -238,7 +240,7 @@ export function TravelWeatherWidget() {
           variants={prefersReducedMotion ? undefined : cityPanelVariants}
           transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, ease: "easeOut" }}
         >
-          {cities.map((city) => <WeatherDetails key={city.id} city={city} isRefreshing={isFetching && city.id === selectedCity.id} />)}
+          {cities.map((city) => <WeatherDetails key={city.id} city={city} isRefreshing={isFetching && city.id === selectedCity.id} isDailyExpanded={isDailyExpanded} onDailyExpandedChange={setIsDailyExpanded} />)}
         </TransitionPanel>
       </div>
     </section>
