@@ -507,6 +507,14 @@ export const HomeActivity: React.FC = () => {
                 </button>
               </div>
 
+              <button onClick={() => push("ExpenseActivity", {})} className="flex min-h-16 items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left shadow-sm transition-transform active:scale-[0.98] dark:border-slate-800 dark:bg-slate-900">
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-white">여행 가계부</h3>
+                  <p className="mt-0.5 text-sm text-slate-500">지출 등록 · 통계 · 자동 정산</p>
+                </div>
+                <span className="text-2xl" aria-hidden="true">🧾</span>
+              </button>
+
               <button onClick={() => push("ExchangeActivity", {})} className="p-4 bg-green-50 dark:bg-green-900/30 rounded-2xl border border-green-200 dark:border-green-800 flex justify-between items-center active:scale-95 transition-transform">
                 <div>
                   <h3 className="font-bold">빠른 환율 계산</h3>

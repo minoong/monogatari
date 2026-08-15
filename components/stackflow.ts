@@ -16,6 +16,7 @@ import { AccommodationActivity } from "../activities/AccommodationActivity";
 import { UtilsActivity } from "../activities/UtilsActivity";
 import { WishListActivity } from "../activities/WishListActivity";
 import { FlightActivity } from "../activities/FlightActivity";
+import { ExpenseActivity } from "../activities/ExpenseActivity";
 
 export const config = defineConfig({
   transitionDuration: 350,
@@ -30,6 +31,7 @@ export const config = defineConfig({
     { name: "UtilsActivity" },
     { name: "WishListActivity" },
     { name: "FlightActivity" },
+    { name: "ExpenseActivity" },
   ],
   initialActivity: () => "HomeActivity",
 });
@@ -47,6 +49,7 @@ export const { Stack } = stackflow({
     UtilsActivity,
     WishListActivity,
     FlightActivity,
+    ExpenseActivity,
   },
   plugins: [
     basicRendererPlugin(),

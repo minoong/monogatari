@@ -9,12 +9,20 @@ import { useExchangeRates } from "@/lib/exchange-rates";
 
 const utilityCards = [
   {
+    activity: "ExpenseActivity" as const,
+    title: "여행 가계부",
+    description: "쓴 돈을 바로 기록하고, 둘이 얼마를 정산할지 한눈에 확인해요.",
+    meta: "지출 · 통계 · 자동 정산",
+    imageSrc: "/card-exchange-ruka.jpg",
+    baseDelay: 0.08,
+  },
+  {
     activity: "ExchangeActivity" as const,
     title: "실수하지 마! 환율 계산기",
     description: "태국 바트 바가지 쓰지 않도록 원화랑 달러로 똑바로 확인해!",
     meta: "바가지 방지 · ฿100 ≈ ₩3,850",
     imageSrc: "/card-exchange-ruka.jpg",
-    baseDelay: 0.1,
+    baseDelay: 0.28,
   },
   {
     activity: "DictionaryActivity" as const,
@@ -22,7 +30,7 @@ const utilityCards = [
     description: "말 안 통한다고 버벅이지 말고, 발음 듣거나 현지인한테 크게 보여줘!",
     meta: "버벅임 방지 · 검색 · 발음 · 크게 보기",
     imageSrc: "/card-dictionary-echidna.png",
-    baseDelay: 0.36,
+    baseDelay: 0.48,
   },
 ] as const;
 
