@@ -288,7 +288,7 @@ export function BeforeTripWeatherTicker() {
             transition={{ duration: prefersReducedMotion ? 0.12 : 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0 flex min-w-0 items-center gap-1.5"
           >
-            <WeatherIcon icon={weather.icon} size={17} className="shrink-0 text-sky-500" aria-hidden="true" />
+            <WeatherIcon icon={weather.icon} size={17} className="shrink-0 text-sky-500" autoPlay aria-hidden="true" />
             <span className="shrink-0 text-xs font-bold text-slate-800">{city.city}</span>
             <span className="shrink-0 text-[10px] font-semibold tabular-nums text-slate-400">{formatCompactDate(city.observedAt)}</span>
             <span className="shrink-0 text-sm font-bold tracking-[-0.04em] text-slate-950">{city.temperature}°</span>
