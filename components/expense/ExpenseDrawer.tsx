@@ -2,8 +2,8 @@
 
 import imageCompression from "browser-image-compression";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Checkbox, CheckboxGroup, FieldError, Input, Label, Radio, RadioGroup, TextField } from "@heroui/react";
-import { RefreshCw } from "lucide-react";
+import { Button, Checkbox, CheckboxGroup, FieldError, Input, Label, Radio, RadioGroup, Tag, TagGroup, TextField } from "@heroui/react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import {
@@ -82,6 +82,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const [category, setCategory] = useState<ExpenseCategory>(expense?.category ?? "food");
   const [customCategoryMode, setCustomCategoryMode] = useState(Boolean(expense?.custom_category));
   const [customCategory, setCustomCategory] = useState(expense?.custom_category ?? "");
+  const [categoryDraft, setCategoryDraft] = useState("");
   const [amount, setAmount] = useState(expense ? String(expense.amount_thb) : "");
   const [rate, setRate] = useState(expense ? String(expense.exchange_rate_krw_per_thb) : "");
   const [rateDate, setRateDate] = useState(expense?.exchange_rate_date ?? initial.date);
@@ -125,6 +126,18 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const automaticShares = equalShares(numericAmount, participants, payer);
   const effectiveGahyunShare = manualSplit ? gahyunShare : String(automaticShares.gahyun);
   const effectiveMinuShare = manualSplit ? minuShare : String(automaticShares.minu);
+  const selectedCategoryTag = customCategoryMode ? customCategory : EXPENSE_CATEGORY_META[category].label;
+  const categorySuggestions = EXPENSE_CATEGORIES.map((value) => EXPENSE_CATEGORY_META[value].label);
+
+  const selectCategoryTag = (value: string) => {
+    const next = value.trim();
+    if (!next) return;
+    const preset = EXPENSE_CATEGORIES.find((item) => EXPENSE_CATEGORY_META[item].label === next);
+    setCategory(preset ?? "other");
+    setCustomCategoryMode(!preset);
+    setCustomCategory(preset ? "" : next);
+    setCategoryDraft("");
+  };
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -198,29 +211,29 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
 
           <TextField isRequired value={itemName} onChange={setItemName}><Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>품목</DrawerFieldLabel></Label><Input maxLength={100} placeholder="예: 팟타이, 볼트 택시" /><FieldError /></TextField>
 
-          <RadioGroup className="gap-2" name="expense-category" value={customCategoryMode ? "custom" : category} onChange={(value) => {
-            if (value === "custom") { setCategory("other"); setCustomCategoryMode(true); return; }
-            setCategory(value as ExpenseCategory); setCustomCategoryMode(false);
-          }}>
-            <Label><DrawerFieldLabel icon={LayersIcon} active={open}>카테고리</DrawerFieldLabel></Label>
-            <div className="grid grid-cols-3 gap-2 min-[440px]:grid-cols-4">
-              {EXPENSE_CATEGORIES.map((value) => <Radio className="min-w-0" key={value} value={value}><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected)}><Radio.Control><Radio.Indicator /></Radio.Control><span>{EXPENSE_CATEGORY_META[value].label}</span></Radio.Content></Radio>)}
-              <Radio className="min-w-0" value="custom"><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected)}><Radio.Control><Radio.Indicator /></Radio.Control><span>직접 입력</span></Radio.Content></Radio>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-end gap-2">
+              <TextField className="min-w-0 flex-1" name="categoryDraft" value={categoryDraft} onChange={setCategoryDraft}>
+                <Label><DrawerFieldLabel icon={LayersIcon} active={open}>카테고리 태그</DrawerFieldLabel></Label>
+                <Input autoComplete="off" maxLength={30} onKeyDown={(event) => {
+                  if (event.nativeEvent.isComposing || event.keyCode === 229) return;
+                  if (event.key === "Enter" || event.key === ",") { event.preventDefault(); selectCategoryTag(categoryDraft); }
+                }} placeholder="입력 후 Enter" />
+              </TextField>
+              <Button aria-label="카테고리 태그 적용" isDisabled={!categoryDraft.trim()} onPress={() => selectCategoryTag(categoryDraft)} type="button" variant="secondary"><Plus className="size-4" /></Button>
             </div>
-            {customCategoryMode && <TextField
-              fullWidth
-              isRequired
-              className="mt-3 min-w-0"
-              isInvalid={customCategory.length > 0 && !customCategory.trim()}
-              name="custom-category"
-              value={customCategory}
-              onChange={setCustomCategory}
-            >
-              <Label><DrawerFieldLabel icon={LayersIcon} active={open}>직접 입력 카테고리</DrawerFieldLabel></Label>
-              <Input maxLength={30} placeholder="예: 카페, 선물, 기념품" />
-              <FieldError>카테고리 이름을 입력해 주세요.</FieldError>
-            </TextField>}
-          </RadioGroup>
+            <TagGroup aria-label="선택한 카테고리" size="sm" variant="surface"><TagGroup.List><Tag id={selectedCategoryTag} textValue={selectedCategoryTag}>{selectedCategoryTag}</Tag></TagGroup.List></TagGroup>
+            <div>
+              <p className="mb-2 text-xs font-medium text-gray-500">추천 태그</p>
+              <div className="flex flex-wrap gap-2">
+                {categorySuggestions.map((suggestion) => {
+                  const isSelected = selectedCategoryTag === suggestion;
+                  return <button className={`min-h-8 rounded-full border px-3 text-xs font-semibold transition-colors ${isSelected ? "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300" : "border-gray-200 bg-white text-gray-500 hover:border-blue-300 dark:border-gray-700 dark:bg-white/5"}`} disabled={isSelected} key={suggestion} onClick={() => selectCategoryTag(suggestion)} type="button">{isSelected ? "✓ " : "+ "}{suggestion}</button>;
+                })}
+              </div>
+              <p className="mt-2 text-xs text-gray-400">하나 선택 가능 · 직접 입력은 최대 30자</p>
+            </div>
+          </div>
 
           <section className="rounded-2xl bg-slate-50 p-4 dark:bg-white/5">
             <DrawerFieldLabel icon={WalletIcon} active={open}>결제 금액</DrawerFieldLabel>
