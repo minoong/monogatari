@@ -209,6 +209,7 @@ export function TravelWeatherWidget() {
         <div className="grid grid-cols-3 gap-1 rounded-2xl bg-slate-100 p-1" role="tablist" aria-label="여행지 선택">
           {cities.map((city, index) => {
             const isSelected = index === selectedCityIndex;
+            const cityWeather = getWeatherPresentation(city.weatherCode, city.isDay);
             return (
               <motion.button
                 key={city.id}
@@ -222,6 +223,7 @@ export function TravelWeatherWidget() {
               >
                 {isSelected && <motion.span layoutId="selected-weather-city" className="absolute inset-0 rounded-xl bg-white shadow-[0_1px_3px_rgba(15,23,42,0.12)]" transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, ease: "easeOut" }} />}
                 <span className="relative flex items-center justify-center gap-1 whitespace-nowrap">
+                  <WeatherIcon icon={cityWeather.icon} size={15} className={isSelected ? "text-sky-500" : "text-slate-400"} aria-label={cityWeather.label} />
                   <span className="truncate text-[11px] font-semibold">{city.city}</span>
                   <span className="text-xs font-bold tracking-[-0.04em]">{city.temperature}°</span>
                 </span>
