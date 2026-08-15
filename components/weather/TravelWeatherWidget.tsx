@@ -71,6 +71,17 @@ const formatUpdatedAt = (value: string) => new Intl.DateTimeFormat("ko-KR", {
   hour12: false,
 }).format(new Date(value));
 
+const formatCompactDate = (value: string) => {
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Bangkok",
+    month: "numeric",
+    day: "numeric",
+  }).formatToParts(new Date(value));
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  return `${month}/${day}`;
+};
+
 const formatSunTime = (value: string) => new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Bangkok",
   hour: "2-digit",
@@ -279,6 +290,7 @@ export function BeforeTripWeatherTicker() {
           >
             <WeatherIcon icon={weather.icon} size={17} className="shrink-0 text-sky-500" aria-hidden="true" />
             <span className="shrink-0 text-xs font-bold text-slate-800">{city.city}</span>
+            <span className="shrink-0 text-[10px] font-semibold tabular-nums text-slate-400">{formatCompactDate(city.observedAt)}</span>
             <span className="shrink-0 text-sm font-bold tracking-[-0.04em] text-slate-950">{city.temperature}°</span>
             <span className="min-w-0 truncate text-[10px] font-semibold text-slate-400">{weather.label}</span>
             <span className="ml-auto flex shrink-0 items-center gap-0.5 text-[10px] font-bold text-sky-500"><Droplets size={10} aria-hidden="true" />{city.nextSixHourPrecipitationProbability}%</span>
