@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, Droplets, RefreshCw, Umbrella } from "lucide-react";
 import { Button } from "@heroui/react";
@@ -11,7 +11,6 @@ import { CloudSunIcon } from "@/components/ui/cloud-sun";
 import { CloudRainIcon } from "@/components/ui/cloud-rain";
 import { CloudSnowIcon } from "@/components/ui/cloud-snow";
 import { CloudLightningIcon } from "@/components/ui/cloud-lightning";
-import { TransitionPanel } from "@/components/motion-primitives/transition-panel";
 
 const weatherSurfaceStyle = {
   background: "#ffffff",
@@ -20,7 +19,10 @@ const weatherSurfaceStyle = {
   color: "#0f172a",
 };
 
-const WeatherIcon = ({ icon, size = 24, className, ...props }: Pick<WeatherPresentation, "icon"> & { size?: number; className?: string }) => {
+type AnimatedIconHandle = { startAnimation: () => void; stopAnimation: () => void };
+
+const WeatherIcon = ({ icon, size = 24, className, autoPlay = false, ...props }: Pick<WeatherPresentation, "icon"> & { size?: number; className?: string; autoPlay?: boolean }) => {
+  const animationRef = useRef<AnimatedIconHandle>(null);
   const Icon = {
     sun: SunIcon,
     moon: MoonIcon,
@@ -34,7 +36,11 @@ const WeatherIcon = ({ icon, size = 24, className, ...props }: Pick<WeatherPrese
     thunder: CloudLightningIcon,
   }[icon];
 
-  return <Icon size={size} className={className} {...props} />;
+  useEffect(() => {
+    if (autoPlay) animationRef.current?.startAnimation();
+  }, [autoPlay]);
+
+  return <Icon ref={autoPlay ? animationRef : undefined} size={size} className={className} {...props} />;
 };
 
 const formatUpdatedAt = (value: string) => new Intl.DateTimeFormat("ko-KR", {
@@ -55,12 +61,6 @@ const formatForecastDay = (value: string, index: number) => ({
   date: new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Bangkok", month: "numeric", day: "numeric" }).format(new Date(value)),
 });
 
-const cityPanelVariants = {
-  enter: (direction: number) => ({ opacity: 0, x: direction * 10 }),
-  center: { opacity: 1, x: 0 },
-  exit: (direction: number) => ({ opacity: 0, x: direction * -10 }),
-};
-
 function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedChange }: { city: WeatherCity; isRefreshing: boolean; isDailyExpanded: boolean; onDailyExpandedChange: (expanded: boolean) => void }) {
   const weather = getWeatherPresentation(city.weatherCode, city.isDay);
   const needsUmbrella = city.nextSixHourPrecipitationProbability >= 40;
@@ -77,7 +77,7 @@ function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedCh
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <div className="flex size-8 items-center justify-center">
-            {isRefreshing ? <RefreshCw size={14} className="animate-spin text-sky-500" aria-label="날씨 갱신 중" /> : <WeatherIcon icon={weather.icon} size={32} className="text-sky-500" aria-label={weather.label} />}
+            {isRefreshing ? <RefreshCw size={14} className="animate-spin text-sky-500" aria-label="날씨 갱신 중" /> : <WeatherIcon icon={weather.icon} size={32} className="text-sky-500" autoPlay aria-label={weather.label} />}
           </div>
           <div className="rounded-lg px-2 py-1 text-right">
             <p className="flex items-center justify-end gap-1 text-[10px] font-bold text-slate-500"><Droplets size={11} aria-hidden="true" />6시간 내 비</p>
@@ -179,7 +179,6 @@ function WeatherSkeleton() {
 export function TravelWeatherWidget() {
   const { data: cities, isPending, isError, isFetching, refetch } = useWeather();
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
-  const [transitionDirection, setTransitionDirection] = useState(1);
   const [isDailyExpanded, setIsDailyExpanded] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
@@ -200,10 +199,7 @@ export function TravelWeatherWidget() {
   const selectedCityIndex = Math.max(0, cities.findIndex((city) => city.id === selectedCityId));
   const selectedCity = cities[selectedCityIndex];
 
-  const selectCity = (cityId: string, index: number) => {
-    if (index !== selectedCityIndex) setTransitionDirection(index > selectedCityIndex ? 1 : -1);
-    setSelectedCityId(cityId);
-  };
+  const selectCity = (cityId: string) => setSelectedCityId(cityId);
 
   return (
     <section className="relative overflow-hidden rounded-3xl p-3" style={weatherSurfaceStyle} aria-label="여행지 실시간 날씨">
@@ -216,7 +212,7 @@ export function TravelWeatherWidget() {
               <motion.button
                 key={city.id}
                 type="button"
-                onClick={() => selectCity(city.id, index)}
+                onClick={() => selectCity(city.id)}
                 role="tab"
                 aria-selected={isSelected}
                 whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
@@ -233,15 +229,9 @@ export function TravelWeatherWidget() {
             );
           })}
         </div>
-        <TransitionPanel
-          className="mt-3"
-          activeIndex={selectedCityIndex}
-          custom={transitionDirection}
-          variants={prefersReducedMotion ? undefined : cityPanelVariants}
-          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, ease: "easeOut" }}
-        >
-          {cities.map((city) => <WeatherDetails key={city.id} city={city} isRefreshing={isFetching && city.id === selectedCity.id} isDailyExpanded={isDailyExpanded} onDailyExpandedChange={setIsDailyExpanded} />)}
-        </TransitionPanel>
+        <div className="mt-3">
+          <WeatherDetails city={selectedCity} isRefreshing={isFetching} isDailyExpanded={isDailyExpanded} onDailyExpandedChange={setIsDailyExpanded} />
+        </div>
       </div>
     </section>
   );
