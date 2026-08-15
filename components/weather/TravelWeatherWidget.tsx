@@ -79,12 +79,9 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
         <div className="min-w-0">
           <div className="flex items-baseline gap-1.5">
             <h2 className="text-base font-bold tracking-[-0.04em]">{city.city}</h2>
-            <p className="truncate text-[10px] font-medium text-slate-400">태국 기준 {formatUpdatedAt(city.observedAt)} 업데이트</p>
-          </div>
-          <div className="mt-0.5 flex items-baseline gap-1.5">
             <p className="text-4xl font-light leading-none tracking-[-0.08em]">{city.temperature}°</p>
-            <p className="truncate text-[11px] font-semibold text-slate-500">{weather.label} · 체감 {city.apparentTemperature}°</p>
           </div>
+          <p className="mt-1 truncate text-[10px] font-medium text-slate-400">태국 기준 {formatUpdatedAt(city.observedAt)} 업데이트 · {weather.label} · 체감 {city.apparentTemperature}°</p>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <div className="flex size-8 items-center justify-center">
@@ -108,7 +105,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
           {city.hourlyForecast.map((forecast) => {
             const forecastWeather = getWeatherPresentation(forecast.weatherCode, forecast.isDay);
             return (
-              <div key={forecast.time} className="min-w-0 rounded-lg border border-slate-100 px-1 py-1 text-center">
+              <div key={forecast.time} className="min-w-0 rounded-lg px-1 py-1 text-center">
                 <p className="text-[10px] font-semibold text-slate-400">{formatForecastHour(forecast.time)}시</p>
                 <div className="mt-1 flex h-5 items-center justify-center"><WeatherIcon icon={forecastWeather.icon} size={20} className="text-sky-500" aria-label={forecastWeather.label} /></div>
                 <p className="mt-1 text-sm font-bold">{forecast.temperature}°</p>
