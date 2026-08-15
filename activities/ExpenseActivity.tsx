@@ -165,7 +165,7 @@ export const ExpenseActivity: React.FC = () => {
               <label className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-900"><Search className="size-4 shrink-0 text-slate-400" /><input aria-label="지출 검색" className="min-w-0 flex-1 bg-transparent text-sm outline-none" onChange={(event) => setSearch(event.target.value)} placeholder="품목, 상호, 메모 검색" value={search} />{search && <button aria-label="검색어 지우기" className="grid size-8 shrink-0 place-items-center" onClick={() => setSearch("")} type="button"><X className="size-4" /></button>}</label>
               <button aria-label="지출 필터" className={cn("relative grid size-11 shrink-0 place-items-center rounded-xl border bg-white dark:bg-slate-900", filtersActive ? "border-blue-500 text-blue-600" : "border-slate-200 text-slate-500 dark:border-slate-800")} onClick={openFilters} type="button"><Filter className="size-4" />{filtersActive && <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-blue-500" />}</button>
             </div>
-            {expenses.length === 0 ? <EmptyState onCreate={openCreate} /> : filtered.length === 0 ? <div className="py-16 text-center"><p className="font-bold">조건에 맞는 지출이 없어요.</p><button className="mt-3 min-h-11 px-4 text-sm font-bold text-blue-600" onClick={clearFilters} type="button">필터 초기화</button></div> : <div className="mt-5 space-y-6">{grouped.map((group) => <section key={group.date}><header className="mb-2 flex items-end justify-between px-1"><h2 className="text-sm font-extrabold">{formatBangkokDate(group.items[0].purchased_at)}</h2><p className="text-xs font-bold tabular-nums text-slate-500">{formatKrw(group.items.reduce((total, item) => total + getEffectiveKrw(item), 0))}</p></header><div className="overflow-hidden rounded-2xl border border-slate-200 bg-white divide-y divide-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:divide-slate-800">{group.items.map((expense) => <ExpenseRow expense={expense} key={expense.id} onDelete={() => setDeleting(expense)} onEdit={() => openEdit(expense)} />)}</div></section>)}</div>}
+            {expenses.length === 0 ? <EmptyState onCreate={openCreate} /> : filtered.length === 0 ? <div className="py-16 text-center"><p className="font-bold">조건에 맞는 지출이 없어요.</p><button className="mt-3 min-h-11 px-4 text-sm font-bold text-blue-600" onClick={clearFilters} type="button">필터 초기화</button></div> : <div className="mt-5 space-y-6">{grouped.map((group) => <section key={group.date}><ExpenseDayHeader items={group.items} /><div className="overflow-hidden rounded-2xl border border-slate-200 bg-white divide-y divide-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:divide-slate-800">{group.items.map((expense) => <ExpenseRow expense={expense} key={expense.id} onDelete={() => setDeleting(expense)} onEdit={() => openEdit(expense)} />)}</div></section>)}</div>}
           </section>}
         </Tabs.Panel>
         <Tabs.Panel className="min-w-0 max-w-full overflow-x-clip !p-0" id="stats">
@@ -182,7 +182,33 @@ export const ExpenseActivity: React.FC = () => {
 
 function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
   const summary = summarizeExpenses(expenses);
-  return <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><p className="text-[11px] font-semibold text-slate-400">전체 지출</p><div className="mt-1 flex items-end justify-between gap-3"><div><p className="text-2xl font-black tracking-tight tabular-nums">{formatKrw(summary.totalKrw)}</p><p className="mt-1 text-xs font-semibold text-slate-500">{formatThb(summary.totalThb)} · {summary.count}건</p></div>{summary.settlement ? <div className="text-right"><p className="text-[10px] font-semibold text-slate-400">현재 정산</p><p className="mt-1 text-xs font-extrabold"><span className="text-blue-600">{EXPENSE_PERSON_META[summary.settlement.from].label}</span> → {EXPENSE_PERSON_META[summary.settlement.to].label}</p><p className="text-sm font-black tabular-nums">{formatKrw(summary.settlement.amount)}</p></div> : <p className="text-xs font-bold text-slate-400">정산 완료</p>}</div></section>;
+  return <section className="overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10">
+    <div className="px-4 py-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold text-slate-500">총 지출</p>
+        <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold tabular-nums text-slate-500 dark:bg-slate-800">{summary.count}건</span>
+      </div>
+      <p className="mt-1 text-[28px] font-black leading-none tracking-tight tabular-nums">{formatKrw(summary.totalKrw)}</p>
+      <p className="mt-2 text-sm font-bold tabular-nums text-slate-500">{formatThb(summary.totalThb)}</p>
+    </div>
+    <div className="flex min-w-0 items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/70 px-4 py-3 dark:border-slate-800 dark:bg-slate-800/40">
+      <div className="min-w-0">
+        <p className="text-[10px] font-semibold text-slate-400">현재 정산</p>
+        {summary.settlement ? <p className="mt-0.5 truncate text-xs font-extrabold"><span className="text-blue-600">{EXPENSE_PERSON_META[summary.settlement.from].label}</span><span className="mx-1 text-slate-300">→</span>{EXPENSE_PERSON_META[summary.settlement.to].label}</p> : <p className="mt-0.5 text-xs font-bold text-slate-500">정산할 금액이 없어요</p>}
+      </div>
+      <p className="shrink-0 text-base font-black tabular-nums">{summary.settlement ? formatKrw(summary.settlement.amount) : formatKrw(0)}</p>
+    </div>
+  </section>;
+}
+
+function ExpenseDayHeader({ items }: { items: Expense[] }) {
+  const summary = summarizeExpenses(items);
+  return <header className="mb-2 flex min-w-0 items-center justify-between gap-2 px-1">
+    <h2 className="shrink-0 text-sm font-extrabold">{formatBangkokDate(items[0].purchased_at)}</h2>
+    <p aria-label={`${summary.count}건, ${formatThb(summary.totalThb)}, ${formatKrw(summary.totalKrw)}`} className="flex min-w-0 items-center justify-end gap-1.5 whitespace-nowrap text-[11px] font-bold tabular-nums text-slate-400">
+      <span>{summary.count}건</span><span aria-hidden="true" className="text-slate-300">·</span><span>{formatThb(summary.totalThb)}</span><span aria-hidden="true" className="text-slate-300">·</span><span className="text-slate-600 dark:text-slate-300">{formatKrw(summary.totalKrw)}</span>
+    </p>
+  </header>;
 }
 
 function ExpenseRow({ expense, onEdit, onDelete }: { expense: Expense; onEdit: () => void; onDelete: () => void }) {
