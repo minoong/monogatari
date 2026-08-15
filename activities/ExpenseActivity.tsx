@@ -4,14 +4,17 @@ import dynamic from "next/dynamic";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { Button, Skeleton, Tabs } from "@heroui/react";
+import { Button, Label, Radio, RadioGroup, Skeleton, Tabs } from "@heroui/react";
 import { Camera, Filter, Pencil, Plus, ReceiptText, RefreshCw, Search, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { ExpenseDrawer } from "@/components/expense/ExpenseDrawer";
 import { CompactSegmentedTabsList } from "@/components/ui/compact-segmented-tabs";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
-import { Button as BaseButton } from "@/components/ui/button";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CalendarDaysIcon } from "@/components/ui/calendar-days";
+import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
+import { LayersIcon } from "@/components/ui/layers";
+import { UsersRoundIcon } from "@/components/ui/users-round";
 import { WishImageGallery } from "@/components/wish/WishImageGallery";
 import {
   AlertDialog,
@@ -85,6 +88,7 @@ export const ExpenseActivity: React.FC = () => {
   const [editing, setEditing] = useState<Expense | null>(null);
   const [deleting, setDeleting] = useState<Expense | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [filterSession, setFilterSession] = useState(0);
   const [person, setPerson] = useState<PersonFilter>("all");
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [from, setFrom] = useState("");
@@ -144,6 +148,7 @@ export const ExpenseActivity: React.FC = () => {
 
   const openCreate = () => { setEditing(null); setDrawerSession((value) => value + 1); setDrawerOpen(true); };
   const openEdit = (expense: Expense) => { setEditing(expense); setDrawerSession((value) => value + 1); setDrawerOpen(true); };
+  const openFilters = () => { setFilterSession((value) => value + 1); setFilterOpen(true); };
   const clearFilters = () => { setPerson("all"); setCategory("all"); setFrom(""); setTo(""); };
 
   return <AppScreen appBar={{ title: "여행 가계부" }}>
@@ -158,7 +163,7 @@ export const ExpenseActivity: React.FC = () => {
             {query.isError && query.data && <div className="mt-3 flex items-center justify-between rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 dark:bg-amber-500/10 dark:text-amber-300"><span>최근 데이터를 표시 중이에요.</span><button className="min-h-8 px-2 font-bold" onClick={() => query.refetch()} type="button">다시 연결</button></div>}
             <div className="mt-4 flex items-center gap-2">
               <label className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-900"><Search className="size-4 shrink-0 text-slate-400" /><input aria-label="지출 검색" className="min-w-0 flex-1 bg-transparent text-sm outline-none" onChange={(event) => setSearch(event.target.value)} placeholder="품목, 상호, 메모 검색" value={search} />{search && <button aria-label="검색어 지우기" className="grid size-8 shrink-0 place-items-center" onClick={() => setSearch("")} type="button"><X className="size-4" /></button>}</label>
-              <button aria-label="지출 필터" className={cn("relative grid size-11 shrink-0 place-items-center rounded-xl border bg-white dark:bg-slate-900", filtersActive ? "border-blue-500 text-blue-600" : "border-slate-200 text-slate-500 dark:border-slate-800")} onClick={() => setFilterOpen(true)} type="button"><Filter className="size-4" />{filtersActive && <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-blue-500" />}</button>
+              <button aria-label="지출 필터" className={cn("relative grid size-11 shrink-0 place-items-center rounded-xl border bg-white dark:bg-slate-900", filtersActive ? "border-blue-500 text-blue-600" : "border-slate-200 text-slate-500 dark:border-slate-800")} onClick={openFilters} type="button"><Filter className="size-4" />{filtersActive && <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-blue-500" />}</button>
             </div>
             {expenses.length === 0 ? <EmptyState onCreate={openCreate} /> : filtered.length === 0 ? <div className="py-16 text-center"><p className="font-bold">조건에 맞는 지출이 없어요.</p><button className="mt-3 min-h-11 px-4 text-sm font-bold text-blue-600" onClick={clearFilters} type="button">필터 초기화</button></div> : <div className="mt-5 space-y-6">{grouped.map((group) => <section key={group.date}><header className="mb-2 flex items-end justify-between px-1"><h2 className="text-sm font-extrabold">{formatBangkokDate(group.items[0].purchased_at)}</h2><p className="text-xs font-bold tabular-nums text-slate-500">{formatKrw(group.items.reduce((total, item) => total + getEffectiveKrw(item), 0))}</p></header><div className="overflow-hidden rounded-2xl border border-slate-200 bg-white divide-y divide-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:divide-slate-800">{group.items.map((expense) => <ExpenseRow expense={expense} key={expense.id} onDelete={() => setDeleting(expense)} onEdit={() => openEdit(expense)} />)}</div></section>)}</div>}
           </section>}
@@ -170,7 +175,7 @@ export const ExpenseActivity: React.FC = () => {
     </main>
     <div className="fixed bottom-[calc(1.5rem+max(env(safe-area-inset-bottom,0px),12px))] right-5 z-40 h-14 min-w-14"><Button aria-label="지출 등록" className="h-full w-full rounded-full px-5 shadow-xl" onPress={openCreate}><Plus className="size-5" /><span className="font-bold">등록</span></Button><NativeHapticSwitch ariaLabel="지출 등록" checked={drawerOpen} onChange={openCreate} /></div>
     <ExpenseDrawer key={drawerSession} expense={editing} open={drawerOpen} onOpenChange={setDrawerOpen} />
-    <FilterDrawer category={category} categoryOptions={categoryOptions} from={from} open={filterOpen} person={person} to={to} onCategory={setCategory} onFrom={setFrom} onOpenChange={setFilterOpen} onPerson={setPerson} onReset={clearFilters} onTo={setTo} />
+    <FilterDrawer key={filterSession} category={category} categoryOptions={categoryOptions} from={from} open={filterOpen} person={person} to={to} onApply={({ person: nextPerson, category: nextCategory, from: nextFrom, to: nextTo }) => { setPerson(nextPerson); setCategory(nextCategory); setFrom(nextFrom); setTo(nextTo); }} onOpenChange={setFilterOpen} />
     <AlertDialog open={Boolean(deleting)} onOpenChange={(next) => { if (!next && !remove.isPending) setDeleting(null); }}><AlertDialogPopup><AlertDialogHeader><div className="mx-auto grid size-12 place-items-center rounded-full bg-red-50 text-red-500"><Trash2 className="size-5" /></div><AlertDialogTitle>지출을 삭제할까요?</AlertDialogTitle><AlertDialogDescription><strong>{deleting?.item_name}</strong> 내역과 영수증 사진이 함께 삭제돼요.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter className="grid grid-cols-2"><button className="h-12 rounded-xl bg-white font-bold ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700" disabled={remove.isPending} onClick={() => setDeleting(null)} type="button">취소</button><button className="h-12 rounded-xl bg-red-500 font-bold text-white disabled:opacity-50" disabled={!deleting || remove.isPending} onClick={() => deleting && remove.mutate(deleting)} type="button">{remove.isPending ? "삭제 중…" : "삭제"}</button></AlertDialogFooter></AlertDialogPopup></AlertDialog>
   </AppScreen>;
 };
@@ -189,24 +194,48 @@ function ExpenseRow({ expense, onEdit, onDelete }: { expense: Expense; onEdit: (
 
 function Detail({ label, value }: { label: string; value: string }) { return <div className="flex items-start justify-between gap-4 py-3"><span className="shrink-0 text-xs font-semibold text-slate-400">{label}</span><span className="text-right font-semibold">{value}</span></div>; }
 
-function FilterDrawer({ open, person, category, categoryOptions, from, to, onOpenChange, onPerson, onCategory, onFrom, onTo, onReset }: { open: boolean; person: PersonFilter; category: CategoryFilter; categoryOptions: CategoryOption[]; from: string; to: string; onOpenChange: (open: boolean) => void; onPerson: (value: PersonFilter) => void; onCategory: (value: CategoryFilter) => void; onFrom: (value: string) => void; onTo: (value: string) => void; onReset: () => void }) {
+function FilterDrawer({ open, person, category, categoryOptions, from, to, onOpenChange, onApply }: { open: boolean; person: PersonFilter; category: CategoryFilter; categoryOptions: CategoryOption[]; from: string; to: string; onOpenChange: (open: boolean) => void; onApply: (filter: { person: PersonFilter; category: CategoryFilter; from: string; to: string }) => void }) {
+  const [draftPerson, setDraftPerson] = useState<PersonFilter>(person);
+  const [draftCategory, setDraftCategory] = useState<CategoryFilter>(category);
+  const [draftFrom, setDraftFrom] = useState(from);
+  const [draftTo, setDraftTo] = useState(to);
+
+  const resetDraft = () => {
+    setDraftPerson("all");
+    setDraftCategory("all");
+    setDraftFrom("");
+    setDraftTo("");
+  };
+
   return <Drawer open={open} onOpenChange={onOpenChange}>
-    <DrawerPopup variant="inset" showBar className="max-w-full overflow-hidden">
-      <DrawerHeader className="pt-6"><DrawerTitle>지출 필터</DrawerTitle></DrawerHeader>
-      <DrawerPanel className="max-w-full space-y-5 overflow-x-hidden">
-        <Field className="gap-2"><FieldLabel className="text-sm">사용자</FieldLabel><div className="grid grid-cols-3 gap-2">{(["all", ...EXPENSE_PEOPLE] as PersonFilter[]).map((value) => <BaseButton aria-pressed={person === value} className={filterButtonClass(person === value)} key={value} onClick={() => onPerson(value)} title={value === "all" ? "전체" : EXPENSE_PERSON_META[value].label} variant="outline">{value === "all" ? "전체" : EXPENSE_PERSON_META[value].label}</BaseButton>)}</div></Field>
-        <Field className="gap-2"><FieldLabel className="text-sm">카테고리</FieldLabel><div className="grid grid-cols-3 gap-2"><BaseButton aria-pressed={category === "all"} className={filterButtonClass(category === "all")} onClick={() => onCategory("all")} variant="outline">전체</BaseButton>{categoryOptions.map((option) => <BaseButton aria-pressed={category === option.value} className={filterButtonClass(category === option.value)} key={option.value} onClick={() => onCategory(option.value)} title={option.label} variant="outline">{option.label}</BaseButton>)}</div></Field>
-        <Field className="gap-2"><FieldLabel className="text-sm">날짜 범위</FieldLabel><div className="grid min-w-0 grid-cols-2 gap-2"><input aria-label="시작 날짜" className="h-11 min-w-0 rounded-xl border px-2 text-sm dark:bg-slate-900" max={to || undefined} onChange={(event) => onFrom(event.target.value)} type="date" value={from} /><input aria-label="종료 날짜" className="h-11 min-w-0 rounded-xl border px-2 text-sm dark:bg-slate-900" min={from || undefined} onChange={(event) => onTo(event.target.value)} type="date" value={to} /></div></Field>
+    <DrawerPopup variant="inset" showBar className="overflow-hidden">
+      <DrawerHeader className="px-6 pb-1 pt-6 text-center"><DrawerTitle>지출 필터</DrawerTitle></DrawerHeader>
+      <DrawerPanel scrollable={false} className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
+        <RadioGroup className="gap-2" name="expense-filter-person" value={draftPerson} onChange={(value) => setDraftPerson(value as PersonFilter)}>
+          <Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>사용자</DrawerFieldLabel></Label>
+          <div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">
+            <Radio value="all"><Radio.Content><Radio.Control><Radio.Indicator /></Radio.Control><span>전체</span></Radio.Content></Radio>
+            {EXPENSE_PEOPLE.map((value) => <Radio key={value} value={value}><Radio.Content><Radio.Control><Radio.Indicator /></Radio.Control><FilterPersonAvatar person={value} /><span>{EXPENSE_PERSON_META[value].label}</span></Radio.Content></Radio>)}
+          </div>
+        </RadioGroup>
+        <RadioGroup className="gap-2" name="expense-filter-category" value={draftCategory} onChange={(value) => setDraftCategory(value as CategoryFilter)}>
+          <Label><DrawerFieldLabel icon={LayersIcon} active={open}>카테고리</DrawerFieldLabel></Label>
+          <div className="flex flex-row flex-wrap gap-x-5 gap-y-3 pt-1">
+            <Radio value="all"><Radio.Content><Radio.Control><Radio.Indicator /></Radio.Control><span>전체</span></Radio.Content></Radio>
+            {categoryOptions.map((option) => <Radio key={option.value} value={option.value}><Radio.Content><Radio.Control><Radio.Indicator /></Radio.Control><span>{option.label}</span></Radio.Content></Radio>)}
+          </div>
+        </RadioGroup>
+        <section className="space-y-2"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>날짜 범위</DrawerFieldLabel><div className="grid min-w-0 grid-cols-2 gap-2"><input aria-label="시작 날짜" className="h-11 min-w-0 rounded-xl border border-slate-200 bg-white px-2 text-sm dark:border-slate-700 dark:bg-slate-900" max={draftTo || undefined} onChange={(event) => setDraftFrom(event.target.value)} type="date" value={draftFrom} /><input aria-label="종료 날짜" className="h-11 min-w-0 rounded-xl border border-slate-200 bg-white px-2 text-sm dark:border-slate-700 dark:bg-slate-900" min={draftFrom || undefined} onChange={(event) => setDraftTo(event.target.value)} type="date" value={draftTo} /></div></section>
       </DrawerPanel>
-      <DrawerFooter className="grid grid-cols-2 gap-2 pb-[calc(1rem+env(safe-area-inset-bottom))]"><BaseButton className="h-12 rounded-xl bg-slate-100 font-bold dark:bg-slate-800" onClick={onReset} variant="secondary">초기화</BaseButton><BaseButton className="h-12 rounded-xl bg-slate-900 font-bold text-white dark:bg-white dark:text-slate-900" onClick={() => onOpenChange(false)}>적용</BaseButton></DrawerFooter>
+      <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4"><Button fullWidth className={drawerCancelButtonClass} onPress={resetDraft} size="lg" type="button">초기화</Button><Button fullWidth className={drawerPrimaryButtonClass} onPress={() => { onApply({ person: draftPerson, category: draftCategory, from: draftFrom, to: draftTo }); onOpenChange(false); }} size="lg" type="button">적용</Button></DrawerFooter>
     </DrawerPopup>
   </Drawer>;
 }
 
-const filterButtonClass = (selected: boolean) => cn(
-  "min-h-11 min-w-0 truncate rounded-xl px-2 text-xs font-bold",
-  selected ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-500/15" : "border-slate-200 dark:border-slate-700",
-);
+function FilterPersonAvatar({ person }: { person: ExpensePerson }) {
+  const meta = EXPENSE_PERSON_META[person];
+  return <Avatar color={person === "gahyun" ? "accent" : "success"} size="sm"><AvatarImage alt="" src={meta.image} /><AvatarFallback>{person === "gahyun" ? "G" : "M"}</AvatarFallback></Avatar>;
+}
 
 function EmptyState({ onCreate }: { onCreate: () => void }) { return <div className="flex min-h-72 flex-col items-center justify-center text-center"><div className="grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-900"><ReceiptText className="size-6" /></div><h2 className="mt-4 font-extrabold">아직 지출 내역이 없어요</h2><p className="mt-1 text-sm text-slate-500">태국에서 쓴 첫 비용을 기록해 보세요.</p><Button className="mt-5" onPress={onCreate}><Plus className="size-4" />첫 지출 등록</Button></div>; }
 function LoadError({ onRetry }: { onRetry: () => void }) { return <div className="mx-auto flex min-h-80 max-w-lg flex-col items-center justify-center px-4 text-center"><p className="font-extrabold">지출 내역을 불러오지 못했어요.</p><p className="mt-1 text-sm text-slate-500">기존 데이터가 있다면 화면에 유지되고 다시 연결을 시도할 수 있어요.</p><Button className="mt-4" onPress={onRetry} variant="secondary"><RefreshCw className="size-4" />다시 시도</Button></div>; }
