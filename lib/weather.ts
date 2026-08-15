@@ -5,6 +5,14 @@ export const WEATHER_REFRESH_INTERVAL = 15 * 60 * 1000;
 
 export type WeatherCityId = "bangkok" | "pattaya" | "koh-sichang";
 
+export interface HourlyWeatherForecast {
+  time: string;
+  temperature: number;
+  weatherCode: number;
+  precipitationProbability: number;
+  isDay: boolean;
+}
+
 export interface WeatherCity {
   id: WeatherCityId;
   city: string;
@@ -14,6 +22,7 @@ export interface WeatherCity {
   isDay: boolean;
   observedAt: string;
   nextSixHourPrecipitationProbability: number;
+  hourlyForecast: HourlyWeatherForecast[];
 }
 
 export interface WeatherResponse {

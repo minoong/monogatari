@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { WeatherCity, WeatherCityId } from "@/lib/weather";
+import type { HourlyWeatherForecast, WeatherCity, WeatherCityId } from "@/lib/weather";
 
 const CACHE_SECONDS = 15 * 60;
 const THAILAND_UTC_OFFSET = "+07:00";
@@ -20,7 +20,10 @@ type OpenMeteoLocation = {
   };
   hourly?: {
     time?: string[];
+    temperature_2m?: Array<number | null>;
+    weather_code?: Array<number | null>;
     precipitation_probability?: Array<number | null>;
+    is_day?: Array<number | null>;
   };
 };
 
@@ -54,6 +57,29 @@ function getNextSixHourPrecipitationProbability(location: OpenMeteoLocation, cur
   return Math.max(0, ...nextSixHours.map((value) => Math.round(value)));
 }
 
+function getHourlyForecast(location: OpenMeteoLocation, currentTime: string): HourlyWeatherForecast[] {
+  const hourly = location.hourly;
+  const times = hourly?.time ?? [];
+  const startIndex = Math.max(0, times.findIndex((time) => time >= currentTime));
+
+  return times.slice(startIndex, startIndex + 6).flatMap((time, offset) => {
+    const index = startIndex + offset;
+    const temperature = hourly?.temperature_2m?.[index];
+    const weatherCode = hourly?.weather_code?.[index];
+    const precipitationProbability = hourly?.precipitation_probability?.[index];
+    const isDay = hourly?.is_day?.[index];
+    if (typeof temperature !== "number" || typeof weatherCode !== "number" || typeof precipitationProbability !== "number" || (isDay !== 0 && isDay !== 1)) return [];
+
+    return [{
+      time: new Date(`${time}${THAILAND_UTC_OFFSET}`).toISOString(),
+      temperature: Math.round(temperature),
+      weatherCode,
+      precipitationProbability: Math.round(precipitationProbability),
+      isDay: isDay === 1,
+    }];
+  });
+}
+
 function normalizeWeather(locations: unknown): WeatherCity[] | null {
   if (!Array.isArray(locations) || locations.length !== TRAVEL_DESTINATIONS.length) return null;
 
@@ -71,6 +97,7 @@ function normalizeWeather(locations: unknown): WeatherCity[] | null {
       isDay: location.current.is_day === 1,
       observedAt: new Date(`${location.current.time}${THAILAND_UTC_OFFSET}`).toISOString(),
       nextSixHourPrecipitationProbability: getNextSixHourPrecipitationProbability(location, location.current.time),
+      hourlyForecast: getHourlyForecast(location, location.current.time),
     } satisfies WeatherCity;
   });
 
@@ -82,7 +109,7 @@ export async function GET() {
     latitude: TRAVEL_DESTINATIONS.map((destination) => destination.latitude).join(","),
     longitude: TRAVEL_DESTINATIONS.map((destination) => destination.longitude).join(","),
     current: "temperature_2m,apparent_temperature,weather_code,is_day",
-    hourly: "precipitation_probability",
+    hourly: "temperature_2m,weather_code,precipitation_probability,is_day",
     forecast_days: "1",
     timezone: "Asia/Bangkok",
   });
