@@ -37,7 +37,13 @@ const WeatherIcon = ({ icon, size = 24, className, autoPlay = false, ...props }:
   }[icon];
 
   useEffect(() => {
-    if (autoPlay) animationRef.current?.startAnimation();
+    if (!autoPlay) return;
+
+    const playAnimation = () => animationRef.current?.startAnimation();
+    playAnimation();
+    const intervalId = window.setInterval(playAnimation, 3200);
+
+    return () => window.clearInterval(intervalId);
   }, [autoPlay]);
 
   return <Icon ref={autoPlay ? animationRef : undefined} size={size} className={className} {...props} />;
