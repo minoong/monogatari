@@ -20,7 +20,7 @@ import { FlightWidget } from "../components/flight/FlightWidget";
 import { useQuery } from "@tanstack/react-query";
 import { ChecklistBattleCard } from "../components/checklist/ChecklistBattleCard";
 import { fetchChecklist, getChecklistBattleStats, type PreparationItem } from "../lib/checklist";
-import { TravelWeatherWidget } from "../components/weather/TravelWeatherWidget";
+import { BeforeTripWeatherTicker, TravelWeatherWidget } from "../components/weather/TravelWeatherWidget";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -474,6 +474,8 @@ export const HomeActivity: React.FC = () => {
           <div className="flex flex-col gap-6 p-4">
             <Tabs.Panel className="!p-0" id="before">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
+              <BeforeTripWeatherTicker />
+
               <BangkokDepartureCard />
 
               <ChecklistBattleCard

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, Droplets, RefreshCw, Umbrella } from "lucide-react";
 import { Button, Skeleton } from "@heroui/react";
 import { getWeatherPresentation, useWeather, type WeatherCity, type WeatherPresentation } from "@/lib/weather";
@@ -225,6 +225,72 @@ function WeatherSkeleton() {
 
       <div className="mt-2.5 border-t border-slate-100 pt-2.5">
         <Skeleton className="h-12 w-full rounded-lg" />
+      </div>
+    </section>
+  );
+}
+
+export function BeforeTripWeatherTicker() {
+  const { data: cities, isPending, isError, refetch } = useWeather();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!cities || cities.length < 2 || prefersReducedMotion) return;
+
+    const intervalId = window.setInterval(() => {
+      setCurrentIndex((index) => (index + 1) % cities.length);
+    }, 3_600);
+
+    return () => window.clearInterval(intervalId);
+  }, [cities, prefersReducedMotion]);
+
+  if (isPending) {
+    return (
+      <section className="flex h-12 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]" aria-busy="true" aria-label="태국 날씨를 불러오는 중">
+        <Skeleton className="h-3 w-14 shrink-0 rounded-full" />
+        <div className="h-4 w-px bg-slate-100" aria-hidden="true" />
+        <Skeleton className="h-4 flex-1 rounded-full" />
+      </section>
+    );
+  }
+
+  if (isError || !cities?.length) {
+    return (
+      <section className="flex h-12 items-center justify-between rounded-2xl border border-slate-200 bg-white px-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]" aria-live="polite">
+        <p className="text-[11px] font-semibold text-slate-500">날씨를 불러오지 못했어요.</p>
+        <Button size="sm" variant="tertiary" className="!h-7 !min-h-7 !px-2 !text-[10px]" onPress={() => void refetch()}>재시도</Button>
+      </section>
+    );
+  }
+
+  const city = cities[currentIndex % cities.length];
+  const weather = getWeatherPresentation(city.weatherCode, city.isDay, { windSpeed: city.windSpeed, time: city.observedAt, sunrise: city.sunrise, sunset: city.sunset });
+
+  return (
+    <section className="flex h-12 items-center gap-3 overflow-hidden rounded-2xl border border-slate-200 bg-white px-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]" aria-label="여행지 현재 날씨">
+      <div className="flex shrink-0 items-center gap-1.5">
+        <span className="size-1.5 rounded-full bg-sky-500 shadow-[0_0_0_3px_rgba(14,165,233,0.1)]" aria-hidden="true" />
+        <span className="text-[10px] font-bold tracking-[-0.02em] text-slate-500">태국 날씨</span>
+      </div>
+      <div className="h-4 w-px shrink-0 bg-slate-100" aria-hidden="true" />
+      <div className="relative h-7 min-w-0 flex-1 overflow-hidden">
+        <AnimatePresence initial={false} mode="popLayout">
+          <motion.div
+            key={city.id}
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
+            transition={{ duration: prefersReducedMotion ? 0.12 : 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0 flex min-w-0 items-center gap-1.5"
+          >
+            <WeatherIcon icon={weather.icon} size={17} className="shrink-0 text-sky-500" aria-hidden="true" />
+            <span className="shrink-0 text-xs font-bold text-slate-800">{city.city}</span>
+            <span className="shrink-0 text-sm font-bold tracking-[-0.04em] text-slate-950">{city.temperature}°</span>
+            <span className="min-w-0 truncate text-[10px] font-semibold text-slate-400">{weather.label}</span>
+            <span className="ml-auto flex shrink-0 items-center gap-0.5 text-[10px] font-bold text-sky-500"><Droplets size={10} aria-hidden="true" />{city.nextSixHourPrecipitationProbability}%</span>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </section>
   );
