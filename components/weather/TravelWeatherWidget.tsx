@@ -77,36 +77,36 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
         <div>
           <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-400">THAILAND WEATHER</p>
           <h2 className="mt-1 text-xl font-bold tracking-[-0.04em]">{city.city}</h2>
-          <p className="mt-1 text-xs font-medium text-slate-400">태국 기준 {formatUpdatedAt(city.observedAt)} 업데이트</p>
+          <p className="mt-0.5 text-[11px] font-medium text-slate-400">태국 기준 {formatUpdatedAt(city.observedAt)} 업데이트</p>
         </div>
-        <div className="flex size-12 shrink-0 items-center justify-center">
-          {isRefreshing ? <RefreshCw size={16} className="animate-spin text-sky-500" aria-label="날씨 갱신 중" /> : <WeatherIcon icon={weather.icon} size={48} className="text-sky-500" aria-label={weather.label} />}
+        <div className="flex size-10 shrink-0 items-center justify-center">
+          {isRefreshing ? <RefreshCw size={15} className="animate-spin text-sky-500" aria-label="날씨 갱신 중" /> : <WeatherIcon icon={weather.icon} size={40} className="text-sky-500" aria-label={weather.label} />}
         </div>
       </div>
 
-      <div className="mt-4 flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
+      <div className="mt-3 flex items-end justify-between gap-4 border-t border-slate-100 pt-3">
         <div>
-          <p className="text-6xl font-light leading-none tracking-[-0.08em]">{city.temperature}°</p>
-          <p className="mt-2 text-sm font-semibold text-slate-500">{weather.label} · 체감 {city.apparentTemperature}°</p>
+          <p className="text-5xl font-light leading-none tracking-[-0.08em]">{city.temperature}°</p>
+          <p className="mt-1.5 text-xs font-semibold text-slate-500">{weather.label} · 체감 {city.apparentTemperature}°</p>
         </div>
-        <div className="rounded-2xl border px-3 py-2 text-right" style={{ backgroundColor: needsUmbrella ? "#eff6ff" : "#f8fafc", borderColor: needsUmbrella ? "#bae6fd" : "#e2e8f0" }}>
+        <div className="rounded-xl border px-2.5 py-1.5 text-right" style={{ borderColor: needsUmbrella ? "#7dd3fc" : "#e2e8f0" }}>
           <p className="flex items-center justify-end gap-1 text-[11px] font-bold text-slate-500"><Droplets size={13} aria-hidden="true" />6시간 내 비</p>
           <p className="mt-0.5 text-lg font-bold">{city.nextSixHourPrecipitationProbability}%</p>
         </div>
       </div>
 
-      {needsUmbrella && <p className="mt-4 flex items-center gap-1.5 rounded-2xl px-3 py-2 text-xs font-semibold text-sky-700" style={{ backgroundColor: "#f0f9ff" }}><Umbrella size={14} aria-hidden="true" />우산을 챙기세요. 비 예보가 있어요.</p>}
+      {needsUmbrella && <p className="mt-3 flex items-center gap-1.5 rounded-xl border border-sky-100 px-2.5 py-1.5 text-[11px] font-semibold text-sky-700"><Umbrella size={13} aria-hidden="true" />우산을 챙기세요. 비 예보가 있어요.</p>}
 
-      <div className="mt-4 border-t border-slate-100 pt-4">
-        <div className="mb-2 flex items-center justify-between">
+      <div className="mt-3 border-t border-slate-100 pt-3">
+        <div className="mb-1.5 flex items-center justify-between">
           <p className="text-xs font-bold">시간대별 예보</p>
           <p className="text-[10px] font-medium text-slate-400">다음 6시간</p>
         </div>
-        <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
+        <div className="-mx-1 flex snap-x snap-mandatory gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
           {city.hourlyForecast.map((forecast) => {
             const forecastWeather = getWeatherPresentation(forecast.weatherCode, forecast.isDay);
             return (
-              <div key={forecast.time} className="min-w-[66px] snap-start rounded-2xl px-2 py-2.5 text-center" style={{ backgroundColor: "#f8fafc" }}>
+              <div key={forecast.time} className="min-w-[60px] snap-start rounded-xl border border-slate-100 px-1.5 py-1.5 text-center">
                 <p className="text-[10px] font-semibold text-slate-400">{formatForecastHour(forecast.time)}시</p>
                 <div className="mt-1 flex h-5 items-center justify-center"><WeatherIcon icon={forecastWeather.icon} size={20} className="text-sky-500" aria-label={forecastWeather.label} /></div>
                 <p className="mt-1 text-sm font-bold">{forecast.temperature}°</p>
@@ -117,18 +117,18 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
         </div>
       </div>
 
-      <div className="mt-4 border-t border-slate-100 pt-4">
-        <div className="rounded-2xl border p-3" style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}>
-          <div className="mb-2 flex items-center justify-between px-1">
+      <div className="mt-3 border-t border-slate-100 pt-3">
+        <div className="rounded-xl border p-2" style={{ borderColor: "#e2e8f0" }}>
+          <div className="mb-1.5 flex items-center justify-between px-1">
             <p className="text-xs font-bold">7일 예보</p>
             <p className="text-[10px] font-medium text-slate-400">최고 · 최저</p>
           </div>
-          <div className="-mx-1 flex snap-x snap-mandatory gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
+          <div className="-mx-1 flex snap-x snap-mandatory gap-1 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
             {city.dailyForecast.map((forecast, index) => {
               const forecastWeather = getWeatherPresentation(forecast.weatherCode, true);
               const day = formatForecastDay(forecast.date, index);
               return (
-                <div key={forecast.date} className="min-w-[58px] flex-1 snap-start rounded-xl px-1 py-2 text-center" style={{ backgroundColor: index === 0 ? "#eff6ff" : "#ffffff" }}>
+                <div key={forecast.date} className={`min-w-[54px] flex-1 snap-start rounded-lg border border-transparent px-1 py-1.5 text-center ${index === 0 ? "border-slate-100" : ""}`}>
                   <p className="text-[10px] font-bold text-slate-700">{day.weekday}</p>
                   <p className="mt-0.5 text-[9px] font-medium text-slate-400">{day.date}</p>
                   <div className="my-1.5 flex h-[19px] items-center justify-center"><WeatherIcon icon={forecastWeather.icon} size={19} className="text-sky-500" aria-label={forecastWeather.label} /></div>
