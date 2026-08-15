@@ -84,7 +84,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
         </div>
       </div>
 
-      <div className="mt-5 flex items-end justify-between gap-4 border-t border-slate-100 pt-5">
+      <div className="mt-4 flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
         <div>
           <p className="text-6xl font-light leading-none tracking-[-0.08em]">{city.temperature}°</p>
           <p className="mt-2 text-sm font-semibold text-slate-500">{weather.label} · 체감 {city.apparentTemperature}°</p>
@@ -97,7 +97,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
 
       {needsUmbrella && <p className="mt-4 flex items-center gap-1.5 rounded-2xl px-3 py-2 text-xs font-semibold text-sky-700" style={{ backgroundColor: "#f0f9ff" }}><Umbrella size={14} aria-hidden="true" />우산을 챙기세요. 비 예보가 있어요.</p>}
 
-      <div className="mt-5 border-t border-slate-100 pt-4">
+      <div className="mt-4 border-t border-slate-100 pt-4">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-xs font-bold">시간대별 예보</p>
           <p className="text-[10px] font-medium text-slate-400">다음 6시간</p>
@@ -117,7 +117,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
         </div>
       </div>
 
-      <div className="mt-5 border-t border-slate-100 pt-4">
+      <div className="mt-4 border-t border-slate-100 pt-4">
         <div className="rounded-2xl border p-3" style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}>
           <div className="mb-2 flex items-center justify-between px-1">
             <p className="text-xs font-bold">7일 예보</p>
@@ -147,7 +147,7 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
 
 function WeatherSkeleton() {
   return (
-    <section className="overflow-hidden rounded-[28px] p-5" style={weatherSurfaceStyle} aria-label="날씨 정보를 불러오는 중">
+    <section className="overflow-hidden rounded-[28px] p-4" style={weatherSurfaceStyle} aria-label="날씨 정보를 불러오는 중">
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <div className="h-3 w-24 animate-pulse rounded-full" style={{ backgroundColor: "#cbd5e1" }} />
@@ -155,14 +155,14 @@ function WeatherSkeleton() {
         </div>
         <div className="size-12 animate-pulse rounded-full" style={{ backgroundColor: "#dbeafe" }} />
       </div>
-      <div className="mt-6 flex items-end justify-between">
+      <div className="mt-4 flex items-end justify-between">
         <div className="space-y-3">
           <div className="h-14 w-28 animate-pulse rounded-2xl" style={{ backgroundColor: "#dbeafe" }} />
           <div className="h-3 w-36 animate-pulse rounded-full" style={{ backgroundColor: "#e2e8f0" }} />
         </div>
         <div className="h-14 w-20 animate-pulse rounded-2xl" style={{ backgroundColor: "#f1f5f9" }} />
       </div>
-      <div className="mt-6 border-t pt-4" style={{ borderColor: "#e2e8f0" }}>
+      <div className="mt-4 border-t pt-4" style={{ borderColor: "#e2e8f0" }}>
         <div className="mb-3 h-3 w-20 animate-pulse rounded-full" style={{ backgroundColor: "#cbd5e1" }} />
         <div className="flex gap-2 overflow-hidden">
           {[0, 1, 2, 3, 4].map((item) => <div key={item} className="h-24 min-w-[66px] animate-pulse rounded-2xl" style={{ backgroundColor: "#f1f5f9" }} />)}
@@ -204,9 +204,9 @@ export function TravelWeatherWidget() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-[28px] p-5" style={weatherSurfaceStyle} aria-label="여행지 실시간 날씨">
+    <section className="relative overflow-hidden rounded-[28px] p-4" style={weatherSurfaceStyle} aria-label="여행지 실시간 날씨">
       <div className="relative">
-        <div className="grid grid-cols-3 border-b border-slate-200" role="tablist" aria-label="여행지 선택">
+        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-slate-100 p-1" role="tablist" aria-label="여행지 선택">
           {cities.map((city, index) => {
             const isSelected = index === selectedCityIndex;
             return (
@@ -216,19 +216,21 @@ export function TravelWeatherWidget() {
                 onClick={() => selectCity(city.id, index)}
                 role="tab"
                 aria-selected={isSelected}
-                whileTap={prefersReducedMotion ? undefined : { opacity: 0.72 }}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
                 transition={{ duration: 0.16, ease: "easeOut" }}
-                className={`relative min-w-0 px-2 pb-3 text-center outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 ${isSelected ? "text-slate-900" : "text-slate-400"}`}
+                className={`relative min-w-0 rounded-xl px-2 py-2 text-center outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 ${isSelected ? "text-slate-900" : "text-slate-400"}`}
               >
-                <span className="block truncate text-xs font-semibold">{city.city}</span>
-                <span className="mt-1 block text-sm font-medium tracking-[-0.04em]">{city.temperature}°</span>
-                {isSelected && <motion.span layoutId="selected-weather-city" className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-sky-500" transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, ease: "easeOut" }} />}
+                {isSelected && <motion.span layoutId="selected-weather-city" className="absolute inset-0 rounded-xl bg-white shadow-[0_1px_3px_rgba(15,23,42,0.12)]" transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, ease: "easeOut" }} />}
+                <span className="relative flex items-center justify-center gap-1 whitespace-nowrap">
+                  <span className="truncate text-[11px] font-semibold">{city.city}</span>
+                  <span className="text-xs font-bold tracking-[-0.04em]">{city.temperature}°</span>
+                </span>
               </motion.button>
             );
           })}
         </div>
         <TransitionPanel
-          className="mt-5"
+          className="mt-4"
           activeIndex={selectedCityIndex}
           custom={transitionDirection}
           variants={prefersReducedMotion ? undefined : cityPanelVariants}
