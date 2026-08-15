@@ -52,6 +52,7 @@ export interface Expense {
   purchased_at: string;
   item_name: string;
   category: ExpenseCategory;
+  custom_category: string | null;
   merchant: string | null;
   payment_method: ExpensePaymentMethod;
   amount_thb: number;
@@ -75,6 +76,7 @@ export interface ExpenseInput {
   purchased_at: string;
   item_name: string;
   category: ExpenseCategory;
+  custom_category: string | null;
   merchant: string | null;
   payment_method: ExpensePaymentMethod;
   amount_thb: number;
@@ -106,6 +108,20 @@ export const isExpensePaymentMethod = (value: unknown): value is ExpensePaymentM
   typeof value === "string" && EXPENSE_PAYMENT_METHODS.some((method) => method === value);
 
 export const getEffectiveKrw = (expense: Expense) => expense.actual_amount_krw ?? expense.amount_krw;
+
+export const getExpenseCategoryLabel = (
+  expense: Pick<Expense, "category" | "custom_category">,
+) => expense.custom_category ?? EXPENSE_CATEGORY_META[expense.category].label;
+
+export const getExpenseCategoryColor = (
+  expense: Pick<Expense, "category" | "custom_category">,
+) => expense.custom_category
+  ? EXPENSE_CATEGORY_META.other.color
+  : EXPENSE_CATEGORY_META[expense.category].color;
+
+export const getExpenseCategoryKey = (
+  expense: Pick<Expense, "category" | "custom_category">,
+) => expense.custom_category ? `custom:${expense.custom_category}` : expense.category;
 
 export const formatKrw = (value: number) => `₩${Math.round(value).toLocaleString("ko-KR")}`;
 export const formatThb = (value: number) => `฿${value.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}`;
@@ -166,13 +182,20 @@ export const aggregateExpensesByDate = (expenses: Expense[]) => {
   return Array.from(totals, ([date, amount]) => ({ date, amount })).sort((a, b) => a.date.localeCompare(b.date));
 };
 
-export const aggregateExpensesByCategory = (expenses: Expense[]) =>
-  EXPENSE_CATEGORIES.map((category) => ({
-    category,
-    label: EXPENSE_CATEGORY_META[category].label,
-    color: EXPENSE_CATEGORY_META[category].color,
-    amount: sum(expenses.filter((expense) => expense.category === category).map(getEffectiveKrw)),
-  })).filter((item) => item.amount > 0).sort((a, b) => b.amount - a.amount);
+export const aggregateExpensesByCategory = (expenses: Expense[]) => {
+  const totals = new Map<string, { key: string; label: string; color: string; amount: number }>();
+  expenses.forEach((expense) => {
+    const key = getExpenseCategoryKey(expense);
+    const current = totals.get(key);
+    totals.set(key, {
+      key,
+      label: getExpenseCategoryLabel(expense),
+      color: getExpenseCategoryColor(expense),
+      amount: (current?.amount ?? 0) + getEffectiveKrw(expense),
+    });
+  });
+  return Array.from(totals.values()).sort((a, b) => b.amount - a.amount);
+};
 
 export const splitKrwByThb = ({
   effectiveKrw,

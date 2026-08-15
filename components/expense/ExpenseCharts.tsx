@@ -15,7 +15,6 @@ import {
   YAxis,
 } from "recharts";
 import {
-  EXPENSE_CATEGORY_META,
   EXPENSE_PERSON_META,
   aggregateExpensesByCategory,
   aggregateExpensesByDate,
@@ -39,7 +38,7 @@ export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
   const animationDuration = reduceMotion ? 0 : 400;
   const average = summary.count ? Math.round(summary.totalKrw / Math.max(1, daily.length)) : 0;
 
-  return <div className="flex flex-col gap-4">
+  return <div className="flex w-full min-w-0 max-w-full flex-col gap-4 overflow-x-hidden">
     <section className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800">
       <Metric label="총 지출" value={formatKrw(summary.totalKrw)} />
       <Metric label="태국 바트" value={formatThb(summary.totalThb)} />
@@ -48,19 +47,19 @@ export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
     </section>
 
     <ChartSection title="날짜별 지출" description="태국 현지 날짜 기준 원화">
-      <div className="h-48 min-w-0" aria-hidden="true"><ResponsiveContainer width="100%" height="100%" minWidth={0}><BarChart data={daily} margin={{ top: 8, right: 0, bottom: 0, left: -20 }}><CartesianGrid vertical={false} stroke="#e2e8f0" strokeDasharray="3 3" /><XAxis dataKey="date" tickFormatter={(value) => String(value).slice(5).replace("-", "/")} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(value) => `${Math.round(Number(value) / 1000)}천`} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><Tooltip formatter={(value) => formatKrw(Number(value))} labelFormatter={(label) => `${label} 지출`} /><Bar dataKey="amount" fill="#0a84ff" radius={[6, 6, 2, 2]} isAnimationActive={!reduceMotion} animationDuration={animationDuration} /></BarChart></ResponsiveContainer></div>
+      <div className="h-48 w-full min-w-0 max-w-full overflow-hidden" aria-hidden="true"><ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 320, height: 192 }}><BarChart data={daily} margin={{ top: 8, right: 0, bottom: 0, left: -20 }}><CartesianGrid vertical={false} stroke="#e2e8f0" strokeDasharray="3 3" /><XAxis dataKey="date" tickFormatter={(value) => String(value).slice(5).replace("-", "/")} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(value) => `${Math.round(Number(value) / 1000)}천`} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><Tooltip formatter={(value) => formatKrw(Number(value))} labelFormatter={(label) => `${label} 지출`} /><Bar dataKey="amount" fill="#0a84ff" radius={[6, 6, 2, 2]} isAnimationActive={!reduceMotion} animationDuration={animationDuration} /></BarChart></ResponsiveContainer></div>
       <AccessibleTable caption="날짜별 원화 지출" rows={daily.map((item) => [item.date, formatKrw(item.amount)])} />
     </ChartSection>
 
     <ChartSection title="사용자별 비교" description={personMode === "used" ? "각자 사용한 비용" : "각자 결제한 비용"} action={<div className="flex rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">{(["used", "paid"] as const).map((mode) => <button key={mode} className={cn("min-h-8 rounded-md px-3 text-[11px] font-bold", personMode === mode ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white" : "text-slate-500")} onClick={() => setPersonMode(mode)} type="button">{mode === "used" ? "사용액" : "결제액"}</button>)}</div>}>
-      <div className="h-36 min-w-0" aria-hidden="true"><ResponsiveContainer width="100%" height="100%" minWidth={0}><BarChart data={people} layout="vertical" margin={{ left: 0, right: 12, top: 5, bottom: 5 }}><XAxis type="number" hide /><YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700 }} width={58} /><Tooltip formatter={(value) => formatKrw(Number(value))} /><Bar dataKey="value" fill="#0a84ff" radius={[0, 7, 7, 0]} isAnimationActive={!reduceMotion} animationDuration={animationDuration} /></BarChart></ResponsiveContainer></div>
+      <div className="h-36 w-full min-w-0 max-w-full overflow-hidden" aria-hidden="true"><ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 320, height: 144 }}><BarChart data={people} layout="vertical" margin={{ left: 0, right: 12, top: 5, bottom: 5 }}><XAxis type="number" hide /><YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700 }} width={58} /><Tooltip formatter={(value) => formatKrw(Number(value))} /><Bar dataKey="value" fill="#0a84ff" radius={[0, 7, 7, 0]} isAnimationActive={!reduceMotion} animationDuration={animationDuration} /></BarChart></ResponsiveContainer></div>
       <AccessibleTable caption={`사용자별 ${personMode === "used" ? "사용액" : "결제액"}`} rows={people.map((item) => [item.name, formatKrw(item.value)])} />
     </ChartSection>
 
     <ChartSection title="카테고리별 지출" description="금액이 큰 순서">
-      <div className="grid grid-cols-[8rem_1fr] items-center gap-3">
-        <div className="h-32 min-w-0" aria-hidden="true"><ResponsiveContainer width="100%" height="100%" minWidth={0}><PieChart><Pie data={categories} dataKey="amount" nameKey="label" innerRadius={35} outerRadius={55} paddingAngle={2} isAnimationActive={!reduceMotion} animationDuration={animationDuration}>{categories.map((item) => <Cell key={item.category} fill={item.color} />)}</Pie><Tooltip formatter={(value) => formatKrw(Number(value))} /></PieChart></ResponsiveContainer></div>
-        <ol className="space-y-2">{categories.map((item) => <li key={item.category} className="flex items-center gap-2 text-xs"><span className="size-2 rounded-full" style={{ backgroundColor: item.color }} /><span className="font-semibold">{EXPENSE_CATEGORY_META[item.category].label}</span><span className="ml-auto font-bold tabular-nums">{formatKrw(item.amount)}</span></li>)}</ol>
+      <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] items-center gap-3">
+        <div className="h-32 min-w-0 overflow-hidden" aria-hidden="true"><ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 112, height: 128 }}><PieChart><Pie data={categories} dataKey="amount" nameKey="label" innerRadius={35} outerRadius={55} paddingAngle={2} isAnimationActive={!reduceMotion} animationDuration={animationDuration}>{categories.map((item) => <Cell key={item.key} fill={item.color} />)}</Pie><Tooltip formatter={(value) => formatKrw(Number(value))} /></PieChart></ResponsiveContainer></div>
+        <ol className="min-w-0 space-y-2">{categories.map((item) => <li key={item.key} className="flex min-w-0 items-center gap-2 text-xs"><span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: item.color }} /><span className="min-w-0 flex-1 truncate font-semibold" title={item.label}>{item.label}</span><span className="shrink-0 font-bold tabular-nums">{formatKrw(item.amount)}</span></li>)}</ol>
       </div>
       <AccessibleTable caption="카테고리별 원화 지출" rows={categories.map((item) => [item.label, formatKrw(item.amount)])} />
     </ChartSection>
@@ -74,6 +73,6 @@ export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
 
 function Metric({ label, value }: { label: string; value: string }) { return <div className="bg-white p-4 dark:bg-slate-900"><p className="text-[11px] font-semibold text-slate-400">{label}</p><p className="mt-1 text-lg font-extrabold tabular-nums">{value}</p></div>; }
 
-function ChartSection({ title, description, action, children }: { title: string; description: string; action?: React.ReactNode; children: React.ReactNode }) { return <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex items-center justify-between gap-3"><div><h2 className="text-sm font-extrabold">{title}</h2><p className="mt-0.5 text-[11px] text-slate-400">{description}</p></div>{action}</div>{children}</section>; }
+function ChartSection({ title, description, action, children }: { title: string; description: string; action?: React.ReactNode; children: React.ReactNode }) { return <section className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex min-w-0 items-center justify-between gap-3"><div className="min-w-0"><h2 className="truncate text-sm font-extrabold">{title}</h2><p className="mt-0.5 truncate text-[11px] text-slate-400">{description}</p></div>{action}</div>{children}</section>; }
 
 function AccessibleTable({ caption, rows }: { caption: string; rows: string[][] }) { return <table className="sr-only"><caption>{caption}</caption><thead><tr><th>구분</th><th>금액</th></tr></thead><tbody>{rows.map((row) => <tr key={row.join("-")}><th>{row[0]}</th><td>{row[1]}</td></tr>)}</tbody></table>; }

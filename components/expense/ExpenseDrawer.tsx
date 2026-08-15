@@ -70,6 +70,8 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const [time, setTime] = useState(initial.time);
   const [itemName, setItemName] = useState(expense?.item_name ?? "");
   const [category, setCategory] = useState<ExpenseCategory>(expense?.category ?? "food");
+  const [customCategoryMode, setCustomCategoryMode] = useState(Boolean(expense?.custom_category));
+  const [customCategory, setCustomCategory] = useState(expense?.custom_category ?? "");
   const [amount, setAmount] = useState(expense ? String(expense.amount_thb) : "");
   const [rate, setRate] = useState(expense ? String(expense.exchange_rate_krw_per_thb) : "");
   const [rateDate, setRateDate] = useState(expense?.exchange_rate_date ?? initial.date);
@@ -143,7 +145,9 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             purchased_at: new Date(`${date}T${time}:00+07:00`).toISOString(),
-            item_name: itemName, category, merchant, payment_method: paymentMethod,
+            item_name: itemName, category,
+            custom_category: customCategoryMode ? customCategory.trim() : null,
+            merchant, payment_method: paymentMethod,
             amount_thb: numericAmount, exchange_rate_krw_per_thb: numericRate,
             exchange_rate_date: effectiveRateDate, rate_manually_edited: manualRate || rateQuery.data?.source === "supabase_fallback",
             actual_amount_krw: paymentMethod === "card" && actualKrw ? Number(actualKrw) : null,
@@ -172,7 +176,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setSubmitError(null);
-    if (!itemName.trim() || numericAmount <= 0 || numericRate <= 0 || !payer) {
+    if (!itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmount <= 0 || numericRate <= 0 || !payer) {
       setSubmitError("필수 입력과 결제자를 확인해 주세요.");
       return;
     }
@@ -180,10 +184,10 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   };
 
   return <Drawer open={open} onOpenChange={onOpenChange}>
-    <DrawerPopup id="expense-drawer" variant="inset" showBar className="overflow-hidden">
-      <Form aria-label={expense ? "지출 수정" : "지출 등록"} className="flex min-h-0 flex-1 flex-col overflow-hidden" onSubmit={submit}>
+    <DrawerPopup id="expense-drawer" variant="inset" showBar className="max-w-full overflow-hidden">
+      <Form aria-label={expense ? "지출 수정" : "지출 등록"} className="flex min-h-0 min-w-0 max-w-full flex-1 flex-col overflow-hidden" onSubmit={submit}>
         <DrawerHeader className="px-6 pb-2 pt-6 text-center"><DrawerTitle>{expense ? "지출 수정" : "지출 등록"}</DrawerTitle></DrawerHeader>
-        <DrawerPanel scrollable={false} className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
+        <DrawerPanel scrollable={false} className="flex min-h-0 min-w-0 max-w-full flex-1 touch-pan-y flex-col gap-5 overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-3">
           <section className="grid grid-cols-1 gap-3 min-[440px]:grid-cols-2">
             <NativeField label="구매 날짜"><input aria-label="구매 날짜" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} /></NativeField>
             <NativeField label="태국 현지 시간"><input aria-label="구매 시간" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" onChange={(event) => setTime(event.target.value)} type="time" value={time} /></NativeField>
@@ -191,7 +195,25 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
 
           <TextField isRequired value={itemName} onChange={setItemName}><Label>품목</Label><Input maxLength={100} placeholder="예: 팟타이, 볼트 택시" /><FieldError /></TextField>
 
-          <NativeField label="카테고리"><div className="grid grid-cols-4 gap-2">{EXPENSE_CATEGORIES.map((value) => <ChoiceButton key={value} selected={category === value} onClick={() => setCategory(value)}>{EXPENSE_CATEGORY_META[value].label}</ChoiceButton>)}</div></NativeField>
+          <NativeField label="카테고리">
+            <div className="grid grid-cols-3 gap-2 min-[440px]:grid-cols-4">
+              {EXPENSE_CATEGORIES.map((value) => <ChoiceButton key={value} selected={!customCategoryMode && category === value} onClick={() => { setCategory(value); setCustomCategoryMode(false); }}>{EXPENSE_CATEGORY_META[value].label}</ChoiceButton>)}
+              <ChoiceButton selected={customCategoryMode} onClick={() => { setCategory("other"); setCustomCategoryMode(true); }}>직접 입력</ChoiceButton>
+            </div>
+            {customCategoryMode && <TextField
+              fullWidth
+              isRequired
+              className="mt-3 min-w-0"
+              isInvalid={customCategory.length > 0 && !customCategory.trim()}
+              name="custom-category"
+              value={customCategory}
+              onChange={setCustomCategory}
+            >
+              <Label>직접 입력 카테고리</Label>
+              <Input maxLength={30} placeholder="예: 카페, 선물, 기념품" />
+              <FieldError>카테고리 이름을 입력해 주세요.</FieldError>
+            </TextField>}
+          </NativeField>
 
           <section className="rounded-2xl bg-slate-50 p-4 dark:bg-white/5">
             <label className="text-sm font-bold">결제 금액</label>
@@ -222,7 +244,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
         </DrawerPanel>
         <DrawerFooter className="grid shrink-0 grid-cols-2 gap-3 border-t bg-white px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 dark:bg-slate-950">
           <Button className={drawerCancelButtonClass} isDisabled={mutation.isPending} onPress={() => onOpenChange(false)} type="button" variant="secondary">취소</Button>
-          <Button className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || !itemName.trim() || numericAmount <= 0 || numericRate <= 0 || !payer} type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
+          <Button className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmount <= 0 || numericRate <= 0 || !payer} type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
         </DrawerFooter>
       </Form>
     </DrawerPopup>

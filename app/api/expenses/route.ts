@@ -73,6 +73,7 @@ const parseInput = (body: Record<string, unknown>) => {
   const purchasedDate = typeof body.purchased_at === "string" ? new Date(body.purchased_at) : null;
   const purchasedAt = purchasedDate && Number.isFinite(purchasedDate.getTime()) && purchasedDate.getTime() <= Date.now() + 5 * 60 * 1000 ? body.purchased_at as string : null;
   const itemName = optionalText(body.item_name, 100);
+  const customCategory = optionalText(body.custom_category, 30);
   const merchant = optionalText(body.merchant, 100);
   const memo = optionalText(body.memo, 500);
   const amountThb = money(body.amount_thb);
@@ -86,7 +87,7 @@ const parseInput = (body: Record<string, unknown>) => {
   const minuThb = shares ? money(shares.minu, true) : undefined;
   const paths = Array.isArray(body.image_paths) ? body.image_paths : null;
 
-  if (!purchasedAt || !itemName || merchant === undefined || memo === undefined || !isExpenseCategory(body.category)
+  if (!purchasedAt || !itemName || customCategory === undefined || merchant === undefined || memo === undefined || !isExpenseCategory(body.category)
     || !isExpensePaymentMethod(body.payment_method) || amountThb === undefined || !Number.isFinite(rate) || rate <= 0
     || Math.round(rate * 1_000_000) !== rate * 1_000_000 || actualKrw === undefined || !rateDate
     || !isExpensePerson(payer) || !participants || participants.length < 1 || participants.length > 2
@@ -94,7 +95,8 @@ const parseInput = (body: Record<string, unknown>) => {
     || gahyunThb === undefined || minuThb === undefined || !paths || paths.length > 5
     || paths.some((path) => typeof path !== "string" || !IMAGE_PATH.test(path)) || new Set(paths).size !== paths.length
     || (body.payment_method !== "card" && actualKrw !== null)
-    || (purchasedDate && rateDate && rateDate > bangkokDate(purchasedDate))) {
+    || (purchasedDate && rateDate && rateDate > bangkokDate(purchasedDate))
+    || (customCategory !== null && body.category !== "other")) {
     return { error: "입력 내용을 확인해 주세요." } as const;
   }
   const selected = new Set<ExpensePerson>(participants as ExpensePerson[]);
@@ -111,6 +113,7 @@ const parseInput = (body: Record<string, unknown>) => {
   return {
     data: {
       purchased_at: new Date(purchasedAt).toISOString(), item_name: itemName, category: body.category,
+      custom_category: customCategory,
       merchant, payment_method: body.payment_method, amount_thb: amountThb,
       exchange_rate_krw_per_thb: rate, exchange_rate_date: rateDate,
       exchange_rate_source: body.rate_manually_edited === true ? "manual_override" : "frankfurter",
