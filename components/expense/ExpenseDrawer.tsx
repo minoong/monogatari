@@ -30,6 +30,8 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
+import { Button as BaseButton } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 
 const nowInBangkok = () => {
@@ -189,16 +191,17 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
         <DrawerHeader className="px-6 pb-2 pt-6 text-center"><DrawerTitle>{expense ? "지출 수정" : "지출 등록"}</DrawerTitle></DrawerHeader>
         <DrawerPanel scrollable={false} className="flex min-h-0 min-w-0 max-w-full flex-1 touch-pan-y flex-col gap-5 overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-3">
           <section className="grid grid-cols-1 gap-3 min-[440px]:grid-cols-2">
-            <NativeField label="구매 날짜"><input aria-label="구매 날짜" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} /></NativeField>
-            <NativeField label="태국 현지 시간"><input aria-label="구매 시간" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" onChange={(event) => setTime(event.target.value)} type="time" value={time} /></NativeField>
+            <Field className="gap-2"><FieldLabel className="text-sm">구매 날짜</FieldLabel><input aria-label="구매 날짜" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} /></Field>
+            <Field className="gap-2"><FieldLabel className="text-sm">태국 현지 시간</FieldLabel><input aria-label="구매 시간" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" onChange={(event) => setTime(event.target.value)} type="time" value={time} /></Field>
           </section>
 
           <TextField isRequired value={itemName} onChange={setItemName}><Label>품목</Label><Input maxLength={100} placeholder="예: 팟타이, 볼트 택시" /><FieldError /></TextField>
 
-          <NativeField label="카테고리">
+          <Field className="gap-2">
+            <FieldLabel className="text-sm">카테고리</FieldLabel>
             <div className="grid grid-cols-3 gap-2 min-[440px]:grid-cols-4">
-              {EXPENSE_CATEGORIES.map((value) => <ChoiceButton key={value} selected={!customCategoryMode && category === value} onClick={() => { setCategory(value); setCustomCategoryMode(false); }}>{EXPENSE_CATEGORY_META[value].label}</ChoiceButton>)}
-              <ChoiceButton selected={customCategoryMode} onClick={() => { setCategory("other"); setCustomCategoryMode(true); }}>직접 입력</ChoiceButton>
+              {EXPENSE_CATEGORIES.map((value) => <BaseButton aria-pressed={!customCategoryMode && category === value} className={choiceButtonClass(!customCategoryMode && category === value)} key={value} onClick={() => { setCategory(value); setCustomCategoryMode(false); }} variant="outline">{!customCategoryMode && category === value && <Check className="absolute right-1.5 top-1.5 size-3" />}{EXPENSE_CATEGORY_META[value].label}</BaseButton>)}
+              <BaseButton aria-pressed={customCategoryMode} className={choiceButtonClass(customCategoryMode)} onClick={() => { setCategory("other"); setCustomCategoryMode(true); }} variant="outline">{customCategoryMode && <Check className="absolute right-1.5 top-1.5 size-3" />}직접 입력</BaseButton>
             </div>
             {customCategoryMode && <TextField
               fullWidth
@@ -213,7 +216,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
               <Input maxLength={30} placeholder="예: 카페, 선물, 기념품" />
               <FieldError>카테고리 이름을 입력해 주세요.</FieldError>
             </TextField>}
-          </NativeField>
+          </Field>
 
           <section className="rounded-2xl bg-slate-50 p-4 dark:bg-white/5">
             <label className="text-sm font-bold">결제 금액</label>
@@ -221,25 +224,25 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
             <p className="mt-2 text-right text-sm font-semibold text-slate-500">{numericRate > 0 ? formatKrw(convertedKrw) : "환율 확인 중"}</p>
           </section>
 
-          <NativeField label="구매일 환율">
+          <Field className="gap-2"><FieldLabel className="text-sm">구매일 환율</FieldLabel>
             <div className="rounded-xl border border-slate-200 px-3 py-3 dark:border-slate-700">
               <div className="flex items-center gap-2"><span className="text-sm text-slate-500">฿1 =</span><input aria-label="원화 환율" className="min-w-0 flex-1 bg-transparent text-right font-bold tabular-nums outline-none" inputMode="decimal" onChange={(event) => { setRate(event.target.value); setRateDate(date); setManualRate(true); }} step="0.000001" type="number" value={effectiveRate} /><span className="text-sm font-bold">원</span></div>
               <div className="mt-2 flex items-center justify-between text-xs text-slate-400"><span>{effectiveRateDate} 관측</span>{rateQuery.isFetching && <span className="inline-flex items-center gap-1"><RefreshCw className="size-3 animate-spin" /> 조회 중</span>}{manualRate && <span>직접 입력</span>}</div>
             </div>
             {rateQuery.isError && !rate && <p className="mt-2 text-xs text-red-500">{rateQuery.error.message}</p>}
-          </NativeField>
+          </Field>
 
-          <NativeField label="결제자"><div className="grid grid-cols-2 gap-2">{EXPENSE_PEOPLE.map((person) => <ChoiceButton key={person} selected={payer === person} onClick={() => setPayer(person)}>{EXPENSE_PERSON_META[person].label}</ChoiceButton>)}</div></NativeField>
-          <NativeField label="비용 사용자"><div className="grid grid-cols-2 gap-2">{EXPENSE_PEOPLE.map((person) => <ChoiceButton key={person} selected={participantSet.has(person)} onClick={() => toggleParticipant(person)}>{EXPENSE_PERSON_META[person].label}</ChoiceButton>)}</div></NativeField>
+          <Field className="gap-2"><FieldLabel className="text-sm">결제자</FieldLabel><div className="grid grid-cols-2 gap-2">{EXPENSE_PEOPLE.map((person) => <BaseButton aria-pressed={payer === person} className={choiceButtonClass(payer === person)} key={person} onClick={() => setPayer(person)} variant="outline">{payer === person && <Check className="absolute right-1.5 top-1.5 size-3" />}{EXPENSE_PERSON_META[person].label}</BaseButton>)}</div></Field>
+          <Field className="gap-2"><FieldLabel className="text-sm">비용 사용자</FieldLabel><div className="grid grid-cols-2 gap-2">{EXPENSE_PEOPLE.map((person) => <BaseButton aria-pressed={participantSet.has(person)} className={choiceButtonClass(participantSet.has(person))} key={person} onClick={() => toggleParticipant(person)} variant="outline">{participantSet.has(person) && <Check className="absolute right-1.5 top-1.5 size-3" />}{EXPENSE_PERSON_META[person].label}</BaseButton>)}</div></Field>
 
-          {participants.length === 2 && <NativeField label="공동 지출 분담"><div className="flex items-center justify-between gap-2"><p className="min-w-0 text-xs text-slate-500">기본은 반반, 1사땅 잔액은 결제자 몫이에요.</p><button className="min-h-11 shrink-0 whitespace-nowrap px-1 text-[11px] font-bold text-blue-600" onClick={() => { if (!manualSplit) { setGahyunShare(String(automaticShares.gahyun)); setMinuShare(String(automaticShares.minu)); } setManualSplit((value) => !value); }} type="button">{manualSplit ? "반반으로" : "직접 나누기"}</button></div>{manualSplit && <div className="mt-2 grid grid-cols-2 gap-2"><ShareInput label="가현쨩" value={gahyunShare} onChange={setGahyunShare} /><ShareInput label="미누쿤" value={minuShare} onChange={setMinuShare} /></div>}</NativeField>}
+          {participants.length === 2 && <Field className="gap-2"><FieldLabel className="text-sm">공동 지출 분담</FieldLabel><div className="flex items-center justify-between gap-2"><p className="min-w-0 text-xs text-slate-500">기본은 반반, 1사땅 잔액은 결제자 몫이에요.</p><BaseButton className="min-h-11 shrink-0 whitespace-nowrap px-1 text-[11px] font-bold text-blue-600" onClick={() => { if (!manualSplit) { setGahyunShare(String(automaticShares.gahyun)); setMinuShare(String(automaticShares.minu)); } setManualSplit((value) => !value); }} size="sm" variant="ghost">{manualSplit ? "반반으로" : "직접 나누기"}</BaseButton></div>{manualSplit && <div className="mt-2 grid grid-cols-2 gap-2"><ShareInput label="가현쨩" value={gahyunShare} onChange={setGahyunShare} /><ShareInput label="미누쿤" value={minuShare} onChange={setMinuShare} /></div>}</Field>}
 
           <TextField value={merchant} onChange={setMerchant}><Label>상호 · 매장 (선택)</Label><Input maxLength={100} placeholder="예: Terminal 21" /></TextField>
-          <NativeField label="결제 수단"><div className="grid grid-cols-4 gap-2">{EXPENSE_PAYMENT_METHODS.map((method) => <ChoiceButton key={method} selected={paymentMethod === method} onClick={() => setPaymentMethod(method)}>{EXPENSE_PAYMENT_META[method]}</ChoiceButton>)}</div></NativeField>
+          <Field className="gap-2"><FieldLabel className="text-sm">결제 수단</FieldLabel><div className="grid grid-cols-4 gap-2">{EXPENSE_PAYMENT_METHODS.map((method) => <BaseButton aria-pressed={paymentMethod === method} className={choiceButtonClass(paymentMethod === method)} key={method} onClick={() => setPaymentMethod(method)} variant="outline">{paymentMethod === method && <Check className="absolute right-1.5 top-1.5 size-3" />}{EXPENSE_PAYMENT_META[method]}</BaseButton>)}</div></Field>
           {paymentMethod === "card" && <TextField value={actualKrw} onChange={setActualKrw}><Label>실제 카드 청구 원화 (선택)</Label><Input inputMode="numeric" min="1" placeholder="승인 내역 확인 후 입력" type="number" /></TextField>}
 
           <WishImagePicker images={images} inputId="expense-images" itemLabel="영수증 사진" label="영수증 사진" description="최대 5장 · 업로드 전에 자동으로 가볍게 압축해요." onChange={setImages} />
-          <NativeField label="메모 (선택)"><textarea aria-label="지출 메모" className="min-h-24 w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900" maxLength={500} onChange={(event) => setMemo(event.target.value)} placeholder="기억할 내용을 남겨 주세요." value={memo} /></NativeField>
+          <Field className="gap-2"><FieldLabel className="text-sm">메모 (선택)</FieldLabel><textarea aria-label="지출 메모" className="min-h-24 w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900" maxLength={500} onChange={(event) => setMemo(event.target.value)} placeholder="기억할 내용을 남겨 주세요." value={memo} /></Field>
           {submitError && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600" role="alert">{submitError}</p>}
         </DrawerPanel>
         <DrawerFooter className="grid shrink-0 grid-cols-2 gap-3 border-t bg-white px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 dark:bg-slate-950">
@@ -251,13 +254,12 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   </Drawer>;
 }
 
-function NativeField({ label, children }: { label: string; children: React.ReactNode }) {
-  return <section><p className="mb-2 text-sm font-bold text-slate-900 dark:text-white">{label}</p>{children}</section>;
-}
-
-function ChoiceButton({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
-  return <button className={cn("relative min-h-11 rounded-xl border px-2 text-xs font-bold transition active:scale-[0.98]", selected ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300" : "border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900")} onClick={onClick} type="button">{selected && <Check className="absolute right-1.5 top-1.5 size-3" />}{children}</button>;
-}
+const choiceButtonClass = (selected: boolean) => cn(
+  "relative min-h-11 rounded-xl px-2 text-xs font-bold transition active:scale-[0.98]",
+  selected
+    ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+    : "border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900",
+);
 
 function ShareInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return <label className="rounded-xl border border-slate-200 p-3 text-xs font-semibold dark:border-slate-700"><span>{label}</span><span className="mt-2 flex items-center gap-1"><span>฿</span><input aria-label={`${label} 분담액`} className="min-w-0 flex-1 bg-transparent text-right text-base font-bold outline-none" inputMode="decimal" min="0" onChange={(event) => onChange(event.target.value)} step="0.01" type="number" value={value} /></span></label>;
