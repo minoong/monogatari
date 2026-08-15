@@ -71,7 +71,6 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
   const weather = getWeatherPresentation(city.weatherCode, city.isDay);
   const needsUmbrella = city.nextSixHourPrecipitationProbability >= 40;
   const [isDailyExpanded, setIsDailyExpanded] = useState(false);
-  const visibleDailyForecast = isDailyExpanded ? city.dailyForecast : city.dailyForecast.slice(0, 3);
 
   return (
     <div>
@@ -119,13 +118,14 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
       </div>
 
       <div className="mt-2.5 border-t border-slate-100 pt-2.5">
-        <div className="rounded-lg border p-1.5" style={{ borderColor: "#e2e8f0" }}>
-          <div className="mb-1 flex items-center justify-between px-1">
-            <p className="text-xs font-bold">7일 예보</p>
-            <p className="text-[10px] font-medium text-slate-400">최고 · 최저</p>
-          </div>
-          <motion.div layout className={`grid gap-1 ${isDailyExpanded ? "grid-cols-7" : "grid-cols-4"}`}>
-            {visibleDailyForecast.map((forecast, index) => {
+        {isDailyExpanded ? (
+          <motion.div layout className="rounded-lg border p-1.5" style={{ borderColor: "#e2e8f0" }}>
+            <div className="mb-1 flex items-center justify-between px-1">
+              <p className="text-xs font-bold">7일 예보</p>
+              <p className="text-[10px] font-medium text-slate-400">최고 · 최저</p>
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+              {city.dailyForecast.map((forecast, index) => {
               const forecastWeather = getWeatherPresentation(forecast.weatherCode, true);
               const day = formatForecastDay(forecast.date, index);
               return (
@@ -139,20 +139,20 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
                 </div>
               );
             })}
-            {!isDailyExpanded && (
-              <button type="button" onClick={() => setIsDailyExpanded(true)} className="relative min-w-0 overflow-hidden rounded-md border border-slate-100 px-0.5 py-1 text-center outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="false" aria-label="7일 예보 전체 보기">
-                <WeatherIcon icon={getWeatherPresentation(city.dailyForecast[3].weatherCode, true).icon} size={19} className="mx-auto mt-3 opacity-25 blur-[1px]" aria-hidden="true" />
-                <span className="absolute inset-x-0 bottom-1 z-10 flex items-center justify-center gap-0.5 text-[10px] font-bold text-slate-600">+4일<ChevronDown size={11} aria-hidden="true" /></span>
-                <span className="absolute inset-x-0 bottom-0 h-7 bg-gradient-to-t from-white via-white/90 to-transparent" aria-hidden="true" />
-              </button>
-            )}
-          </motion.div>
-          {isDailyExpanded && (
+            </div>
             <button type="button" onClick={() => setIsDailyExpanded(false)} className="mx-auto mt-1.5 flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-semibold text-slate-400 transition-colors hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="true">
               접기<ChevronDown size={11} className="rotate-180" aria-hidden="true" />
             </button>
-          )}
-        </div>
+          </motion.div>
+        ) : (
+          <button type="button" onClick={() => setIsDailyExpanded(true)} className="relative flex h-9 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="false" aria-label="7일 예보 전체 보기">
+            <span className="absolute inset-0 flex items-center justify-around px-5 opacity-30 blur-[1.5px]" aria-hidden="true">
+              {city.dailyForecast.slice(0, 4).map((forecast) => <WeatherIcon key={forecast.date} icon={getWeatherPresentation(forecast.weatherCode, true).icon} size={18} className="text-sky-500" />)}
+            </span>
+            <span className="relative z-10 flex items-center gap-1 rounded-full border border-slate-100 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm">7일 예보 더보기<ChevronDown size={12} aria-hidden="true" /></span>
+            <span className="absolute inset-0 bg-white/35" aria-hidden="true" />
+          </button>
+        )}
       </div>
     </div>
   );
