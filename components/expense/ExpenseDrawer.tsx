@@ -59,6 +59,16 @@ const bangkokParts = (value: string) => {
   return { date: `${parts.year}-${parts.month}-${parts.day}`, time: `${parts.hour}:${parts.minute}` };
 };
 
+const formatDateInputValue = (value: string) => {
+  const [year, month, day] = value.split("-").map(Number);
+  return year && month && day ? `${year}. ${month}. ${day}.` : "날짜 선택";
+};
+
+const formatTimeInputValue = (value: string) => {
+  const [hour, minute] = value.split(":");
+  return hour && minute ? `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}` : "시간 선택";
+};
+
 const fetchRate = async (date: string): Promise<ExchangeRateSnapshot> => {
   const response = await fetch(`/api/exchange-rates?date=${date}`);
   const payload = await response.json();
@@ -208,19 +218,21 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
       <form aria-label={expense ? "지출 수정" : "지출 등록"} className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col overflow-hidden" onSubmit={submit}>
         <DrawerHeader className="px-4 pb-1 pt-5 text-center sm:px-6 sm:pt-6"><DrawerTitle>{expense ? "지출 수정" : "지출 등록"}</DrawerTitle></DrawerHeader>
         <DrawerPanel scrollable={false} className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-2 sm:gap-5 sm:px-6 sm:py-3">
-          <section className="grid min-w-0 grid-cols-1 gap-3 min-[340px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <Field className="min-w-0 gap-2 overflow-hidden">
+          <section className="grid min-w-0 grid-cols-1 gap-3 min-[340px]:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] sm:grid-cols-2">
+            <Field className="min-w-0 gap-2">
               <Label htmlFor="expense-date"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>날짜</DrawerFieldLabel></Label>
-              <div className="relative w-full min-w-0">
-                <input id="expense-date" aria-label="구매 날짜" className="block h-11 w-full min-w-0! max-w-full rounded-xl border border-slate-200 bg-white py-0 pl-3 pr-8 text-left text-sm leading-none tabular-nums dark:border-slate-700 dark:bg-slate-900 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:m-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} />
-                <CalendarDaysIcon aria-hidden="true" className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={16} />
+              <div className="relative flex h-11 w-full min-w-0 items-center rounded-xl border border-slate-200 bg-white px-3 pr-9 text-[15px] tabular-nums transition-colors focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-900">
+                <span aria-hidden="true" className="min-w-0 truncate">{formatDateInputValue(date)}</span>
+                <input id="expense-date" aria-label="구매 날짜" className="absolute inset-0 z-10 block size-full min-w-0 cursor-pointer opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:m-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} />
+                <CalendarDaysIcon aria-hidden="true" className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={17} />
               </div>
             </Field>
-            <Field className="min-w-0 gap-2 overflow-hidden">
+            <Field className="min-w-0 gap-2">
               <Label htmlFor="expense-time"><DrawerFieldLabel icon={ClockIcon} active={open}>시간</DrawerFieldLabel></Label>
-              <div className="relative w-full min-w-0">
-                <input id="expense-time" aria-label="구매 시간" className="block h-11 w-full min-w-0! max-w-full rounded-xl border border-slate-200 bg-white py-0 pl-3 pr-8 text-left text-sm leading-none tabular-nums dark:border-slate-700 dark:bg-slate-900 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:m-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0" onChange={(event) => setTime(event.target.value)} type="time" value={time} />
-                <ClockIcon aria-hidden="true" className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={16} />
+              <div className="relative flex h-11 w-full min-w-0 items-center rounded-xl border border-slate-200 bg-white px-3 pr-9 text-[15px] tabular-nums transition-colors focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-900">
+                <span aria-hidden="true" className="min-w-0 truncate">{formatTimeInputValue(time)}</span>
+                <input id="expense-time" aria-label="구매 시간" className="absolute inset-0 z-10 block size-full min-w-0 cursor-pointer opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:m-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" onChange={(event) => setTime(event.target.value)} type="time" value={time} />
+                <ClockIcon aria-hidden="true" className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={17} />
               </div>
             </Field>
           </section>
