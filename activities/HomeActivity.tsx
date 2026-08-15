@@ -33,6 +33,13 @@ type TravelClockProps = {
   flagCode: string;
 };
 
+const ClockSeparator = () => (
+  <span className="flex h-[1.12em] w-[3px] shrink-0 flex-col items-center justify-center gap-[3px]" aria-hidden="true">
+    <span className="size-[2px] rounded-full bg-slate-400 dark:bg-slate-500" />
+    <span className="size-[2px] rounded-full bg-slate-400 dark:bg-slate-500" />
+  </span>
+);
+
 const TravelClock: React.FC<TravelClockProps> = ({ city, zone, flagCode }) => {
   const [now, setNow] = useState(() => dayjs().tz(zone));
 
@@ -48,23 +55,23 @@ const TravelClock: React.FC<TravelClockProps> = ({ city, zone, flagCode }) => {
         <AvatarFallback>{flagCode}</AvatarFallback>
       </Avatar>
       <span className="flex shrink-0 flex-col leading-none">
-        <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">{city}</span>
-        <span className="mt-0.5 text-[10px] font-semibold tracking-[-0.01em] text-slate-500 dark:text-slate-400">
+        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200">{city}</span>
+        <span className="mt-0.5 text-[9px] font-medium tabular-nums text-slate-500 dark:text-slate-400">
           {now.format("YYYY.MM.DD")}
         </span>
       </span>
       <div
-        className="ml-auto shrink-0 text-right text-sm font-semibold tracking-[-0.05em] text-slate-950 dark:text-white"
-        style={{ fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums slashed-zero" }}
-        aria-label={`${city} 현재 시각 ${now.format("HH시 mm분 ss초")}`}
+        className="ml-auto shrink-0 text-right text-[13px] font-bold tracking-[-0.035em] text-slate-900 dark:text-white"
+        style={{ fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums" }}
       >
-        <div className="flex items-center gap-px">
-          <SlidingNumber value={now.hour()} padStart />
-          <span className="text-slate-300 dark:text-slate-600">:</span>
-          <SlidingNumber value={now.minute()} padStart />
-          <span className="text-slate-300 dark:text-slate-600">:</span>
-          <SlidingNumber value={now.second()} padStart />
+        <div className="flex h-4 items-center gap-[2px]" aria-hidden="true">
+          <SlidingNumber value={now.hour()} padStart className="!gap-0" />
+          <ClockSeparator />
+          <SlidingNumber value={now.minute()} padStart className="!gap-0" />
+          <ClockSeparator />
+          <SlidingNumber value={now.second()} padStart className="!gap-0" />
         </div>
+        <span className="sr-only">{city} 현재 시각 {now.format("HH시 mm분 ss초")}</span>
       </div>
     </div>
   );
