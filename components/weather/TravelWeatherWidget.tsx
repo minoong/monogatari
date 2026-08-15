@@ -9,8 +9,11 @@ import { SunIcon } from "@/components/ui/sun";
 import { MoonIcon } from "@/components/ui/moon";
 import { CloudSunIcon } from "@/components/ui/cloud-sun";
 import { CloudRainIcon } from "@/components/ui/cloud-rain";
+import { CloudRainWindIcon } from "@/components/ui/cloud-rain-wind";
 import { CloudSnowIcon } from "@/components/ui/cloud-snow";
 import { CloudLightningIcon } from "@/components/ui/cloud-lightning";
+import { WindIcon } from "@/components/ui/wind";
+import { SunMoonIcon } from "@/components/ui/sun-moon";
 
 const weatherSurfaceStyle = {
   background: "#ffffff",
@@ -26,12 +29,15 @@ const WeatherIcon = ({ icon, size = 24, className, autoPlay = false, ...props }:
   const Icon = {
     sun: SunIcon,
     moon: MoonIcon,
+    "sun-moon": SunMoonIcon,
     "cloud-sun": CloudSunIcon,
     "cloud-moon": MoonIcon,
     cloud: CloudSunIcon,
     fog: CloudRainIcon,
     drizzle: CloudRainIcon,
     rain: CloudRainIcon,
+    "rain-wind": CloudRainWindIcon,
+    wind: WindIcon,
     snow: CloudSnowIcon,
     thunder: CloudLightningIcon,
   }[icon];
@@ -76,7 +82,7 @@ const formatForecastDay = (value: string, index: number) => ({
 });
 
 function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedChange }: { city: WeatherCity; isRefreshing: boolean; isDailyExpanded: boolean; onDailyExpandedChange: (expanded: boolean) => void }) {
-  const weather = getWeatherPresentation(city.weatherCode, city.isDay);
+  const weather = getWeatherPresentation(city.weatherCode, city.isDay, { windSpeed: city.windSpeed, time: city.observedAt, sunrise: city.sunrise, sunset: city.sunset });
   const needsUmbrella = city.nextSixHourPrecipitationProbability >= 40;
 
   return (
@@ -111,7 +117,7 @@ function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedCh
         </div>
         <div className="grid grid-cols-6 gap-1">
           {city.hourlyForecast.map((forecast) => {
-            const forecastWeather = getWeatherPresentation(forecast.weatherCode, forecast.isDay);
+            const forecastWeather = getWeatherPresentation(forecast.weatherCode, forecast.isDay, { windSpeed: forecast.windSpeed, time: forecast.time, sunrise: city.sunrise, sunset: city.sunset });
             return (
               <div key={forecast.time} className="min-w-0 rounded-lg px-1 py-1 text-center">
                 <p className="text-[10px] font-semibold text-slate-400">{formatForecastHour(forecast.time)}시</p>
@@ -133,7 +139,7 @@ function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedCh
             </div>
             <div className="grid grid-cols-7 gap-1">
               {city.dailyForecast.map((forecast, index) => {
-              const forecastWeather = getWeatherPresentation(forecast.weatherCode, true);
+              const forecastWeather = getWeatherPresentation(forecast.weatherCode, true, { windSpeed: forecast.windSpeedMax });
               const day = formatForecastDay(forecast.date, index);
               return (
                 <div key={forecast.date} className="min-w-0 rounded-md px-0.5 py-1 text-center">
@@ -221,7 +227,7 @@ export function TravelWeatherWidget() {
         <div className="grid grid-cols-3 gap-1 rounded-2xl bg-slate-100 p-1" role="tablist" aria-label="여행지 선택">
           {cities.map((city, index) => {
             const isSelected = index === selectedCityIndex;
-            const cityWeather = getWeatherPresentation(city.weatherCode, city.isDay);
+            const cityWeather = getWeatherPresentation(city.weatherCode, city.isDay, { windSpeed: city.windSpeed, time: city.observedAt, sunrise: city.sunrise, sunset: city.sunset });
             return (
               <motion.button
                 key={city.id}

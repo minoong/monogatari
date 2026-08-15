@@ -16,6 +16,7 @@ type OpenMeteoLocation = {
     temperature_2m?: number;
     apparent_temperature?: number;
     weather_code?: number;
+    wind_speed_10m?: number;
     is_day?: number;
   };
   hourly?: {
@@ -23,6 +24,7 @@ type OpenMeteoLocation = {
     temperature_2m?: Array<number | null>;
     weather_code?: Array<number | null>;
     precipitation_probability?: Array<number | null>;
+    wind_speed_10m?: Array<number | null>;
     is_day?: Array<number | null>;
   };
   daily?: {
@@ -31,6 +33,9 @@ type OpenMeteoLocation = {
     temperature_2m_min?: Array<number | null>;
     weather_code?: Array<number | null>;
     precipitation_probability_max?: Array<number | null>;
+    wind_speed_10m_max?: Array<number | null>;
+    sunrise?: string[];
+    sunset?: string[];
   };
 };
 
@@ -39,6 +44,7 @@ type OpenMeteoCurrent = {
   temperature_2m: number;
   apparent_temperature: number;
   weather_code: number;
+  wind_speed_10m: number;
   is_day: 0 | 1;
 };
 
@@ -50,6 +56,7 @@ function isValidCurrent(location: OpenMeteoLocation): location is OpenMeteoLocat
       && typeof current.temperature_2m === "number"
       && typeof current.apparent_temperature === "number"
       && typeof current.weather_code === "number"
+      && typeof current.wind_speed_10m === "number"
       && (current.is_day === 0 || current.is_day === 1),
   );
 }
@@ -74,14 +81,16 @@ function getHourlyForecast(location: OpenMeteoLocation, currentTime: string): Ho
     const temperature = hourly?.temperature_2m?.[index];
     const weatherCode = hourly?.weather_code?.[index];
     const precipitationProbability = hourly?.precipitation_probability?.[index];
+    const windSpeed = hourly?.wind_speed_10m?.[index];
     const isDay = hourly?.is_day?.[index];
-    if (typeof temperature !== "number" || typeof weatherCode !== "number" || typeof precipitationProbability !== "number" || (isDay !== 0 && isDay !== 1)) return [];
+    if (typeof temperature !== "number" || typeof weatherCode !== "number" || typeof precipitationProbability !== "number" || typeof windSpeed !== "number" || (isDay !== 0 && isDay !== 1)) return [];
 
     return [{
       time: new Date(`${time}${THAILAND_UTC_OFFSET}`).toISOString(),
       temperature: Math.round(temperature),
       weatherCode,
       precipitationProbability: Math.round(precipitationProbability),
+      windSpeed: Math.round(windSpeed),
       isDay: isDay === 1,
     }];
   });
@@ -96,7 +105,10 @@ function getDailyForecast(location: OpenMeteoLocation): DailyWeatherForecast[] {
     const temperatureMin = daily?.temperature_2m_min?.[index];
     const weatherCode = daily?.weather_code?.[index];
     const precipitationProbability = daily?.precipitation_probability_max?.[index];
-    if (typeof temperatureMax !== "number" || typeof temperatureMin !== "number" || typeof weatherCode !== "number" || typeof precipitationProbability !== "number") return [];
+    const windSpeedMax = daily?.wind_speed_10m_max?.[index];
+    const sunrise = daily?.sunrise?.[index];
+    const sunset = daily?.sunset?.[index];
+    if (typeof temperatureMax !== "number" || typeof temperatureMin !== "number" || typeof weatherCode !== "number" || typeof precipitationProbability !== "number" || typeof windSpeedMax !== "number" || typeof sunrise !== "string" || typeof sunset !== "string") return [];
 
     return [{
       date: new Date(`${date}T00:00:00${THAILAND_UTC_OFFSET}`).toISOString(),
@@ -104,6 +116,9 @@ function getDailyForecast(location: OpenMeteoLocation): DailyWeatherForecast[] {
       temperatureMin: Math.round(temperatureMin),
       weatherCode,
       precipitationProbability: Math.round(precipitationProbability),
+      windSpeedMax: Math.round(windSpeedMax),
+      sunrise: new Date(`${sunrise}${THAILAND_UTC_OFFSET}`).toISOString(),
+      sunset: new Date(`${sunset}${THAILAND_UTC_OFFSET}`).toISOString(),
     }];
   });
 }
@@ -116,6 +131,10 @@ function normalizeWeather(locations: unknown): WeatherCity[] | null {
     if (!isValidCurrent(location)) return null;
 
     const destination = TRAVEL_DESTINATIONS[index];
+    const dailyForecast = getDailyForecast(location);
+    const today = dailyForecast[0];
+    if (!today) return null;
+
     return {
       id: destination.id,
       city: destination.city,
@@ -123,10 +142,13 @@ function normalizeWeather(locations: unknown): WeatherCity[] | null {
       apparentTemperature: Math.round(location.current.apparent_temperature),
       weatherCode: location.current.weather_code,
       isDay: location.current.is_day === 1,
+      windSpeed: Math.round(location.current.wind_speed_10m),
       observedAt: new Date(`${location.current.time}${THAILAND_UTC_OFFSET}`).toISOString(),
+      sunrise: today.sunrise,
+      sunset: today.sunset,
       nextSixHourPrecipitationProbability: getNextSixHourPrecipitationProbability(location, location.current.time),
       hourlyForecast: getHourlyForecast(location, location.current.time),
-      dailyForecast: getDailyForecast(location),
+      dailyForecast,
     } satisfies WeatherCity;
   });
 
@@ -137,9 +159,9 @@ export async function GET() {
   const parameters = new URLSearchParams({
     latitude: TRAVEL_DESTINATIONS.map((destination) => destination.latitude).join(","),
     longitude: TRAVEL_DESTINATIONS.map((destination) => destination.longitude).join(","),
-    current: "temperature_2m,apparent_temperature,weather_code,is_day",
-    hourly: "temperature_2m,weather_code,precipitation_probability,is_day",
-    daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+    current: "temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day",
+    hourly: "temperature_2m,weather_code,precipitation_probability,wind_speed_10m,is_day",
+    daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset",
     forecast_days: "7",
     timezone: "Asia/Bangkok",
   });

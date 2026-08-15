@@ -10,6 +10,7 @@ export interface HourlyWeatherForecast {
   temperature: number;
   weatherCode: number;
   precipitationProbability: number;
+  windSpeed: number;
   isDay: boolean;
 }
 
@@ -19,6 +20,9 @@ export interface DailyWeatherForecast {
   temperatureMin: number;
   weatherCode: number;
   precipitationProbability: number;
+  windSpeedMax: number;
+  sunrise: string;
+  sunset: string;
 }
 
 export interface WeatherCity {
@@ -28,7 +32,10 @@ export interface WeatherCity {
   apparentTemperature: number;
   weatherCode: number;
   isDay: boolean;
+  windSpeed: number;
   observedAt: string;
+  sunrise: string;
+  sunset: string;
   nextSixHourPrecipitationProbability: number;
   hourlyForecast: HourlyWeatherForecast[];
   dailyForecast: DailyWeatherForecast[];
@@ -40,8 +47,19 @@ export interface WeatherResponse {
 
 export interface WeatherPresentation {
   label: string;
-  icon: "sun" | "moon" | "cloud-sun" | "cloud-moon" | "cloud" | "fog" | "drizzle" | "rain" | "snow" | "thunder";
+  icon: "sun" | "moon" | "sun-moon" | "cloud-sun" | "cloud-moon" | "cloud" | "fog" | "drizzle" | "rain" | "rain-wind" | "wind" | "snow" | "thunder";
 }
+
+type WeatherPresentationOptions = {
+  windSpeed?: number;
+  time?: string;
+  sunrise?: string;
+  sunset?: string;
+};
+
+const WINDY_RAIN_THRESHOLD_KMH = 25;
+const WINDY_WEATHER_THRESHOLD_KMH = 35;
+const SUN_TRANSITION_WINDOW_MS = 60 * 60 * 1000;
 
 const WEATHER_PRESENTATIONS: Record<number, Omit<WeatherPresentation, "icon">> = {
   0: { label: "맑음" },
@@ -74,15 +92,21 @@ const WEATHER_PRESENTATIONS: Record<number, Omit<WeatherPresentation, "icon">> =
   99: { label: "강한 우박 동반 뇌우" },
 };
 
-export function getWeatherPresentation(weatherCode: number, isDay: boolean): WeatherPresentation {
+export function getWeatherPresentation(weatherCode: number, isDay: boolean, options: WeatherPresentationOptions = {}): WeatherPresentation {
   const label = WEATHER_PRESENTATIONS[weatherCode]?.label ?? "날씨 정보 없음";
+  const windSpeed = options.windSpeed ?? 0;
+  const time = options.time ? new Date(options.time).getTime() : Number.NaN;
+  const sunrise = options.sunrise ? new Date(options.sunrise).getTime() : Number.NaN;
+  const sunset = options.sunset ? new Date(options.sunset).getTime() : Number.NaN;
+  const isNearSunTransition = Number.isFinite(time) && ([sunrise, sunset].some((eventTime) => Number.isFinite(eventTime) && Math.abs(time - eventTime) <= SUN_TRANSITION_WINDOW_MS));
 
-  if (weatherCode === 0) return { label: isDay ? label : "맑은 밤", icon: isDay ? "sun" : "moon" };
+  if (weatherCode === 0) return { label: isDay ? label : "맑은 밤", icon: isDay ? (isNearSunTransition ? "sun-moon" : "sun") : "moon" };
+  if (weatherCode <= 3 && windSpeed >= WINDY_WEATHER_THRESHOLD_KMH) return { label, icon: "wind" };
   if (weatherCode === 1 || weatherCode === 2) return { label, icon: isDay ? "cloud-sun" : "cloud-moon" };
   if (weatherCode === 3) return { label, icon: "cloud" };
   if (weatherCode === 45 || weatherCode === 48) return { label, icon: "fog" };
   if (weatherCode >= 51 && weatherCode <= 57) return { label, icon: "drizzle" };
-  if ((weatherCode >= 61 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)) return { label, icon: "rain" };
+  if ((weatherCode >= 61 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)) return { label, icon: windSpeed >= WINDY_RAIN_THRESHOLD_KMH ? "rain-wind" : "rain" };
   if ((weatherCode >= 71 && weatherCode <= 77) || (weatherCode >= 85 && weatherCode <= 86)) return { label, icon: "snow" };
   if (weatherCode >= 95) return { label, icon: "thunder" };
   return { label, icon: "cloud-sun" };
