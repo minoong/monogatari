@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, Droplets, RefreshCw, Umbrella } from "lucide-react";
 import { Button } from "@heroui/react";
@@ -20,10 +20,7 @@ const weatherSurfaceStyle = {
   color: "#0f172a",
 };
 
-type AnimatedIconHandle = { startAnimation: () => void; stopAnimation: () => void };
-
 const WeatherIcon = ({ icon, size = 24, className, ...props }: Pick<WeatherPresentation, "icon"> & { size?: number; className?: string }) => {
-  const animationRef = useRef<AnimatedIconHandle>(null);
   const Icon = {
     sun: SunIcon,
     moon: MoonIcon,
@@ -37,11 +34,7 @@ const WeatherIcon = ({ icon, size = 24, className, ...props }: Pick<WeatherPrese
     thunder: CloudLightningIcon,
   }[icon];
 
-  useEffect(() => {
-    animationRef.current?.startAnimation();
-  }, [icon]);
-
-  return <Icon ref={animationRef} size={size} className={className} {...props} />;
+  return <Icon size={size} className={className} {...props} />;
 };
 
 const formatUpdatedAt = (value: string) => new Intl.DateTimeFormat("ko-KR", {
