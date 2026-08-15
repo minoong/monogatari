@@ -1,8 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudMoon, CloudRain, CloudSnow, CloudSun, Droplets, Moon, RefreshCw, Sun, Umbrella, type LucideProps } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Droplets, RefreshCw, Umbrella } from "lucide-react";
 import { getWeatherPresentation, useWeather, type WeatherPresentation } from "@/lib/weather";
+import { SunIcon } from "@/components/ui/sun";
+import { MoonIcon } from "@/components/ui/moon";
+import { CloudSunIcon } from "@/components/ui/cloud-sun";
+import { CloudRainIcon } from "@/components/ui/cloud-rain";
+import { CloudSnowIcon } from "@/components/ui/cloud-snow";
+import { CloudLightningIcon } from "@/components/ui/cloud-lightning";
 
 const weatherSurfaceStyle = {
   background: "linear-gradient(145deg, #3195e9 0%, #1768ce 54%, #0a3d98 100%)",
@@ -10,21 +16,28 @@ const weatherSurfaceStyle = {
   color: "#f8fbff",
 };
 
-const WeatherIcon = ({ icon, ...props }: Pick<WeatherPresentation, "icon"> & LucideProps) => {
+type AnimatedIconHandle = { startAnimation: () => void; stopAnimation: () => void };
+
+const WeatherIcon = ({ icon, size = 24, className, ...props }: Pick<WeatherPresentation, "icon"> & { size?: number; className?: string }) => {
+  const animationRef = useRef<AnimatedIconHandle>(null);
   const Icon = {
-    sun: Sun,
-    moon: Moon,
-    "cloud-sun": CloudSun,
-    "cloud-moon": CloudMoon,
-    cloud: Cloud,
-    fog: CloudFog,
-    drizzle: CloudDrizzle,
-    rain: CloudRain,
-    snow: CloudSnow,
-    thunder: CloudLightning,
+    sun: SunIcon,
+    moon: MoonIcon,
+    "cloud-sun": CloudSunIcon,
+    "cloud-moon": MoonIcon,
+    cloud: CloudSunIcon,
+    fog: CloudRainIcon,
+    drizzle: CloudRainIcon,
+    rain: CloudRainIcon,
+    snow: CloudSnowIcon,
+    thunder: CloudLightningIcon,
   }[icon];
 
-  return <Icon strokeWidth={1.65} {...props} />;
+  useEffect(() => {
+    animationRef.current?.startAnimation();
+  }, [icon]);
+
+  return <Icon ref={animationRef} size={size} className={className} {...props} />;
 };
 
 const formatUpdatedAt = (value: string) => new Intl.DateTimeFormat("ko-KR", {
@@ -43,10 +56,25 @@ const formatForecastHour = (value: string) => new Intl.DateTimeFormat("ko-KR", {
 function WeatherSkeleton() {
   return (
     <section className="overflow-hidden rounded-[28px] p-5" style={weatherSurfaceStyle} aria-label="날씨 정보를 불러오는 중">
-      <div className="mb-5 h-4 w-28 animate-pulse rounded bg-white/20" />
-      <div className="h-24 animate-pulse rounded-3xl bg-white/15" />
-      <div className="mt-4 flex gap-2 overflow-hidden">
-        {[0, 1, 2, 3].map((item) => <div key={item} className="h-24 min-w-[70px] animate-pulse rounded-2xl bg-white/10" />)}
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <div className="h-3 w-24 animate-pulse rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.32)" }} />
+          <div className="h-5 w-16 animate-pulse rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.22)" }} />
+        </div>
+        <div className="size-12 animate-pulse rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.18)" }} />
+      </div>
+      <div className="mt-6 flex items-end justify-between">
+        <div className="space-y-3">
+          <div className="h-14 w-28 animate-pulse rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.3)" }} />
+          <div className="h-3 w-36 animate-pulse rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.22)" }} />
+        </div>
+        <div className="h-14 w-20 animate-pulse rounded-2xl" style={{ backgroundColor: "rgba(5,34,101,0.22)" }} />
+      </div>
+      <div className="mt-6 border-t pt-4" style={{ borderColor: "rgba(255,255,255,0.2)" }}>
+        <div className="mb-3 h-3 w-20 animate-pulse rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.25)" }} />
+        <div className="flex gap-2 overflow-hidden">
+          {[0, 1, 2, 3, 4].map((item) => <div key={item} className="h-24 min-w-[66px] animate-pulse rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.16)" }} />)}
+        </div>
       </div>
     </section>
   );
