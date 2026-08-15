@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, Droplets, RefreshCw, Umbrella } from "lucide-react";
-import { Button } from "@heroui/react";
+import { Button, Skeleton } from "@heroui/react";
 import { getWeatherPresentation, useWeather, type WeatherCity, type WeatherPresentation } from "@/lib/weather";
 import { SunIcon } from "@/components/ui/sun";
 import { MoonIcon } from "@/components/ui/moon";
@@ -143,7 +143,7 @@ function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedCh
       </div>
 
       <div className="mt-2.5 border-t border-slate-100 pt-2.5">
-        <motion.div animate={{ height: isDailyExpanded ? "auto" : 48 }} transition={{ duration: 0.18, ease: "easeInOut" }} className="relative overflow-hidden rounded-lg">
+        <motion.div initial={false} animate={{ height: isDailyExpanded ? "auto" : 48 }} transition={{ duration: 0.18, ease: "easeInOut" }} className="relative overflow-hidden rounded-lg">
           <div className={`p-1.5 transition-[filter,opacity] duration-150 ${isDailyExpanded ? "pb-10" : "pointer-events-none select-none blur-[1.5px] opacity-35"}`} aria-hidden={!isDailyExpanded}>
             <div className="mb-1 flex items-center justify-between px-1">
               <p className="text-xs font-bold">7일 예보</p>
@@ -180,29 +180,51 @@ function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedCh
 
 function WeatherSkeleton() {
   return (
-    <section className="overflow-hidden rounded-[28px] p-4" style={weatherSurfaceStyle} aria-label="날씨 정보를 불러오는 중">
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <div className="h-3 w-24 animate-pulse rounded-full" style={{ backgroundColor: "#cbd5e1" }} />
-          <div className="h-5 w-16 animate-pulse rounded-full" style={{ backgroundColor: "#e2e8f0" }} />
-        </div>
-        <div className="size-12 animate-pulse rounded-full" style={{ backgroundColor: "#dbeafe" }} />
+    <section className="overflow-hidden rounded-3xl p-3" style={weatherSurfaceStyle} aria-busy="true" aria-label="날씨 정보를 불러오는 중">
+      <div className="grid grid-cols-3 gap-1 rounded-2xl bg-slate-100 p-1">
+        {[0, 1, 2].map((item) => <Skeleton key={item} className="h-7 rounded-lg" />)}
       </div>
-      <div className="mt-4 flex items-end justify-between">
-        <div className="space-y-3">
-          <div className="h-14 w-28 animate-pulse rounded-2xl" style={{ backgroundColor: "#dbeafe" }} />
-          <div className="h-3 w-36 animate-pulse rounded-full" style={{ backgroundColor: "#e2e8f0" }} />
+
+      <div className="mt-3 flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="h-3.5 w-10 rounded-full" />
+            <Skeleton className="h-2.5 w-20 rounded-full" />
+          </div>
+          <div className="mt-1 flex items-end gap-2">
+            <Skeleton className="h-[42px] w-20 rounded-xl" />
+            <Skeleton className="mb-1 h-3 w-10 rounded-full" />
+          </div>
         </div>
-        <div className="h-14 w-20 animate-pulse rounded-2xl" style={{ backgroundColor: "#f1f5f9" }} />
+        <Skeleton className="size-11 rounded-full" />
       </div>
-      <div className="mt-4 border-t pt-4" style={{ borderColor: "#e2e8f0" }}>
-        <div className="mb-3 h-3 w-20 animate-pulse rounded-full" style={{ backgroundColor: "#cbd5e1" }} />
-        <div className="flex gap-2 overflow-hidden">
-          {[0, 1, 2, 3, 4].map((item) => <div key={item} className="h-24 min-w-[66px] animate-pulse rounded-2xl" style={{ backgroundColor: "#f1f5f9" }} />)}
+
+      <div className="mt-2 flex items-center justify-between gap-2">
+        {[9, 16, 12, 12].map((width, item) => <Skeleton key={item} className={`h-3 rounded-full ${width === 16 ? "w-16" : width === 9 ? "w-9" : "w-12"}`} />)}
+      </div>
+      <div className="mt-1.5 min-h-4">
+        <Skeleton className="h-3 w-44 rounded-full" />
+      </div>
+
+      <div className="mt-2.5 border-t border-slate-100 pt-2.5">
+        <div className="mb-1 flex items-center justify-between">
+          <Skeleton className="h-3 w-16 rounded-full" />
+          <Skeleton className="h-2.5 w-12 rounded-full" />
+        </div>
+        <div className="grid grid-cols-6 gap-1">
+          {[0, 1, 2, 3, 4, 5].map((item) => (
+            <div key={item} className="flex h-[70px] min-w-0 flex-col items-center justify-between py-1">
+              <Skeleton className="h-2.5 w-6 rounded-full" />
+              <Skeleton className="size-5 rounded-full" />
+              <Skeleton className="h-3.5 w-7 rounded-full" />
+              <Skeleton className="h-2.5 w-6 rounded-full" />
+            </div>
+          ))}
         </div>
       </div>
-      <div className="mt-4 flex gap-2 overflow-hidden">
-        {[0, 1, 2, 3, 4, 5, 6].map((item) => <div key={item} className="h-20 min-w-[56px] animate-pulse rounded-2xl" style={{ backgroundColor: "#f8fafc" }} />)}
+
+      <div className="mt-2.5 border-t border-slate-100 pt-2.5">
+        <Skeleton className="h-12 w-full rounded-lg" />
       </div>
     </section>
   );
