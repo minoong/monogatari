@@ -165,7 +165,7 @@ export const ExpenseActivity: React.FC = () => {
               <label className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-900"><Search className="size-4 shrink-0 text-slate-400" /><input aria-label="지출 검색" className="min-w-0 flex-1 bg-transparent text-sm outline-none" onChange={(event) => setSearch(event.target.value)} placeholder="품목, 상호, 메모 검색" value={search} />{search && <button aria-label="검색어 지우기" className="grid size-8 shrink-0 place-items-center" onClick={() => setSearch("")} type="button"><X className="size-4" /></button>}</label>
               <button aria-label="지출 필터" className={cn("relative grid size-11 shrink-0 place-items-center rounded-xl border bg-white dark:bg-slate-900", filtersActive ? "border-blue-500 text-blue-600" : "border-slate-200 text-slate-500 dark:border-slate-800")} onClick={openFilters} type="button"><Filter className="size-4" />{filtersActive && <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-blue-500" />}</button>
             </div>
-            {expenses.length === 0 ? <EmptyState onCreate={openCreate} /> : filtered.length === 0 ? <div className="py-16 text-center"><p className="font-bold">조건에 맞는 지출이 없어요.</p><button className="mt-3 min-h-11 px-4 text-sm font-bold text-blue-600" onClick={clearFilters} type="button">필터 초기화</button></div> : <div className="mt-5 space-y-6">{grouped.map((group) => <section key={group.date}><ExpenseDayHeader items={group.items} /><div className="overflow-hidden rounded-2xl border border-slate-200 bg-white divide-y divide-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:divide-slate-800">{group.items.map((expense) => <ExpenseRow expense={expense} key={expense.id} onDelete={() => setDeleting(expense)} onEdit={() => openEdit(expense)} />)}</div></section>)}</div>}
+            {expenses.length === 0 ? <EmptyState onCreate={openCreate} /> : filtered.length === 0 ? <div className="py-16 text-center"><p className="font-bold">조건에 맞는 지출이 없어요.</p><button className="mt-3 min-h-11 px-4 text-sm font-bold text-blue-600" onClick={clearFilters} type="button">필터 초기화</button></div> : <div className="mt-6 space-y-7">{grouped.map((group) => <section key={group.date}><ExpenseDayHeader items={group.items} /><div className="mt-3 overflow-hidden rounded-[20px] bg-white shadow-[0_10px_30px_-26px_rgba(15,23,42,0.55)] ring-1 ring-black/[0.055] dark:bg-slate-900 dark:ring-white/10">{group.items.map((expense, index) => <ExpenseRow expense={expense} key={expense.id} onDelete={() => setDeleting(expense)} onEdit={() => openEdit(expense)} showDivider={index < group.items.length - 1} />)}</div></section>)}</div>}
           </section>}
         </Tabs.Panel>
         <Tabs.Panel className="min-w-0 max-w-full overflow-x-clip !p-0" id="stats">
@@ -203,29 +203,40 @@ function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
 
 function ExpenseDayHeader({ items }: { items: Expense[] }) {
   const summary = summarizeExpenses(items);
-  return <header className="mb-2 flex min-w-0 items-center justify-between gap-2 px-1">
-    <h2 className="shrink-0 text-sm font-extrabold">{formatBangkokDate(items[0].purchased_at)}</h2>
-    <p aria-label={`${summary.count}건, ${formatThb(summary.totalThb)}, ${formatKrw(summary.totalKrw)}`} className="flex min-w-0 items-center justify-end gap-1.5 whitespace-nowrap text-[11px] font-bold tabular-nums text-slate-400">
-      <span>{summary.count}건</span><span aria-hidden="true" className="text-slate-300">·</span><span>{formatThb(summary.totalThb)}</span><span aria-hidden="true" className="text-slate-300">·</span><span className="text-slate-600 dark:text-slate-300">{formatKrw(summary.totalKrw)}</span>
-    </p>
+  const [, month, day] = formatBangkokDateKey(items[0].purchased_at).split("-");
+  const weekday = formatBangkokDate(items[0].purchased_at).match(/\((.+)\)/)?.[1] ?? "";
+  return <header className="flex min-w-0 items-end justify-between gap-4 px-1">
+    <div className="flex min-w-0 items-end gap-2.5">
+      <h2 className="sr-only">{formatBangkokDate(items[0].purchased_at)}</h2>
+      <span aria-hidden="true" className="shrink-0 text-[30px] font-black leading-[0.9] tracking-[-0.05em] tabular-nums text-slate-950 dark:text-white">{Number(day)}</span>
+      <div className="min-w-0 pb-0.5">
+        <p aria-hidden="true" className="truncate text-[13px] font-extrabold text-slate-800 dark:text-slate-100">{Number(month)}월 · {weekday}요일</p>
+        <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{summary.count}개의 지출</p>
+      </div>
+    </div>
+    <div aria-label={`${summary.count}건, ${formatThb(summary.totalThb)}, ${formatKrw(summary.totalKrw)}`} className="shrink-0 text-right tabular-nums">
+      <p className="text-[15px] font-black tracking-[-0.02em] text-slate-900 dark:text-white">{formatKrw(summary.totalKrw)}</p>
+      <p className="mt-0.5 text-[11px] font-bold text-slate-400">{formatThb(summary.totalThb)}</p>
+    </div>
   </header>;
 }
 
-function ExpenseRow({ expense, onEdit, onDelete }: { expense: Expense; onEdit: () => void; onDelete: () => void }) {
+function ExpenseRow({ expense, onEdit, onDelete, showDivider }: { expense: Expense; onEdit: () => void; onDelete: () => void; showDivider: boolean }) {
   const categoryLabel = getExpenseCategoryLabel(expense);
   const categoryColor = getExpenseCategoryColor(expense);
   const users = EXPENSE_PEOPLE.filter((person) => person === "gahyun" ? expense.share_gahyun_thb > 0 : expense.share_minu_thb > 0);
   return <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.42 }}>
-    <MorphingDialogTrigger ariaLabel={`${expense.item_name} 상세 보기`} className="block w-full max-w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500">
-      <article className="flex min-h-[82px] min-w-0 items-center gap-3 px-4 py-3.5 transition-colors hover:bg-slate-50 active:bg-slate-100 dark:hover:bg-white/5 dark:active:bg-white/10">
-        <div className="grid size-10 shrink-0 place-items-center rounded-xl" style={{ backgroundColor: `${categoryColor}14`, color: categoryColor }}><ReceiptText className="size-5" /></div>
+    <MorphingDialogTrigger ariaLabel={`${expense.item_name} 상세 보기`} className="group relative block w-full max-w-full text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500">
+      <article className="flex min-h-[80px] min-w-0 items-center gap-3 px-4 py-3 transition-[background-color,transform] duration-150 hover:bg-slate-50/80 active:scale-[0.995] active:bg-slate-100 motion-reduce:transition-none dark:hover:bg-white/5 dark:active:bg-white/10">
+        <div className="grid size-10 shrink-0 place-items-center rounded-[12px]" style={{ backgroundColor: `${categoryColor}12`, color: categoryColor }}><ReceiptText className="size-[19px]" /></div>
         <div className="min-w-0 flex-1">
-          <MorphingDialogTitle><h3 className="truncate text-sm font-extrabold">{expense.item_name}</h3></MorphingDialogTitle>
-          <p className="mt-1 truncate text-[11px] font-semibold text-slate-500"><span style={{ color: categoryColor }}>{categoryLabel}</span><span className="mx-1 text-slate-300">·</span>{formatBangkokTime(expense.purchased_at)}{expense.merchant ? ` · ${expense.merchant}` : ""}</p>
-          <div className="mt-1 flex min-w-0 items-center gap-1.5 overflow-hidden text-[10px] font-semibold text-slate-400"><span className="shrink-0">{EXPENSE_PERSON_META[expense.payer].label} 결제</span><span>·</span><span className="truncate">{users.map((person) => EXPENSE_PERSON_META[person].label).join(" + ")}</span>{expense.images.length > 0 && <><span>·</span><Camera className="size-3 shrink-0" /><span>{expense.images.length}</span></>}</div>
+          <MorphingDialogTitle><h3 className="truncate text-[15px] font-extrabold tracking-[-0.01em] text-slate-900 dark:text-white">{expense.item_name}</h3></MorphingDialogTitle>
+          <div className="mt-1 flex min-w-0 items-center gap-1.5 overflow-hidden text-[11px] font-semibold text-slate-500"><span className="max-w-28 shrink-0 truncate rounded-md px-1.5 py-0.5 text-[10px] font-extrabold" style={{ backgroundColor: `${categoryColor}12`, color: categoryColor }}>{categoryLabel}</span><span className="shrink-0 tabular-nums">{formatBangkokTime(expense.purchased_at)}</span>{expense.merchant && <><span className="text-slate-300">·</span><span className="truncate">{expense.merchant}</span></>}</div>
+          <div className="mt-1.5 flex min-w-0 items-center gap-1.5 overflow-hidden text-[11px] font-semibold text-slate-400"><span className="shrink-0">{EXPENSE_PERSON_META[expense.payer].label} 결제</span><span className="text-slate-300">·</span><span className="truncate">{users.map((person) => EXPENSE_PERSON_META[person].label).join(" + ")}</span>{expense.images.length > 0 && <><span className="text-slate-300">·</span><Camera className="size-3 shrink-0" /><span>{expense.images.length}</span></>}</div>
         </div>
-        <div className="shrink-0 text-right"><p className="text-sm font-black tabular-nums">{formatThb(expense.amount_thb)}</p><p className="mt-1 text-[11px] font-semibold tabular-nums text-slate-400">{formatKrw(getEffectiveKrw(expense))}</p></div>
+        <div className="shrink-0 self-start pt-0.5 text-right"><p className="text-[15px] font-black tracking-[-0.02em] tabular-nums text-slate-900 dark:text-white">{formatThb(expense.amount_thb)}</p><p className="mt-1 text-[12px] font-semibold tabular-nums text-slate-400">{formatKrw(getEffectiveKrw(expense))}</p></div>
       </article>
+      {showDivider && <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-[4.25rem] right-4 h-px bg-slate-100 dark:bg-slate-800" />}
     </MorphingDialogTrigger>
     <MorphingDialogContainer>
       <MorphingDialogContent className="relative mx-4 flex max-h-[88dvh] w-[calc(100%_-_2rem)] max-w-md flex-col overflow-hidden rounded-[28px] bg-white shadow-2xl dark:bg-slate-900">
