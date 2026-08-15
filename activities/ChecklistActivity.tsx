@@ -15,7 +15,7 @@ import {
   TabsContent as AnimateTabsContent,
   TabsContents as AnimateTabsContents,
 } from "../components/animate-ui/components/animate/tabs";
-import { Tabs as HeroTabs } from "@heroui/react";
+import { Chip, Tabs as HeroTabs } from "@heroui/react";
 import { motion, AnimatePresence, useMotionValue, animate, useTransform, useReducedMotion } from "framer-motion";
 import { RingChart } from "../components/ui/ring-chart";
 import { useRef } from "react";
@@ -28,6 +28,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { NativeHapticSwitch } from "../components/ui/native-haptic-switch";
+import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
 import {
   fetchChecklist,
   getChecklistBattleStats,
@@ -915,45 +916,57 @@ export const ChecklistActivity: React.FC = () => {
                 onSelectionChange={(key) => setPackingTab(String(key))}
                 className="mt-2 w-full"
               >
-                <HeroTabs.ListContainer>
-                  <HeroTabs.List
-                    aria-label="짐싸기 담당자"
-                    className="grid h-20 w-full grid-cols-2 gap-2 bg-transparent p-0 *:h-full *:w-full"
-                  >
-                    <HeroTabs.Tab
-                      id="gahyun"
-                      className="relative z-0 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-left text-slate-500 shadow-sm transition data-[selected=true]:border-blue-300 data-[selected=true]:text-slate-950 data-[selected=true]:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:data-[selected=true]:border-blue-500/50 dark:data-[selected=true]:text-white"
-                    >
-                      <div className="flex w-full items-center gap-2.5">
-                        <Avatar className="size-8 shrink-0 ring-2 ring-white dark:ring-slate-800">
-                          <AvatarImage alt="" src={avatarSources.gahyun} />
-                          <AvatarFallback className="bg-gray-200 text-[10px] text-gray-700 dark:bg-gray-700 dark:text-gray-300">G</AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-extrabold">가현쨩</span><span className="shrink-0 text-[11px] font-bold tabular-nums text-blue-600 dark:text-blue-300">{gahyunCheckedCount}/{gahyunItems.length}</span></div>
-                          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"><span className="block h-full rounded-full bg-blue-500 transition-[width] duration-300" style={{ width: `${gahyunProgress}%` }} /></div>
-                        </div>
-                      </div>
-                      <HeroTabs.Indicator className="-z-10 rounded-2xl bg-blue-50 dark:bg-blue-500/10" />
-                    </HeroTabs.Tab>
-                    <HeroTabs.Tab
-                      id="minu"
-                      className="relative z-0 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-left text-slate-500 shadow-sm transition data-[selected=true]:border-blue-300 data-[selected=true]:text-slate-950 data-[selected=true]:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:data-[selected=true]:border-blue-500/50 dark:data-[selected=true]:text-white"
-                    >
-                      <div className="flex w-full items-center gap-2.5">
-                        <Avatar className="size-8 shrink-0 ring-2 ring-white dark:ring-slate-800">
-                          <AvatarImage alt="" src={avatarSources.minu} />
-                          <AvatarFallback className="bg-gray-200 text-[10px] text-gray-700 dark:bg-gray-700 dark:text-gray-300">M</AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-extrabold">미누쿤</span><span className="shrink-0 text-[11px] font-bold tabular-nums text-blue-600 dark:text-blue-300">{minuCheckedCount}/{minuItems.length}</span></div>
-                          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"><span className="block h-full rounded-full bg-blue-500 transition-[width] duration-300" style={{ width: `${minuProgress}%` }} /></div>
-                        </div>
-                      </div>
-                      <HeroTabs.Indicator className="-z-10 rounded-2xl bg-blue-50 dark:bg-blue-500/10" />
-                    </HeroTabs.Tab>
-                  </HeroTabs.List>
-                </HeroTabs.ListContainer>
+                <CompactSegmentedTabsList
+                  ariaLabel="짐싸기 담당자"
+                  items={[
+                    {
+                      id: "gahyun",
+                      label: (
+                        <span className="flex w-full min-w-0 items-center gap-1.5">
+                      <Avatar className="size-6">
+                        <AvatarImage alt="" src={avatarSources.gahyun} />
+                        <AvatarFallback className="bg-gray-200 text-[10px] text-gray-700 dark:bg-gray-700 dark:text-gray-300">G</AvatarFallback>
+                      </Avatar>
+                      <span className="min-w-0 truncate text-[11px] font-bold">가현쨩</span>
+                      <Chip
+                        aria-label={`가현쨩 ${gahyunItems.length}개 중 ${gahyunCheckedCount}개 완료`}
+                        className="ml-auto !h-5 !min-h-5 min-w-10 shrink-0 justify-center border border-blue-200 bg-blue-50 px-1.5 tabular-nums dark:border-blue-400/20 dark:bg-blue-400/10"
+                        color="accent"
+                        size="sm"
+                        variant="tertiary"
+                      >
+                        <Chip.Label className="text-[11px] font-bold text-blue-600 dark:text-blue-300">
+                          {gahyunCheckedCount}/{gahyunItems.length}
+                        </Chip.Label>
+                      </Chip>
+                        </span>
+                      ),
+                    },
+                    {
+                      id: "minu",
+                      label: (
+                        <span className="flex w-full min-w-0 items-center gap-1.5">
+                      <Avatar className="size-6">
+                        <AvatarImage alt="" src={avatarSources.minu} />
+                        <AvatarFallback className="bg-gray-200 text-[10px] text-gray-700 dark:bg-gray-700 dark:text-gray-300">M</AvatarFallback>
+                      </Avatar>
+                      <span className="min-w-0 truncate text-[11px] font-bold">미누쿤</span>
+                      <Chip
+                        aria-label={`미누쿤 ${minuItems.length}개 중 ${minuCheckedCount}개 완료`}
+                        className="ml-auto !h-5 !min-h-5 min-w-10 shrink-0 justify-center border border-blue-200 bg-blue-50 px-1.5 tabular-nums dark:border-blue-400/20 dark:bg-blue-400/10"
+                        color="accent"
+                        size="sm"
+                        variant="tertiary"
+                      >
+                        <Chip.Label className="text-[11px] font-bold text-blue-600 dark:text-blue-300">
+                          {minuCheckedCount}/{minuItems.length}
+                        </Chip.Label>
+                      </Chip>
+                        </span>
+                      ),
+                    },
+                  ]}
+                />
               </HeroTabs>
               <AnimateTabs value={packingTab}>
                 <AnimateTabsContents>
