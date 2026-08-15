@@ -2,7 +2,7 @@
 
 import imageCompression from "browser-image-compression";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Checkbox, CheckboxGroup, FieldError, Input, Label, Radio, RadioGroup, Tag, TagGroup, TextField } from "@heroui/react";
+import { Button, Checkbox, CheckboxGroup, FieldError, Input, Label, Radio, RadioGroup, TextField } from "@heroui/react";
 import { Plus, RefreshCw } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/drawer";
 import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import { Field } from "@/components/ui/field";
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 
 const nowInBangkok = () => {
@@ -128,6 +129,9 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const effectiveMinuShare = manualSplit ? minuShare : String(automaticShares.minu);
   const selectedCategoryTag = customCategoryMode ? customCategory : EXPENSE_CATEGORY_META[category].label;
   const categorySuggestions = EXPENSE_CATEGORIES.map((value) => EXPENSE_CATEGORY_META[value].label);
+  const visibleCategorySuggestions = selectedCategoryTag && !categorySuggestions.includes(selectedCategoryTag)
+    ? [selectedCategoryTag, ...categorySuggestions]
+    : categorySuggestions;
 
   const selectCategoryTag = (value: string) => {
     const next = value.trim();
@@ -204,9 +208,9 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
       <form aria-label={expense ? "지출 수정" : "지출 등록"} className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col overflow-hidden" onSubmit={submit}>
         <DrawerHeader className="px-4 pb-1 pt-5 text-center sm:px-6 sm:pt-6"><DrawerTitle>{expense ? "지출 수정" : "지출 등록"}</DrawerTitle></DrawerHeader>
         <DrawerPanel scrollable={false} className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-2 sm:gap-5 sm:px-6 sm:py-3">
-          <section className="grid grid-cols-2 gap-3">
-            <Field className="min-w-0 gap-2"><Label htmlFor="expense-date"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>날짜</DrawerFieldLabel></Label><input id="expense-date" aria-label="구매 날짜" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-2 text-sm dark:border-slate-700 dark:bg-slate-900" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} /></Field>
-            <Field className="min-w-0 gap-2"><Label htmlFor="expense-time"><DrawerFieldLabel icon={ClockIcon} active={open}>시간</DrawerFieldLabel></Label><input id="expense-time" aria-label="구매 시간" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-2 text-sm dark:border-slate-700 dark:bg-slate-900" onChange={(event) => setTime(event.target.value)} type="time" value={time} /></Field>
+          <section className="grid min-w-0 grid-cols-1 gap-3 min-[340px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <Field className="min-w-0 gap-2 overflow-hidden"><Label htmlFor="expense-date"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>날짜</DrawerFieldLabel></Label><input id="expense-date" aria-label="구매 날짜" className="block h-11 w-full min-w-0! max-w-full appearance-none overflow-hidden rounded-xl border border-slate-200 bg-white px-2 text-sm tabular-nums dark:border-slate-700 dark:bg-slate-900" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} /></Field>
+            <Field className="min-w-0 gap-2 overflow-hidden"><Label htmlFor="expense-time"><DrawerFieldLabel icon={ClockIcon} active={open}>시간</DrawerFieldLabel></Label><input id="expense-time" aria-label="구매 시간" className="block h-11 w-full min-w-0! max-w-full appearance-none overflow-hidden rounded-xl border border-slate-200 bg-white px-2 text-sm tabular-nums dark:border-slate-700 dark:bg-slate-900" onChange={(event) => setTime(event.target.value)} type="time" value={time} /></Field>
           </section>
 
           <TextField isRequired value={itemName} onChange={setItemName}><Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>품목</DrawerFieldLabel></Label><Input maxLength={100} placeholder="예: 팟타이, 볼트 택시" /><FieldError /></TextField>
@@ -222,30 +226,38 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
               </TextField>
               <Button aria-label="카테고리 태그 적용" isDisabled={!categoryDraft.trim()} onPress={() => selectCategoryTag(categoryDraft)} type="button" variant="secondary"><Plus className="size-4" /></Button>
             </div>
-            <TagGroup key={selectedCategoryTag} aria-label="선택한 카테고리" size="sm" variant="surface"><TagGroup.List><Tag id={selectedCategoryTag} textValue={selectedCategoryTag}>{selectedCategoryTag}</Tag></TagGroup.List></TagGroup>
             <div>
               <p className="mb-1.5 text-xs font-medium text-gray-500">추천 태그</p>
-              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {categorySuggestions.map((suggestion) => {
+              <div className="flex min-w-0 flex-wrap gap-2">
+                {visibleCategorySuggestions.map((suggestion) => {
                   const isSelected = selectedCategoryTag === suggestion;
-                  return <button className={`min-h-8 shrink-0 rounded-full border px-3 text-xs font-semibold transition-colors ${isSelected ? "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300" : "border-gray-200 bg-white text-gray-500 hover:border-blue-300 dark:border-gray-700 dark:bg-white/5"}`} disabled={isSelected} key={suggestion} onClick={() => selectCategoryTag(suggestion)} type="button">{isSelected ? "✓ " : "+ "}{suggestion}</button>;
+                  return <button className={`min-h-8 max-w-full rounded-full border px-3 text-xs font-semibold transition-colors ${isSelected ? "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300" : "border-gray-200 bg-white text-gray-500 hover:border-blue-300 dark:border-gray-700 dark:bg-white/5"}`} disabled={isSelected} key={suggestion} onClick={() => selectCategoryTag(suggestion)} type="button"><span className="block max-w-full truncate">{isSelected ? "✓ " : "+ "}{suggestion}</span></button>;
                 })}
               </div>
               <p className="mt-1 text-xs text-gray-400">하나 선택 가능 · 직접 입력은 최대 30자</p>
             </div>
           </div>
 
-          <section className="rounded-2xl bg-slate-50 p-4 dark:bg-white/5">
-            <DrawerFieldLabel icon={WalletIcon} active={open}>결제 금액</DrawerFieldLabel>
-            <div className="mt-2 flex items-center gap-2"><span className="text-2xl font-bold">฿</span><input aria-label="태국 바트 금액" className="min-w-0 flex-1 bg-transparent text-right text-3xl font-semibold tabular-nums outline-none" inputMode="decimal" min="0.01" onChange={(event) => setAmount(event.target.value)} placeholder="0" step="0.01" type="number" value={amount} /></div>
-            <p className="mt-2 text-right text-sm font-semibold text-slate-500">{numericRate > 0 ? formatKrw(convertedKrw) : "환율 확인 중"}</p>
-          </section>
+          <Field className="min-w-0 gap-2">
+            <Label htmlFor="expense-amount"><DrawerFieldLabel icon={WalletIcon} active={open}>결제 금액</DrawerFieldLabel></Label>
+            <InputGroup className="h-12 min-w-0 rounded-2xl">
+              <InputGroupAddon><InputGroupText className="text-base font-bold">฿</InputGroupText></InputGroupAddon>
+              <InputGroupInput id="expense-amount" aria-label="태국 바트 금액" className="min-w-0 text-right font-semibold tabular-nums" inputMode="decimal" min="0.01" onChange={(event) => setAmount(event.target.value)} placeholder="0" step="0.01" style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }} type="number" value={amount} />
+              <InputGroupAddon align="inline-end"><InputGroupText className="text-xs font-semibold">THB</InputGroupText></InputGroupAddon>
+            </InputGroup>
+            <div className="flex min-w-0 items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-white/5">
+              <span className="shrink-0 text-xs font-medium text-slate-400">대한민국 원</span>
+              <span className="min-w-0 truncate text-right text-sm font-bold tabular-nums text-slate-700 dark:text-slate-200">{numericRate > 0 ? formatKrw(convertedKrw) : "환율 확인 중"}</span>
+            </div>
+          </Field>
 
           <Field className="gap-2"><Label htmlFor="expense-rate"><DrawerFieldLabel icon={WalletIcon} active={open}>구매일 환율</DrawerFieldLabel></Label>
-            <div className="rounded-xl border border-slate-200 px-3 py-3 dark:border-slate-700">
-              <div className="flex items-center gap-2"><span className="text-sm text-slate-500">฿1 =</span><input id="expense-rate" aria-label="원화 환율" className="min-w-0 flex-1 bg-transparent text-right font-bold tabular-nums outline-none" inputMode="decimal" onChange={(event) => { setRate(event.target.value); setRateDate(date); setManualRate(true); }} step="0.000001" type="number" value={effectiveRate} /><span className="text-sm font-bold">원</span></div>
-              <div className="mt-2 flex items-center justify-between text-xs text-slate-400"><span>{effectiveRateDate} 관측</span>{rateQuery.isFetching && <span className="inline-flex items-center gap-1"><RefreshCw className="size-3 animate-spin" /> 조회 중</span>}{manualRate && <span>직접 입력</span>}</div>
-            </div>
+            <InputGroup className="h-12 min-w-0 rounded-2xl">
+              <InputGroupAddon><InputGroupText className="text-sm font-semibold">฿1 =</InputGroupText></InputGroupAddon>
+              <InputGroupInput id="expense-rate" aria-label="원화 환율" className="min-w-0 text-right font-bold tabular-nums" inputMode="decimal" onChange={(event) => { setRate(event.target.value); setRateDate(date); setManualRate(true); }} step="0.000001" style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }} type="number" value={effectiveRate} />
+              <InputGroupAddon align="inline-end"><InputGroupText className="text-xs font-semibold">KRW</InputGroupText></InputGroupAddon>
+            </InputGroup>
+            <div className="flex min-w-0 items-center justify-between gap-2 px-1 text-xs text-slate-400"><span className="min-w-0 truncate">{effectiveRateDate} 관측</span>{rateQuery.isFetching && <span className="inline-flex shrink-0 items-center gap-1"><RefreshCw className="size-3 animate-spin" /> 조회 중</span>}{manualRate && <span className="shrink-0">직접 입력</span>}</div>
             {rateQuery.isError && !rate && <p className="mt-2 text-xs text-red-500">{rateQuery.error.message}</p>}
           </Field>
 
