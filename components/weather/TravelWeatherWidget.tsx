@@ -277,7 +277,8 @@ export function BeforeTripWeatherTicker() {
   const weather = getWeatherPresentation(city.weatherCode, city.isDay, { windSpeed: city.windSpeed, time: city.observedAt, sunrise: city.sunrise, sunset: city.sunset });
 
   return (
-    <section className="flex h-12 items-center overflow-hidden rounded-2xl border border-slate-200 bg-white px-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]" aria-label="여행지 현재 날씨">
+    <section className="flex h-12 items-center gap-1.5 overflow-hidden rounded-2xl border border-slate-200 bg-white px-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]" aria-label="여행지 현재 날씨">
+      <span className="shrink-0 text-[10px] font-semibold tabular-nums text-slate-400">{formatCompactDate(cities[0].observedAt)}</span>
       <div className="relative h-7 min-w-0 flex-1 overflow-hidden">
         <AnimatePresence initial={false} mode="popLayout">
           <motion.div
@@ -288,7 +289,6 @@ export function BeforeTripWeatherTicker() {
             transition={{ duration: prefersReducedMotion ? 0.12 : 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0 flex min-w-0 items-center gap-1.5"
           >
-            <span className="shrink-0 text-[10px] font-semibold tabular-nums text-slate-400">{formatCompactDate(city.observedAt)}</span>
             <WeatherIcon icon={weather.icon} size={17} className="shrink-0 text-sky-500" autoPlay aria-hidden="true" />
             <span className="shrink-0 text-xs font-bold text-slate-800">{city.city}</span>
             <span className="shrink-0 text-sm font-bold tracking-[-0.04em] text-slate-950">{city.temperature}°</span>
