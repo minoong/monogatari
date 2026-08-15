@@ -2,9 +2,9 @@
 
 import imageCompression from "browser-image-compression";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, FieldError, Input, Label, TextField } from "@heroui/react";
-import { Check, RefreshCw } from "lucide-react";
-import { useMemo, useState, type FormEvent } from "react";
+import { Button, Checkbox, CheckboxGroup, FieldError, Input, Label, Radio, RadioGroup, TextField } from "@heroui/react";
+import { RefreshCw } from "lucide-react";
+import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import {
   EXPENSE_CATEGORIES,
@@ -21,6 +21,14 @@ import {
   type ExpensePerson,
 } from "@/lib/expenses";
 import { WishImagePicker, type WishImageDraft } from "@/components/wish/WishImagePicker";
+import { CalendarDaysIcon } from "@/components/ui/calendar-days";
+import { ClockIcon } from "@/components/ui/clock";
+import { FileTextIcon } from "@/components/ui/file-text";
+import { GalleryThumbnailsIcon } from "@/components/ui/gallery-thumbnails";
+import { LayersIcon } from "@/components/ui/layers";
+import { ScanTextIcon } from "@/components/ui/scan-text";
+import { UsersRoundIcon } from "@/components/ui/users-round";
+import { WalletIcon } from "@/components/ui/wallet";
 import {
   Drawer,
   DrawerFooter,
@@ -29,9 +37,8 @@ import {
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
-import { Button as BaseButton } from "@/components/ui/button";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
+import { Field } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 
 const nowInBangkok = () => {
@@ -118,13 +125,6 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const effectiveGahyunShare = manualSplit ? gahyunShare : String(automaticShares.gahyun);
   const effectiveMinuShare = manualSplit ? minuShare : String(automaticShares.minu);
 
-  const participantSet = useMemo(() => new Set(participants), [participants]);
-  const toggleParticipant = (person: ExpensePerson) => {
-    setParticipants((current) => current.includes(person)
-      ? current.length === 1 ? current : current.filter((item) => item !== person)
-      : [...current, person]);
-  };
-
   const mutation = useMutation({
     mutationFn: async () => {
       const uploadedPaths: string[] = [];
@@ -191,17 +191,20 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
         <DrawerHeader className="px-6 pb-1 pt-6 text-center"><DrawerTitle>{expense ? "지출 수정" : "지출 등록"}</DrawerTitle></DrawerHeader>
         <DrawerPanel scrollable={false} className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-5 overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-3">
           <section className="grid grid-cols-1 gap-3 min-[440px]:grid-cols-2">
-            <Field className="gap-2"><FieldLabel className="text-sm">구매 날짜</FieldLabel><input aria-label="구매 날짜" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} /></Field>
-            <Field className="gap-2"><FieldLabel className="text-sm">태국 현지 시간</FieldLabel><input aria-label="구매 시간" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" onChange={(event) => setTime(event.target.value)} type="time" value={time} /></Field>
+            <Field className="gap-2"><Label htmlFor="expense-date"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>구매 날짜</DrawerFieldLabel></Label><input id="expense-date" aria-label="구매 날짜" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} /></Field>
+            <Field className="gap-2"><Label htmlFor="expense-time"><DrawerFieldLabel icon={ClockIcon} active={open}>태국 현지 시간</DrawerFieldLabel></Label><input id="expense-time" aria-label="구매 시간" className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900" onChange={(event) => setTime(event.target.value)} type="time" value={time} /></Field>
           </section>
 
-          <TextField isRequired value={itemName} onChange={setItemName}><Label>품목</Label><Input maxLength={100} placeholder="예: 팟타이, 볼트 택시" /><FieldError /></TextField>
+          <TextField isRequired value={itemName} onChange={setItemName}><Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>품목</DrawerFieldLabel></Label><Input maxLength={100} placeholder="예: 팟타이, 볼트 택시" /><FieldError /></TextField>
 
-          <Field className="gap-2">
-            <FieldLabel className="text-sm">카테고리</FieldLabel>
+          <RadioGroup className="gap-2" name="expense-category" value={customCategoryMode ? "custom" : category} onChange={(value) => {
+            if (value === "custom") { setCategory("other"); setCustomCategoryMode(true); return; }
+            setCategory(value as ExpenseCategory); setCustomCategoryMode(false);
+          }}>
+            <Label><DrawerFieldLabel icon={LayersIcon} active={open}>카테고리</DrawerFieldLabel></Label>
             <div className="grid grid-cols-3 gap-2 min-[440px]:grid-cols-4">
-              {EXPENSE_CATEGORIES.map((value) => <BaseButton aria-pressed={!customCategoryMode && category === value} className={choiceButtonClass(!customCategoryMode && category === value)} key={value} onClick={() => { setCategory(value); setCustomCategoryMode(false); }} variant="outline">{!customCategoryMode && category === value && <Check className="absolute right-1.5 top-1.5 size-3" />}{EXPENSE_CATEGORY_META[value].label}</BaseButton>)}
-              <BaseButton aria-pressed={customCategoryMode} className={choiceButtonClass(customCategoryMode)} onClick={() => { setCategory("other"); setCustomCategoryMode(true); }} variant="outline">{customCategoryMode && <Check className="absolute right-1.5 top-1.5 size-3" />}직접 입력</BaseButton>
+              {EXPENSE_CATEGORIES.map((value) => <Radio className="min-w-0" key={value} value={value}><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected)}><Radio.Control><Radio.Indicator /></Radio.Control><span>{EXPENSE_CATEGORY_META[value].label}</span></Radio.Content></Radio>)}
+              <Radio className="min-w-0" value="custom"><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected)}><Radio.Control><Radio.Indicator /></Radio.Control><span>직접 입력</span></Radio.Content></Radio>
             </div>
             {customCategoryMode && <TextField
               fullWidth
@@ -212,37 +215,37 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
               value={customCategory}
               onChange={setCustomCategory}
             >
-              <Label>직접 입력 카테고리</Label>
+              <Label><DrawerFieldLabel icon={LayersIcon} active={open}>직접 입력 카테고리</DrawerFieldLabel></Label>
               <Input maxLength={30} placeholder="예: 카페, 선물, 기념품" />
               <FieldError>카테고리 이름을 입력해 주세요.</FieldError>
             </TextField>}
-          </Field>
+          </RadioGroup>
 
           <section className="rounded-2xl bg-slate-50 p-4 dark:bg-white/5">
-            <label className="text-sm font-bold">결제 금액</label>
+            <DrawerFieldLabel icon={WalletIcon} active={open}>결제 금액</DrawerFieldLabel>
             <div className="mt-2 flex items-center gap-2"><span className="text-2xl font-bold">฿</span><input aria-label="태국 바트 금액" className="min-w-0 flex-1 bg-transparent text-right text-3xl font-semibold tabular-nums outline-none" inputMode="decimal" min="0.01" onChange={(event) => setAmount(event.target.value)} placeholder="0" step="0.01" type="number" value={amount} /></div>
             <p className="mt-2 text-right text-sm font-semibold text-slate-500">{numericRate > 0 ? formatKrw(convertedKrw) : "환율 확인 중"}</p>
           </section>
 
-          <Field className="gap-2"><FieldLabel className="text-sm">구매일 환율</FieldLabel>
+          <Field className="gap-2"><Label htmlFor="expense-rate"><DrawerFieldLabel icon={WalletIcon} active={open}>구매일 환율</DrawerFieldLabel></Label>
             <div className="rounded-xl border border-slate-200 px-3 py-3 dark:border-slate-700">
-              <div className="flex items-center gap-2"><span className="text-sm text-slate-500">฿1 =</span><input aria-label="원화 환율" className="min-w-0 flex-1 bg-transparent text-right font-bold tabular-nums outline-none" inputMode="decimal" onChange={(event) => { setRate(event.target.value); setRateDate(date); setManualRate(true); }} step="0.000001" type="number" value={effectiveRate} /><span className="text-sm font-bold">원</span></div>
+              <div className="flex items-center gap-2"><span className="text-sm text-slate-500">฿1 =</span><input id="expense-rate" aria-label="원화 환율" className="min-w-0 flex-1 bg-transparent text-right font-bold tabular-nums outline-none" inputMode="decimal" onChange={(event) => { setRate(event.target.value); setRateDate(date); setManualRate(true); }} step="0.000001" type="number" value={effectiveRate} /><span className="text-sm font-bold">원</span></div>
               <div className="mt-2 flex items-center justify-between text-xs text-slate-400"><span>{effectiveRateDate} 관측</span>{rateQuery.isFetching && <span className="inline-flex items-center gap-1"><RefreshCw className="size-3 animate-spin" /> 조회 중</span>}{manualRate && <span>직접 입력</span>}</div>
             </div>
             {rateQuery.isError && !rate && <p className="mt-2 text-xs text-red-500">{rateQuery.error.message}</p>}
           </Field>
 
-          <Field className="gap-2"><FieldLabel className="text-sm">결제자</FieldLabel><div className="grid grid-cols-2 gap-2">{EXPENSE_PEOPLE.map((person) => <BaseButton aria-pressed={payer === person} className={choiceButtonClass(payer === person)} key={person} onClick={() => setPayer(person)} variant="outline">{payer === person && <Check className="absolute right-1.5 top-1.5 size-3" />}{EXPENSE_PERSON_META[person].label}</BaseButton>)}</div></Field>
-          <Field className="gap-2"><FieldLabel className="text-sm">비용 사용자</FieldLabel><div className="grid grid-cols-2 gap-2">{EXPENSE_PEOPLE.map((person) => <BaseButton aria-pressed={participantSet.has(person)} className={choiceButtonClass(participantSet.has(person))} key={person} onClick={() => toggleParticipant(person)} variant="outline">{participantSet.has(person) && <Check className="absolute right-1.5 top-1.5 size-3" />}{EXPENSE_PERSON_META[person].label}</BaseButton>)}</div></Field>
+          <RadioGroup className="gap-2" name="expense-payer" value={payer ?? undefined} onChange={(value) => setPayer(value as ExpensePerson)}><Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>결제자</DrawerFieldLabel></Label><div className="grid grid-cols-2 gap-2">{EXPENSE_PEOPLE.map((person) => <Radio className="min-w-0" key={person} value={person}><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected)}><Radio.Control><Radio.Indicator /></Radio.Control><span>{EXPENSE_PERSON_META[person].label}</span></Radio.Content></Radio>)}</div></RadioGroup>
+          <CheckboxGroup className="gap-2" name="expense-participants" value={participants} onChange={(value) => { const next = value as ExpensePerson[]; if (next.length) setParticipants(next); }}><Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>비용 사용자</DrawerFieldLabel></Label><div className="grid grid-cols-2 gap-2">{EXPENSE_PEOPLE.map((person) => <Checkbox className="min-w-0" key={person} value={person}><Checkbox.Content className={({ isSelected }) => choiceControlClass(isSelected)}><Checkbox.Control><Checkbox.Indicator /></Checkbox.Control><span>{EXPENSE_PERSON_META[person].label}</span></Checkbox.Content></Checkbox>)}</div></CheckboxGroup>
 
-          {participants.length === 2 && <Field className="gap-2"><FieldLabel className="text-sm">공동 지출 분담</FieldLabel><div className="flex items-center justify-between gap-2"><p className="min-w-0 text-xs text-slate-500">기본은 반반, 1사땅 잔액은 결제자 몫이에요.</p><BaseButton className="min-h-11 shrink-0 whitespace-nowrap px-1 text-[11px] font-bold text-blue-600" onClick={() => { if (!manualSplit) { setGahyunShare(String(automaticShares.gahyun)); setMinuShare(String(automaticShares.minu)); } setManualSplit((value) => !value); }} size="sm" variant="ghost">{manualSplit ? "반반으로" : "직접 나누기"}</BaseButton></div>{manualSplit && <div className="mt-2 grid grid-cols-2 gap-2"><ShareInput label="가현쨩" value={gahyunShare} onChange={setGahyunShare} /><ShareInput label="미누쿤" value={minuShare} onChange={setMinuShare} /></div>}</Field>}
+          {participants.length === 2 && <Field className="gap-2"><DrawerFieldLabel icon={UsersRoundIcon} active={open}>공동 지출 분담</DrawerFieldLabel><div className="flex items-center justify-between gap-2"><p className="min-w-0 text-xs text-slate-500">기본은 반반, 1사땅 잔액은 결제자 몫이에요.</p><Button className="min-h-11 shrink-0 whitespace-nowrap px-1 text-[11px] font-bold text-blue-600" onPress={() => { if (!manualSplit) { setGahyunShare(String(automaticShares.gahyun)); setMinuShare(String(automaticShares.minu)); } setManualSplit((value) => !value); }} size="sm" type="button" variant="ghost">{manualSplit ? "반반으로" : "직접 나누기"}</Button></div>{manualSplit && <div className="mt-2 grid grid-cols-2 gap-2"><ShareInput label="가현쨩" value={gahyunShare} onChange={setGahyunShare} /><ShareInput label="미누쿤" value={minuShare} onChange={setMinuShare} /></div>}</Field>}
 
-          <TextField value={merchant} onChange={setMerchant}><Label>상호 · 매장 (선택)</Label><Input maxLength={100} placeholder="예: Terminal 21" /></TextField>
-          <Field className="gap-2"><FieldLabel className="text-sm">결제 수단</FieldLabel><div className="grid grid-cols-4 gap-2">{EXPENSE_PAYMENT_METHODS.map((method) => <BaseButton aria-pressed={paymentMethod === method} className={choiceButtonClass(paymentMethod === method)} key={method} onClick={() => setPaymentMethod(method)} variant="outline">{paymentMethod === method && <Check className="absolute right-1.5 top-1.5 size-3" />}{EXPENSE_PAYMENT_META[method]}</BaseButton>)}</div></Field>
-          {paymentMethod === "card" && <TextField value={actualKrw} onChange={setActualKrw}><Label>실제 카드 청구 원화 (선택)</Label><Input inputMode="numeric" min="1" placeholder="승인 내역 확인 후 입력" type="number" /></TextField>}
+          <TextField value={merchant} onChange={setMerchant}><Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>상호 · 매장 (선택)</DrawerFieldLabel></Label><Input maxLength={100} placeholder="예: Terminal 21" /></TextField>
+          <RadioGroup className="gap-2" name="expense-payment-method" value={paymentMethod} onChange={(value) => setPaymentMethod(value as ExpensePaymentMethod)}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>결제 수단</DrawerFieldLabel></Label><div className="grid grid-cols-4 gap-2">{EXPENSE_PAYMENT_METHODS.map((method) => <Radio className="min-w-0" key={method} value={method}><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected, true)}><Radio.Control><Radio.Indicator /></Radio.Control><span>{EXPENSE_PAYMENT_META[method]}</span></Radio.Content></Radio>)}</div></RadioGroup>
+          {paymentMethod === "card" && <TextField value={actualKrw} onChange={setActualKrw}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>실제 카드 청구 원화 (선택)</DrawerFieldLabel></Label><Input inputMode="numeric" min="1" placeholder="승인 내역 확인 후 입력" type="number" /></TextField>}
 
-          <WishImagePicker images={images} inputId="expense-images" itemLabel="영수증 사진" label="영수증 사진" description="최대 5장 · 업로드 전에 자동으로 가볍게 압축해요." onChange={setImages} />
-          <Field className="gap-2"><FieldLabel className="text-sm">메모 (선택)</FieldLabel><textarea aria-label="지출 메모" className="min-h-24 w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900" maxLength={500} onChange={(event) => setMemo(event.target.value)} placeholder="기억할 내용을 남겨 주세요." value={memo} /></Field>
+          <div className="space-y-2"><DrawerFieldLabel icon={GalleryThumbnailsIcon} active={open}>영수증 사진</DrawerFieldLabel><WishImagePicker images={images} inputId="expense-images" itemLabel="영수증 사진" label="사진 첨부" description="최대 5장 · 업로드 전에 자동으로 가볍게 압축해요." onChange={setImages} /></div>
+          <Field className="gap-2"><Label htmlFor="expense-memo"><DrawerFieldLabel icon={FileTextIcon} active={open}>메모 (선택)</DrawerFieldLabel></Label><textarea id="expense-memo" aria-label="지출 메모" className="min-h-24 w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900" maxLength={500} onChange={(event) => setMemo(event.target.value)} placeholder="기억할 내용을 남겨 주세요." value={memo} /></Field>
           {submitError && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600" role="alert">{submitError}</p>}
         </DrawerPanel>
         <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
@@ -254,8 +257,9 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   </Drawer>;
 }
 
-const choiceButtonClass = (selected: boolean) => cn(
-  "relative min-h-11 rounded-xl px-2 text-xs font-bold transition active:scale-[0.98]",
+const choiceControlClass = (selected: boolean, compact = false) => cn(
+  "flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border px-2 text-xs font-bold transition active:scale-[0.98]",
+  compact && "gap-1 px-1 text-[11px]",
   selected
     ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
     : "border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900",
