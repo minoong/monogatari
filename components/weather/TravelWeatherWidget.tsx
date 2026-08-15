@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, Droplets, RefreshCw, Umbrella } from "lucide-react";
 import { getWeatherPresentation, useWeather, type WeatherCity, type WeatherPresentation } from "@/lib/weather";
 import { SunIcon } from "@/components/ui/sun";
@@ -118,8 +118,10 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
       </div>
 
       <div className="mt-2.5 border-t border-slate-100 pt-2.5">
-        {isDailyExpanded ? (
-          <motion.div layout className="rounded-lg border p-1.5" style={{ borderColor: "#e2e8f0" }}>
+        <AnimatePresence initial={false} mode="wait">
+          {isDailyExpanded ? (
+          <motion.div key="daily-expanded" initial={{ height: 36, opacity: 0.5 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 36, opacity: 0.5 }} transition={{ duration: 0.2, ease: "easeInOut" }} className="overflow-hidden">
+            <div className="rounded-lg border p-1.5" style={{ borderColor: "#e2e8f0" }}>
             <div className="mb-1 flex items-center justify-between px-1">
               <p className="text-xs font-bold">7일 예보</p>
               <p className="text-[10px] font-medium text-slate-400">최고 · 최저</p>
@@ -140,19 +142,25 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
               );
             })}
             </div>
-            <button type="button" onClick={() => setIsDailyExpanded(false)} className="mx-auto mt-1.5 flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-semibold text-slate-400 transition-colors hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="true">
-              접기<ChevronDown size={11} className="rotate-180" aria-hidden="true" />
+            <button type="button" onClick={() => setIsDailyExpanded(false)} className="relative mt-1.5 flex h-9 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="true">
+              <span className="absolute inset-0 flex items-center justify-around px-5 opacity-20 blur-[1.5px]" aria-hidden="true">
+                {city.dailyForecast.slice(0, 4).map((forecast) => <WeatherIcon key={forecast.date} icon={getWeatherPresentation(forecast.weatherCode, true).icon} size={18} className="text-sky-500" />)}
+              </span>
+              <span className="relative z-10 flex items-center gap-1 rounded-full border border-slate-100 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm">7일 예보 접기<ChevronDown size={12} className="rotate-180" aria-hidden="true" /></span>
+              <span className="absolute inset-0 bg-white/35" aria-hidden="true" />
             </button>
+            </div>
           </motion.div>
-        ) : (
-          <button type="button" onClick={() => setIsDailyExpanded(true)} className="relative flex h-9 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="false" aria-label="7일 예보 전체 보기">
+          ) : (
+          <motion.button key="daily-collapsed" initial={{ height: "auto", opacity: 0.5 }} animate={{ height: 36, opacity: 1 }} exit={{ height: "auto", opacity: 0.5 }} transition={{ duration: 0.2, ease: "easeInOut" }} type="button" onClick={() => setIsDailyExpanded(true)} className="relative flex w-full items-center justify-center overflow-hidden rounded-lg border border-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded="false" aria-label="7일 예보 전체 보기">
             <span className="absolute inset-0 flex items-center justify-around px-5 opacity-30 blur-[1.5px]" aria-hidden="true">
               {city.dailyForecast.slice(0, 4).map((forecast) => <WeatherIcon key={forecast.date} icon={getWeatherPresentation(forecast.weatherCode, true).icon} size={18} className="text-sky-500" />)}
             </span>
             <span className="relative z-10 flex items-center gap-1 rounded-full border border-slate-100 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm">7일 예보 더보기<ChevronDown size={12} aria-hidden="true" /></span>
             <span className="absolute inset-0 bg-white/35" aria-hidden="true" />
-          </button>
-        )}
+          </motion.button>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
