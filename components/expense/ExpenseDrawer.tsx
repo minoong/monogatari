@@ -23,6 +23,7 @@ import {
 import { WishImagePicker, type WishImageDraft } from "@/components/wish/WishImagePicker";
 import { CalendarDaysIcon } from "@/components/ui/calendar-days";
 import { ClockIcon } from "@/components/ui/clock";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FileTextIcon } from "@/components/ui/file-text";
 import { GalleryThumbnailsIcon } from "@/components/ui/gallery-thumbnails";
 import { LayersIcon } from "@/components/ui/layers";
@@ -235,8 +236,8 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
             {rateQuery.isError && !rate && <p className="mt-2 text-xs text-red-500">{rateQuery.error.message}</p>}
           </Field>
 
-          <RadioGroup className="gap-2" name="expense-payer" value={payer ?? undefined} onChange={(value) => setPayer(value as ExpensePerson)}><Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>결제자</DrawerFieldLabel></Label><div className="grid grid-cols-2 gap-2">{EXPENSE_PEOPLE.map((person) => <Radio className="min-w-0" key={person} value={person}><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected)}><Radio.Control><Radio.Indicator /></Radio.Control><span>{EXPENSE_PERSON_META[person].label}</span></Radio.Content></Radio>)}</div></RadioGroup>
-          <CheckboxGroup className="gap-2" name="expense-participants" value={participants} onChange={(value) => { const next = value as ExpensePerson[]; if (next.length) setParticipants(next); }}><Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>비용 사용자</DrawerFieldLabel></Label><div className="grid grid-cols-2 gap-2">{EXPENSE_PEOPLE.map((person) => <Checkbox className="min-w-0" key={person} value={person}><Checkbox.Content className={({ isSelected }) => choiceControlClass(isSelected)}><Checkbox.Control><Checkbox.Indicator /></Checkbox.Control><span>{EXPENSE_PERSON_META[person].label}</span></Checkbox.Content></Checkbox>)}</div></CheckboxGroup>
+          <RadioGroup className="gap-2" name="expense-payer" value={payer ?? undefined} onChange={(value) => setPayer(value as ExpensePerson)}><Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>결제자</DrawerFieldLabel></Label><div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">{EXPENSE_PEOPLE.map((person) => <Radio key={person} value={person}><Radio.Content><Radio.Control><Radio.Indicator /></Radio.Control><PersonAvatar person={person} /><span>{EXPENSE_PERSON_META[person].label}</span></Radio.Content></Radio>)}</div></RadioGroup>
+          <CheckboxGroup className="gap-2" name="expense-participants" value={participants} onChange={(value) => { const next = value as ExpensePerson[]; if (next.length) setParticipants(next); }}><Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>비용 사용자</DrawerFieldLabel></Label><div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">{EXPENSE_PEOPLE.map((person) => <Checkbox key={person} value={person}><Checkbox.Content><Checkbox.Control><Checkbox.Indicator /></Checkbox.Control><PersonAvatar person={person} /><span>{EXPENSE_PERSON_META[person].label}</span></Checkbox.Content></Checkbox>)}</div></CheckboxGroup>
 
           {participants.length === 2 && <Field className="gap-2"><DrawerFieldLabel icon={UsersRoundIcon} active={open}>공동 지출 분담</DrawerFieldLabel><div className="flex items-center justify-between gap-2"><p className="min-w-0 text-xs text-slate-500">기본은 반반, 1사땅 잔액은 결제자 몫이에요.</p><Button className="min-h-11 shrink-0 whitespace-nowrap px-1 text-[11px] font-bold text-blue-600" onPress={() => { if (!manualSplit) { setGahyunShare(String(automaticShares.gahyun)); setMinuShare(String(automaticShares.minu)); } setManualSplit((value) => !value); }} size="sm" type="button" variant="ghost">{manualSplit ? "반반으로" : "직접 나누기"}</Button></div>{manualSplit && <div className="mt-2 grid grid-cols-2 gap-2"><ShareInput label="가현쨩" value={gahyunShare} onChange={setGahyunShare} /><ShareInput label="미누쿤" value={minuShare} onChange={setMinuShare} /></div>}</Field>}
 
@@ -264,6 +265,11 @@ const choiceControlClass = (selected: boolean, compact = false) => cn(
     ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
     : "border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900",
 );
+
+function PersonAvatar({ person }: { person: ExpensePerson }) {
+  const meta = EXPENSE_PERSON_META[person];
+  return <Avatar color={person === "gahyun" ? "accent" : "success"} size="sm"><AvatarImage alt="" src={meta.image} /><AvatarFallback>{person === "gahyun" ? "G" : "M"}</AvatarFallback></Avatar>;
+}
 
 function ShareInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return <label className="rounded-xl border border-slate-200 p-3 text-xs font-semibold dark:border-slate-700"><span>{label}</span><span className="mt-2 flex items-center gap-1"><span>฿</span><input aria-label={`${label} 분담액`} className="min-w-0 flex-1 bg-transparent text-right text-base font-bold outline-none" inputMode="decimal" min="0" onChange={(event) => onChange(event.target.value)} step="0.01" type="number" value={value} /></span></label>;
