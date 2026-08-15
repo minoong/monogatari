@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Droplets, RefreshCw, Umbrella } from "lucide-react";
 import { getWeatherPresentation, useWeather, type WeatherPresentation } from "@/lib/weather";
 import { SunIcon } from "@/components/ui/sun";
@@ -92,6 +93,7 @@ function WeatherSkeleton() {
 export function TravelWeatherWidget() {
   const { data: cities, isPending, isError, isFetching, refetch } = useWeather();
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   if (isPending) return <WeatherSkeleton />;
 
@@ -125,18 +127,29 @@ export function TravelWeatherWidget() {
           </div>
         </div>
 
-        <div className="mt-4 -mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]" aria-label="도시 선택">
+        <div className="mt-4 grid grid-cols-3 gap-1.5 rounded-[20px] border border-slate-200 bg-slate-100 p-1.5" aria-label="여행지 선택">
           {cities.map((city) => {
             const cityWeather = getWeatherPresentation(city.weatherCode, city.isDay);
             const isSelected = city.id === selectedCity.id;
             return (
-              <button key={city.id} type="button" onClick={() => setSelectedCityId(city.id)} aria-pressed={isSelected} className="min-w-[106px] snap-start rounded-2xl border px-3 py-2.5 text-left transition duration-200 active:scale-[0.97]" style={{ backgroundColor: isSelected ? "#eff6ff" : "#f8fafc", borderColor: isSelected ? "#93c5fd" : "#e2e8f0" }}>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-bold">{city.city}</span>
-                  <span className="flex size-[18px] shrink-0 items-center justify-center"><WeatherIcon icon={cityWeather.icon} size={18} className="text-sky-500" aria-label={cityWeather.label} /></span>
-                </div>
-                <p className="mt-1 text-lg font-semibold tracking-[-0.05em]">{city.temperature}°</p>
-              </button>
+              <motion.button
+                key={city.id}
+                type="button"
+                onClick={() => setSelectedCityId(city.id)}
+                aria-pressed={isSelected}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 420, damping: 28 }}
+                className={`relative min-w-0 overflow-hidden rounded-[14px] px-2.5 py-2.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${isSelected ? "text-slate-900" : "text-slate-500"}`}
+              >
+                {isSelected && <motion.span layoutId="selected-weather-city" className="absolute inset-0 rounded-[14px] bg-white shadow-[0_3px_10px_-6px_rgba(15,23,42,0.45)]" transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 30 }} />}
+                <span className="relative flex items-center justify-between gap-1.5">
+                  <span className="truncate text-xs font-bold">{city.city}</span>
+                  <motion.span animate={{ scale: isSelected ? 1 : 0.88, opacity: isSelected ? 1 : 0.62 }} transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 360, damping: 20 }} className="flex size-[18px] shrink-0 items-center justify-center">
+                    <WeatherIcon icon={cityWeather.icon} size={18} className={isSelected ? "text-sky-500" : "text-slate-400"} aria-label={cityWeather.label} />
+                  </motion.span>
+                </span>
+                <motion.p animate={{ y: isSelected ? 0 : 1 }} transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 360, damping: 24 }} className="relative mt-1 text-lg font-semibold tracking-[-0.05em]">{city.temperature}°</motion.p>
+              </motion.button>
             );
           })}
         </div>
