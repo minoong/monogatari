@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, Droplets, RefreshCw, Umbrella } from "lucide-react";
+import { Button } from "@heroui/react";
 import { getWeatherPresentation, useWeather, type WeatherCity, type WeatherPresentation } from "@/lib/weather";
 import { SunIcon } from "@/components/ui/sun";
 import { MoonIcon } from "@/components/ui/moon";
@@ -143,9 +144,11 @@ function WeatherDetails({ city, isRefreshing }: { city: WeatherCity; isRefreshin
             </div>
           </div>
           {!isDailyExpanded && <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/15 via-white/70 to-white" aria-hidden="true" />}
-          <motion.button layout transition={{ type: "spring", stiffness: 500, damping: 36 }} type="button" onClick={() => setIsDailyExpanded((expanded) => !expanded)} className="absolute inset-x-0 bottom-1 z-10 mx-auto flex w-fit items-center gap-0.5 rounded-full border border-slate-100 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-slate-700 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400" aria-expanded={isDailyExpanded}>
-            {isDailyExpanded ? "접기" : "7일 예보 더보기"}<ChevronDown size={12} className={isDailyExpanded ? "rotate-180" : ""} aria-hidden="true" />
-          </motion.button>
+          <motion.div layout transition={{ type: "spring", stiffness: 500, damping: 36 }} className="absolute inset-x-0 bottom-1 z-10 mx-auto w-fit">
+            <Button size="sm" variant="tertiary" onPress={() => setIsDailyExpanded((expanded) => !expanded)} className="min-h-11 rounded-full px-3 text-[11px] font-bold shadow-sm" aria-expanded={isDailyExpanded}>
+              {isDailyExpanded ? "접기" : "7일 예보 더보기"}<ChevronDown size={14} className={isDailyExpanded ? "rotate-180" : ""} aria-hidden="true" />
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
     </div>
