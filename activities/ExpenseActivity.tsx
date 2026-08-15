@@ -182,19 +182,19 @@ export const ExpenseActivity: React.FC = () => {
 
 function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
   const summary = summarizeExpenses(expenses);
-  return <section className="overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10">
-    <div className="px-4 py-4">
+  return <section className="overflow-hidden rounded-[24px] bg-slate-950 text-white shadow-[0_14px_34px_-22px_rgba(15,23,42,0.9)] dark:bg-slate-900">
+    <div className="px-5 pb-5 pt-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold text-slate-500">총 지출</p>
-        <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold tabular-nums text-slate-500 dark:bg-slate-800">{summary.count}건</span>
+        <p className="text-xs font-semibold text-white/60">여행 지출</p>
+        <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold tabular-nums text-white/70">{summary.count}건</span>
       </div>
-      <p className="mt-1 text-[28px] font-black leading-none tracking-tight tabular-nums">{formatKrw(summary.totalKrw)}</p>
-      <p className="mt-2 text-sm font-bold tabular-nums text-slate-500">{formatThb(summary.totalThb)}</p>
+      <p className="mt-2 text-[32px] font-black leading-none tracking-[-0.04em] tabular-nums">{formatKrw(summary.totalKrw)}</p>
+      <p className="mt-2 text-sm font-bold tabular-nums text-white/55">{formatThb(summary.totalThb)}</p>
     </div>
-    <div className="flex min-w-0 items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/70 px-4 py-3 dark:border-slate-800 dark:bg-slate-800/40">
+    <div className="flex min-w-0 items-center justify-between gap-3 border-t border-white/10 bg-white/[0.04] px-5 py-3.5">
       <div className="min-w-0">
-        <p className="text-[10px] font-semibold text-slate-400">현재 정산</p>
-        {summary.settlement ? <p className="mt-0.5 truncate text-xs font-extrabold"><span className="text-blue-600">{EXPENSE_PERSON_META[summary.settlement.from].label}</span><span className="mx-1 text-slate-300">→</span>{EXPENSE_PERSON_META[summary.settlement.to].label}</p> : <p className="mt-0.5 text-xs font-bold text-slate-500">정산할 금액이 없어요</p>}
+        <p className="text-[10px] font-semibold text-white/45">현재 정산</p>
+        {summary.settlement ? <p className="mt-0.5 truncate text-xs font-extrabold"><span className="text-sky-300">{EXPENSE_PERSON_META[summary.settlement.from].label}</span><span className="mx-1 text-white/35">→</span>{EXPENSE_PERSON_META[summary.settlement.to].label}</p> : <p className="mt-0.5 text-xs font-bold text-white/60">정산할 금액이 없어요</p>}
       </div>
       <p className="shrink-0 text-base font-black tabular-nums">{summary.settlement ? formatKrw(summary.settlement.amount) : formatKrw(0)}</p>
     </div>
@@ -215,10 +215,62 @@ function ExpenseRow({ expense, onEdit, onDelete }: { expense: Expense; onEdit: (
   const categoryLabel = getExpenseCategoryLabel(expense);
   const categoryColor = getExpenseCategoryColor(expense);
   const users = EXPENSE_PEOPLE.filter((person) => person === "gahyun" ? expense.share_gahyun_thb > 0 : expense.share_minu_thb > 0);
-  return <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.42 }}><MorphingDialogTrigger ariaLabel={`${expense.item_name} 상세 보기`} className="block w-full max-w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"><article className="flex min-h-[76px] min-w-0 items-center gap-3 px-4 py-3"><div className="grid size-10 shrink-0 place-items-center rounded-xl text-lg" style={{ backgroundColor: `${categoryColor}18`, color: categoryColor }}><ReceiptText className="size-5" /></div><div className="min-w-0 flex-1"><MorphingDialogTitle><h3 className="truncate text-sm font-bold">{expense.item_name}</h3></MorphingDialogTitle><p className="mt-1 truncate text-xs text-slate-400">{formatBangkokTime(expense.purchased_at)}{expense.merchant ? ` · ${expense.merchant}` : ""}</p><div className="mt-1 flex min-w-0 items-center gap-1.5 overflow-hidden text-[10px] font-semibold text-slate-500"><span className="shrink-0">{EXPENSE_PERSON_META[expense.payer].label} 결제</span><span>·</span><span className="truncate">{users.map((person) => EXPENSE_PERSON_META[person].label).join(" + ")}</span>{expense.images.length > 0 && <><span>·</span><Camera className="size-3 shrink-0" /><span>{expense.images.length}</span></>}</div></div><div className="shrink-0 text-right"><p className="text-sm font-extrabold tabular-nums">{formatThb(expense.amount_thb)}</p><p className="mt-1 text-[11px] font-semibold tabular-nums text-slate-400">{formatKrw(getEffectiveKrw(expense))}</p></div></article></MorphingDialogTrigger><MorphingDialogContainer><MorphingDialogContent className="relative mx-4 flex max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md flex-col overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900"><MorphingDialogClose className="right-4 top-4 z-20 flex size-10 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur" /><div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">{expense.images.length > 0 && <WishImageGallery images={expense.images} onImagePress={() => {}} title={expense.item_name} />}<div className="min-w-0 p-5"><p className="truncate text-xs font-bold" style={{ color: categoryColor }}>{categoryLabel}</p><MorphingDialogTitle><h2 className="mt-1 break-words text-xl font-extrabold">{expense.item_name}</h2></MorphingDialogTitle><p className="mt-2 text-3xl font-black tabular-nums">{formatThb(expense.amount_thb)}</p><p className="mt-1 text-sm font-bold text-slate-500">{formatKrw(getEffectiveKrw(expense))}</p><MorphingDialogDescription disableLayoutAnimation className="mt-5 divide-y divide-slate-100 text-sm dark:divide-slate-800"><Detail label="카테고리" value={categoryLabel} /><Detail label="구매 시각" value={`${formatBangkokDate(expense.purchased_at)} ${formatBangkokTime(expense.purchased_at)}`} /><Detail label="상호" value={expense.merchant ?? "—"} /><Detail label="결제" value={`${EXPENSE_PERSON_META[expense.payer].label} · ${EXPENSE_PAYMENT_META[expense.payment_method]}`} /><Detail label="비용 사용자" value={users.map((person) => EXPENSE_PERSON_META[person].label).join(" + ")} /><Detail label="환율" value={`฿1 = ₩${expense.exchange_rate_krw_per_thb.toLocaleString()} · ${expense.exchange_rate_date}`} /><Detail label="가현쨩 몫" value={`${formatThb(expense.share_gahyun_thb)} · ${formatKrw(expense.share_gahyun_krw)}`} /><Detail label="미누쿤 몫" value={`${formatThb(expense.share_minu_thb)} · ${formatKrw(expense.share_minu_krw)}`} />{expense.memo && <div className="py-3"><p className="text-xs font-semibold text-slate-400">메모</p><p className="mt-1 break-words whitespace-pre-wrap leading-6">{expense.memo}</p></div>}</MorphingDialogDescription></div></div><div className="grid shrink-0 grid-cols-[44px_1fr_1fr] gap-2 border-t bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><MorphingDialogClose ariaLabel="지출 삭제" className="static grid h-11 place-items-center rounded-xl bg-red-50 text-red-500" onClick={onDelete}><Trash2 className="size-4" /></MorphingDialogClose><MorphingDialogClose ariaLabel="상세 닫기" className="static grid h-11 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold dark:bg-slate-800">닫기</MorphingDialogClose><MorphingDialogClose ariaLabel="지출 수정" className="static flex h-11 items-center justify-center gap-1.5 rounded-xl bg-slate-900 text-sm font-bold text-white dark:bg-white dark:text-slate-900" onClick={onEdit}><Pencil className="size-4" />수정</MorphingDialogClose></div></MorphingDialogContent></MorphingDialogContainer></MorphingDialog>;
+  return <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.42 }}>
+    <MorphingDialogTrigger ariaLabel={`${expense.item_name} 상세 보기`} className="block w-full max-w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500">
+      <article className="flex min-h-[82px] min-w-0 items-center gap-3 px-4 py-3.5 transition-colors hover:bg-slate-50 active:bg-slate-100 dark:hover:bg-white/5 dark:active:bg-white/10">
+        <div className="grid size-10 shrink-0 place-items-center rounded-xl" style={{ backgroundColor: `${categoryColor}14`, color: categoryColor }}><ReceiptText className="size-5" /></div>
+        <div className="min-w-0 flex-1">
+          <MorphingDialogTitle><h3 className="truncate text-sm font-extrabold">{expense.item_name}</h3></MorphingDialogTitle>
+          <p className="mt-1 truncate text-[11px] font-semibold text-slate-500"><span style={{ color: categoryColor }}>{categoryLabel}</span><span className="mx-1 text-slate-300">·</span>{formatBangkokTime(expense.purchased_at)}{expense.merchant ? ` · ${expense.merchant}` : ""}</p>
+          <div className="mt-1 flex min-w-0 items-center gap-1.5 overflow-hidden text-[10px] font-semibold text-slate-400"><span className="shrink-0">{EXPENSE_PERSON_META[expense.payer].label} 결제</span><span>·</span><span className="truncate">{users.map((person) => EXPENSE_PERSON_META[person].label).join(" + ")}</span>{expense.images.length > 0 && <><span>·</span><Camera className="size-3 shrink-0" /><span>{expense.images.length}</span></>}</div>
+        </div>
+        <div className="shrink-0 text-right"><p className="text-sm font-black tabular-nums">{formatThb(expense.amount_thb)}</p><p className="mt-1 text-[11px] font-semibold tabular-nums text-slate-400">{formatKrw(getEffectiveKrw(expense))}</p></div>
+      </article>
+    </MorphingDialogTrigger>
+    <MorphingDialogContainer>
+      <MorphingDialogContent className="relative mx-4 flex max-h-[88dvh] w-[calc(100%_-_2rem)] max-w-md flex-col overflow-hidden rounded-[28px] bg-white shadow-2xl dark:bg-slate-900">
+        <MorphingDialogClose className="right-4 top-4 z-20 flex size-10 items-center justify-center rounded-full bg-slate-900/75 text-white backdrop-blur dark:bg-white/15" />
+        <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          {expense.images.length > 0 && <WishImageGallery images={expense.images} onImagePress={() => {}} title={expense.item_name} />}
+          <div className="min-w-0 px-5 pb-5 pt-6">
+            <span className="inline-flex max-w-[calc(100%_-_3rem)] truncate rounded-full px-2.5 py-1 text-[11px] font-extrabold" style={{ backgroundColor: `${categoryColor}14`, color: categoryColor }}>{categoryLabel}</span>
+            <MorphingDialogTitle><h2 className="mt-2 break-words pr-12 text-[22px] font-black leading-tight tracking-[-0.02em]">{expense.item_name}</h2></MorphingDialogTitle>
+            <div className="mt-4 flex min-w-0 items-end justify-between gap-4"><p className="text-[34px] font-black leading-none tracking-[-0.04em] tabular-nums">{formatThb(expense.amount_thb)}</p><p className="shrink-0 pb-0.5 text-sm font-bold tabular-nums text-slate-500">{formatKrw(getEffectiveKrw(expense))}</p></div>
+          </div>
+          <MorphingDialogDescription disableLayoutAnimation className="space-y-5 border-t border-slate-100 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-950/40">
+            <section>
+              <h3 className="mb-2 px-1 text-xs font-extrabold text-slate-500">구매 정보</h3>
+              <div className="overflow-hidden rounded-2xl bg-white px-4 shadow-sm ring-1 ring-black/5 divide-y divide-slate-100 dark:bg-slate-900 dark:ring-white/10 dark:divide-slate-800">
+                <Detail label="구매 시각" value={`${formatBangkokDate(expense.purchased_at)} ${formatBangkokTime(expense.purchased_at)}`} />
+                <Detail label="상호" value={expense.merchant ?? "기록 없음"} />
+                <Detail label="결제 수단" value={EXPENSE_PAYMENT_META[expense.payment_method]} />
+                <Detail label="적용 환율" value={`฿1 = ₩${expense.exchange_rate_krw_per_thb.toLocaleString()}`} />
+              </div>
+              <p className="mt-2 px-1 text-[10px] font-semibold text-slate-400">{expense.exchange_rate_date} 기준 환율</p>
+            </section>
+            <section>
+              <h3 className="mb-2 px-1 text-xs font-extrabold text-slate-500">함께 쓴 금액</h3>
+              <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10">
+                <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800"><span className="text-xs font-semibold text-slate-400">결제자</span><span className="flex items-center gap-2 text-sm font-extrabold"><FilterPersonAvatar person={expense.payer} />{EXPENSE_PERSON_META[expense.payer].label}</span></div>
+                <div className="divide-y divide-slate-100 px-4 dark:divide-slate-800">{users.map((person) => <ExpenseShareRow expense={expense} key={person} person={person} />)}</div>
+              </div>
+            </section>
+            {expense.memo && <section><h3 className="mb-2 px-1 text-xs font-extrabold text-slate-500">메모</h3><p className="break-words whitespace-pre-wrap rounded-2xl bg-white px-4 py-3 text-sm leading-6 shadow-sm ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10">{expense.memo}</p></section>}
+          </MorphingDialogDescription>
+        </div>
+        <div className="grid shrink-0 grid-cols-[44px_1fr_1fr] gap-2 border-t bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><MorphingDialogClose ariaLabel="지출 삭제" className="static grid h-11 place-items-center rounded-xl bg-red-50 text-red-500" onClick={onDelete}><Trash2 className="size-4" /></MorphingDialogClose><MorphingDialogClose ariaLabel="상세 닫기" className="static grid h-11 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold dark:bg-slate-800">닫기</MorphingDialogClose><MorphingDialogClose ariaLabel="지출 수정" className="static flex h-11 items-center justify-center gap-1.5 rounded-xl bg-slate-900 text-sm font-bold text-white dark:bg-white dark:text-slate-900" onClick={onEdit}><Pencil className="size-4" />수정</MorphingDialogClose></div>
+      </MorphingDialogContent>
+    </MorphingDialogContainer>
+  </MorphingDialog>;
 }
 
 function Detail({ label, value }: { label: string; value: string }) { return <div className="flex items-start justify-between gap-4 py-3"><span className="shrink-0 text-xs font-semibold text-slate-400">{label}</span><span className="text-right font-semibold">{value}</span></div>; }
+
+function ExpenseShareRow({ expense, person }: { expense: Expense; person: ExpensePerson }) {
+  const thb = person === "gahyun" ? expense.share_gahyun_thb : expense.share_minu_thb;
+  const krw = person === "gahyun" ? expense.share_gahyun_krw : expense.share_minu_krw;
+  return <div className="flex items-center justify-between gap-3 py-3"><span className="flex min-w-0 items-center gap-2"><FilterPersonAvatar person={person} /><span className="truncate text-sm font-bold">{EXPENSE_PERSON_META[person].label}</span></span><span className="shrink-0 text-right"><strong className="block text-sm font-black tabular-nums">{formatThb(thb)}</strong><span className="mt-0.5 block text-[10px] font-semibold tabular-nums text-slate-400">{formatKrw(krw)}</span></span></div>;
+}
 
 function FilterDrawer({ open, person, category, categoryOptions, from, to, onOpenChange, onApply }: { open: boolean; person: PersonFilter; category: CategoryFilter; categoryOptions: CategoryOption[]; from: string; to: string; onOpenChange: (open: boolean) => void; onApply: (filter: { person: PersonFilter; category: CategoryFilter; from: string; to: string }) => void }) {
   const [draftPerson, setDraftPerson] = useState<PersonFilter>(person);
