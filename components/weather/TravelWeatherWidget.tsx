@@ -14,6 +14,7 @@ import { CloudSnowIcon } from "@/components/ui/cloud-snow";
 import { CloudLightningIcon } from "@/components/ui/cloud-lightning";
 import { WindIcon } from "@/components/ui/wind";
 import { SunMoonIcon } from "@/components/ui/sun-moon";
+import { SunsetIcon } from "@/components/ui/sunset";
 
 const weatherSurfaceStyle = {
   background: "#ffffff",
@@ -70,6 +71,13 @@ const formatUpdatedAt = (value: string) => new Intl.DateTimeFormat("ko-KR", {
   hour12: false,
 }).format(new Date(value));
 
+const formatSunTime = (value: string) => new Intl.DateTimeFormat("ko-KR", {
+  timeZone: "Asia/Bangkok",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+}).format(new Date(value));
+
 const formatForecastHour = (value: string) => new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Bangkok",
   hour: "numeric",
@@ -104,6 +112,11 @@ function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedCh
             <p className="mt-0.5 text-base font-bold">{city.nextSixHourPrecipitationProbability}%</p>
           </div>
         </div>
+      </div>
+
+      <div className="mt-1.5 flex items-center gap-3 text-[10px] font-medium text-slate-400">
+        <span className="flex items-center gap-1"><SunIcon size={14} className="text-amber-500" aria-hidden="true" />일출 {formatSunTime(city.sunrise)}</span>
+        <span className="flex items-center gap-1"><SunsetIcon size={14} className="text-orange-500" aria-hidden="true" />일몰 {formatSunTime(city.sunset)}</span>
       </div>
 
       <div className="mt-2 min-h-7">
