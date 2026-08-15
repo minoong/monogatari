@@ -41,7 +41,7 @@ export const UtilsActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "유틸 도구... 실수하지 마!" }}>
-      <div className="flex min-h-full w-full flex-col overflow-y-auto bg-slate-50 px-4 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] pt-5 dark:bg-slate-950">
+      <div className="flex min-h-full w-full flex-col overflow-y-auto bg-white px-4 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] pt-5 dark:bg-slate-950">
         <div className="mx-auto flex w-full max-w-lg flex-col gap-5">
           <header>
             <AnimatedContent

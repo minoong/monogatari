@@ -137,7 +137,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
 
   return (
     <AppScreen appBar={{ title: meta.activityTitle }}>
-      <main className="min-h-full w-full bg-slate-50 pb-12 dark:bg-slate-950">
+      <main className="min-h-full w-full bg-white pb-12 dark:bg-slate-950">
         {showInitialLoader ? (
           <ActivityFetchLoader messages={WISH_LOADING_MESSAGES[type]} />
         ) : <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">

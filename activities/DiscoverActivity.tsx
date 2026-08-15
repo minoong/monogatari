@@ -32,7 +32,7 @@ export const DiscoverActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "원하는 건 확실히 골라!" }}>
-      <main className="min-h-full w-full bg-slate-50 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
+      <main className="min-h-full w-full bg-white pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
         {showInitialLoader ? (
           <ActivityFetchLoader messages={["위시를 확인하고 있어…", "원하는 걸 모아 보는 중이야…", "뭘 골랐는지 살펴볼게…"]} />
         ) : <section className="mx-auto w-full max-w-lg px-5 pt-6">

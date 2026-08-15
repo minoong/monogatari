@@ -168,7 +168,7 @@ export const FlightActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "항공권 상세" }}>
-      <main ref={screenRef} className="min-h-full w-full bg-[#f5f9fd] px-3 pb-10 pt-5 sm:px-4 [font-family:var(--font-korean-air)]">
+      <main ref={screenRef} className="min-h-full w-full bg-white px-3 pb-10 pt-5 sm:px-4 [font-family:var(--font-korean-air)]">
         <section data-flight-tabs>
           <Tabs variant="secondary" selectedKey={selectedFlight} onSelectionChange={(key) => setSelectedFlight(String(key) as typeof selectedFlight)}>
             <Tabs.ListContainer>

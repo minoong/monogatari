@@ -159,9 +159,9 @@ export const ExpenseActivity: React.FC = () => {
   const clearFilters = () => { setPerson("all"); setCategory("all"); setFrom(""); setTo(""); };
 
   return <AppScreen appBar={{ title: "여행 가계부" }}>
-    <main className="min-h-full w-full max-w-full overflow-x-clip bg-slate-50 pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
+    <main className="min-h-full w-full max-w-full overflow-x-clip bg-white pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
       <Tabs aria-label="가계부 보기" selectedKey={selectedTab} onSelectionChange={(key) => setSelectedTab(String(key))} className="w-full min-w-0 max-w-full overflow-x-clip">
-        <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-slate-50/90 px-4 py-3 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/90">
+        <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 px-4 py-3 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/90">
           <CompactSegmentedTabsList ariaLabel="가계부 내역과 통계" items={[{ id: "list", label: "내역" }, { id: "stats", label: "통계" }]} />
         </div>
         <Tabs.Panel className="min-w-0 max-w-full overflow-x-clip !p-0" id="list">
@@ -210,7 +210,7 @@ function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
 
 function ExpenseDayHeader({ items }: { items: Expense[] }) {
   const summary = summarizeExpenses(items);
-  return <header className="sticky top-[4.25rem] z-20 -mx-1 flex min-w-0 items-center justify-between gap-3 rounded-xl bg-slate-50/95 px-2 py-1.5 backdrop-blur-xl dark:bg-slate-950/95">
+  return <header className="sticky top-[4.25rem] z-20 -mx-1 flex min-w-0 items-center justify-between gap-3 rounded-xl bg-white/95 px-2 py-1.5 backdrop-blur-xl dark:bg-slate-950/95">
     <h2 className="min-w-0 truncate text-[13px] font-extrabold tracking-[-0.01em] text-slate-800 dark:text-slate-100">{formatBangkokDate(items[0].purchased_at)}</h2>
     <div aria-label={`${summary.count}건, ${formatThb(summary.totalThb)}, ${formatKrw(summary.totalKrw)}`} className="flex shrink-0 items-center gap-2 tabular-nums">
       <span className="text-[10px] font-bold text-slate-400">{summary.count}건 · {formatThb(summary.totalThb)}</span>

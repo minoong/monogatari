@@ -305,7 +305,7 @@ export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ pa
 
   return (
     <AppScreen appBar={{ title: "숙소 자세히 보기" }}>
-      <div ref={amenitiesRef} className="min-h-full w-full bg-gray-50 px-4 pb-16 pt-4 dark:bg-black">
+      <div ref={amenitiesRef} className="min-h-full w-full bg-white px-4 pb-16 pt-4 dark:bg-black">
         <StayAccordion initialOpenId={initialFilter} onFilterChange={setActiveFilter} />
 
         <div className="mt-5 flex flex-col gap-5">
