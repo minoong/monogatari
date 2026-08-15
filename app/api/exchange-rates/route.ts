@@ -34,7 +34,7 @@ export async function GET(request: Request) {
   for (let offset = 0; offset >= -7; offset -= 1) {
     const candidate = shiftDate(requestedDate, offset);
     try {
-      const response = await fetch(`https://api.frankfurter.dev/v2/rate/THB/KRW/${candidate}`, {
+      const response = await fetch(`https://api.frankfurter.dev/v2/rate/THB/KRW?date=${candidate}`, {
         headers: { Accept: "application/json" },
         next: { revalidate: 60 * 60 * 6 },
       });
