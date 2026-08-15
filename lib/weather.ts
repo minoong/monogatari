@@ -31,7 +31,7 @@ export interface WeatherResponse {
 
 export interface WeatherPresentation {
   label: string;
-  icon: string;
+  icon: "sun" | "moon" | "cloud-sun" | "cloud-moon" | "cloud" | "fog" | "drizzle" | "rain" | "snow" | "thunder";
 }
 
 const WEATHER_PRESENTATIONS: Record<number, Omit<WeatherPresentation, "icon">> = {
@@ -68,15 +68,15 @@ const WEATHER_PRESENTATIONS: Record<number, Omit<WeatherPresentation, "icon">> =
 export function getWeatherPresentation(weatherCode: number, isDay: boolean): WeatherPresentation {
   const label = WEATHER_PRESENTATIONS[weatherCode]?.label ?? "날씨 정보 없음";
 
-  if (weatherCode === 0) return { label: isDay ? label : "맑은 밤", icon: isDay ? "☀️" : "🌙" };
-  if (weatherCode === 1 || weatherCode === 2) return { label, icon: isDay ? "🌤️" : "☁️" };
-  if (weatherCode === 3) return { label, icon: "☁️" };
-  if (weatherCode === 45 || weatherCode === 48) return { label, icon: "🌫️" };
-  if (weatherCode >= 51 && weatherCode <= 57) return { label, icon: "🌦️" };
-  if ((weatherCode >= 61 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)) return { label, icon: "🌧️" };
-  if ((weatherCode >= 71 && weatherCode <= 77) || (weatherCode >= 85 && weatherCode <= 86)) return { label, icon: "🌨️" };
-  if (weatherCode >= 95) return { label, icon: "⛈️" };
-  return { label, icon: "🌥️" };
+  if (weatherCode === 0) return { label: isDay ? label : "맑은 밤", icon: isDay ? "sun" : "moon" };
+  if (weatherCode === 1 || weatherCode === 2) return { label, icon: isDay ? "cloud-sun" : "cloud-moon" };
+  if (weatherCode === 3) return { label, icon: "cloud" };
+  if (weatherCode === 45 || weatherCode === 48) return { label, icon: "fog" };
+  if (weatherCode >= 51 && weatherCode <= 57) return { label, icon: "drizzle" };
+  if ((weatherCode >= 61 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)) return { label, icon: "rain" };
+  if ((weatherCode >= 71 && weatherCode <= 77) || (weatherCode >= 85 && weatherCode <= 86)) return { label, icon: "snow" };
+  if (weatherCode >= 95) return { label, icon: "thunder" };
+  return { label, icon: "cloud-sun" };
 }
 
 export async function fetchWeather(): Promise<WeatherCity[]> {
