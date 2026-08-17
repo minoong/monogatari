@@ -54,7 +54,7 @@ export function CurrencyAmountField({
   };
 
   return (
-    <div className="relative min-w-0 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 dark:border-slate-700 dark:bg-white/5">
+    <div className="relative w-full min-w-0 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 dark:border-slate-700 dark:bg-white/5">
       <LayoutGroup id={groupId}>
         <div className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 bg-white py-3 pl-3 pr-14 shadow-sm transition-colors focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-900">
           <CurrencyBadge code={currency} groupId={groupId} key={currency} reduceMotion={reduceMotion} />
