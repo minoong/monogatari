@@ -49,7 +49,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass, scrollDrawerElementIntoView, scrollDrawerFieldIntoView } from "@/components/ui/drawer-form";
-import { useDrawerKeyboardAvoidance } from "@/hooks/use-drawer-keyboard-avoidance";
+import { useKeyboardInset } from "@/hooks/use-keyboard-inset";
 import { Field } from "@/components/ui/field";
 import { CurrencyAmountField } from "@/components/ui/currency-amount-field";
 import { ExpenseReceiptPicker, type ReceiptScanStatus } from "@/components/expense/ExpenseReceiptPicker";
@@ -135,7 +135,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const scanResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const focusedFieldRef = useRef<HTMLElement | null>(null);
-  const { keyboardInset, popupStyle, panelStyle } = useDrawerKeyboardAvoidance(open);
+  const keyboardInset = useKeyboardInset();
   const handleFieldFocus = (event: FocusEvent<HTMLElement>) => {
     focusedFieldRef.current = event.currentTarget;
     scrollDrawerFieldIntoView(event);
@@ -319,14 +319,14 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   };
 
   return <Drawer open={open} onOpenChange={onOpenChange}>
-    <DrawerPopup id="expense-drawer" variant="inset" showBar className="overflow-hidden" style={popupStyle}>
+    <DrawerPopup id="expense-drawer" variant="inset" showBar className="overflow-hidden">
       <form aria-label={expense ? "지출 수정" : "지출 등록"} className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col overflow-hidden" onSubmit={submit}>
         <DrawerHeader className="px-4 pb-1 pt-5 text-center sm:px-6 sm:pt-6"><DrawerTitle>{expense ? "지출 수정" : "지출 등록"}</DrawerTitle></DrawerHeader>
         <DrawerPanel
           ref={panelRef}
           scrollable={false}
           className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-2 *:shrink-0 sm:gap-5 sm:px-6 sm:py-3"
-          style={panelStyle}
+          style={keyboardInset > 0 ? { paddingBottom: `${keyboardInset + 16}px` } : undefined}
         >
           <ExpenseReceiptPicker
             active={open}

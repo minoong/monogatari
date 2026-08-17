@@ -31,7 +31,7 @@ import StatusButton from "@/components/animata/button/status-button";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { DrawerFieldLabel, DrawerIntro, DrawerLinkIcon, DrawerMapPinIcon, drawerCancelButtonClass, drawerPrimaryButtonClass, scrollDrawerFieldIntoView } from "@/components/ui/drawer-form";
-import { useDrawerKeyboardAvoidance } from "@/hooks/use-drawer-keyboard-avoidance";
+import { useKeyboardInset } from "@/hooks/use-keyboard-inset";
 import { CurrencyAmountField } from "@/components/ui/currency-amount-field";
 import {
   Drawer,
@@ -110,7 +110,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   const formRef = useRef<HTMLFormElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { popupStyle, panelStyle } = useDrawerKeyboardAvoidance(open);
+  const keyboardInset = useKeyboardInset();
   const handleFieldFocus = (event: FocusEvent<HTMLElement>) => scrollDrawerFieldIntoView(event);
   const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
     queryKey: EXCHANGE_RATE_QUERY_KEY,
@@ -279,7 +279,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
-      <DrawerPopup id="wish-drawer" variant="inset" showBar className="overflow-hidden" style={popupStyle}>
+      <DrawerPopup id="wish-drawer" variant="inset" showBar className="overflow-hidden">
         <Form ref={formRef} aria-label={isEditing ? "위시 편집" : "위시 등록"} className="flex min-h-0 w-full flex-1 flex-col overflow-hidden" onSubmit={handleSubmit} validationBehavior="native">
           <DrawerHeader className="px-6 pb-1 pt-6 text-center">
             <DrawerTitle>{isEditing ? "위시 편집" : "위시 등록"}</DrawerTitle>
@@ -289,7 +289,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             ref={panelRef}
             scrollable={false}
             className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3"
-            style={panelStyle}
+            style={keyboardInset > 0 ? { paddingBottom: `${keyboardInset + 16}px` } : undefined}
           >
             <DrawerIntro open={open} image="/drawer-wish-intro.gif" alt="위시 목록을 기록하는 캐릭터" title={isEditing ? "이 위시는 아직 완성되지 않았다… 다듬어라!" : "이 맛은… 위시에 등록해야만 하는 맛이다!"} />
             <div data-drawer-interactive-field className="flex flex-col gap-2" onPointerDownCapture={() => setTypeInteraction((value) => value + 1)}>
