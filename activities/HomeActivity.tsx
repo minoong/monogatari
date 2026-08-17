@@ -3,14 +3,13 @@ import NumberFlow from "@number-flow/react";
 import { AnimatedContent } from "../components/ui/animated-content";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
+import { BottomNav } from "../components/BottomNav";
 import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { Tabs } from "@heroui/react";
 import { ChevronRight, Hotel } from "lucide-react";
 import { MinimalCardExpand } from "../components/ui/minimal-card-expand";
 import { ACCOMMODATIONS, type Accommodation } from "../lib/accommodations";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { NativeHapticSwitch } from "../components/ui/native-haptic-switch";
 import { SlidingNumber } from "../components/core/sliding-number";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -288,14 +287,11 @@ const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }>
             <ChevronRight size={17} className="shrink-0" />
           </span>
         </div>
-        <NativeHapticSwitch
-          ariaLabel="HP! 위치 찾기"
-          checked={false}
-          onClick={() => {
-            triggerHapticFeedback(15);
-            onOpen("all");
-          }}
-          onChange={() => undefined}
+        <button
+          type="button"
+          aria-label="HP! 위치 찾기"
+          className="absolute inset-0 z-20 h-full w-full cursor-pointer opacity-[0.01]"
+          onClick={() => onOpen("all")}
         />
       </div>
     </section>
