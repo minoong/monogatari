@@ -1,0 +1,18 @@
+.schedule-timeline-rail,
+.schedule-timeline-progress {
+  transform-origin: top center;
+}
+
+/* GSAP이 인라인 transform으로 덮어쓴다. reduced motion에서는 계속 숨겨진 상태로 남는다. */
+.schedule-timeline-progress {
+  transform: scaleY(0);
+}
+
+.schedule-timeline-dot-core {
+  transition: background-color 260ms ease, box-shadow 260ms ease;
+}
+
+.schedule-timeline-dot[data-active="true"] .schedule-timeline-dot-core {
+  background-color: var(--color-blue-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue-500) 20%, transparent);
+}
