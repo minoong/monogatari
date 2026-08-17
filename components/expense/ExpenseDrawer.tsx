@@ -7,6 +7,13 @@ import { Plus, RefreshCw } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import {
+  convertKrwToThb,
+  convertThbToKrw,
+  toggleCurrencyAmount,
+  toFiniteAmount,
+  type InputCurrency,
+} from "@/lib/exchange-rates";
+import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_META,
   EXPENSE_PAYMENT_META,
@@ -14,6 +21,7 @@ import {
   EXPENSE_PEOPLE,
   EXPENSE_PERSON_META,
   formatKrw,
+  formatThb,
   type ExchangeRateSnapshot,
   type Expense,
   type ExpenseCategory,
@@ -40,6 +48,7 @@ import {
 } from "@/components/ui/drawer";
 import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import { Field } from "@/components/ui/field";
+import { CurrencySwitchButton } from "@/components/ui/currency-switch-button";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 
@@ -95,6 +104,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const [customCategory, setCustomCategory] = useState(expense?.custom_category ?? "");
   const [categoryDraft, setCategoryDraft] = useState("");
   const [amount, setAmount] = useState(expense ? String(expense.amount_thb) : "");
+  const [inputCurrency, setInputCurrency] = useState<InputCurrency>("THB");
   const [rate, setRate] = useState(expense ? String(expense.exchange_rate_krw_per_thb) : "");
   const [rateDate, setRateDate] = useState(expense?.exchange_rate_date ?? initial.date);
   const [manualRate, setManualRate] = useState(expense?.exchange_rate_source === "manual_override");
@@ -117,7 +127,8 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const [images, setImages] = useState<WishImageDraft[]>(() => expense?.images.map((image) => ({ id: image.id, path: image.path, url: image.url })) ?? []);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const numericAmount = Number(amount) || 0;
+  const numericInput = toFiniteAmount(Number(amount) || 0);
+  const isKrwInput = inputCurrency === "KRW";
   const shouldLoadRate = open && !manualRate && (!expense || date !== initial.date);
   const rateQuery = useQuery({
     queryKey: ["expense-exchange-rate", date],
@@ -133,8 +144,15 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const effectiveRate = rate || autoRate;
   const effectiveRateDate = shouldLoadRate && rateQuery.data ? rateQuery.data.observedDate : rateDate;
   const numericRate = Number(effectiveRate) || 0;
-  const convertedKrw = Math.round(numericAmount * numericRate);
-  const automaticShares = equalShares(numericAmount, participants, payer);
+  const numericAmountThb = isKrwInput ? convertKrwToThb(numericInput, numericRate) : numericInput;
+  const convertedKrw = convertThbToKrw(numericAmountThb, numericRate);
+  const automaticShares = equalShares(numericAmountThb, participants, payer);
+
+  const toggleInputCurrency = () => {
+    const { nextCurrency, nextAmount } = toggleCurrencyAmount(numericInput, numericRate, inputCurrency, amount);
+    setAmount(nextAmount);
+    setInputCurrency(nextCurrency);
+  };
   const effectiveGahyunShare = manualSplit ? gahyunShare : String(automaticShares.gahyun);
   const effectiveMinuShare = manualSplit ? minuShare : String(automaticShares.minu);
   const selectedCategoryTag = customCategoryMode ? customCategory : EXPENSE_CATEGORY_META[category].label;
@@ -178,7 +196,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
             item_name: itemName, category,
             custom_category: customCategoryMode ? customCategory.trim() : null,
             merchant, payment_method: paymentMethod,
-            amount_thb: numericAmount, exchange_rate_krw_per_thb: numericRate,
+            amount_thb: numericAmountThb, exchange_rate_krw_per_thb: numericRate,
             exchange_rate_date: effectiveRateDate, rate_manually_edited: manualRate || rateQuery.data?.source === "supabase_fallback",
             actual_amount_krw: paymentMethod === "card" && actualKrw ? Number(actualKrw) : null,
             payer, participants,
@@ -206,7 +224,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setSubmitError(null);
-    if (!itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmount <= 0 || numericRate <= 0 || !payer) {
+    if (!itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmountThb <= 0 || numericRate <= 0 || !payer) {
       setSubmitError("필수 입력과 결제자를 확인해 주세요.");
       return;
     }
@@ -265,14 +283,27 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
           <Field className="min-w-0 gap-2">
             <Label htmlFor="expense-amount"><DrawerFieldLabel icon={WalletIcon} active={open}>결제 금액</DrawerFieldLabel></Label>
             <InputGroup className="h-12 min-w-0 rounded-2xl">
-              <InputGroupAddon><InputGroupText className="text-base font-bold">฿</InputGroupText></InputGroupAddon>
-              <InputGroupInput id="expense-amount" aria-label="태국 바트 금액" className="min-w-0 text-right font-semibold tabular-nums" inputMode="decimal" min="0.01" onChange={(event) => setAmount(event.target.value)} placeholder="0" step="0.01" style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }} type="number" value={amount} />
-              <InputGroupAddon align="inline-end"><InputGroupText className="text-xs font-semibold">THB</InputGroupText></InputGroupAddon>
+              <InputGroupAddon><InputGroupText className="text-base font-bold">{isKrwInput ? "₩" : "฿"}</InputGroupText></InputGroupAddon>
+              <InputGroupInput
+                id="expense-amount"
+                aria-label={isKrwInput ? "대한민국 원 금액" : "태국 바트 금액"}
+                className="min-w-0 text-right font-semibold tabular-nums"
+                inputMode={isKrwInput ? "numeric" : "decimal"}
+                min={isKrwInput ? "1" : "0.01"}
+                onChange={(event) => setAmount(event.target.value)}
+                placeholder="0"
+                step={isKrwInput ? "1" : "0.01"}
+                style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }}
+                type="number"
+                value={amount}
+              />
+              <InputGroupAddon align="inline-end"><InputGroupText className="text-xs font-semibold">{isKrwInput ? "KRW" : "THB"}</InputGroupText></InputGroupAddon>
             </InputGroup>
-            <div className="flex min-w-0 items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-white/5">
-              <span className="shrink-0 text-xs font-medium text-slate-400">대한민국 원</span>
-              <span className="min-w-0 truncate text-right text-sm font-bold tabular-nums text-slate-700 dark:text-slate-200">{numericRate > 0 ? formatKrw(convertedKrw) : "환율 확인 중"}</span>
-            </div>
+            <CurrencySwitchButton
+              convertedText={numericRate > 0 ? (isKrwInput ? formatThb(numericAmountThb) : formatKrw(convertedKrw)) : "환율 확인 중"}
+              isKrwInput={isKrwInput}
+              onToggle={toggleInputCurrency}
+            />
           </Field>
 
           <Field className="gap-2"><Label htmlFor="expense-rate"><DrawerFieldLabel icon={WalletIcon} active={open}>구매일 환율</DrawerFieldLabel></Label>
@@ -300,7 +331,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
         </DrawerPanel>
         <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pt-4">
           <Button fullWidth className={drawerCancelButtonClass} isDisabled={mutation.isPending} onPress={() => onOpenChange(false)} size="lg" type="button">취소</Button>
-          <Button fullWidth className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmount <= 0 || numericRate <= 0 || !payer} size="lg" type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
+          <Button fullWidth className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmountThb <= 0 || numericRate <= 0 || !payer} size="lg" type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
         </DrawerFooter>
       </form>
     </DrawerPopup>

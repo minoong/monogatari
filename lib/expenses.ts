@@ -123,8 +123,14 @@ export const getExpenseCategoryKey = (
   expense: Pick<Expense, "category" | "custom_category">,
 ) => expense.custom_category ? `custom:${expense.custom_category}` : expense.category;
 
-export const formatKrw = (value: number) => `₩${Math.round(value).toLocaleString("ko-KR")}`;
-export const formatThb = (value: number) => `฿${value.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}`;
+export const formatKrw = (value: number) => {
+  const safe = Number.isFinite(value) ? Math.round(value) : 0;
+  return `₩${safe.toLocaleString("ko-KR")}`;
+};
+export const formatThb = (value: number) => {
+  const safe = Number.isFinite(value) ? value : 0;
+  return `฿${safe.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}`;
+};
 
 export const formatBangkokDateKey = (value: string) =>
   new Intl.DateTimeFormat("en-CA", {

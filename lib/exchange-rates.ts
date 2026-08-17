@@ -67,3 +67,32 @@ export async function fetchThbToKrwRate(): Promise<number> {
   const ratesData = await fetchExchangeRates();
   return ratesData.THB;
 }
+
+export type InputCurrency = "THB" | "KRW";
+
+export const toFiniteAmount = (value: number) => (Number.isFinite(value) ? value : 0);
+
+export const convertThbToKrw = (thb: number, rate: number) =>
+  Math.round(toFiniteAmount(thb) * toFiniteAmount(rate));
+
+export const convertKrwToThb = (krw: number, rate: number) =>
+  rate > 0 ? toFiniteAmount(krw) / rate : 0;
+
+export const formatCurrencyInputAmount = (value: number, currency: InputCurrency) => {
+  if (!Number.isFinite(value) || value <= 0) return "";
+  return currency === "KRW" ? String(Math.round(value)) : String(Number(value.toFixed(2)));
+};
+
+export const toggleCurrencyAmount = (
+  amount: number,
+  rate: number,
+  from: InputCurrency,
+  fallbackAmount = "",
+): { nextCurrency: InputCurrency; nextAmount: string } => {
+  const nextCurrency: InputCurrency = from === "THB" ? "KRW" : "THB";
+  if (rate <= 0) return { nextCurrency, nextAmount: fallbackAmount };
+
+  const currentKrw = from === "KRW" ? toFiniteAmount(amount) : toFiniteAmount(amount) * rate;
+  const converted = nextCurrency === "KRW" ? currentKrw : convertKrwToThb(currentKrw, rate);
+  return { nextCurrency, nextAmount: formatCurrencyInputAmount(converted, nextCurrency) };
+};
