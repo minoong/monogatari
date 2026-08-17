@@ -110,7 +110,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   const formRef = useRef<HTMLFormElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const keyboardInset = useKeyboardInset();
+  useKeyboardInset();
   const handleFieldFocus = (event: FocusEvent<HTMLElement>) => scrollDrawerFieldIntoView(event);
   const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
     queryKey: EXCHANGE_RATE_QUERY_KEY,
@@ -289,7 +289,6 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             ref={panelRef}
             scrollable={false}
             className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3"
-            style={keyboardInset > 0 ? { paddingBottom: `${keyboardInset + 16}px` } : undefined}
           >
             <DrawerIntro open={open} image="/drawer-wish-intro.gif" alt="위시 목록을 기록하는 캐릭터" title={isEditing ? "이 위시는 아직 완성되지 않았다… 다듬어라!" : "이 맛은… 위시에 등록해야만 하는 맛이다!"} />
             <div data-drawer-interactive-field className="flex flex-col gap-2" onPointerDownCapture={() => setTypeInteraction((value) => value + 1)}>

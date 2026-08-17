@@ -10,6 +10,7 @@ import { ChevronRightIcon, XIcon } from "lucide-react";
 import type React from "react";
 import { createContext, useContext } from "react";
 import { cn } from "@/lib/utils";
+import { useKeyboardInsetVar } from "@/hooks/use-keyboard-inset";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -116,6 +117,8 @@ export function DrawerViewport({
   position?: DrawerPosition;
   variant?: "default" | "straight" | "inset";
 }): React.ReactElement {
+  useKeyboardInsetVar();
+
   return (
     <DrawerPrimitive.Viewport
       className={cn(
@@ -127,7 +130,8 @@ export function DrawerViewport({
         position === "right" && "flex justify-end",
         variant === "inset" && "px-(--inset) [--inset:--spacing(4)]",
         variant === "inset" && position !== "bottom" && "pt-[calc(var(--inset)+env(safe-area-inset-top,0px))]",
-        variant === "inset" && position !== "top" && "pb-[calc(var(--inset)+env(safe-area-inset-bottom,0px))]",
+        variant === "inset" && position !== "top" && "pb-[calc(var(--inset)+max(var(--kb-inset,0px),env(safe-area-inset-bottom,0px)))]",
+        variant !== "inset" && position === "bottom" && "pb-(--kb-inset)",
         className,
       )}
       data-slot="drawer-viewport"

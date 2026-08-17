@@ -326,7 +326,6 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
           ref={panelRef}
           scrollable={false}
           className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-2 *:shrink-0 sm:gap-5 sm:px-6 sm:py-3"
-          style={keyboardInset > 0 ? { paddingBottom: `${keyboardInset + 16}px` } : undefined}
         >
           <ExpenseReceiptPicker
             active={open}
