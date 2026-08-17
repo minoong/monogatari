@@ -1,0 +1,209 @@
+.expense-list-scroll {
+  --summary-p: 0;
+  --summary-expanded-h: 168px;
+  --summary-collapsed-h: 52px;
+  --summary-h: calc(
+    var(--summary-expanded-h) - var(--summary-p) *
+      (var(--summary-expanded-h) - var(--summary-collapsed-h))
+  );
+  overflow-anchor: none;
+}
+
+.expense-summary-article {
+  height: var(--summary-h);
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgb(15 23 42 / 0.08);
+  border-radius: 16px;
+}
+
+.dark .expense-summary-article {
+  background: #0f172a;
+  border-color: rgb(255 255 255 / 0.1);
+}
+
+.expense-summary-canvas {
+  position: relative;
+  height: var(--summary-expanded-h);
+}
+
+/* 접힌 줄(52px)이 정렬 기준. 펼침에서도 이 줄의 수직 중앙을 공유한다. */
+.expense-summary-bar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 3;
+  display: flex;
+  height: 52px;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.expense-summary-brand {
+  position: absolute;
+  top: 0;
+  left: 16px;
+  z-index: 2;
+  display: flex;
+  height: 52px;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  clip-path: inset(0 0 calc(var(--summary-p) * 100%) 0);
+  pointer-events: none;
+}
+
+.expense-summary-count {
+  position: absolute;
+  top: 0;
+  right: 16px;
+  z-index: 4;
+  display: flex;
+  height: 52px;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: #64748b;
+  overflow: hidden;
+  clip-path: inset(0 0 calc(var(--summary-p) * 100%) 0);
+  pointer-events: none;
+}
+
+.expense-summary-amount-row {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+}
+
+.expense-summary-spacer-start {
+  flex: calc(1 - var(--summary-p)) 1 0;
+}
+
+.expense-summary-spacer-end {
+  flex: 1 1 0;
+}
+
+.expense-summary-amount {
+  flex: 0 0 auto;
+  transform: translate3d(0, calc((1 - var(--summary-p)) * 22px), 0)
+    scale(calc(0.56 + (1 - var(--summary-p)) * 0.44));
+  transform-origin: left center;
+}
+
+.expense-summary-amount .number-flow-wrap {
+  display: block;
+  line-height: 1;
+}
+
+.expense-summary-thb {
+  position: absolute;
+  top: 72px;
+  right: 16px;
+  left: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.expense-summary-perforation {
+  position: absolute;
+  top: 92px;
+  right: 0;
+  left: 0;
+  height: 14px;
+}
+
+.expense-summary-perforation-line {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  left: 16px;
+  border-top: 1px dashed rgb(148 163 184 / 0.9);
+}
+
+.expense-summary-notch {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgb(15 23 42 / 0.08);
+  transform: translateY(-50%);
+}
+
+.expense-summary-notch-left {
+  left: -7px;
+}
+
+.expense-summary-notch-right {
+  right: -7px;
+}
+
+.dark .expense-summary-notch {
+  background: #020617;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
+}
+
+.expense-summary-settle-copy {
+  position: absolute;
+  top: 108px;
+  left: 16px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.expense-summary-cluster {
+  position: absolute;
+  top: calc((1 - var(--summary-p)) * 116px);
+  right: 16px;
+  left: 16px;
+  z-index: 3;
+  display: flex;
+  height: 52px;
+  align-items: center;
+}
+
+.expense-summary-cluster-lead {
+  flex: calc(var(--summary-p)) 1 0;
+}
+
+.expense-summary-cluster-gap {
+  flex: calc(1 - var(--summary-p)) 1 0;
+  min-width: 10px;
+}
+
+.expense-summary-avatars {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.expense-summary-avatar-names {
+  max-width: calc((1 - var(--summary-p)) * 72px);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.expense-summary-settle-krw {
+  flex: 0 0 auto;
+  font-size: calc(16px - var(--summary-p) * 3px);
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, #0f172a calc((1 - var(--summary-p)) * 100%), #64748b);
+}
+
+.dark .expense-summary-settle-krw {
+  color: color-mix(in srgb, #f1f5f9 calc((1 - var(--summary-p)) * 100%), #94a3b8);
+}
+
+.expense-day-header {
+  top: calc(var(--summary-h) + 14px);
+}

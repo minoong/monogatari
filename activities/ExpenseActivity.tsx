@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Button, Label, Radio, RadioGroup, Skeleton, Tabs } from "@heroui/react";
@@ -10,6 +10,7 @@ import { Filter, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { ExpenseDrawer } from "@/components/expense/ExpenseDrawer";
 import { ExpenseReceiptDetail } from "@/components/expense/ExpenseReceiptDetail";
+import { ExpenseSummaryHeader } from "@/components/expense/ExpenseSummaryHeader";
 import { CompactSegmentedTabsList } from "@/components/ui/compact-segmented-tabs";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -99,6 +100,7 @@ export const ExpenseActivity: React.FC = () => {
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search.trim().toLocaleLowerCase("ko-KR"));
   const query = useQuery({ queryKey: ["expenses"], queryFn: fetchExpenses });
+  const listScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const channel = supabase.channel("expenses_changes")
@@ -155,23 +157,24 @@ export const ExpenseActivity: React.FC = () => {
   const clearFilters = () => { setPerson("all"); setCategory("all"); setFrom(""); setTo(""); };
 
   return <AppScreen appBar={{ title: "여행 가계부" }}>
-    <main className="min-h-full w-full max-w-full bg-white pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
-      <Tabs aria-label="가계부 보기" selectedKey={selectedTab} onSelectionChange={(key) => setSelectedTab(String(key))} className="w-full min-w-0 max-w-full">
-        <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
+    <main className="flex h-[calc(100svh-56px)] w-full max-w-full flex-col overflow-hidden bg-white dark:bg-slate-950">
+      <Tabs aria-label="가계부 보기" selectedKey={selectedTab} onSelectionChange={(key) => setSelectedTab(String(key))} className="flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col">
+        <div className="z-30 shrink-0 border-b border-slate-200/80 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
           <CompactSegmentedTabsList ariaLabel="가계부 내역과 통계" items={[{ id: "list", label: "내역" }, { id: "stats", label: "통계" }]} />
         </div>
-        <Tabs.Panel className="min-w-0 max-w-full !p-0" id="list">
-          {query.isLoading ? <ExpenseSkeleton /> : initialError ? <LoadError onRetry={() => query.refetch()} /> : <section className="mx-auto w-full min-w-0 max-w-lg px-4 py-4">
-            <ExpenseSummary expenses={filtered} />
-            {query.isError && query.data && <div className="mt-3 flex items-center justify-between rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 dark:bg-amber-500/10 dark:text-amber-300"><span>최근 데이터를 표시 중이에요.</span><button className="min-h-8 px-2 font-bold" onClick={() => query.refetch()} type="button">다시 연결</button></div>}
-            <div className="mt-4 flex items-center gap-2">
+        <Tabs.Panel className="flex min-h-0 min-w-0 max-w-full flex-1 flex-col overflow-hidden !p-0" id="list">
+          {query.isLoading ? <ExpenseSkeleton /> : initialError ? <LoadError onRetry={() => query.refetch()} /> : <div ref={listScrollRef} className="expense-list-scroll flex-1 overflow-y-auto overscroll-contain pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))]">
+            <ExpenseSummaryHeader expenses={filtered} scrollRef={listScrollRef} />
+            <section className="mx-auto w-full min-w-0 max-w-lg px-4 pb-4 pt-3">
+            {query.isError && query.data && <div className="mb-3 flex items-center justify-between rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 dark:bg-amber-500/10 dark:text-amber-300"><span>최근 데이터를 표시 중이에요.</span><button className="min-h-8 px-2 font-bold" onClick={() => query.refetch()} type="button">다시 연결</button></div>}
+            <div className="flex items-center gap-2">
               <label className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-900"><Search className="size-4 shrink-0 text-slate-400" /><input aria-label="지출 검색" className="min-w-0 flex-1 bg-transparent text-sm outline-none" onChange={(event) => setSearch(event.target.value)} placeholder="품목, 상호, 메모 검색" value={search} />{search && <button aria-label="검색어 지우기" className="grid size-8 shrink-0 place-items-center" onClick={() => setSearch("")} type="button"><X className="size-4" /></button>}</label>
               <button aria-label="지출 필터" className={cn("relative grid size-11 shrink-0 place-items-center rounded-xl border bg-white dark:bg-slate-900", filtersActive ? "border-blue-500 text-blue-600" : "border-slate-200 text-slate-500 dark:border-slate-800")} onClick={openFilters} type="button"><Filter className="size-4" />{filtersActive && <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-blue-500" />}</button>
             </div>
             {expenses.length === 0 ? <EmptyState onCreate={openCreate} /> : filtered.length === 0 ? <div className="py-16 text-center"><p className="font-bold">조건에 맞는 지출이 없어요.</p><button className="mt-3 min-h-11 px-4 text-sm font-bold text-blue-600" onClick={clearFilters} type="button">필터 초기화</button></div> : <div className="mt-6 space-y-5">{grouped.map((group) => <section key={group.date}><ExpenseDayHeader items={group.items} /><div className="mt-2 overflow-hidden rounded-[18px] bg-white shadow-[0_10px_30px_-26px_rgba(15,23,42,0.55)] ring-1 ring-black/[0.055] dark:bg-slate-900 dark:ring-white/10">{group.items.map((expense, index) => <ExpenseRow expense={expense} key={expense.id} onDelete={() => setDeleting(expense)} onEdit={() => openEdit(expense)} showDivider={index < group.items.length - 1} />)}</div></section>)}</div>}
-          </section>}
+          </section></div>}
         </Tabs.Panel>
-        <Tabs.Panel className="min-w-0 max-w-full !p-0" id="stats">
+        <Tabs.Panel className="min-h-0 min-w-0 max-w-full flex-1 overflow-y-auto overscroll-contain !p-0 pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))]" id="stats">
           {selectedTab === "stats" && (query.isLoading ? <div className="mx-auto w-full min-w-0 max-w-lg px-4 py-4"><ChartSkeleton /></div> : initialError ? <LoadError onRetry={() => query.refetch()} /> : <section className="mx-auto w-full min-w-0 max-w-lg px-4 py-4">{expenses.length ? <ExpenseCharts expenses={filtered} /> : <EmptyState onCreate={openCreate} />}</section>)}
         </Tabs.Panel>
       </Tabs>
@@ -183,30 +186,9 @@ export const ExpenseActivity: React.FC = () => {
   </AppScreen>;
 };
 
-function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
-  const summary = summarizeExpenses(expenses);
-  return <section className="overflow-hidden rounded-[24px] bg-slate-950 text-white shadow-[0_14px_34px_-22px_rgba(15,23,42,0.9)] dark:bg-slate-900">
-    <div className="px-5 pb-5 pt-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2"><div className="grid size-7 place-items-center rounded-lg bg-white/10 text-sky-300"><WalletIcon aria-hidden="true" size={15} /></div><p className="text-xs font-semibold text-white/60">여행 지출</p></div>
-        <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold tabular-nums text-white/70">{summary.count}건</span>
-      </div>
-      <p className="mt-2 text-[32px] font-black leading-none tracking-[-0.04em] tabular-nums">{formatKrw(summary.totalKrw)}</p>
-      <p className="mt-2 text-sm font-bold tabular-nums text-white/55">{formatThb(summary.totalThb)}</p>
-    </div>
-    <div className="flex min-w-0 items-center justify-between gap-3 border-t border-white/10 bg-white/[0.04] px-5 py-3.5">
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold text-white/45">현재 정산</p>
-        {summary.settlement ? <div className="mt-1 flex min-w-0 items-center gap-1.5 text-xs font-extrabold"><span className="inline-flex min-w-0 items-center gap-1 text-sky-300"><FilterPersonAvatar compact person={summary.settlement.from} /><span className="truncate">{EXPENSE_PERSON_META[summary.settlement.from].label}</span></span><span className="text-white/35">→</span><span className="inline-flex min-w-0 items-center gap-1"><FilterPersonAvatar compact person={summary.settlement.to} /><span className="truncate">{EXPENSE_PERSON_META[summary.settlement.to].label}</span></span></div> : <p className="mt-0.5 text-xs font-bold text-white/60">정산할 금액이 없어요</p>}
-      </div>
-      <p className="shrink-0 text-base font-black tabular-nums">{summary.settlement ? formatKrw(summary.settlement.amount) : formatKrw(0)}</p>
-    </div>
-  </section>;
-}
-
 function ExpenseDayHeader({ items }: { items: Expense[] }) {
   const summary = summarizeExpenses(items);
-  return <header className="sticky top-[4.25rem] z-20 -mx-1 flex min-w-0 items-center justify-between gap-3 rounded-xl bg-white px-2 py-1.5 dark:bg-slate-950">
+  return <header className="expense-day-header sticky z-20 -mx-1 flex min-w-0 items-center justify-between gap-3 rounded-xl bg-white px-2 py-1.5 dark:bg-slate-950">
     <h2 className="min-w-0 truncate text-[13px] font-extrabold tracking-[-0.01em] text-slate-800 dark:text-slate-100">{formatBangkokDate(items[0].purchased_at)}</h2>
     <div aria-label={`${summary.count}건, ${formatThb(summary.totalThb)}, ${formatKrw(summary.totalKrw)}`} className="flex shrink-0 items-center gap-2 tabular-nums">
       <span className="text-[10px] font-bold text-slate-400">{summary.count}건 · {formatThb(summary.totalThb)}</span>
