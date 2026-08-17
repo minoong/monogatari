@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, type ReactNode } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
+import { Pencil, Trash2, ZoomIn } from "lucide-react";
 import { MorphingDialogClose, MorphingDialogDescription, MorphingDialogTitle } from "@/components/motion-primitives/morphing-dialog";
+import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   EXPENSE_PAYMENT_META,
@@ -16,6 +17,7 @@ import {
   getEffectiveKrw,
   getExpenseCategoryLabel,
   type Expense,
+  type ExpenseImage,
   type ExpensePerson,
 } from "@/lib/expenses";
 import { cn } from "@/lib/utils";
@@ -31,6 +33,13 @@ export function ExpenseReceiptDetail({ expense, categoryColor, onDelete, onEdit 
   const categoryLabel = getExpenseCategoryLabel(expense);
   const users = EXPENSE_PEOPLE.filter((person) => (person === "gahyun" ? expense.share_gahyun_thb > 0 : expense.share_minu_thb > 0));
   const receiptNo = expense.id.slice(0, 8).toUpperCase();
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const [zoomIndex, setZoomIndex] = useState(0);
+
+  const openZoom = (index: number) => {
+    setZoomIndex(index);
+    setZoomOpen(true);
+  };
 
   return (
     <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -54,13 +63,11 @@ export function ExpenseReceiptDetail({ expense, categoryColor, onDelete, onEdit 
             />
 
             {expense.images.length > 0 && (
-              <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {expense.images.map((image, index) => (
-                  <div className="relative size-16 shrink-0 overflow-hidden rounded-md border border-dashed border-slate-300 bg-white/70" key={image.id}>
-                    <Image alt={index === 0 ? "영수증 사진" : `영수증 사진 ${index + 1}`} className="object-cover" fill sizes="64px" src={image.url} unoptimized />
-                  </div>
-                ))}
-              </div>
+              <ReceiptPhotoStrip
+                images={expense.images}
+                onImagePress={openZoom}
+                title={expense.item_name}
+              />
             )}
 
             <header className="relative text-center">
@@ -151,7 +158,121 @@ export function ExpenseReceiptDetail({ expense, categoryColor, onDelete, onEdit 
           수정
         </MorphingDialogClose>
       </div>
+
+      {expense.images[zoomIndex] && (
+        <ImageZoomModal
+          alt={zoomIndex === 0 ? "영수증 사진" : `영수증 사진 ${zoomIndex + 1}`}
+          isOpen={zoomOpen}
+          onClose={() => setZoomOpen(false)}
+          src={expense.images[zoomIndex].url}
+          title={`${expense.item_name}${expense.images.length > 1 ? ` · ${zoomIndex + 1}/${expense.images.length}` : ""}`}
+        />
+      )}
     </div>
+  );
+}
+
+function ReceiptPhotoStrip({
+  images,
+  onImagePress,
+  title,
+}: {
+  images: ExpenseImage[];
+  onImagePress: (index: number) => void;
+  title: string;
+}) {
+  const multiple = images.length > 1;
+
+  return (
+    <section aria-label="첨부 영수증" className="mb-4">
+      <div className="flex items-center justify-between gap-2 px-0.5">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Attached Receipt</p>
+        <span className="font-mono text-[10px] font-bold tabular-nums text-slate-400">{images.length}장</span>
+      </div>
+
+      {multiple ? (
+        <div className="mt-2 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {images.map((image, index) => (
+            <ReceiptPhotoThumb
+              countLabel={`${index + 1}/${images.length}`}
+              image={image}
+              index={index}
+              key={image.id}
+              onPress={() => onImagePress(index)}
+              title={title}
+            />
+          ))}
+        </div>
+      ) : (
+        <ReceiptPhotoHero image={images[0]} onPress={() => onImagePress(0)} title={title} />
+      )}
+
+      <p className="mt-2 text-center font-mono text-[9px] text-slate-400">
+        {multiple ? "옆으로 넘기고 · 탭하면 크게 볼 수 있어요" : "탭하면 크게 볼 수 있어요"}
+      </p>
+    </section>
+  );
+}
+
+function ReceiptPhotoHero({
+  image,
+  onPress,
+  title,
+}: {
+  image: ExpenseImage;
+  onPress: () => void;
+  title: string;
+}) {
+  return (
+    <button
+      className="relative mt-2 block h-44 w-full overflow-hidden rounded-lg border border-dashed border-slate-300 bg-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
+      onClick={onPress}
+      type="button"
+    >
+      <Image alt={`${title} 영수증`} className="object-cover" fill sizes="300px" src={image.url} unoptimized />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 bg-gradient-to-t from-black/55 to-transparent px-3 py-2 font-mono text-[10px] font-bold text-white">
+        <ZoomIn className="size-3.5" strokeWidth={2.25} />
+        확대 보기
+      </span>
+    </button>
+  );
+}
+
+function ReceiptPhotoThumb({
+  countLabel,
+  image,
+  index,
+  onPress,
+  title,
+}: {
+  countLabel: string;
+  image: ExpenseImage;
+  index: number;
+  onPress: () => void;
+  title: string;
+}) {
+  return (
+    <button
+      className={cn(
+        "group relative h-32 w-[88px] shrink-0 snap-start overflow-hidden rounded-lg border border-dashed bg-white/80",
+        index === 0 ? "border-blue-400/70 ring-1 ring-blue-300/40" : "border-slate-300",
+      )}
+      onClick={onPress}
+      type="button"
+    >
+      <Image alt={`${title} 영수증 ${index + 1}`} className="object-cover" fill sizes="88px" src={image.url} unoptimized />
+      <span className="absolute left-1.5 top-1.5 rounded-full bg-black/55 px-1.5 py-0.5 font-mono text-[9px] font-bold text-white backdrop-blur-sm">
+        {countLabel}
+      </span>
+      {index === 0 && (
+        <span className="absolute bottom-1.5 left-1.5 rounded-full bg-blue-600/90 px-1.5 py-0.5 font-mono text-[8px] font-bold text-white">
+          메인
+        </span>
+      )}
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/45 to-transparent py-1.5 opacity-80 transition group-active:opacity-100">
+        <ZoomIn className="size-3 text-white" strokeWidth={2.25} />
+      </span>
+    </button>
   );
 }
 
