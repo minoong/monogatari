@@ -221,6 +221,27 @@ body {
 }
 
 /*
+ * iOS 상태바/노치 탭은 WKWebView 문서 스크롤만 움직입니다.
+ * 앱 셸은 fixed로 고정하고 html만 1px 스크롤되게 열어 그 탭을 받습니다.
+ */
+html.ios-sb-scroll {
+  height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-width: none;
+}
+
+html.ios-sb-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+html.ios-sb-scroll body {
+  height: auto !important;
+  min-height: calc(100% + 1px);
+  overflow: visible !important;
+}
+
+/*
  * AppScreen의 기본 paperContent는 스크롤 컨테이너입니다. 회화 사전은 내부 목록만
  * 별도로 스크롤하므로, iOS가 input 포커스 때 이 상위 컨테이너를 강제로 올리지 않게 막습니다.
  */

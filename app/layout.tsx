@@ -69,12 +69,14 @@ export default function RootLayout({
       lang="ko"
       className={cn("h-[100svh] w-full overflow-hidden overscroll-none", "antialiased", koreanAirSans.variable, geistMono.variable, kanit.variable, "font-sans")}
     >
-      <body className="h-[100svh] w-full overflow-hidden overscroll-none isolate flex flex-col relative">
-        <QueryProvider>
-          {children}
-          <IosStatusBarScrollToTop />
-          <Toaster position="top-center" />
-        </QueryProvider>
+      <body className="min-h-full w-full">
+        <div className="fixed inset-0 isolate flex flex-col overflow-hidden overscroll-none">
+          <QueryProvider>
+            {children}
+            <IosStatusBarScrollToTop />
+            <Toaster position="top-center" />
+          </QueryProvider>
+        </div>
       </body>
     </html>
   );
