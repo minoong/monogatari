@@ -46,13 +46,16 @@ const frontmostRoot = () => {
   return screen?.querySelector<HTMLElement>("[data-part='paper'] > div") ?? screen ?? document.body;
 };
 
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const scrollBehavior = (): ScrollBehavior => (prefersReducedMotion() ? "auto" : "smooth");
+
 const scrollToTop = (element: HTMLElement) => {
-  element.scrollTop = 0;
-  element.scrollTo({ top: 0, behavior: "auto" });
+  element.scrollTo({ top: 0, behavior: scrollBehavior() });
 };
 
 const scrollFrontmostToTop = () => {
-  window.scrollTo({ top: 0, behavior: "auto" });
   const root = frontmostRoot();
   const scrollers = collectScrollers(root);
   if (root instanceof HTMLElement) scrollers.unshift(root);
