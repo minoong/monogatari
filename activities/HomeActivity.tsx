@@ -332,17 +332,17 @@ const BangkokDepartureCard: React.FC = () => {
       <div className="absolute -right-3 top-1/2 size-6 -translate-y-1/2 rounded-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 z-10" aria-hidden="true" />
 
       {/* Ticket Header Bar - Korean Air Deep Blue */}
-      <AnimatedContent distance={20} direction="vertical" duration={0.6} delay={0.05}>
-        <div className="bg-[#00256C] px-5 py-3 text-white flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-black tracking-widest uppercase text-cyan-300">
+      <AnimatedContent distance={20} direction="vertical" duration={0.6} delay={0.05} className="w-full">
+        <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 bg-[#00256C] px-4 py-2.5 text-white sm:px-5 sm:py-3">
+          <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
+            <span className="text-[10px] font-black uppercase tracking-[0.14em] text-cyan-300 sm:text-[11px] sm:tracking-widest">
               BOARDING PASS
             </span>
-            <span className="text-[10px] text-blue-200/70 font-mono">KE657</span>
+            <span className="shrink-0 text-[10px] font-mono text-blue-200/70 tabular-nums">KE657</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs font-bold">
+          <div className="flex shrink-0 items-center gap-1 whitespace-nowrap text-[11px] font-bold sm:gap-1.5 sm:text-xs">
             <span>인천 ICN</span>
-            <span className="text-cyan-400">✈️</span>
+            <span className="text-cyan-400" aria-hidden="true">✈️</span>
             <span>방콕 BKK</span>
           </div>
         </div>
