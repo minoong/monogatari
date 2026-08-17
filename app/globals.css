@@ -254,8 +254,6 @@ html.ios-sb-scroll body {
 :root {
   --sa-top: env(safe-area-inset-top, 0px);
   --sa-bottom: env(safe-area-inset-bottom, 0px);
-  /* 소프트 키보드 높이. useKeyboardInset이 갱신한다. */
-  --kb-inset: 0px;
   --card: var(--color-white);
   --card-foreground: var(--color-neutral-800);
   --popover: var(--color-white);
