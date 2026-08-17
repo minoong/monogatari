@@ -126,31 +126,36 @@ export function DrawerLinkIcon({ active }: { active: boolean }) {
   return <span ref={hostRef}><LinkIcon ref={iconRef} aria-hidden="true" size={16} /></span>;
 }
 
-export function scrollDrawerFieldIntoView(event: FocusEvent<HTMLElement>) {
-  const target = event.currentTarget;
+export function scrollDrawerElementIntoView(target: HTMLElement) {
   const panel = target.closest("[data-slot=drawer-panel]") as HTMLElement | null;
 
-  window.setTimeout(() => {
-    if (!panel) {
-      target.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      return;
-    }
+  if (!panel) {
+    target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    return;
+  }
 
-    const viewport = window.visualViewport;
-    const keyboardInset = viewport
-      ? Math.max(0, window.innerHeight - (viewport.height + viewport.offsetTop))
-      : 0;
-    const panelRect = panel.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-    const margin = 12;
-    const visibleBottom = keyboardInset > 100 && viewport
-      ? viewport.height + viewport.offsetTop - margin
-      : panelRect.bottom - margin;
+  const viewport = window.visualViewport;
+  const keyboardInset = viewport
+    ? Math.max(0, window.innerHeight - (viewport.height + viewport.offsetTop))
+    : 0;
+  const panelRect = panel.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const margin = 12;
+  const keyboardTop = keyboardInset > 100 && viewport
+    ? viewport.height + viewport.offsetTop
+    : window.innerHeight;
+  const visibleBottom = Math.min(panelRect.bottom, keyboardTop) - margin;
 
-    if (targetRect.bottom > visibleBottom) {
-      panel.scrollTop += targetRect.bottom - visibleBottom;
-    } else if (targetRect.top < panelRect.top + margin) {
-      panel.scrollTop -= panelRect.top + margin - targetRect.top;
-    }
-  }, 320);
+  if (targetRect.bottom > visibleBottom) {
+    panel.scrollTop += targetRect.bottom - visibleBottom;
+  } else if (targetRect.top < panelRect.top + margin) {
+    panel.scrollTop -= panelRect.top + margin - targetRect.top;
+  }
+}
+
+export function scrollDrawerFieldIntoView(event: FocusEvent<HTMLElement>) {
+  const target = event.currentTarget;
+
+  window.setTimeout(() => scrollDrawerElementIntoView(target), 320);
+  window.setTimeout(() => scrollDrawerElementIntoView(target), 560);
 }

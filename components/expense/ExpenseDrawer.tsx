@@ -48,7 +48,7 @@ import {
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass, scrollDrawerFieldIntoView } from "@/components/ui/drawer-form";
+import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass, scrollDrawerElementIntoView, scrollDrawerFieldIntoView } from "@/components/ui/drawer-form";
 import { useKeyboardInset } from "@/hooks/use-keyboard-inset";
 import { Field } from "@/components/ui/field";
 import { CurrencyAmountField } from "@/components/ui/currency-amount-field";
@@ -134,11 +134,23 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const [scanStatus, setScanStatus] = useState<ReceiptScanStatus>("idle");
   const scanResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const focusedFieldRef = useRef<HTMLElement | null>(null);
   const keyboardInset = useKeyboardInset();
-  const handleFieldFocus = (event: FocusEvent<HTMLElement>) => scrollDrawerFieldIntoView(event);
+  const handleFieldFocus = (event: FocusEvent<HTMLElement>) => {
+    focusedFieldRef.current = event.currentTarget;
+    scrollDrawerFieldIntoView(event);
+  };
   useEffect(() => {
     if (!open) panelRef.current?.scrollTo({ top: 0 });
   }, [open]);
+  useEffect(() => {
+    if (keyboardInset > 0 && focusedFieldRef.current) {
+      requestAnimationFrame(() => {
+        if (focusedFieldRef.current) scrollDrawerElementIntoView(focusedFieldRef.current);
+      });
+    }
+    if (keyboardInset === 0) focusedFieldRef.current = null;
+  }, [keyboardInset]);
   const scanning = scanStatus === "scanning";
   useEffect(() => () => { if (scanResetRef.current) clearTimeout(scanResetRef.current); }, []);
 
@@ -405,7 +417,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
           <Field className="gap-2"><Label htmlFor="expense-memo"><DrawerFieldLabel icon={FileTextIcon} active={open}>메모 (선택)</DrawerFieldLabel></Label><textarea enterKeyHint="done" id="expense-memo" aria-label="지출 메모" className="min-h-24 w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900" maxLength={500} onChange={(event) => setMemo(event.target.value)} onFocus={handleFieldFocus} placeholder="기억할 내용을 남겨 주세요." value={memo} /></Field>
           {submitError && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600" role="alert">{submitError}</p>}
         </DrawerPanel>
-        <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pt-4">
+        <DrawerFooter className={cn("relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pt-4", keyboardInset > 0 && "hidden")}>
           <Button fullWidth className={drawerCancelButtonClass} isDisabled={mutation.isPending || scanning} onPress={() => onOpenChange(false)} size="lg" type="button">취소</Button>
           <Button fullWidth className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || scanning || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmountThb <= 0 || numericRate <= 0 || !payer} size="lg" type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
         </DrawerFooter>
