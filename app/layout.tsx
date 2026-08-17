@@ -3,6 +3,7 @@ import { Geist_Mono, Kanit } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { IosStatusBarScrollToTop } from "@/components/ios-status-bar-scroll-to-top";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
 
@@ -71,6 +72,7 @@ export default function RootLayout({
       <body className="h-[100svh] w-full overflow-hidden overscroll-none isolate flex flex-col relative">
         <QueryProvider>
           {children}
+          <IosStatusBarScrollToTop />
           <Toaster position="top-center" />
         </QueryProvider>
       </body>
