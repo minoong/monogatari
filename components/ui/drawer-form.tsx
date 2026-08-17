@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type ForwardRefExoticComponent, type HTMLAttributes, type ReactNode, type RefAttributes } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type ForwardRefExoticComponent, type HTMLAttributes, type ReactNode, type RefAttributes } from "react";
 import { useReducedMotion } from "motion/react";
 import { TextEffect } from "@/components/core/text-effect";
 import { LinkIcon, type LinkIconHandle } from "@/components/ui/link";
@@ -124,4 +124,45 @@ export function DrawerLinkIcon({ active }: { active: boolean }) {
   }, [reduceMotion]);
 
   return <span ref={hostRef}><LinkIcon ref={iconRef} aria-hidden="true" size={16} /></span>;
+}
+
+export function scrollDrawerElementIntoView(target: HTMLElement) {
+  const panel = target.closest("[data-slot=drawer-panel]") as HTMLElement | null;
+  const popup = target.closest("[data-slot=drawer-popup]") as HTMLElement | null;
+  const footer = popup?.querySelector("[data-slot=drawer-footer]") as HTMLElement | null;
+
+  if (!panel) {
+    target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    return;
+  }
+
+  const viewport = window.visualViewport;
+  const panelRect = panel.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const margin = 12;
+  const keyboardTop = viewport
+    ? viewport.height + viewport.offsetTop
+    : window.innerHeight;
+  const footerTop = footer?.getBoundingClientRect().top ?? panelRect.bottom;
+  const visibleBottom = Math.min(footerTop, keyboardTop) - margin;
+
+  if (targetRect.bottom > visibleBottom) {
+    panel.scrollTop += targetRect.bottom - visibleBottom;
+  } else if (targetRect.top < panelRect.top + margin) {
+    panel.scrollTop -= panelRect.top + margin - targetRect.top;
+  }
+}
+
+export function scrollDrawerFieldIntoView(event: FocusEvent<HTMLElement>) {
+  const target = event.currentTarget;
+  const run = () => scrollDrawerElementIntoView(target);
+
+  run();
+  requestAnimationFrame(() => {
+    run();
+    requestAnimationFrame(run);
+  });
+  [120, 320, 560, 820].forEach((delay) => {
+    window.setTimeout(run, delay);
+  });
 }
