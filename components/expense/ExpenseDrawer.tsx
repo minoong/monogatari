@@ -4,15 +4,18 @@ import imageCompression from "browser-image-compression";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Checkbox, CheckboxGroup, FieldError, Input, Label, Radio, RadioGroup, TextField } from "@heroui/react";
 import { Plus, RefreshCw } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { triggerHapticFeedback } from "@/components/BottomNav";
 import {
   convertKrwToThb,
   convertThbToKrw,
   toggleCurrencyAmount,
   toFiniteAmount,
+  formatCurrencyInputAmount,
   type InputCurrency,
 } from "@/lib/exchange-rates";
+import { type ReceiptScanResult } from "@/lib/receipt-scan";
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_META,
@@ -26,12 +29,11 @@ import {
   type ExpensePaymentMethod,
   type ExpensePerson,
 } from "@/lib/expenses";
-import { WishImagePicker, type WishImageDraft } from "@/components/wish/WishImagePicker";
+import type { WishImageDraft } from "@/components/wish/WishImagePicker";
 import { CalendarDaysIcon } from "@/components/ui/calendar-days";
 import { ClockIcon } from "@/components/ui/clock";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FileTextIcon } from "@/components/ui/file-text";
-import { GalleryThumbnailsIcon } from "@/components/ui/gallery-thumbnails";
 import { LayersIcon } from "@/components/ui/layers";
 import { ScanTextIcon } from "@/components/ui/scan-text";
 import { UsersRoundIcon } from "@/components/ui/users-round";
@@ -47,6 +49,7 @@ import {
 import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import { Field } from "@/components/ui/field";
 import { CurrencyAmountField } from "@/components/ui/currency-amount-field";
+import { ExpenseReceiptPicker, type ReceiptScanStatus } from "@/components/expense/ExpenseReceiptPicker";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 
@@ -124,6 +127,10 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const [memo, setMemo] = useState(expense?.memo ?? "");
   const [images, setImages] = useState<WishImageDraft[]>(() => expense?.images.map((image) => ({ id: image.id, path: image.path, url: image.url })) ?? []);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [scanStatus, setScanStatus] = useState<ReceiptScanStatus>("idle");
+  const scanResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scanning = scanStatus === "scanning";
+  useEffect(() => () => { if (scanResetRef.current) clearTimeout(scanResetRef.current); }, []);
 
   const numericInput = toFiniteAmount(Number(amount) || 0);
   const isKrwInput = inputCurrency === "KRW";
@@ -167,6 +174,63 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
     setCustomCategoryMode(!preset);
     setCustomCategory(preset ? "" : next);
     setCategoryDraft("");
+  };
+
+  const applyPurchasedDate = (nextDate: string) => {
+    setDate(nextDate);
+    if (manualRate) setRateDate(nextDate);
+    else if (expense && nextDate === initial.date) {
+      setRate(String(expense.exchange_rate_krw_per_thb));
+      setRateDate(expense.exchange_rate_date);
+    } else setRate("");
+  };
+
+  const applyReceiptScan = (data: ReceiptScanResult) => {
+    if (data.purchased_date) applyPurchasedDate(data.purchased_date);
+    if (data.purchased_time) setTime(data.purchased_time);
+    if (data.item_name) setItemName(data.item_name);
+    if (data.merchant) setMerchant(data.merchant);
+    if (data.payment_method) setPaymentMethod(data.payment_method);
+    if (data.memo) setMemo(data.memo);
+    if (data.custom_category) selectCategoryTag(data.custom_category);
+    else if (data.category) selectCategoryTag(EXPENSE_CATEGORY_META[data.category].label);
+    if (data.amount != null && data.currency) {
+      setInputCurrency(data.currency);
+      setAmount(formatCurrencyInputAmount(data.amount, data.currency));
+    }
+  };
+
+  const scanReceipt = async () => {
+    const image = images[0];
+    if (!image || scanning) return;
+    setScanStatus("scanning");
+    setSubmitError(null);
+    try {
+      let file = image.file;
+      if (!file) {
+        const response = await fetch(image.url);
+        if (!response.ok) throw new Error("영수증 사진을 불러오지 못했어요.");
+        const blob = await response.blob();
+        file = new File([blob], "receipt.jpg", { type: blob.type || "image/jpeg" });
+      }
+      const compressed = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: "image/jpeg" });
+      const formData = new FormData();
+      formData.append("image", compressed);
+      const response = await fetch("/api/expenses/receipt-scan", { method: "POST", body: formData });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "영수증을 스캔하지 못했어요.");
+      applyReceiptScan(payload.data as ReceiptScanResult);
+      triggerHapticFeedback(18);
+      setScanStatus("success");
+      if (scanResetRef.current) clearTimeout(scanResetRef.current);
+      scanResetRef.current = setTimeout(() => setScanStatus("idle"), 1600);
+      toast.success("스캔해서 채웠어요. 확인하고 저장해 주세요.");
+    } catch (error) {
+      setScanStatus("error");
+      if (scanResetRef.current) clearTimeout(scanResetRef.current);
+      scanResetRef.current = setTimeout(() => setScanStatus("idle"), 2200);
+      toast.error(error instanceof Error ? error.message : "영수증을 스캔하지 못했어요.");
+    }
   };
 
   const mutation = useMutation({
@@ -233,13 +297,22 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
     <DrawerPopup id="expense-drawer" variant="inset" showBar className="overflow-hidden">
       <form aria-label={expense ? "지출 수정" : "지출 등록"} className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col overflow-hidden" onSubmit={submit}>
         <DrawerHeader className="px-4 pb-1 pt-5 text-center sm:px-6 sm:pt-6"><DrawerTitle>{expense ? "지출 수정" : "지출 등록"}</DrawerTitle></DrawerHeader>
-        <DrawerPanel scrollable={false} className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-2 sm:gap-5 sm:px-6 sm:py-3">
+        <DrawerPanel scrollable={false} className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-2 *:shrink-0 sm:gap-5 sm:px-6 sm:py-3">
+          <ExpenseReceiptPicker
+            active={open}
+            disabled={mutation.isPending}
+            images={images}
+            onChange={setImages}
+            onScan={scanReceipt}
+            scanStatus={scanStatus}
+          />
+
           <section className="grid min-w-0 grid-cols-1 gap-3 min-[340px]:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] sm:grid-cols-2">
             <Field className="min-w-0 gap-2">
               <Label htmlFor="expense-date"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>날짜</DrawerFieldLabel></Label>
               <div className="relative flex h-11 w-full min-w-0 items-center rounded-xl border border-slate-200 bg-white px-3 pr-9 text-[15px] tabular-nums transition-colors focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-900">
                 <span aria-hidden="true" className="min-w-0 truncate">{formatDateInputValue(date)}</span>
-                <input id="expense-date" aria-label="구매 날짜" className="absolute inset-0 z-10 block size-full min-w-0 cursor-pointer opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:m-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" max={nowInBangkok().date} onChange={(event) => { const nextDate = event.target.value; setDate(nextDate); if (manualRate) setRateDate(nextDate); else if (expense && nextDate === initial.date) { setRate(String(expense.exchange_rate_krw_per_thb)); setRateDate(expense.exchange_rate_date); } else setRate(""); }} type="date" value={date} />
+                <input id="expense-date" aria-label="구매 날짜" className="absolute inset-0 z-10 block size-full min-w-0 cursor-pointer opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:m-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" max={nowInBangkok().date} onChange={(event) => applyPurchasedDate(event.target.value)} type="date" value={date} />
                 <CalendarDaysIcon aria-hidden="true" className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={17} />
               </div>
             </Field>
@@ -310,13 +383,12 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
           <RadioGroup className="gap-2" name="expense-payment-method" value={paymentMethod} onChange={(value) => setPaymentMethod(value as ExpensePaymentMethod)}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>결제 수단</DrawerFieldLabel></Label><div className="grid grid-cols-2 gap-2 min-[440px]:grid-cols-4">{EXPENSE_PAYMENT_METHODS.map((method) => <Radio className="min-w-0" key={method} value={method}><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected, true)}><Radio.Control><Radio.Indicator /></Radio.Control><span>{EXPENSE_PAYMENT_META[method]}</span></Radio.Content></Radio>)}</div></RadioGroup>
           {paymentMethod === "card" && <TextField value={actualKrw} onChange={setActualKrw}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>실제 카드 청구 원화 (선택)</DrawerFieldLabel></Label><Input inputMode="numeric" min="1" placeholder="승인 내역 확인 후 입력" type="number" /></TextField>}
 
-          <div className="space-y-2"><DrawerFieldLabel icon={GalleryThumbnailsIcon} active={open}>영수증 사진</DrawerFieldLabel><WishImagePicker images={images} inputId="expense-images" itemLabel="영수증 사진" label="사진 첨부" description="최대 5장 · 업로드 전에 자동으로 가볍게 압축해요." onChange={setImages} /></div>
           <Field className="gap-2"><Label htmlFor="expense-memo"><DrawerFieldLabel icon={FileTextIcon} active={open}>메모 (선택)</DrawerFieldLabel></Label><textarea id="expense-memo" aria-label="지출 메모" className="min-h-24 w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900" maxLength={500} onChange={(event) => setMemo(event.target.value)} placeholder="기억할 내용을 남겨 주세요." value={memo} /></Field>
           {submitError && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600" role="alert">{submitError}</p>}
         </DrawerPanel>
         <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pt-4">
-          <Button fullWidth className={drawerCancelButtonClass} isDisabled={mutation.isPending} onPress={() => onOpenChange(false)} size="lg" type="button">취소</Button>
-          <Button fullWidth className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmountThb <= 0 || numericRate <= 0 || !payer} size="lg" type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
+          <Button fullWidth className={drawerCancelButtonClass} isDisabled={mutation.isPending || scanning} onPress={() => onOpenChange(false)} size="lg" type="button">취소</Button>
+          <Button fullWidth className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || scanning || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmountThb <= 0 || numericRate <= 0 || !payer} size="lg" type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
         </DrawerFooter>
       </form>
     </DrawerPopup>

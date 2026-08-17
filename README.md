@@ -39,7 +39,10 @@
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+GROQ_API_KEY=your-groq-api-key
 ```
+
+`GROQ_API_KEY`는 서버에서만 사용합니다. 가계부 드로어의 영수증 인식에 필요하며, 브라우저로 노출하지 마세요.
 
 브라우저에서도 같은 Supabase 클라이언트를 사용하므로 `preparation_items`와 `exchange_rates` 테이블의 Row Level Security 정책을 반드시 환경에 맞게 구성해야 합니다. 애플리케이션 코드에는 별도의 인증 계층이 아직 없습니다.
 
