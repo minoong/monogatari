@@ -8,11 +8,29 @@
   transform: scaleY(0);
 }
 
+.schedule-timeline-dot {
+  transform-origin: center center;
+}
+
 .schedule-timeline-dot-core {
+  transform-origin: center center;
   transition: background-color 260ms ease, box-shadow 260ms ease;
 }
 
 .schedule-timeline-dot[data-active="true"] .schedule-timeline-dot-core {
   background-color: var(--color-blue-500);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue-500) 20%, transparent);
+}
+
+@keyframes schedule-dot-pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.45);
+  }
+}
+
+.schedule-timeline-dot[data-current="true"] .schedule-timeline-dot-core {
+  animation: schedule-dot-pulse 1.15s ease-in-out infinite alternate;
 }

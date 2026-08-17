@@ -9,6 +9,9 @@ import "./schedule-timeline.css";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
+/** 진행 게이지 끝점·노드 하이라이트가 같이 따라가는 읽기선 (뷰포트 비율) */
+const READING_LINE_RATIO = 0.3;
+
 export type ScheduleTimelineEntry = {
   id: string;
   time: string;
@@ -19,6 +22,55 @@ export type ScheduleTimelineEntry = {
 interface ScheduleTimelineProps {
   entries: ScheduleTimelineEntry[];
   railContent?: React.ReactNode;
+}
+
+function getReadingLineY(scroller: Element | undefined) {
+  if (!scroller) return window.innerHeight * READING_LINE_RATIO;
+
+  const rect = scroller.getBoundingClientRect();
+  return rect.top + scroller.clientHeight * READING_LINE_RATIO;
+}
+
+function syncTimelineProgress(
+  progress: HTMLElement,
+  dots: HTMLElement[],
+  scroller: Element | undefined,
+  railHeight: number,
+) {
+  if (!railHeight) return;
+
+  const readingY = getReadingLineY(scroller);
+  let activeIndex = -1;
+
+  dots.forEach((dot, index) => {
+    const rect = dot.getBoundingClientRect();
+    const dotY = rect.top + rect.height / 2;
+    if (dotY <= readingY + 2) activeIndex = index;
+  });
+
+  const progressRect = progress.getBoundingClientRect();
+  let fillScale = 0;
+
+  if (activeIndex >= 0) {
+    const activeDot = dots[activeIndex];
+    const dotY = activeDot.getBoundingClientRect().top + activeDot.getBoundingClientRect().height / 2;
+    fillScale = Math.max(0, Math.min(1, (dotY - progressRect.top) / railHeight));
+  }
+
+  gsap.set(progress, { scaleY: fillScale });
+
+  dots.forEach((dot, index) => {
+    const isCurrent = dot.dataset.current === "true";
+    const isReading = index === activeIndex;
+
+    dot.dataset.active = isReading || isCurrent ? "true" : "false";
+    gsap.to(dot, {
+      scale: isReading ? 1.35 : 1,
+      duration: 0.25,
+      ease: isReading ? "back.out(2.4)" : "power2.out",
+      overwrite: "auto",
+    });
+  });
 }
 
 export function ScheduleTimeline({ entries, railContent }: ScheduleTimelineProps) {
@@ -59,68 +111,41 @@ export function ScheduleTimeline({ entries, railContent }: ScheduleTimelineProps
         clearProps: "opacity,visibility,transform",
       });
 
-      if (progress) {
-        gsap.fromTo(
-          progress,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: "none",
-            // 파란 끝점이 화면 30% 지점(읽고 있는 위치)의 레일 좌표를 그대로 가리키게 한다.
-            scrollTrigger: { trigger: content, scroller, start: "top 30%", end: "bottom 30%", scrub: true },
-          },
-        );
+      gsap.set(dots, { scale: 1, transformOrigin: "center center" });
+
+      const triggers: ScrollTrigger[] = [];
+      let removeScrollListener: (() => void) | undefined;
+
+      if (progress && scroller && railHeight > 0) {
+        const handleScroll = () => syncTimelineProgress(progress, dots, scroller, railHeight);
+        scroller.addEventListener("scroll", handleScroll, { passive: true });
+        requestAnimationFrame(handleScroll);
+        removeScrollListener = () => scroller.removeEventListener("scroll", handleScroll);
       }
-
-      dots.forEach((dot, index) => {
-        const card = cards[index];
-        if (!card) return;
-
-        // 현재 일정 노드는 스크롤 하이라이트 대신 상시 펄스로 존재감을 유지한다.
-        if (dot.dataset.current === "true") {
-          dot.dataset.active = "true";
-          gsap.to(dot, { scale: 1.35, duration: 1.15, repeat: -1, yoyo: true, ease: "sine.inOut" });
-          return;
-        }
-
-        const setActive = (active: boolean) => {
-          dot.dataset.active = active ? "true" : "false";
-          gsap.to(dot, {
-            scale: active ? 1.35 : 1,
-            duration: 0.3,
-            ease: active ? "back.out(2.4)" : "power2.out",
-            overwrite: "auto",
-          });
-        };
-
-        ScrollTrigger.create({
-          trigger: card,
-          scroller,
-          start: "top 62%",
-          end: "bottom 38%",
-          onEnter: () => setActive(true),
-          onEnterBack: () => setActive(true),
-          onLeave: () => setActive(false),
-          onLeaveBack: () => setActive(false),
-        });
-      });
 
       const avatars = avatarRef.current;
       if (avatars) {
-        ScrollTrigger.create({
-          trigger: content,
-          scroller,
-          start: "top top",
-          end: "bottom top",
-          onUpdate: (self) => gsap.set(avatars, { y: self.progress * 14 }),
-        });
+        triggers.push(
+          ScrollTrigger.create({
+            trigger: content,
+            scroller,
+            start: "top top",
+            end: "bottom top",
+            onUpdate: (self) => gsap.set(avatars, { y: self.progress * 14 }),
+          }),
+        );
       }
 
       ScrollTrigger.refresh();
+
+      return () => {
+        removeScrollListener?.();
+        triggers.forEach((trigger) => trigger.kill());
+      };
     });
 
     return () => media.revert();
-  }, { scope: rootRef, dependencies: [entries.length], revertOnUpdate: true });
+  }, { scope: rootRef, dependencies: [entries.length, railHeight], revertOnUpdate: true });
 
   return (
     <section ref={rootRef} className="relative w-full min-w-0 font-sans" aria-label="일정 타임라인">
@@ -138,7 +163,7 @@ export function ScheduleTimeline({ entries, railContent }: ScheduleTimelineProps
             <span
               aria-hidden="true"
               data-current={entry.current ? "true" : "false"}
-              data-active={entry.current ? "true" : "false"}
+              data-active="false"
               className="schedule-timeline-dot absolute left-[3.3rem] top-4 z-10 grid size-3 place-items-center rounded-full border-[3px] border-slate-50 bg-white dark:border-slate-950 dark:bg-slate-900"
             >
               <span className="schedule-timeline-dot-core size-1.5 rounded-full bg-slate-300 dark:bg-slate-700" />
