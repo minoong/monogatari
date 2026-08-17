@@ -10,7 +10,7 @@ type ScrambleTextProps = {
   className?: string;
   delay?: number;
   duration?: number;
-  enabled?: boolean;
+  enabled: boolean;
 };
 
 const getInitialScramble = (text: string) => Array.from(text)
@@ -20,6 +20,7 @@ const getInitialScramble = (text: string) => Array.from(text)
   .join("");
 
 /** 첫 진입에서만 랜덤 문자 사이로 원문이 드러나는 짧은 텍스트 리빌 효과 */
+/** 하하히히히 이 코드는 내가 탈취하겠다 히히히히히*/
 export function ScrambleText({
   text,
   className,
