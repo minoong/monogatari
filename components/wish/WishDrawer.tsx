@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
 import {
@@ -30,7 +30,8 @@ import { toast } from "sonner";
 import StatusButton from "@/components/animata/button/status-button";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
-import { DrawerFieldLabel, DrawerIntro, DrawerLinkIcon, DrawerMapPinIcon, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
+import { DrawerFieldLabel, DrawerIntro, DrawerLinkIcon, DrawerMapPinIcon, drawerCancelButtonClass, drawerPrimaryButtonClass, scrollDrawerFieldIntoView } from "@/components/ui/drawer-form";
+import { useKeyboardInset } from "@/hooks/use-keyboard-inset";
 import { CurrencyAmountField } from "@/components/ui/currency-amount-field";
 import {
   Drawer,
@@ -107,7 +108,10 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   const [success, setSuccess] = useState(false);
   const [typeInteraction, setTypeInteraction] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const keyboardInset = useKeyboardInset();
+  const handleFieldFocus = (event: FocusEvent<HTMLElement>) => scrollDrawerFieldIntoView(event);
   const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
     queryKey: EXCHANGE_RATE_QUERY_KEY,
     queryFn: fetchThbToKrwRate,
@@ -123,6 +127,9 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
     setInputCurrency(nextCurrency);
   };
   useEffect(() => () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current); }, []);
+  useEffect(() => {
+    if (!open) panelRef.current?.scrollTo({ top: 0 });
+  }, [open]);
 
   const resetForm = () => {
     setType(initialType);
@@ -143,13 +150,6 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
     setSuccess(false);
   };
 
-
-  const handleInputFocus = (event: React.FocusEvent<HTMLElement>) => {
-    const target = event.currentTarget;
-    setTimeout(() => {
-      target.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 300);
-  };
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) resetForm();
@@ -285,7 +285,12 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             <DrawerTitle>{isEditing ? "위시 편집" : "위시 등록"}</DrawerTitle>
           </DrawerHeader>
 
-          <DrawerPanel scrollable={false} className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3">
+          <DrawerPanel
+            ref={panelRef}
+            scrollable={false}
+            className="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-y-auto overscroll-contain px-6 py-3"
+            style={keyboardInset > 0 ? { paddingBottom: `${keyboardInset + 16}px` } : undefined}
+          >
             <DrawerIntro open={open} image="/drawer-wish-intro.gif" alt="위시 목록을 기록하는 캐릭터" title={isEditing ? "이 위시는 아직 완성되지 않았다… 다듬어라!" : "이 맛은… 위시에 등록해야만 하는 맛이다!"} />
             <div data-drawer-interactive-field className="flex flex-col gap-2" onPointerDownCapture={() => setTypeInteraction((value) => value + 1)}>
               <Label><DrawerFieldLabel icon={BoxIcon} active={open} interactionSignal={typeInteraction}>종류</DrawerFieldLabel></Label>
@@ -327,7 +332,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
 
             <TextField isRequired name="title" value={title} onChange={setTitle}>
               <Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>{type === "restaurant" ? "식당 이름" : type === "menu" ? "메뉴 이름" : "이름"}</DrawerFieldLabel></Label>
-              <Input autoComplete="off" placeholder={type === "shopping" ? "예: 야돔" : type === "snack" ? "예: 망고 쥬스" : type === "menu" ? "예: 팟타이" : "예: 팁싸마이"} />
+              <Input autoComplete="off" onFocus={handleFieldFocus} placeholder={type === "shopping" ? "예: 야돔" : type === "snack" ? "예: 망고 쥬스" : type === "menu" ? "예: 팟타이" : "예: 팁싸마이"} />
               <FieldError />
             </TextField>
 
@@ -338,6 +343,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                   <Input
                     autoComplete="off"
                     maxLength={14}
+                    onFocus={handleFieldFocus}
                     onKeyDown={(event) => {
                       if (event.nativeEvent.isComposing || event.keyCode === 229) return;
                       if (event.key === "Enter" || event.key === ",") {
@@ -405,7 +411,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                   inputId="wish-target-price"
                   name="targetPrice"
                   onAmountChange={setTargetPrice}
-                  onInputFocus={handleInputFocus}
+                  onInputFocus={handleFieldFocus}
                   onToggle={toggleInputCurrency}
                   rateReady={thbToKrwRate > 0}
                 />
@@ -418,7 +424,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
 
             <TextField name="vendor" value={vendor} onChange={setVendor}>
               <Label><DrawerFieldLabel icon={HomeIcon} active={open}>{isDiningType(type) ? "식당 또는 지점" : "판매점"}</DrawerFieldLabel></Label>
-              <Input onFocus={handleInputFocus} autoComplete="off" placeholder={isDiningType(type) ? "예: 팁싸마이 프라투피" : "예: 세븐일레븐, 짜뚜짝 시장"} />
+              <Input onFocus={handleFieldFocus} autoComplete="off" placeholder={isDiningType(type) ? "예: 팁싸마이 프라투피" : "예: 세븐일레븐, 짜뚜짝 시장"} />
             </TextField>
 
             <div className="flex flex-col gap-6">
@@ -435,6 +441,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                   setLocationDraft(value);
                   if (locationError) setLocationError(null);
                 }}
+                onInputFocus={handleFieldFocus}
                 onRemove={(keys) => setLocations((current) => current.filter((item) => !keys.has(item)))}
                 placeholder="Google Maps 링크 붙여넣기"
               />
@@ -447,6 +454,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                 maxLength={500}
                 onAdd={() => addListItem(linkDraft, links, setLinks, setLinkDraft, normalizeExternalUrl)}
                 onDraftChange={setLinkDraft}
+                onInputFocus={handleFieldFocus}
                 onRemove={(keys) => setLinks((current) => current.filter((item) => !keys.has(item)))}
                 placeholder="예: instagram.com/example"
               />
@@ -457,11 +465,12 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             <div className="flex flex-col gap-2">
               <Label htmlFor="wish-memo"><DrawerFieldLabel icon={FileTextIcon} active={open}>메모</DrawerFieldLabel></Label>
               <TextArea
+                enterKeyHint="done"
                 id="wish-memo"
                 className="min-h-24"
                 maxLength={500}
                 onChange={(event) => setMemo(event.target.value)}
-                onFocus={handleInputFocus}
+                onFocus={handleFieldFocus}
                 placeholder="기억해 둘 팁이나 이유를 남겨 보세요."
                 rows={4}
                 value={memo}
@@ -523,6 +532,7 @@ interface MultiValueFieldProps {
   maxLength: number;
   onAdd: () => void;
   onDraftChange: (value: string) => void;
+  onInputFocus?: (event: FocusEvent<HTMLElement>) => void;
   onRemove: (keys: Set<Key>) => void;
   placeholder: string;
 }
@@ -537,6 +547,7 @@ function MultiValueField({
   maxLength,
   onAdd,
   onDraftChange,
+  onInputFocus,
   onRemove,
   placeholder,
 }: MultiValueFieldProps) {
@@ -560,6 +571,7 @@ function MultiValueField({
             aria-label={`${label} 입력`}
             autoComplete="off"
             maxLength={maxLength}
+            onFocus={onInputFocus}
             onKeyDown={(event) => {
               if (event.nativeEvent.isComposing || event.keyCode === 229) return;
               if (event.key === "Enter") {
