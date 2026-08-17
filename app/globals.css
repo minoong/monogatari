@@ -231,6 +231,7 @@ body {
 }
 
 :root {
+  --sa-top: env(safe-area-inset-top, 0px);
   --sa-bottom: env(safe-area-inset-bottom, 0px);
   --card: var(--color-white);
   --card-foreground: var(--color-neutral-800);
