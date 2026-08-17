@@ -132,6 +132,11 @@ export const formatThb = (value: number) => {
   return `฿${safe.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}`;
 };
 
+export const roundThb = (value: number) => {
+  if (!Number.isFinite(value)) return 0;
+  return Math.round(value * 100) / 100;
+};
+
 export const formatBangkokDateKey = (value: string) =>
   new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Bangkok",

@@ -23,6 +23,7 @@ import {
   EXPENSE_PAYMENT_METHODS,
   EXPENSE_PEOPLE,
   EXPENSE_PERSON_META,
+  roundThb,
   type ExchangeRateSnapshot,
   type Expense,
   type ExpenseCategory,
@@ -87,8 +88,9 @@ const fetchRate = async (date: string): Promise<ExchangeRateSnapshot> => {
 };
 
 const equalShares = (amount: number, participants: ExpensePerson[], payer: ExpensePerson | null) => {
-  if (participants.length === 1) return { gahyun: participants[0] === "gahyun" ? amount : 0, minu: participants[0] === "minu" ? amount : 0 };
-  const cents = Math.round(amount * 100);
+  const total = roundThb(amount);
+  if (participants.length === 1) return { gahyun: participants[0] === "gahyun" ? total : 0, minu: participants[0] === "minu" ? total : 0 };
+  const cents = Math.round(total * 100);
   const lower = Math.floor(cents / 2) / 100;
   const upper = (cents - Math.floor(cents / 2)) / 100;
   return payer === "gahyun" ? { gahyun: upper, minu: lower } : { gahyun: lower, minu: upper };
@@ -149,7 +151,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const effectiveRate = rate || autoRate;
   const effectiveRateDate = shouldLoadRate && rateQuery.data ? rateQuery.data.observedDate : rateDate;
   const numericRate = Number(effectiveRate) || 0;
-  const numericAmountThb = isKrwInput ? convertKrwToThb(numericInput, numericRate) : numericInput;
+  const numericAmountThb = roundThb(isKrwInput ? convertKrwToThb(numericInput, numericRate) : numericInput);
   const convertedKrw = convertThbToKrw(numericAmountThb, numericRate);
   const automaticShares = equalShares(numericAmountThb, participants, payer);
 
@@ -262,7 +264,10 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
             exchange_rate_date: effectiveRateDate, rate_manually_edited: manualRate || rateQuery.data?.source === "supabase_fallback",
             actual_amount_krw: paymentMethod === "card" && actualKrw ? Number(actualKrw) : null,
             payer, participants,
-            shares_thb: { gahyun: Number(effectiveGahyunShare) || 0, minu: Number(effectiveMinuShare) || 0 },
+            shares_thb: {
+              gahyun: roundThb(Number(effectiveGahyunShare) || 0),
+              minu: roundThb(Number(effectiveMinuShare) || 0),
+            },
             memo, image_paths: imagePaths,
           }),
         });

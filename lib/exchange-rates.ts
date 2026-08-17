@@ -76,7 +76,7 @@ export const convertThbToKrw = (thb: number, rate: number) =>
   Math.round(toFiniteAmount(thb) * toFiniteAmount(rate));
 
 export const convertKrwToThb = (krw: number, rate: number) =>
-  rate > 0 ? toFiniteAmount(krw) / rate : 0;
+  rate > 0 ? Math.round((toFiniteAmount(krw) / rate) * 100) / 100 : 0;
 
 export const formatCurrencyInputAmount = (value: number, currency: InputCurrency) => {
   if (!Number.isFinite(value) || value <= 0) return "";

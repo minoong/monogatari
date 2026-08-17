@@ -59,8 +59,10 @@ const optionalText = (value: unknown, max: number) => {
 
 const money = (value: unknown, allowZero = false) => {
   const number = typeof value === "number" || typeof value === "string" ? Number(value) : Number.NaN;
-  if (!Number.isFinite(number) || number < (allowZero ? 0 : 0.01) || Math.round(number * 100) !== number * 100) return undefined;
-  return number;
+  if (!Number.isFinite(number)) return undefined;
+  const rounded = Math.round(number * 100) / 100;
+  if (rounded < (allowZero ? 0 : 0.01)) return undefined;
+  return rounded;
 };
 
 const integerMoney = (value: unknown, optional = false) => {
