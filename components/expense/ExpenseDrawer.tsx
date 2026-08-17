@@ -20,8 +20,6 @@ import {
   EXPENSE_PAYMENT_METHODS,
   EXPENSE_PEOPLE,
   EXPENSE_PERSON_META,
-  formatKrw,
-  formatThb,
   type ExchangeRateSnapshot,
   type Expense,
   type ExpenseCategory,
@@ -48,7 +46,7 @@ import {
 } from "@/components/ui/drawer";
 import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import { Field } from "@/components/ui/field";
-import { CurrencySwitchButton } from "@/components/ui/currency-switch-button";
+import { CurrencyAmountField } from "@/components/ui/currency-amount-field";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 
@@ -282,27 +280,14 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
 
           <Field className="min-w-0 gap-2">
             <Label htmlFor="expense-amount"><DrawerFieldLabel icon={WalletIcon} active={open}>결제 금액</DrawerFieldLabel></Label>
-            <InputGroup className="h-12 min-w-0 rounded-2xl">
-              <InputGroupAddon><InputGroupText className="text-base font-bold">{isKrwInput ? "₩" : "฿"}</InputGroupText></InputGroupAddon>
-              <InputGroupInput
-                id="expense-amount"
-                aria-label={isKrwInput ? "대한민국 원 금액" : "태국 바트 금액"}
-                className="min-w-0 text-right font-semibold tabular-nums"
-                inputMode={isKrwInput ? "numeric" : "decimal"}
-                min={isKrwInput ? "1" : "0.01"}
-                onChange={(event) => setAmount(event.target.value)}
-                placeholder="0"
-                step={isKrwInput ? "1" : "0.01"}
-                style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }}
-                type="number"
-                value={amount}
-              />
-              <InputGroupAddon align="inline-end"><InputGroupText className="text-xs font-semibold">{isKrwInput ? "KRW" : "THB"}</InputGroupText></InputGroupAddon>
-            </InputGroup>
-            <CurrencySwitchButton
-              convertedText={numericRate > 0 ? (isKrwInput ? formatThb(numericAmountThb) : formatKrw(convertedKrw)) : "환율 확인 중"}
-              isKrwInput={isKrwInput}
+            <CurrencyAmountField
+              amount={amount}
+              convertedValue={isKrwInput ? numericAmountThb : convertedKrw}
+              currency={inputCurrency}
+              inputId="expense-amount"
+              onAmountChange={setAmount}
               onToggle={toggleInputCurrency}
+              rateReady={numericRate > 0}
             />
           </Field>
 

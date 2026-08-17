@@ -31,7 +31,7 @@ import StatusButton from "@/components/animata/button/status-button";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { DrawerFieldLabel, DrawerIntro, DrawerLinkIcon, DrawerMapPinIcon, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
-import { CurrencySwitchButton } from "@/components/ui/currency-switch-button";
+import { CurrencyAmountField } from "@/components/ui/currency-amount-field";
 import {
   Drawer,
   DrawerFooter,
@@ -42,12 +42,6 @@ import {
 } from "@/components/ui/drawer";
 import { WishImagePicker, type WishImageDraft } from "@/components/wish/WishImagePicker";
 import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  InputGroupText,
-} from "@/components/ui/input-group";
-import {
   DEFAULT_THB_TO_KRW_RATE,
   EXCHANGE_RATE_QUERY_KEY,
   convertKrwToThb,
@@ -57,7 +51,6 @@ import {
   toFiniteAmount,
   type InputCurrency,
 } from "@/lib/exchange-rates";
-import { formatKrw, formatThb } from "@/lib/expenses";
 import {
   isGoogleMapsUrl,
   normalizeExternalUrl,
@@ -405,35 +398,16 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             {!isDiningType(type) && (
               <div className="flex flex-col gap-2">
                 <Label htmlFor="wish-target-price"><DrawerFieldLabel icon={WalletIcon} active={open}>현지 적정 가격</DrawerFieldLabel></Label>
-                <InputGroup className="h-12 rounded-2xl">
-                  <InputGroupAddon>
-                    <InputGroupText className="text-base font-bold text-slate-500">{isKrwInput ? "₩" : "฿"}</InputGroupText>
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    id="wish-target-price"
-                    aria-label={isKrwInput ? "대한민국 원 가격" : "태국 바트 가격"}
-                    inputMode={isKrwInput ? "numeric" : "decimal"}
-                    min={isKrwInput ? 1 : 0}
-                    name="targetPrice"
-                    onChange={(event) => setTargetPrice(event.target.value)}
-                    onFocus={handleInputFocus}
-                    placeholder="0"
-                    step={isKrwInput ? "1" : "0.01"}
-                    style={{
-                      fontVariantNumeric: "tabular-nums",
-                      textAlign: "right",
-                    }}
-                    type="number"
-                    value={targetPrice}
-                  />
-                  <InputGroupAddon align="inline-end">
-                    <InputGroupText className="font-semibold">{isKrwInput ? "KRW" : "THB"}</InputGroupText>
-                  </InputGroupAddon>
-                </InputGroup>
-                <CurrencySwitchButton
-                  convertedText={thbToKrwRate > 0 ? (isKrwInput ? formatThb(targetPriceThb) : formatKrw(targetPriceKrw)) : "환율 확인 중"}
-                  isKrwInput={isKrwInput}
+                <CurrencyAmountField
+                  amount={targetPrice}
+                  convertedValue={isKrwInput ? targetPriceThb : targetPriceKrw}
+                  currency={inputCurrency}
+                  inputId="wish-target-price"
+                  name="targetPrice"
+                  onAmountChange={setTargetPrice}
+                  onInputFocus={handleInputFocus}
                   onToggle={toggleInputCurrency}
+                  rateReady={thbToKrwRate > 0}
                 />
                 <p className="px-1 text-xs text-slate-400">가격을 모르면 비워 두어도 됩니다.</p>
                 <p className="text-right text-[11px] text-slate-400">
