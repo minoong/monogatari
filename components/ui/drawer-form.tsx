@@ -128,6 +128,8 @@ export function DrawerLinkIcon({ active }: { active: boolean }) {
 
 export function scrollDrawerElementIntoView(target: HTMLElement) {
   const panel = target.closest("[data-slot=drawer-panel]") as HTMLElement | null;
+  const popup = target.closest("[data-slot=drawer-popup]") as HTMLElement | null;
+  const footer = popup?.querySelector("[data-slot=drawer-footer]") as HTMLElement | null;
 
   if (!panel) {
     target.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -135,16 +137,14 @@ export function scrollDrawerElementIntoView(target: HTMLElement) {
   }
 
   const viewport = window.visualViewport;
-  const keyboardInset = viewport
-    ? Math.max(0, window.innerHeight - (viewport.height + viewport.offsetTop))
-    : 0;
   const panelRect = panel.getBoundingClientRect();
   const targetRect = target.getBoundingClientRect();
   const margin = 12;
-  const keyboardTop = keyboardInset > 100 && viewport
+  const keyboardTop = viewport
     ? viewport.height + viewport.offsetTop
     : window.innerHeight;
-  const visibleBottom = Math.min(panelRect.bottom, keyboardTop) - margin;
+  const footerTop = footer?.getBoundingClientRect().top ?? panelRect.bottom;
+  const visibleBottom = Math.min(footerTop, keyboardTop) - margin;
 
   if (targetRect.bottom > visibleBottom) {
     panel.scrollTop += targetRect.bottom - visibleBottom;
@@ -155,8 +155,14 @@ export function scrollDrawerElementIntoView(target: HTMLElement) {
 
 export function scrollDrawerFieldIntoView(event: FocusEvent<HTMLElement>) {
   const target = event.currentTarget;
+  const run = () => scrollDrawerElementIntoView(target);
 
-  [0, 120, 320, 560, 820].forEach((delay) => {
-    window.setTimeout(() => scrollDrawerElementIntoView(target), delay);
+  run();
+  requestAnimationFrame(() => {
+    run();
+    requestAnimationFrame(run);
+  });
+  [120, 320, 560, 820].forEach((delay) => {
+    window.setTimeout(run, delay);
   });
 }

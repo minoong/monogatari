@@ -2,7 +2,7 @@
 
 import imageCompression from "browser-image-compression";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Checkbox, CheckboxGroup, FieldError, Input, Label, Radio, RadioGroup, TextField } from "@heroui/react";
+import { Button, Checkbox, CheckboxGroup, FieldError, Input, Label, Radio, RadioGroup, TextArea, TextField } from "@heroui/react";
 import { Plus, RefreshCw } from "lucide-react";
 import type { FocusEvent, FormEvent } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -48,7 +48,7 @@ import {
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass, scrollDrawerElementIntoView, scrollDrawerFieldIntoView } from "@/components/ui/drawer-form";
+import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass, scrollDrawerFieldIntoView } from "@/components/ui/drawer-form";
 import { useKeyboardInset } from "@/hooks/use-keyboard-inset";
 import { Field } from "@/components/ui/field";
 import { CurrencyAmountField } from "@/components/ui/currency-amount-field";
@@ -134,23 +134,11 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const [scanStatus, setScanStatus] = useState<ReceiptScanStatus>("idle");
   const scanResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const focusedFieldRef = useRef<HTMLElement | null>(null);
-  const keyboardInset = useKeyboardInset();
-  const handleFieldFocus = (event: FocusEvent<HTMLElement>) => {
-    focusedFieldRef.current = event.currentTarget;
-    scrollDrawerFieldIntoView(event);
-  };
+  useKeyboardInset();
+  const handleFieldFocus = (event: FocusEvent<HTMLElement>) => scrollDrawerFieldIntoView(event);
   useEffect(() => {
     if (!open) panelRef.current?.scrollTo({ top: 0 });
   }, [open]);
-  useEffect(() => {
-    if (keyboardInset > 0 && focusedFieldRef.current) {
-      requestAnimationFrame(() => {
-        if (focusedFieldRef.current) scrollDrawerElementIntoView(focusedFieldRef.current);
-      });
-    }
-    if (keyboardInset === 0) focusedFieldRef.current = null;
-  }, [keyboardInset]);
   const scanning = scanStatus === "scanning";
   useEffect(() => () => { if (scanResetRef.current) clearTimeout(scanResetRef.current); }, []);
 
@@ -325,7 +313,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
         <DrawerPanel
           ref={panelRef}
           scrollable={false}
-          className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-2 *:shrink-0 sm:gap-5 sm:px-6 sm:py-3"
+          className="flex min-h-0 min-w-0 flex-1 touch-pan-y flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-2 pb-6 sm:gap-5 sm:px-6 sm:py-3"
         >
           <ExpenseReceiptPicker
             active={open}
@@ -413,10 +401,23 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
           <RadioGroup className="gap-2" name="expense-payment-method" value={paymentMethod} onChange={(value) => setPaymentMethod(value as ExpensePaymentMethod)}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>결제 수단</DrawerFieldLabel></Label><div className="grid grid-cols-2 gap-2 min-[440px]:grid-cols-4">{EXPENSE_PAYMENT_METHODS.map((method) => <Radio className="min-w-0" key={method} value={method}><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected, true)}><Radio.Control><Radio.Indicator /></Radio.Control><span>{EXPENSE_PAYMENT_META[method]}</span></Radio.Content></Radio>)}</div></RadioGroup>
           {paymentMethod === "card" && <TextField value={actualKrw} onChange={setActualKrw}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>실제 카드 청구 원화 (선택)</DrawerFieldLabel></Label><Input inputMode="numeric" min="1" onFocus={handleFieldFocus} placeholder="승인 내역 확인 후 입력" type="number" /></TextField>}
 
-          <Field className="gap-2"><Label htmlFor="expense-memo"><DrawerFieldLabel icon={FileTextIcon} active={open}>메모 (선택)</DrawerFieldLabel></Label><textarea enterKeyHint="done" id="expense-memo" aria-label="지출 메모" className="min-h-24 w-full scroll-mb-28 resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900" maxLength={500} onChange={(event) => setMemo(event.target.value)} onFocus={handleFieldFocus} placeholder="기억할 내용을 남겨 주세요." value={memo} /></Field>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="expense-memo"><DrawerFieldLabel icon={FileTextIcon} active={open}>메모 (선택)</DrawerFieldLabel></Label>
+            <TextArea
+              enterKeyHint="done"
+              id="expense-memo"
+              className="min-h-24 scroll-mb-28"
+              maxLength={500}
+              onChange={(event) => setMemo(event.target.value)}
+              onFocus={handleFieldFocus}
+              placeholder="기억할 내용을 남겨 주세요."
+              rows={4}
+              value={memo}
+            />
+          </div>
           {submitError && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600" role="alert">{submitError}</p>}
         </DrawerPanel>
-        <DrawerFooter className={cn("relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pt-4", keyboardInset > 0 && "hidden")}>
+        <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pt-4">
           <Button fullWidth className={drawerCancelButtonClass} isDisabled={mutation.isPending || scanning} onPress={() => onOpenChange(false)} size="lg" type="button">취소</Button>
           <Button fullWidth className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || scanning || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmountThb <= 0 || numericRate <= 0 || !payer} size="lg" type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
         </DrawerFooter>
