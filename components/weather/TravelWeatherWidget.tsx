@@ -282,7 +282,7 @@ export function BeforeTripWeatherTicker() {
     <section className="flex h-12 items-center gap-1.5 overflow-hidden rounded-2xl border border-slate-200 bg-white px-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]" aria-label="여행지 현재 날씨">
       <span className="shrink-0 text-[10px] font-semibold tabular-nums text-slate-400">{formatCompactDate(cities[0].observedAt)}</span>
       <div className="relative h-7 min-w-0 flex-1 overflow-hidden">
-        <AnimatePresence initial={false} mode="wait">
+        <AnimatePresence initial={false} mode="popLayout">
           <motion.div
             key={city.id}
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
