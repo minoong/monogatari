@@ -156,6 +156,7 @@ export function scrollDrawerElementIntoView(target: HTMLElement) {
 export function scrollDrawerFieldIntoView(event: FocusEvent<HTMLElement>) {
   const target = event.currentTarget;
 
-  window.setTimeout(() => scrollDrawerElementIntoView(target), 320);
-  window.setTimeout(() => scrollDrawerElementIntoView(target), 560);
+  [0, 120, 320, 560, 820].forEach((delay) => {
+    window.setTimeout(() => scrollDrawerElementIntoView(target), delay);
+  });
 }
