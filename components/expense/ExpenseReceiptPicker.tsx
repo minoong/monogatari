@@ -8,13 +8,20 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { gsap } from "gsap";
 import { AlertCircle, Camera, Check, GripVertical, Images, Loader2, Plus, X } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { toast } from "sonner";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import ClickSpark from "@/components/ClickSpark";
 import ElectricBorder from "@/components/ElectricBorder";
 import { DrawerFieldLabel, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import { ScanTextIcon, type ScanTextIconHandle } from "@/components/ui/scan-text";
 import { cn } from "@/lib/utils";
+import {
+  ACCEPT_IMAGE_INPUT,
+  createLocalImageId,
+  isAcceptedImageFile,
+  rejectImageFileReason,
+} from "@/lib/image-upload";
 import type { WishImageDraft } from "@/components/wish/WishImagePicker";
 
 if (typeof window !== "undefined") {
@@ -33,8 +40,6 @@ interface ExpenseReceiptPickerProps {
 }
 
 const MAX_IMAGES = 5;
-const INPUT_ID = "expense-images";
-const CAMERA_INPUT_ID = "expense-images-camera";
 const THUMB_SIZE_CLASS = "h-[88px] w-[88px] shrink-0";
 const SPRING = { type: "spring" as const, stiffness: 420, damping: 28, mass: 0.85 };
 
@@ -65,6 +70,11 @@ export function ExpenseReceiptPicker({
   const beamRef = useRef<HTMLDivElement>(null);
   const cornersRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<ScanTextIconHandle>(null);
+  const albumInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
+  const albumInputId = `${inputId}-album`;
+  const cameraInputDomId = `${inputId}-camera`;
   const objectUrlsRef = useRef(new Set<string>());
   const prevCountRef = useRef(images.length);
   const [newImageId, setNewImageId] = useState<string | null>(null);
@@ -177,13 +187,48 @@ export function ExpenseReceiptPicker({
   }, [images]);
 
   const addFiles = (files: FileList | null) => {
-    if (!files) return;
+    if (!files || disabled) return;
     const remaining = MAX_IMAGES - images.length;
-    const accepted = Array.from(files)
-      .filter((file) => ["image/jpeg", "image/png", "image/webp"].includes(file.type) && file.size <= 5 * 1024 * 1024)
-      .slice(0, remaining);
-    if (!accepted.length) return;
-    onChange([...images, ...accepted.map((file) => ({ id: crypto.randomUUID(), file, url: URL.createObjectURL(file) }))]);
+    if (remaining <= 0) {
+      toast.error(`영수증은 최대 ${MAX_IMAGES}장까지 올릴 수 있어요.`);
+      return;
+    }
+
+    const candidates = Array.from(files).slice(0, remaining);
+    const accepted: File[] = [];
+    let firstRejectReason: string | null = null;
+
+    candidates.forEach((file) => {
+      if (isAcceptedImageFile(file)) {
+        accepted.push(file);
+        return;
+      }
+      firstRejectReason ??= rejectImageFileReason(file);
+    });
+
+    if (!accepted.length) {
+      toast.error(firstRejectReason ?? "올릴 수 있는 사진이 없어요.");
+      return;
+    }
+
+    onChange([
+      ...images,
+      ...accepted.map((file) => ({
+        id: createLocalImageId(),
+        file,
+        url: URL.createObjectURL(file),
+      })),
+    ]);
+  };
+
+  const openAlbumPicker = () => {
+    if (disabled) return;
+    albumInputRef.current?.click();
+  };
+
+  const openCameraPicker = () => {
+    if (disabled) return;
+    cameraInputRef.current?.click();
   };
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -229,20 +274,22 @@ export function ExpenseReceiptPicker({
                 initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                 transition={{ ...SPRING, delay: 0.18 }}
               >
-                <label
-                  htmlFor={CAMERA_INPUT_ID}
+                <button
                   className="flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-blue-500 text-sm font-bold text-white shadow-sm shadow-blue-500/25 transition hover:bg-blue-600 active:scale-[0.98]"
+                  onClick={openCameraPicker}
+                  type="button"
                 >
                   <Camera className="size-4" strokeWidth={1.75} />
                   촬영
-                </label>
-                <label
-                  htmlFor={INPUT_ID}
+                </button>
+                <button
                   className="flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 active:scale-[0.98] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  onClick={openAlbumPicker}
+                  type="button"
                 >
                   <Images className="size-4" strokeWidth={1.75} />
                   앨범
-                </label>
+                </button>
               </motion.div>
             </motion.div>
           </motion.div>
@@ -273,20 +320,21 @@ export function ExpenseReceiptPicker({
                       />
                     ))}
                     {images.length < MAX_IMAGES && (
-                      <motion.label
+                      <motion.button
                         animate={{ opacity: 1, scale: 1 }}
-                        htmlFor={INPUT_ID}
                         initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
                         transition={{ ...SPRING, delay: 0.1 }}
                         className={cn(
                           "flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate-200 bg-slate-50 text-slate-400 transition hover:border-blue-300 hover:bg-blue-50 dark:border-slate-700 dark:bg-white/5",
                           THUMB_SIZE_CLASS,
                         )}
+                        onClick={openAlbumPicker}
+                        type="button"
                         whileTap={reduceMotion ? undefined : { scale: 0.94 }}
                       >
                         <Plus className="size-5 text-blue-500" />
                         <span className="text-[11px] font-semibold">추가</span>
-                      </motion.label>
+                      </motion.button>
                     )}
                   </div>
                 </SortableContext>
@@ -396,8 +444,24 @@ export function ExpenseReceiptPicker({
         card
       )}
 
-      <input accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" id={CAMERA_INPUT_ID} onChange={(event) => { addFiles(event.target.files); event.currentTarget.value = ""; }} type="file" />
-      <input accept="image/jpeg,image/png,image/webp" className="sr-only" id={INPUT_ID} multiple onChange={(event) => { addFiles(event.target.files); event.currentTarget.value = ""; }} type="file" />
+      <input
+        accept={ACCEPT_IMAGE_INPUT}
+        capture="environment"
+        className="sr-only"
+        id={cameraInputDomId}
+        onChange={(event) => { addFiles(event.target.files); event.currentTarget.value = ""; }}
+        ref={cameraInputRef}
+        type="file"
+      />
+      <input
+        accept={ACCEPT_IMAGE_INPUT}
+        className="sr-only"
+        id={albumInputId}
+        multiple
+        onChange={(event) => { addFiles(event.target.files); event.currentTarget.value = ""; }}
+        ref={albumInputRef}
+        type="file"
+      />
     </section>
   );
 }

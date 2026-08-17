@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import * as React from "react";
+import { useSyncExternalStore } from "react";
 
 type SlidingNumberProps = React.HTMLAttributes<HTMLSpanElement> & {
   value: number;
@@ -30,7 +31,20 @@ const SlidingDigit: React.FC<{ value: number }> = ({ value }) => (
 
 export const SlidingNumber = React.forwardRef<HTMLSpanElement, SlidingNumberProps>(
   ({ value, padStart = false, className, ...props }, ref) => {
+    const mounted = useSyncExternalStore(
+      () => () => {},
+      () => true,
+      () => false,
+    );
     const displayValue = String(value).padStart(padStart ? 2 : 1, "0");
+
+    if (!mounted) {
+      return (
+        <span ref={ref} className={`inline-flex items-center gap-0.5 leading-none ${className ?? ""}`} {...props}>
+          {displayValue}
+        </span>
+      );
+    }
 
     return (
       <span ref={ref} className={`inline-flex items-center gap-0.5 leading-none ${className ?? ""}`} {...props}>

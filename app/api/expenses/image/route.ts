@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
+import { MAX_IMAGE_FILE_SIZE, MAX_IMAGE_FILE_SIZE_MB } from "@/lib/image-upload";
 import { supabase } from "@/lib/supabase";
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const IMAGE_PATH = /^expenses\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:jpe?g|png|webp)$/i;
 const EXTENSIONS: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     if (!(file instanceof File)) return NextResponse.json({ error: "사진이 필요해요." }, { status: 400 });
     const extension = EXTENSIONS[file.type];
     if (!extension) return NextResponse.json({ error: "JPG, PNG, WEBP 사진만 등록할 수 있어요." }, { status: 400 });
-    if (file.size > MAX_IMAGE_SIZE) return NextResponse.json({ error: "사진은 장당 5MB 이하여야 해요." }, { status: 400 });
+    if (file.size > MAX_IMAGE_FILE_SIZE) return NextResponse.json({ error: `사진은 장당 ${MAX_IMAGE_FILE_SIZE_MB}MB 이하여야 해요.` }, { status: 400 });
 
     const path = `expenses/${crypto.randomUUID()}.${extension}`;
     const { error } = await supabase.storage.from("expense-images").upload(path, file, {

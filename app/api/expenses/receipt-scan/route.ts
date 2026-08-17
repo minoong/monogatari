@@ -1,13 +1,7 @@
 import { NextResponse } from "next/server";
 import { EXPENSE_CATEGORY_META, EXPENSE_CATEGORIES } from "@/lib/expenses";
+import { isAcceptedImageFile, MAX_IMAGE_FILE_SIZE, MAX_IMAGE_FILE_SIZE_MB, normalizeImageMimeType } from "@/lib/image-upload";
 import { parseReceiptScanJson, RECEIPT_SCAN_MODEL } from "@/lib/receipt-scan";
-
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-const IMAGE_TYPES: Record<string, string> = {
-  "image/jpeg": "image/jpeg",
-  "image/png": "image/png",
-  "image/webp": "image/webp",
-};
 
 const CATEGORY_GUIDE = EXPENSE_CATEGORIES
   .map((value) => `${value}=${EXPENSE_CATEGORY_META[value].label}`)
@@ -39,9 +33,9 @@ Rules:
 - If the image is not a receipt or invoice, set is_receipt to false and all other fields to null.
 - Do not invent amounts, dates, or merchants that are not visible.`;
 
-const toDataUrl = async (file: File) => {
+const toDataUrl = async (file: File, mimeType: string) => {
   const buffer = Buffer.from(await file.arrayBuffer());
-  return `data:${file.type};base64,${buffer.toString("base64")}`;
+  return `data:${mimeType};base64,${buffer.toString("base64")}`;
 };
 
 const groqErrorCode = (payload: unknown) => {
@@ -93,10 +87,11 @@ export async function POST(request: Request) {
   try {
     const file = (await request.formData()).get("image");
     if (!(file instanceof File)) return NextResponse.json({ error: "사진이 필요해요." }, { status: 400 });
-    if (!IMAGE_TYPES[file.type]) return NextResponse.json({ error: "JPG, PNG, WEBP 사진만 인식할 수 있어요." }, { status: 400 });
-    if (file.size > MAX_IMAGE_SIZE) return NextResponse.json({ error: "사진은 장당 5MB 이하여야 해요." }, { status: 400 });
+    if (!isAcceptedImageFile(file)) return NextResponse.json({ error: "JPG, PNG, WEBP, HEIC 사진만 인식할 수 있어요." }, { status: 400 });
+    if (file.size > MAX_IMAGE_FILE_SIZE) return NextResponse.json({ error: `사진은 장당 ${MAX_IMAGE_FILE_SIZE_MB}MB 이하여야 해요.` }, { status: 400 });
 
-    const imageUrl = await toDataUrl(file);
+    const mimeType = normalizeImageMimeType(file);
+    const imageUrl = await toDataUrl(file, mimeType);
     let { response: groqResponse, payload: groqPayload } = await requestGroq(apiKey, imageUrl, true);
     if (!groqResponse.ok && groqErrorCode(groqPayload) === "json_validate_failed") {
       ({ response: groqResponse, payload: groqPayload } = await requestGroq(apiKey, imageUrl, false));

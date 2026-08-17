@@ -6,23 +6,22 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Button, Label, Radio, RadioGroup, Skeleton, Tabs } from "@heroui/react";
-import { Filter, Pencil, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
+import { Filter, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { ExpenseDrawer } from "@/components/expense/ExpenseDrawer";
+import { ExpenseReceiptDetail } from "@/components/expense/ExpenseReceiptDetail";
 import { CompactSegmentedTabsList } from "@/components/ui/compact-segmented-tabs";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CalendarDaysIcon } from "@/components/ui/calendar-days";
 import { ClockIcon } from "@/components/ui/clock";
 import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
-import { FileTextIcon } from "@/components/ui/file-text";
 import { GalleryThumbnailsIcon } from "@/components/ui/gallery-thumbnails";
 import { LayersIcon } from "@/components/ui/layers";
 import { ReceiptIcon } from "@/components/ui/receipt";
 import { ScanTextIcon } from "@/components/ui/scan-text";
 import { UsersRoundIcon } from "@/components/ui/users-round";
 import { WalletIcon } from "@/components/ui/wallet";
-import { WishImageGallery } from "@/components/wish/WishImageGallery";
 import {
   AlertDialog,
   AlertDialogDescription,
@@ -41,17 +40,14 @@ import {
 } from "@/components/ui/drawer";
 import {
   MorphingDialog,
-  MorphingDialogClose,
   MorphingDialogContainer,
   MorphingDialogContent,
-  MorphingDialogDescription,
   MorphingDialogTitle,
   MorphingDialogTrigger,
 } from "@/components/motion-primitives/morphing-dialog";
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_META,
-  EXPENSE_PAYMENT_META,
   EXPENSE_PEOPLE,
   EXPENSE_PERSON_META,
   formatBangkokDate,
@@ -249,48 +245,11 @@ function ExpenseRow({ expense, onEdit, onDelete, showDivider }: { expense: Expen
       {showDivider && <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-[4.75rem] right-3.5 h-px bg-slate-100 dark:bg-slate-800" />}
     </MorphingDialogTrigger>
     <MorphingDialogContainer>
-      <MorphingDialogContent className="relative mx-4 flex max-h-[88dvh] w-[calc(100%_-_2rem)] max-w-md flex-col overflow-hidden rounded-[28px] bg-white shadow-2xl dark:bg-slate-900">
-        <MorphingDialogClose className="right-4 top-4 z-20 flex size-10 items-center justify-center rounded-full bg-slate-900/75 text-white backdrop-blur dark:bg-white/15" />
-        <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          {expense.images.length > 0 && <WishImageGallery images={expense.images} onImagePress={() => {}} title={expense.item_name} />}
-          <div className="min-w-0 px-5 pb-5 pt-6">
-            <span className="inline-flex max-w-[calc(100%_-_3rem)] truncate rounded-full px-2.5 py-1 text-[11px] font-extrabold" style={{ backgroundColor: `${categoryColor}14`, color: categoryColor }}>{categoryLabel}</span>
-            <MorphingDialogTitle><h2 className="mt-2 break-words pr-12 text-[22px] font-black leading-tight tracking-[-0.02em]">{expense.item_name}</h2></MorphingDialogTitle>
-            <div className="mt-4 flex min-w-0 items-end justify-between gap-4"><p className="text-[34px] font-black leading-none tracking-[-0.04em] tabular-nums">{formatThb(expense.amount_thb)}</p><p className="shrink-0 pb-0.5 text-sm font-bold tabular-nums text-slate-500">{formatKrw(getEffectiveKrw(expense))}</p></div>
-          </div>
-          <MorphingDialogDescription disableLayoutAnimation className="space-y-5 border-t border-slate-100 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-950/40">
-            <section>
-              <div className="mb-2 flex items-center gap-1.5 px-1 text-slate-500"><CalendarDaysIcon aria-hidden="true" size={14} /><h3 className="text-xs font-extrabold">구매 정보</h3></div>
-              <div className="overflow-hidden rounded-2xl bg-white px-4 shadow-sm ring-1 ring-black/5 divide-y divide-slate-100 dark:bg-slate-900 dark:ring-white/10 dark:divide-slate-800">
-                <Detail label="구매 시각" value={`${formatBangkokDate(expense.purchased_at)} ${formatBangkokTime(expense.purchased_at)}`} />
-                <Detail label="상호" value={expense.merchant ?? "기록 없음"} />
-                <Detail label="결제 수단" value={EXPENSE_PAYMENT_META[expense.payment_method]} />
-                <Detail label="적용 환율" value={`฿1 = ₩${expense.exchange_rate_krw_per_thb.toLocaleString()}`} />
-              </div>
-              <p className="mt-2 px-1 text-[10px] font-semibold text-slate-400">{expense.exchange_rate_date} 기준 환율</p>
-            </section>
-            <section>
-              <div className="mb-2 flex items-center gap-1.5 px-1 text-slate-500"><UsersRoundIcon aria-hidden="true" size={14} /><h3 className="text-xs font-extrabold">함께 쓴 금액</h3></div>
-              <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10">
-                <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800"><span className="text-xs font-semibold text-slate-400">결제자</span><span className="flex items-center gap-2 text-sm font-extrabold"><FilterPersonAvatar person={expense.payer} />{EXPENSE_PERSON_META[expense.payer].label}</span></div>
-                <div className="divide-y divide-slate-100 px-4 dark:divide-slate-800">{users.map((person) => <ExpenseShareRow expense={expense} key={person} person={person} />)}</div>
-              </div>
-            </section>
-            {expense.memo && <section><div className="mb-2 flex items-center gap-1.5 px-1 text-slate-500"><FileTextIcon aria-hidden="true" size={14} /><h3 className="text-xs font-extrabold">메모</h3></div><p className="break-words whitespace-pre-wrap rounded-2xl bg-white px-4 py-3 text-sm leading-6 shadow-sm ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10">{expense.memo}</p></section>}
-          </MorphingDialogDescription>
-        </div>
-        <div className="grid shrink-0 grid-cols-[44px_1fr_1fr] gap-2 border-t bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><MorphingDialogClose ariaLabel="지출 삭제" className="static grid h-11 place-items-center rounded-xl bg-red-50 text-red-500" onClick={onDelete}><Trash2 className="size-4" /></MorphingDialogClose><MorphingDialogClose ariaLabel="상세 닫기" className="static grid h-11 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold dark:bg-slate-800">닫기</MorphingDialogClose><MorphingDialogClose ariaLabel="지출 수정" className="static flex h-11 items-center justify-center gap-1.5 rounded-xl bg-slate-900 text-sm font-bold text-white dark:bg-white dark:text-slate-900" onClick={onEdit}><Pencil className="size-4" />수정</MorphingDialogClose></div>
+      <MorphingDialogContent className="relative mx-3 flex max-h-[88dvh] w-[calc(100%_-_1.5rem)] max-w-md flex-col overflow-hidden rounded-[20px] bg-transparent shadow-none">
+        <ExpenseReceiptDetail categoryColor={categoryColor} expense={expense} onDelete={onDelete} onEdit={onEdit} />
       </MorphingDialogContent>
     </MorphingDialogContainer>
   </MorphingDialog>;
-}
-
-function Detail({ label, value }: { label: string; value: string }) { return <div className="flex items-start justify-between gap-4 py-3"><span className="shrink-0 text-xs font-semibold text-slate-400">{label}</span><span className="text-right font-semibold">{value}</span></div>; }
-
-function ExpenseShareRow({ expense, person }: { expense: Expense; person: ExpensePerson }) {
-  const thb = person === "gahyun" ? expense.share_gahyun_thb : expense.share_minu_thb;
-  const krw = person === "gahyun" ? expense.share_gahyun_krw : expense.share_minu_krw;
-  return <div className="flex items-center justify-between gap-3 py-3"><span className="flex min-w-0 items-center gap-2"><FilterPersonAvatar person={person} /><span className="truncate text-sm font-bold">{EXPENSE_PERSON_META[person].label}</span></span><span className="shrink-0 text-right"><strong className="block text-sm font-black tabular-nums">{formatThb(thb)}</strong><span className="mt-0.5 block text-[10px] font-semibold tabular-nums text-slate-400">{formatKrw(krw)}</span></span></div>;
 }
 
 function FilterDrawer({ open, person, category, categoryOptions, from, to, onOpenChange, onApply }: { open: boolean; person: PersonFilter; category: CategoryFilter; categoryOptions: CategoryOption[]; from: string; to: string; onOpenChange: (open: boolean) => void; onApply: (filter: { person: PersonFilter; category: CategoryFilter; from: string; to: string }) => void }) {
