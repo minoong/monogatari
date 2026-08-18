@@ -7,16 +7,13 @@ import { useReducedMotion } from "motion/react";
 import Noise from "@/components/Noise";
 import { AnimatedNumber } from "@/components/core/animated-number";
 import { TextEffect } from "@/components/core/text-effect";
-import { cn } from "@/lib/utils";
 import {
   pwaIntroOverlayClassName,
   PwaIntroPortal,
   preloadIntroImages,
-  useIntroViewportChrome,
 } from "@/components/pwa/pwa-intro-layout";
 import {
   PwaIntroBackdrop,
-  usePwaIntroZoomComplete,
   type PwaIntroFlashImage,
 } from "@/components/pwa/pwa-intro-photo-flash";
 
@@ -76,8 +73,6 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
   const [lastImageReady, setLastImageReady] = React.useState(false);
   const [flashStartedAt, setFlashStartedAt] = React.useState<number | null>(null);
 
-  useIntroViewportChrome(true);
-
   const coupleTextEffectVariants = React.useMemo(
     () => createTextEffectVariants({ delayChildren: 0, prefersReducedMotion }),
     [prefersReducedMotion],
@@ -112,9 +107,10 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
 
   const handleLastImageReady = React.useCallback((ready: boolean) => {
     setLastImageReady(ready);
-    if (ready) {
-      setFlashStartedAt((current) => current ?? Date.now());
-    }
+  }, []);
+
+  const handleFirstImageReady = React.useCallback(() => {
+    setFlashStartedAt((current) => current ?? Date.now());
   }, []);
 
   React.useEffect(() => {
@@ -130,24 +126,14 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
     return () => window.clearTimeout(timer);
   }, [beginExit, durationMs, flashStartedAt, lastImageReady]);
 
-  usePwaIntroZoomComplete({
-    onComplete,
-    reducedMotion: prefersReducedMotion,
-    stage,
-  });
-
   return (
     <PwaIntroPortal>
-      <div
-        aria-label="앱 인트로"
-        className={cn(
-          pwaIntroOverlayClassName,
-          stage === "exit" && "bg-transparent",
-        )}
-      >
+      <div aria-label="앱 인트로" className={pwaIntroOverlayClassName}>
         <PwaIntroBackdrop
           images={introImages}
+          onFirstImageReady={handleFirstImageReady}
           onLastImageReady={handleLastImageReady}
+          onZoomComplete={onComplete}
           reducedMotion={prefersReducedMotion}
           stage={stage}
         />

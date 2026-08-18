@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { PwaIntro } from "@/components/pwa/pwa-intro";
-import { PwaIntroPortal, useIntroViewportChrome } from "@/components/pwa/pwa-intro-layout";
+import { PwaIntroPortal } from "@/components/pwa/pwa-intro-layout";
 import { PwaIntroShell } from "@/components/pwa/pwa-intro-shell";
 import { cn } from "@/lib/utils";
 
@@ -21,8 +21,6 @@ function readIntroPhase(): GatePhase {
 }
 
 function PwaIntroBootShell() {
-  useIntroViewportChrome(true);
-
   return (
     <PwaIntroPortal>
       <PwaIntroShell />

@@ -1,8 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "motion/react";
+import { gsap } from "gsap";
 
+import {
+  isIosStandalonePwa,
+  pwaIntroMediaClassName,
+} from "@/components/pwa/pwa-intro-layout";
 import { cn } from "@/lib/utils";
 
 export interface PwaIntroFlashImage {
@@ -24,22 +28,23 @@ const photoGradients = (
 
 function useIntroZoomPreset() {
   return React.useMemo(() => {
-    if (typeof window === "undefined") {
+    const iosStandalone = isIosStandalonePwa();
+    const isCoarsePointer =
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
+    if (iosStandalone || isCoarsePointer) {
       return { blurPx: 22, durationMs: MOBILE_ZOOM_MS, scale: 6 };
     }
 
-    const isCoarsePointer = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-    return {
-      blurPx: isCoarsePointer ? 26 : 20,
-      durationMs: isCoarsePointer ? MOBILE_ZOOM_MS : DESKTOP_ZOOM_MS,
-      scale: isCoarsePointer ? 6.5 : 5,
-    };
+    return { blurPx: 18, durationMs: DESKTOP_ZOOM_MS, scale: 5 };
   }, []);
 }
 
 export function getIntroZoomDurationMs(reducedMotion: boolean) {
   if (reducedMotion) return REDUCED_MOTION_ZOOM_MS;
   if (typeof window === "undefined") return MOBILE_ZOOM_MS;
+  if (isIosStandalonePwa()) return MOBILE_ZOOM_MS;
   return window.matchMedia("(hover: none) and (pointer: coarse)").matches
     ? MOBILE_ZOOM_MS
     : DESKTOP_ZOOM_MS;
@@ -48,11 +53,13 @@ export function getIntroZoomDurationMs(reducedMotion: boolean) {
 function IntroPhotoLayer({
   alt,
   className,
+  imgRef,
   src,
   visible,
 }: {
   alt: string;
   className?: string;
+  imgRef?: React.Ref<HTMLImageElement>;
   src: string;
   visible: boolean;
 }) {
@@ -61,12 +68,13 @@ function IntroPhotoLayer({
     <img
       alt={alt}
       className={cn(
-        "absolute left-1/2 top-1/2 h-[118%] w-[118%] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-200 ease-out",
+        "absolute left-1/2 top-1/2 h-[125%] w-[125%] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-200 ease-out",
         visible ? "opacity-100" : "opacity-0",
         className,
       )}
-      decoding="sync"
+      decoding="async"
       draggable={false}
+      ref={imgRef}
       src={src}
     />
   );
@@ -74,59 +82,97 @@ function IntroPhotoLayer({
 
 function IntroZoomExitLayer({
   image,
+  onZoomComplete,
   reducedMotion,
 }: {
   image: PwaIntroFlashImage;
+  onZoomComplete: () => void;
   reducedMotion: boolean;
 }) {
   const zoom = useIntroZoomPreset();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const imageRef = React.useRef<HTMLImageElement>(null);
+  const completedRef = React.useRef(false);
 
-  if (reducedMotion) {
-    return (
-      <motion.div
-        animate={{ opacity: 0 }}
-        className="absolute inset-0"
-        initial={{ opacity: 1 }}
-        transition={{ duration: REDUCED_MOTION_ZOOM_MS / 1000, ease: "easeOut" }}
-      >
-        <IntroPhotoLayer alt={image.alt} src={image.src} visible />
-      </motion.div>
-    );
-  }
+  React.useEffect(() => {
+    if (completedRef.current) return;
+
+    const container = containerRef.current;
+    const photo = imageRef.current;
+    if (!container || !photo) return;
+
+    if (reducedMotion) {
+      const timer = window.setTimeout(() => {
+        completedRef.current = true;
+        onZoomComplete();
+      }, REDUCED_MOTION_ZOOM_MS);
+      return () => window.clearTimeout(timer);
+    }
+
+    const durationSec = zoom.durationMs / 1000;
+    const finish = () => {
+      if (completedRef.current) return;
+      completedRef.current = true;
+      onZoomComplete();
+    };
+
+    const ctx = gsap.context(() => {
+      gsap.set(container, { opacity: 1, scale: 1, transformOrigin: "center center" });
+      gsap.set(photo, { filter: "blur(0px)" });
+
+      gsap
+        .timeline({ onComplete: finish })
+        .to(
+          container,
+          {
+            duration: durationSec,
+            ease: "power2.in",
+            scale: zoom.scale,
+          },
+          0,
+        )
+        .to(
+          photo,
+          {
+            duration: durationSec,
+            ease: "power2.in",
+            filter: `blur(${zoom.blurPx}px)`,
+          },
+          0,
+        )
+        .to(
+          container,
+          {
+            duration: 0.28,
+            ease: "power2.out",
+            opacity: 0,
+          },
+          Math.max(0, durationSec - 0.28),
+        );
+    }, container);
+
+    return () => ctx.revert();
+  }, [image.src, onZoomComplete, reducedMotion, zoom.blurPx, zoom.durationMs, zoom.scale]);
 
   return (
-    <motion.div
-      animate={{
-        filter: [`blur(0px)`, `blur(${zoom.blurPx}px)`],
-        opacity: [1, 1, 0],
-        scale: [1, zoom.scale],
-      }}
-      className="absolute inset-0 origin-center"
-      initial={false}
-      style={{
-        backfaceVisibility: "hidden",
-        transformOrigin: "center center",
-        willChange: "transform, filter, opacity",
-      }}
-      transition={{
-        duration: zoom.durationMs / 1000,
-        ease: [0.22, 1, 0.36, 1],
-        opacity: { duration: zoom.durationMs / 1000, ease: "easeOut", times: [0, 0.8, 1] },
-      }}
-    >
-      <IntroPhotoLayer alt={image.alt} src={image.src} visible />
-    </motion.div>
+    <div className={cn(pwaIntroMediaClassName, "origin-center")} ref={containerRef}>
+      <IntroPhotoLayer alt={image.alt} imgRef={imageRef} src={image.src} visible />
+    </div>
   );
 }
 
 export function PwaIntroBackdrop({
   images,
+  onFirstImageReady,
   onLastImageReady,
+  onZoomComplete,
   reducedMotion,
   stage,
 }: {
   images: PwaIntroFlashImage[];
+  onFirstImageReady?: () => void;
   onLastImageReady?: (ready: boolean) => void;
+  onZoomComplete?: () => void;
   reducedMotion: boolean;
   stage: "play" | "exit";
 }) {
@@ -138,23 +184,20 @@ export function PwaIntroBackdrop({
   React.useEffect(() => {
     let cancelled = false;
 
-    void (async () => {
-      for (const image of images) {
-        await new Promise<void>((resolve) => {
-          const loader = new window.Image();
-          loader.onload = () => resolve();
-          loader.onerror = () => resolve();
-          loader.src = image.src;
-        });
-
+    for (const image of images) {
+      const loader = new window.Image();
+      const markReady = () => {
         if (cancelled) return;
         setDecodedSources((current) => {
           const next = new Set(current);
           next.add(image.src);
           return next;
         });
-      }
-    })();
+      };
+      loader.onload = markReady;
+      loader.onerror = markReady;
+      loader.src = image.src;
+    }
 
     return () => {
       cancelled = true;
@@ -162,36 +205,39 @@ export function PwaIntroBackdrop({
   }, [images]);
 
   const lastImageReady = Boolean(lastImage && decodedSources.has(lastImage.src));
+  const firstImageReady = Boolean(images[0] && decodedSources.has(images[0].src));
+
+  React.useEffect(() => {
+    if (firstImageReady) onFirstImageReady?.();
+  }, [firstImageReady, onFirstImageReady]);
 
   React.useEffect(() => {
     onLastImageReady?.(lastImageReady);
   }, [lastImageReady, onLastImageReady]);
 
   React.useEffect(() => {
-    if (!lastImageReady || reducedMotion || stage !== "play" || images.length <= 1) return;
+    if (!firstImageReady || reducedMotion || stage !== "play" || images.length <= 1) return;
 
     let current = 0;
     const timer = window.setInterval(() => {
-      current = Math.min(current + 1, lastIndex);
+      const next = Math.min(current + 1, lastIndex);
+      if (next === lastIndex && !lastImageReady) return;
+      current = next;
       setIndex(current);
       if (current >= lastIndex) window.clearInterval(timer);
     }, FLASH_INTERVAL_MS);
 
     return () => window.clearInterval(timer);
-  }, [images.length, lastImageReady, lastIndex, reducedMotion, stage]);
+  }, [firstImageReady, images.length, lastImageReady, lastIndex, reducedMotion, stage]);
 
   const displayIndex = reducedMotion ? lastIndex : index;
 
-  if (stage === "exit" && lastImage) {
-    return (
-      <div className="absolute inset-0 overflow-hidden">
-        <IntroZoomExitLayer image={lastImage} reducedMotion={reducedMotion} />
-      </div>
-    );
+  if (stage === "exit" && lastImage && onZoomComplete) {
+    return <IntroZoomExitLayer image={lastImage} onZoomComplete={onZoomComplete} reducedMotion={reducedMotion} />;
   }
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className={pwaIntroMediaClassName}>
       {images.map((image, imageIndex) => {
         const visible = imageIndex === displayIndex && decodedSources.has(image.src);
 
@@ -207,21 +253,4 @@ export function PwaIntroBackdrop({
       {photoGradients}
     </div>
   );
-}
-
-export function usePwaIntroZoomComplete({
-  onComplete,
-  reducedMotion,
-  stage,
-}: {
-  onComplete: () => void;
-  reducedMotion: boolean;
-  stage: "play" | "exit";
-}) {
-  React.useEffect(() => {
-    if (stage !== "exit") return;
-    const durationMs = getIntroZoomDurationMs(reducedMotion);
-    const timer = window.setTimeout(onComplete, durationMs);
-    return () => window.clearTimeout(timer);
-  }, [onComplete, reducedMotion, stage]);
 }
