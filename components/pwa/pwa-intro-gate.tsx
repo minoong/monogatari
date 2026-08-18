@@ -4,16 +4,16 @@ import { useCallback, useLayoutEffect, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import { ProposalCinematic } from "@/components/cinematic/proposal-cinematic-lazy";
 import { PwaIntro } from "@/components/pwa/pwa-intro";
 import { PwaIntroPortal } from "@/components/pwa/pwa-intro-layout";
 import { PwaIntroShell } from "@/components/pwa/pwa-intro-shell";
-import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const STORAGE_KEY = "monogatari-pwa-intro-seen";
 
-type GatePhase = "boot" | "intro" | "revealing" | "app";
+type GatePhase = "boot" | "intro" | "story" | "app";
 
 function readIntroPhase(): GatePhase {
   if (typeof window === "undefined") return "boot";
@@ -37,11 +37,11 @@ export function PwaIntroGate({ children }: { children: React.ReactNode }) {
     setPhase(readIntroPhase());
   }, []);
 
-  const handleExitStart = useCallback(() => {
-    setPhase("revealing");
+  const handleIntroComplete = useCallback(() => {
+    setPhase("story");
   }, []);
 
-  const dismissIntro = useCallback(() => {
+  const handleStoryComplete = useCallback(() => {
     sessionStorage.setItem(STORAGE_KEY, "1");
     setPhase("app");
     requestAnimationFrame(() => {
@@ -53,21 +53,13 @@ export function PwaIntroGate({ children }: { children: React.ReactNode }) {
     return <PwaIntroBootShell />;
   }
 
-  const showHome = phase === "revealing" || phase === "app";
-  const showIntro = phase === "intro" || phase === "revealing";
-
   return (
     <>
-      {showHome ? (
-        <div
-          className={cn(
-            phase === "revealing" && "fixed inset-0 z-[110] overflow-hidden bg-white dark:bg-black",
-          )}
-        >
-          {children}
-        </div>
+      {phase === "app" ? children : null}
+      {phase === "intro" ? (
+        <PwaIntro onComplete={handleIntroComplete} onExitStart={() => undefined} />
       ) : null}
-      {showIntro ? <PwaIntro onComplete={dismissIntro} onExitStart={handleExitStart} /> : null}
+      {phase === "story" ? <ProposalCinematic onComplete={handleStoryComplete} /> : null}
     </>
   );
 }

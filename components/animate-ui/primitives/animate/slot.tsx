@@ -70,9 +70,11 @@ function Slot<T extends HTMLElement = HTMLElement>({
 
   const Base = React.useMemo(
     () =>
-      isAlreadyMotion
-        ? (children.type as React.ElementType)
-        : motion.create(children.type as React.ElementType),
+      (isAlreadyMotion
+        ? children.type
+        : motion.create(children.type as React.ElementType)) as React.ComponentType<
+        AnyProps & { ref?: React.Ref<T> }
+      >,
     [isAlreadyMotion, children.type],
   );
 
@@ -83,8 +85,6 @@ function Slot<T extends HTMLElement = HTMLElement>({
   const mergedProps = mergeProps(childProps, props);
 
   return (
-    // Animate UI creates the motion wrapper from the slotted child type.
-    // eslint-disable-next-line react-hooks/static-components
     <Base {...mergedProps} ref={mergeRefs(childRef as React.Ref<T>, ref)} />
   );
 }

@@ -5,6 +5,12 @@ import { AnimatePresence, motion, type Transition } from 'motion/react';
 
 import { cn } from '@/lib/utils';
 
+type AnyProps = Record<string, unknown>;
+
+type HighlightHost = React.ComponentType<
+  AnyProps & { ref?: React.Ref<HTMLDivElement | null> }
+>;
+
 type HighlightMode = 'children' | 'parent';
 
 type Bounds = {
@@ -122,7 +128,7 @@ function Highlight<T extends React.ElementType = 'div'>({
   ...props
 }: HighlightProps<T>) {
   const {
-    as: Component = 'div',
+    as: ComponentProp = 'div',
     children,
     value,
     defaultValue,
@@ -138,6 +144,8 @@ function Highlight<T extends React.ElementType = 'div'>({
     exitDelay = 200,
     mode = 'children',
   } = props;
+
+  const Component = ComponentProp as HighlightHost;
 
   const localRef = React.useRef<HTMLDivElement>(null);
   React.useImperativeHandle(ref, () => localRef.current as HTMLDivElement);
@@ -417,7 +425,7 @@ function HighlightItem<T extends React.ElementType>({
     setActiveClassName,
   } = useHighlight();
 
-  const Component = as ?? 'div';
+  const Component = (as ?? 'div') as HighlightHost;
   const element = children as React.ReactElement<ExtendedChildProps>;
   const childValue =
     id ?? value ?? element.props?.['data-value'] ?? element.props?.id ?? itemId;
