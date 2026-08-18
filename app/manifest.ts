@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: '가현쨩과 미누쿤의 모노가타리 🇹🇭',
     start_url: '/',
     display: 'standalone',
-    background_color: '#f8fafc',
-    theme_color: '#3b82f6',
+    background_color: '#ffffff',
+    theme_color: '#ffffff',
     icons: [
       {
         src: '/favicon.ico',

@@ -57,6 +57,7 @@ export const viewport: Viewport = {
   userScalable: false,
   viewportFit: "cover",
   interactiveWidget: "overlays-content",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -69,8 +70,13 @@ export default function RootLayout({
       lang="ko"
       className={cn("h-[100svh] w-full overflow-hidden overscroll-none", "antialiased", koreanAirSans.variable, geistMono.variable, kanit.variable, "font-sans")}
     >
-      <body className="min-h-full w-full">
-        <div className="fixed inset-0 isolate flex flex-col overflow-hidden overscroll-none">
+      <body className="min-h-full w-full bg-white">
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-x-0 top-0 z-[500] bg-white"
+          style={{ height: "env(safe-area-inset-top, 0px)" }}
+        />
+        <div className="fixed inset-0 isolate flex flex-col overflow-hidden overscroll-none bg-white">
           <QueryProvider>
             {children}
             <IosStatusBarScrollToTop />

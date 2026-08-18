@@ -55,6 +55,11 @@ export const { Stack } = stackflow({
     basicRendererPlugin(),
     basicUIPlugin({
       theme: "cupertino",
+      backgroundColor: "#ffffff",
+      appBar: {
+        backgroundColor: "#ffffff",
+        minSafeAreaInsetTop: "env(safe-area-inset-top, 0px)",
+      },
     }),
   ],
 });

@@ -213,22 +213,19 @@
 html,
 body {
   position: relative;
-  background: var(--background);
+  background: #ffffff;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   overscroll-behavior-y: none;
   /* Disables pull-to-refresh on iOS/Android */
 }
 
-/*
- * iOS 상태바/노치 탭은 WKWebView 문서 스크롤만 움직입니다.
- * 앱 셸은 fixed로 고정하고 html만 1px 스크롤되게 열어 그 탭을 받습니다.
- */
 html.ios-sb-scroll {
   height: 100% !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   scrollbar-width: none;
+  background: #ffffff !important;
 }
 
 html.ios-sb-scroll::-webkit-scrollbar {
@@ -239,10 +236,22 @@ html.ios-sb-scroll body {
   height: auto !important;
   min-height: calc(100% + 1px);
   overflow: visible !important;
+  background: #ffffff !important;
 }
 
 /*
- * AppScreen의 기본 paperContent는 스크롤 컨테이너입니다. 회화 사전은 내부 목록만
+ * Stackflow cupertino 앱바·화면 상단을 흰색으로 통일한다.
+ */
+[data-stackflow-component-name="AppScreen"] [data-part="appBar"],
+[data-stackflow-component-name="AppScreen"] [data-part="paper"] {
+  background-color: #ffffff;
+}
+
+[data-stackflow-component-name="AppScreen"] [data-part="appBar"] > * {
+  background-color: #ffffff;
+}
+
+/*
  * 별도로 스크롤하므로, iOS가 input 포커스 때 이 상위 컨테이너를 강제로 올리지 않게 막습니다.
  */
 .dictionary-screen > [data-part="paper"] > div {

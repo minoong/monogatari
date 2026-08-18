@@ -6,7 +6,7 @@ import { PwaIntroGate } from "../components/pwa/pwa-intro-gate";
 export default function Home() {
   return (
     <PwaIntroGate>
-      <main className="w-full h-[100svh] overflow-hidden bg-white dark:bg-black">
+      <main className="h-[100svh] w-full overflow-hidden bg-white">
         <Stack />
       </main>
     </PwaIntroGate>
