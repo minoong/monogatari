@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { PwaIntro } from "@/components/pwa/pwa-intro";
-import { pwaIntroBleedStyle } from "@/components/pwa/pwa-intro-layout";
+import { PwaIntroPortal, useIntroViewportChrome } from "@/components/pwa/pwa-intro-layout";
 import { PwaIntroShell } from "@/components/pwa/pwa-intro-shell";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,16 @@ type GatePhase = "boot" | "intro" | "revealing" | "app";
 function readIntroPhase(): GatePhase {
   if (typeof window === "undefined") return "boot";
   return sessionStorage.getItem(STORAGE_KEY) === "1" ? "app" : "intro";
+}
+
+function PwaIntroBootShell() {
+  useIntroViewportChrome(true);
+
+  return (
+    <PwaIntroPortal>
+      <PwaIntroShell />
+    </PwaIntroPortal>
+  );
 }
 
 export function PwaIntroGate({ children }: { children: React.ReactNode }) {
@@ -42,7 +52,7 @@ export function PwaIntroGate({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (phase === "boot") {
-    return <PwaIntroShell />;
+    return <PwaIntroBootShell />;
   }
 
   const showHome = phase === "revealing" || phase === "app";
@@ -53,10 +63,8 @@ export function PwaIntroGate({ children }: { children: React.ReactNode }) {
       {showHome ? (
         <div
           className={cn(
-            phase === "revealing" &&
-              "fixed left-0 right-0 z-[110] w-full overflow-hidden bg-white dark:bg-black",
+            phase === "revealing" && "fixed inset-0 z-[110] overflow-hidden bg-white dark:bg-black",
           )}
-          style={phase === "revealing" ? pwaIntroBleedStyle : undefined}
         >
           {children}
         </div>

@@ -2,19 +2,21 @@
 
 import * as React from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
 
 import Noise from "@/components/Noise";
 import { AnimatedNumber } from "@/components/core/animated-number";
 import { TextEffect } from "@/components/core/text-effect";
+import { cn } from "@/lib/utils";
 import {
+  pwaIntroOverlayClassName,
+  PwaIntroPortal,
   preloadIntroImages,
-  pwaIntroBleedClassName,
-  pwaIntroBleedStyle,
+  useIntroViewportChrome,
 } from "@/components/pwa/pwa-intro-layout";
 import {
-  PwaIntroPhotoFlash,
-  PwaIntroPhotoZoomExit,
+  PwaIntroBackdrop,
+  usePwaIntroZoomComplete,
   type PwaIntroFlashImage,
 } from "@/components/pwa/pwa-intro-photo-flash";
 
@@ -27,12 +29,11 @@ const introImages = [
   { alt: "함께 손을 맞댄 순간", src: "/intro/couple-hands.jpg" },
 ] satisfies PwaIntroFlashImage[];
 
-const lastIntroImage = introImages[introImages.length - 1]!;
 const datingStartDate = { day: 31, monthIndex: 7, year: 2025 };
 const countUpDurationMs = 2000;
 const reducedMotionCountUpDurationMs = 150;
 const countCompletePauseMs = 650;
-const lastImageHoldMs = 700;
+const lastImageHoldMs = 900;
 const tripTitle = "내 멍멍이 같이 가";
 
 const createTextEffectVariants = ({
@@ -72,6 +73,10 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
   const durationMs = prefersReducedMotion ? reducedMotionCountUpDurationMs : countUpDurationMs;
   const completedRef = React.useRef(false);
   const [stage, setStage] = React.useState<"play" | "exit">("play");
+  const [lastImageReady, setLastImageReady] = React.useState(false);
+  const [flashStartedAt, setFlashStartedAt] = React.useState<number | null>(null);
+
+  useIntroViewportChrome(true);
 
   const coupleTextEffectVariants = React.useMemo(
     () => createTextEffectVariants({ delayChildren: 0, prefersReducedMotion }),
@@ -97,7 +102,7 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
   }, [onExitStart]);
 
   React.useEffect(() => {
-    preloadIntroImages(introImages.map((image) => image.src));
+    void preloadIntroImages(introImages.map((image) => image.src));
   }, []);
 
   React.useEffect(() => {
@@ -105,90 +110,112 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
     return () => window.clearTimeout(timer);
   }, [datingDayCount]);
 
+  const handleLastImageReady = React.useCallback((ready: boolean) => {
+    setLastImageReady(ready);
+    if (ready) {
+      setFlashStartedAt((current) => current ?? Date.now());
+    }
+  }, []);
+
   React.useEffect(() => {
+    if (!lastImageReady || flashStartedAt === null) return;
+
     const flashCompleteMs = (introImages.length - 1) * 480;
     const countCompleteMs = durationMs + countCompletePauseMs;
-    const exitDelayMs = Math.max(flashCompleteMs, countCompleteMs) + lastImageHoldMs;
+    const elapsedSinceFlashMs = Date.now() - flashStartedAt;
+    const remainingFlashMs = Math.max(0, flashCompleteMs - elapsedSinceFlashMs);
+    const exitDelayMs = Math.max(remainingFlashMs, countCompleteMs) + lastImageHoldMs;
     const timer = window.setTimeout(beginExit, exitDelayMs);
+
     return () => window.clearTimeout(timer);
-  }, [beginExit, durationMs]);
+  }, [beginExit, durationMs, flashStartedAt, lastImageReady]);
+
+  usePwaIntroZoomComplete({
+    onComplete,
+    reducedMotion: prefersReducedMotion,
+    stage,
+  });
 
   return (
-    <motion.div
-      aria-label="앱 인트로"
-      className={`${pwaIntroBleedClassName} z-[120] touch-none bg-neutral-950 text-white`}
-      style={pwaIntroBleedStyle}
-    >
-      {stage === "play" ? (
-        <PwaIntroPhotoFlash active images={introImages} reducedMotion={prefersReducedMotion} />
-      ) : (
-        <PwaIntroPhotoZoomExit
-          image={lastIntroImage}
-          onComplete={onComplete}
+    <PwaIntroPortal>
+      <div
+        aria-label="앱 인트로"
+        className={cn(
+          pwaIntroOverlayClassName,
+          stage === "exit" && "bg-transparent",
+        )}
+      >
+        <PwaIntroBackdrop
+          images={introImages}
+          onLastImageReady={handleLastImageReady}
           reducedMotion={prefersReducedMotion}
+          stage={stage}
         />
-      )}
 
-      {stage === "play" ? <Noise patternAlpha={18} patternRefreshInterval={3} /> : null}
+        {stage === "play" ? <Noise patternAlpha={18} patternRefreshInterval={3} /> : null}
 
-      {stage === "play" ? (
-        <div className="relative z-10 flex min-h-full flex-col items-center justify-center px-6 pb-16 pt-[max(3rem,env(safe-area-inset-top))] text-center">
-          <div className="pointer-events-none mb-1 size-24 shrink-0 sm:size-28">
-            <DotLottieReact autoplay loop src="/reservation-heart.lottie" />
+        {stage === "play" ? (
+          <div className="relative z-10 flex min-h-full flex-col items-center justify-center px-6 pb-[calc(4rem+env(safe-area-inset-bottom))] pt-[calc(3rem+env(safe-area-inset-top))] text-center">
+            <div className="pointer-events-none mb-1 size-24 shrink-0 sm:size-28">
+              <DotLottieReact autoplay loop src="/reservation-heart.lottie" />
+            </div>
+
+            <TextEffect
+              as="p"
+              className="text-sm font-black tracking-[0.14em] text-white/70"
+              per="line"
+              segmentTransition={{ duration: prefersReducedMotion ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] }}
+              segmentWrapperClassName="block overflow-hidden"
+              trigger
+              variants={coupleTextEffectVariants}
+            >
+              가현쨩 ❤️ 미누쿤
+            </TextEffect>
+            <p
+              aria-label={`사귄 지 ${datingDayCount}일`}
+              className="mt-5 flex items-end justify-center gap-2 font-black text-white"
+            >
+              <AnimatedNumber
+                className="text-7xl leading-none tracking-normal tabular-nums"
+                springOptions={{ bounce: 0, duration: durationMs }}
+                value={displayedDayCount}
+              />
+              <span className="pb-2 text-3xl leading-none tracking-normal">일</span>
+            </p>
+            <TextEffect
+              as="p"
+              className="mt-3 text-sm font-bold tracking-[0.16em] text-white/55 uppercase"
+              per="line"
+              segmentWrapperClassName="block overflow-hidden"
+              trigger
+              variants={sinceTextEffectVariants}
+            >
+              since 2025.08.31
+            </TextEffect>
+            <TextEffect
+              as="p"
+              className="mt-5 text-lg font-black tracking-[-0.04em] text-white/80"
+              per="line"
+              segmentTransition={{ duration: prefersReducedMotion ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] }}
+              segmentWrapperClassName="block overflow-hidden"
+              trigger
+              variants={titleTextEffectVariants}
+            >
+              {tripTitle}
+            </TextEffect>
           </div>
+        ) : null}
 
-          <TextEffect
-          as="p"
-          className="text-sm font-black tracking-[0.14em] text-white/70"
-          per="line"
-          segmentTransition={{ duration: prefersReducedMotion ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] }}
-          segmentWrapperClassName="block overflow-hidden"
-          trigger
-          variants={coupleTextEffectVariants}
-        >
-          가현쨩 ❤️ 미누쿤
-        </TextEffect>
-        <p aria-label={`사귄 지 ${datingDayCount}일`} className="mt-5 flex items-end justify-center gap-2 font-black text-white">
-          <AnimatedNumber
-            className="text-7xl leading-none tracking-normal tabular-nums"
-            springOptions={{ bounce: 0, duration: durationMs }}
-            value={displayedDayCount}
+        {stage === "play" ? (
+          <button
+            aria-label="인트로 건너뛰기"
+            className="absolute inset-0 z-20 cursor-default"
+            onClick={beginExit}
+            type="button"
           />
-          <span className="pb-2 text-3xl leading-none tracking-normal">일</span>
-        </p>
-        <TextEffect
-          as="p"
-          className="mt-3 text-sm font-bold tracking-[0.16em] text-white/55 uppercase"
-          per="line"
-          segmentWrapperClassName="block overflow-hidden"
-          trigger
-          variants={sinceTextEffectVariants}
-        >
-          since 2025.08.31
-        </TextEffect>
-        <TextEffect
-          as="p"
-          className="mt-5 text-lg font-black tracking-[-0.04em] text-white/80"
-          per="line"
-          segmentTransition={{ duration: prefersReducedMotion ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] }}
-          segmentWrapperClassName="block overflow-hidden"
-          trigger
-          variants={titleTextEffectVariants}
-        >
-          {tripTitle}
-        </TextEffect>
-        </div>
-      ) : null}
-
-      {stage === "play" ? (
-        <button
-          aria-label="인트로 건너뛰기"
-          className="absolute inset-0 z-20 cursor-default"
-          onClick={beginExit}
-          type="button"
-        />
-      ) : null}
-    </motion.div>
+        ) : null}
+      </div>
+    </PwaIntroPortal>
   );
 }
 
