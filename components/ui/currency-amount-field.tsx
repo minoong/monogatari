@@ -98,6 +98,8 @@ export function CurrencyAmountField({
         <motion.button
           animate={reduceMotion ? undefined : { rotate: turns * 180 }}
           aria-label={`${converted.label} 입력으로 전환`}
+          data-drawer-field-nav-exclude=""
+          tabIndex={-1}
           className={cn(
             "absolute right-3 top-1/2 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full",
             "bg-blue-500 text-white shadow-lg shadow-blue-500/30 ring-4 ring-slate-50",

@@ -8,7 +8,8 @@ import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
 import { useRender } from "@base-ui/react/use-render";
 import { ChevronRightIcon, XIcon } from "lucide-react";
 import type React from "react";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useRef } from "react";
+import { useDrawerFieldBehaviors } from "@/hooks/use-drawer-field-behaviors";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -127,7 +128,10 @@ export function DrawerViewport({
         position === "right" && "flex justify-end",
         variant === "inset" && "px-(--inset) [--inset:--spacing(4)]",
         variant === "inset" && position !== "bottom" && "pt-[calc(var(--inset)+env(safe-area-inset-top,0px))]",
-        variant === "inset" && position !== "top" && "pb-[calc(var(--inset)+env(safe-area-inset-bottom,0px))]",
+        variant === "inset" &&
+          position !== "top" &&
+          "pb-[calc(var(--inset)+max(var(--drawer-keyboard-inset,0px),env(safe-area-inset-bottom,0px)))]",
+        variant !== "inset" && position === "bottom" && "pb-[var(--drawer-keyboard-inset,0px)]",
         className,
       )}
       data-slot="drawer-viewport"
@@ -154,12 +158,16 @@ export function DrawerPopup({
 }): React.ReactElement {
   const { position: contextPosition } = useContext(DrawerContext);
   const position = positionProp ?? contextPosition;
+  const popupRef = useRef<HTMLDivElement>(null);
+
+  useDrawerFieldBehaviors(popupRef, true);
 
   return (
     <DrawerPortal {...portalProps}>
       <DrawerBackdrop />
       <DrawerViewport position={position} variant={variant}>
         <DrawerPrimitive.Popup
+          ref={popupRef}
           className={cn(
             "relative flex max-h-full min-h-0 w-full min-w-0 flex-col bg-popover not-dark:bg-clip-padding text-popover-foreground shadow-lg/5 outline-none transition-[transform,box-shadow,height,background-color,display] transition-discrete duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform [--peek:calc(--spacing(6)_-_1px)] [--scale-base:calc(max(0,1_-_(var(--nested-drawers,0)_*_var(--stack-step))))] [--scale:clamp(0,calc(var(--scale-base)_+_(var(--stack-step)_*_var(--stack-progress))),1)] [--shrink:calc(1_-_var(--scale))] [--stack-peek-offset:max(0px,calc((var(--nested-drawers,0)_-_var(--stack-progress))_*_var(--peek)))] [--stack-progress:clamp(0,var(--drawer-swipe-progress,0),1)] [--stack-step:0.05] before:pointer-events-none before:absolute before:inset-0 before:shadow-[0_1px_--theme(--color-black/4%)] after:pointer-events-none after:absolute after:bg-popover data-swiping:select-none data-nested-drawer-open:overflow-hidden data-nested-drawer-open:bg-[color-mix(in_srgb,var(--popover),var(--color-black)_calc(2%_*_(var(--nested-drawers,0)_-_var(--stack-progress))))] data-ending-style:shadow-transparent starting:shadow-transparent data-starting-style:shadow-transparent data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)_*_400ms)] dark:data-nested-drawer-open:bg-[color-mix(in_srgb,var(--popover),var(--color-black)_calc(6%_*_(var(--nested-drawers,0)_-_var(--stack-progress))))] dark:before:shadow-[0_-1px_--theme(--color-white/6%)]",
             "touch-none",
@@ -210,7 +218,9 @@ export function DrawerPopup({
           data-slot="drawer-popup"
           {...props}
         >
-          {children}
+          <DrawerPrimitive.VirtualKeyboardProvider>
+            {children}
+          </DrawerPrimitive.VirtualKeyboardProvider>
           {showCloseButton && (
             <DrawerPrimitive.Close
               aria-label="Close"

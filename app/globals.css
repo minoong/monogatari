@@ -263,6 +263,7 @@ html.ios-sb-scroll body {
 :root {
   --sa-top: env(safe-area-inset-top, 0px);
   --sa-bottom: env(safe-area-inset-bottom, 0px);
+  --drawer-keyboard-inset: 0px;
   --card: var(--color-white);
   --card-foreground: var(--color-neutral-800);
   --popover: var(--color-white);
