@@ -1,9 +1,12 @@
+import { pwaIntroBleedClassName, pwaIntroBleedStyle } from "@/components/pwa/pwa-intro-layout";
+
 export function PwaIntroShell() {
   return (
     <div
       aria-busy="true"
       aria-label="앱을 불러오는 중"
-      className="fixed inset-0 z-[120] grid place-items-center overflow-hidden bg-neutral-950 text-white"
+      className={`${pwaIntroBleedClassName} z-[120] grid place-items-center bg-neutral-950 text-white`}
+      style={pwaIntroBleedStyle}
     >
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.22),rgba(2,6,23,0.72))]" />
       <div className="relative z-10 flex flex-col items-center px-6 text-center">

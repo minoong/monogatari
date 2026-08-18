@@ -8,6 +8,11 @@ import Noise from "@/components/Noise";
 import { AnimatedNumber } from "@/components/core/animated-number";
 import { TextEffect } from "@/components/core/text-effect";
 import {
+  preloadIntroImages,
+  pwaIntroBleedClassName,
+  pwaIntroBleedStyle,
+} from "@/components/pwa/pwa-intro-layout";
+import {
   PwaIntroPhotoFlash,
   PwaIntroPhotoZoomExit,
   type PwaIntroFlashImage,
@@ -19,7 +24,7 @@ const introImages = [
   { alt: "방콕 여행 준비 장면 3", src: "/loading/fetch-03.jpg" },
   { alt: "방콕 여행 준비 장면 4", src: "/loading/fetch-04.jpg" },
   { alt: "방콕 여행 준비 장면 5", src: "/loading/fetch-05.jpg" },
-  { alt: "함께 손을 맞댄 순간", src: "/intro/couple-hands.png" },
+  { alt: "함께 손을 맞댄 순간", src: "/intro/couple-hands.jpg" },
 ] satisfies PwaIntroFlashImage[];
 
 const lastIntroImage = introImages[introImages.length - 1]!;
@@ -92,6 +97,10 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
   }, [onExitStart]);
 
   React.useEffect(() => {
+    preloadIntroImages(introImages.map((image) => image.src));
+  }, []);
+
+  React.useEffect(() => {
     const timer = window.setTimeout(() => setDisplayedDayCount(datingDayCount), 50);
     return () => window.clearTimeout(timer);
   }, [datingDayCount]);
@@ -106,10 +115,9 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
 
   return (
     <motion.div
-      animate={{ backgroundColor: stage === "exit" ? "rgba(2,6,23,0)" : "rgb(10 10 10)" }}
       aria-label="앱 인트로"
-      className="fixed inset-0 z-[120] touch-none overflow-hidden text-white"
-      transition={{ duration: stage === "exit" ? 0.35 : 0 }}
+      className={`${pwaIntroBleedClassName} z-[120] touch-none bg-neutral-950 text-white`}
+      style={pwaIntroBleedStyle}
     >
       {stage === "play" ? (
         <PwaIntroPhotoFlash active images={introImages} reducedMotion={prefersReducedMotion} />

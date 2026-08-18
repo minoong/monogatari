@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { PwaIntro } from "@/components/pwa/pwa-intro";
+import { pwaIntroBleedStyle } from "@/components/pwa/pwa-intro-layout";
 import { PwaIntroShell } from "@/components/pwa/pwa-intro-shell";
 import { cn } from "@/lib/utils";
 
@@ -52,8 +53,10 @@ export function PwaIntroGate({ children }: { children: React.ReactNode }) {
       {showHome ? (
         <div
           className={cn(
-            phase === "revealing" && "fixed inset-0 z-[110] overflow-hidden bg-white dark:bg-black",
+            phase === "revealing" &&
+              "fixed left-0 right-0 z-[110] w-full overflow-hidden bg-white dark:bg-black",
           )}
+          style={phase === "revealing" ? pwaIntroBleedStyle : undefined}
         >
           {children}
         </div>
