@@ -10,7 +10,7 @@ import { useExchangeRates } from "@/lib/exchange-rates";
 const utilityCards = [
   {
     activity: "ExpenseActivity" as const,
-    title: "여행 가계부",
+    title: "가현짱, 렌탈 영수증 발행!",
     description: "쓴 돈을 바로 기록하고, 둘이 얼마를 정산할지 한눈에 확인해요.",
     meta: "지출 · 통계 · 자동 정산",
     imageSrc: "/card-exchange-ruka.jpg",

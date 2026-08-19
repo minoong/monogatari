@@ -40,6 +40,27 @@ export const EXPENSE_PAYMENT_META: Record<ExpensePaymentMethod, string> = {
   other: "기타",
 };
 
+export const EXPENSE_CURRENCY_META = {
+  KRW: {
+    code: "KRW" as const,
+    label: "원화",
+    symbol: "₩",
+    color: "#0f172a",
+    colorClass: "text-slate-900 dark:text-white",
+    mutedClass: "text-slate-500 dark:text-slate-400",
+  },
+  THB: {
+    code: "THB" as const,
+    label: "바트",
+    symbol: "฿",
+    color: "#94a3b8",
+    colorClass: "text-slate-600 dark:text-slate-300",
+    mutedClass: "text-slate-400 dark:text-slate-500",
+  },
+} as const;
+
+export type ExpenseCurrencyCode = keyof typeof EXPENSE_CURRENCY_META;
+
 export interface ExpenseImage {
   id: string;
   path: string;

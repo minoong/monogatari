@@ -53,7 +53,7 @@ export function ExpenseSummaryHeader({ expenses, scrollRef }: ExpenseSummaryHead
           <div className="expense-summary-bar">
             <div className="expense-summary-amount-row">
               <span aria-hidden className="expense-summary-spacer-start" />
-              <p className="expense-summary-amount text-[32px] font-black tracking-[-0.04em] tabular-nums">
+              <p className="expense-summary-amount text-[32px] font-black tracking-[-0.04em] tabular-nums text-slate-900 dark:text-white">
                 <AnimatedKrw value={summary.totalKrw} />
               </p>
               <span aria-hidden className="expense-summary-spacer-end" />

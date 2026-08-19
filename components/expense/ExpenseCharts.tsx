@@ -41,10 +41,10 @@ export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
 
   return <div className="flex w-full min-w-0 max-w-full flex-col gap-4 overflow-x-hidden">
     <section className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800">
-      <Metric label="총 지출" value={formatKrw(summary.totalKrw)} />
-      <Metric label="태국 바트" value={formatThb(summary.totalThb)} />
+      <Metric currency="KRW" label="총 지출" value={formatKrw(summary.totalKrw)} />
+      <Metric currency="THB" label="태국 바트" value={formatThb(summary.totalThb)} />
       <Metric label="지출 건수" value={`${summary.count}건`} />
-      <Metric label="일평균" value={formatKrw(average)} />
+      <Metric currency="KRW" label="일평균" value={formatKrw(average)} />
     </section>
 
     <Card className="w-full min-w-0 max-w-full gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white py-0 dark:border-slate-800 dark:bg-slate-900">
@@ -76,11 +76,18 @@ export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
 
     <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
       <p className="text-sm font-extrabold">자동 정산</p>
-      {summary.settlement ? <><p className="mt-3 text-xl font-bold tracking-tight"><span className="text-blue-600">{EXPENSE_PERSON_META[summary.settlement.from].label}</span> → {EXPENSE_PERSON_META[summary.settlement.to].label}</p><p className="mt-1 text-2xl font-black tabular-nums">{formatKrw(summary.settlement.amount)}</p><details className="mt-3 text-xs text-slate-500"><summary className="min-h-11 cursor-pointer py-3 font-bold">정산 근거 보기</summary><div className="grid grid-cols-2 gap-2 border-t pt-3"><p>가현 결제 {formatKrw(summary.paid.gahyun)}</p><p>가현 사용 {formatKrw(summary.used.gahyun)}</p><p>미누 결제 {formatKrw(summary.paid.minu)}</p><p>미누 사용 {formatKrw(summary.used.minu)}</p></div></details></> : <p className="mt-2 text-sm text-slate-500">현재 서로 주고받을 금액이 없어요.</p>}
+      {summary.settlement ? <><p className="mt-3 text-xl font-bold tracking-tight"><span className="text-blue-600">{EXPENSE_PERSON_META[summary.settlement.from].label}</span> → {EXPENSE_PERSON_META[summary.settlement.to].label}</p><p className="mt-1 text-2xl font-black tabular-nums text-slate-900 dark:text-white">{formatKrw(summary.settlement.amount)}</p><details className="mt-3 text-xs text-slate-500"><summary className="min-h-11 cursor-pointer py-3 font-bold">정산 근거 보기</summary><div className="grid grid-cols-2 gap-2 border-t pt-3"><p>가현 결제 {formatKrw(summary.paid.gahyun)}</p><p>가현 사용 {formatKrw(summary.used.gahyun)}</p><p>미누 결제 {formatKrw(summary.paid.minu)}</p><p>미누 사용 {formatKrw(summary.used.minu)}</p></div></details></> : <p className="mt-2 text-sm text-slate-500">현재 서로 주고받을 금액이 없어요.</p>}
     </section>
   </div>;
 }
 
-function Metric({ label, value }: { label: string; value: string }) { return <div className="bg-white p-4 dark:bg-slate-900"><p className="text-[11px] font-semibold text-slate-400">{label}</p><p className="mt-1 text-lg font-extrabold tabular-nums">{value}</p></div>; }
+function Metric({ label, value, currency }: { label: string; value: string; currency?: "KRW" | "THB" }) {
+  return (
+    <div className="bg-white p-4 dark:bg-slate-900">
+      <p className="text-[11px] font-semibold text-slate-400">{label}</p>
+      <p className={cn("mt-1 text-lg font-extrabold tabular-nums", currency === "THB" ? "text-slate-500 dark:text-slate-400" : undefined)}>{value}</p>
+    </div>
+  );
+}
 
 function AccessibleTable({ caption, rows }: { caption: string; rows: string[][] }) { return <table className="sr-only"><caption>{caption}</caption><thead><tr><th>구분</th><th>금액</th></tr></thead><tbody>{rows.map((row) => <tr key={row.join("-")}><th>{row[0]}</th><td>{row[1]}</td></tr>)}</tbody></table>; }

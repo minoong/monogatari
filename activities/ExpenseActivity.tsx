@@ -9,6 +9,7 @@ import { Button, Label, Radio, RadioGroup, Skeleton, Tabs } from "@heroui/react"
 import { Filter, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { ExpenseDrawer } from "@/components/expense/ExpenseDrawer";
+import { ExpenseCurrencyPair, ExpenseDaySummary } from "@/components/expense/currency-display";
 import { ExpenseReceiptDetail } from "@/components/expense/ExpenseReceiptDetail";
 import { ExpenseSummaryHeader } from "@/components/expense/ExpenseSummaryHeader";
 import { CompactSegmentedTabsList } from "@/components/ui/compact-segmented-tabs";
@@ -54,8 +55,6 @@ import {
   formatBangkokDate,
   formatBangkokDateKey,
   formatBangkokTime,
-  formatKrw,
-  formatThb,
   getEffectiveKrw,
   getExpenseCategoryColor,
   getExpenseCategoryKey,
@@ -156,7 +155,7 @@ export const ExpenseActivity: React.FC = () => {
   const openFilters = () => { setFilterSession((value) => value + 1); setFilterOpen(true); };
   const clearFilters = () => { setPerson("all"); setCategory("all"); setFrom(""); setTo(""); };
 
-  return <AppScreen appBar={{ title: "여행 가계부" }}>
+  return <AppScreen appBar={{ title: "가현짱, 렌탈 영수증 발행!" }}>
     <main className="flex h-[calc(100svh-56px)] w-full max-w-full flex-col overflow-hidden bg-white dark:bg-slate-950">
       <Tabs aria-label="가계부 보기" selectedKey={selectedTab} onSelectionChange={(key) => setSelectedTab(String(key))} className="flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col">
         <div className="z-30 shrink-0 border-b border-slate-200/80 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
@@ -190,10 +189,7 @@ function ExpenseDayHeader({ items }: { items: Expense[] }) {
   const summary = summarizeExpenses(items);
   return <header className="expense-day-header sticky z-20 -mx-1 flex min-w-0 items-center justify-between gap-3 rounded-xl bg-white px-2 py-1.5 dark:bg-slate-950">
     <h2 className="min-w-0 truncate text-[13px] font-extrabold tracking-[-0.01em] text-slate-800 dark:text-slate-100">{formatBangkokDate(items[0].purchased_at)}</h2>
-    <div aria-label={`${summary.count}건, ${formatThb(summary.totalThb)}, ${formatKrw(summary.totalKrw)}`} className="flex shrink-0 items-center gap-2 tabular-nums">
-      <span className="text-[10px] font-bold text-slate-400">{summary.count}건 · {formatThb(summary.totalThb)}</span>
-      <strong className="text-[13px] font-black tracking-[-0.02em] text-slate-900 dark:text-white">{formatKrw(summary.totalKrw)}</strong>
-    </div>
+    <ExpenseDaySummary count={summary.count} krw={summary.totalKrw} thb={summary.totalThb} />
   </header>;
 }
 
@@ -222,12 +218,15 @@ function ExpenseRow({ expense, onEdit, onDelete, showDivider }: { expense: Expen
             {expense.images.length > 0 && <><span className="text-slate-300">·</span><GalleryThumbnailsIcon aria-hidden="true" className="shrink-0" size={12} /><span>{expense.images.length}</span></>}
           </div>
         </div>
-        <div className="flex shrink-0 self-stretch flex-col items-end py-0.5 text-right"><p className="text-[15px] font-black tracking-[-0.02em] tabular-nums text-slate-900 dark:text-white">{formatThb(expense.amount_thb)}</p><p className="mt-1 text-[12px] font-semibold tabular-nums text-slate-400">{formatKrw(getEffectiveKrw(expense))}</p><div aria-label={`구매 시간 ${formatBangkokTime(expense.purchased_at)}`} className="mt-auto flex items-center gap-1 text-[10px] font-semibold tabular-nums text-slate-400"><ClockIcon aria-hidden="true" size={10} /><span>{formatBangkokTime(expense.purchased_at)}</span></div></div>
+        <div className="flex shrink-0 self-stretch flex-col items-end py-0.5 text-right">
+          <ExpenseCurrencyPair krw={getEffectiveKrw(expense)} thb={expense.amount_thb} />
+          <div aria-label={`구매 시간 ${formatBangkokTime(expense.purchased_at)}`} className="mt-auto flex items-center gap-1 text-[10px] font-semibold tabular-nums text-slate-400"><ClockIcon aria-hidden="true" size={10} /><span>{formatBangkokTime(expense.purchased_at)}</span></div>
+        </div>
       </article>
       {showDivider && <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-[4.75rem] right-3.5 h-px bg-slate-100 dark:bg-slate-800" />}
     </MorphingDialogTrigger>
     <MorphingDialogContainer>
-      <MorphingDialogContent className="relative mx-3 flex max-h-[88dvh] w-[calc(100%_-_1.5rem)] max-w-md flex-col overflow-hidden rounded-[20px] bg-transparent shadow-none">
+      <MorphingDialogContent className="relative mx-3 flex max-h-[88dvh] w-[calc(100%_-_1.5rem)] max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-950">
         <ExpenseReceiptDetail categoryColor={categoryColor} expense={expense} onDelete={onDelete} onEdit={onEdit} />
       </MorphingDialogContent>
     </MorphingDialogContainer>
