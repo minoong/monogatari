@@ -20,7 +20,7 @@ export function idlePose(t: number, offset = 0): CharacterPose {
   return pose;
 }
 
-export function walkPose(t: number, offset = 0): CharacterPose {
+export function walkPose(t: number, offset = 0, hearts = false): CharacterPose {
   const pose = basePose();
   const s = Math.sin((t + offset) * 8.5);
   pose.legLeft = s * 0.45;
@@ -29,6 +29,7 @@ export function walkPose(t: number, offset = 0): CharacterPose {
   pose.armRight = 0.2 + s * 0.5;
   pose.bob = Math.abs(Math.cos((t + offset) * 8.5)) * 1.6;
   pose.blink = blinkAt(t + offset);
+  pose.hearts = hearts;
   return pose;
 }
 
@@ -120,6 +121,7 @@ export function kneelPose(t: number, amount: number): CharacterPose {
   pose.bob = Math.sin(t * 2) * 0.6;
   pose.mouth = 0.35;
   pose.blink = blinkAt(t);
+  pose.hearts = amount > 0.35;
   return pose;
 }
 

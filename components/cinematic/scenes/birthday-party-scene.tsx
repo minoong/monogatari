@@ -8,7 +8,7 @@ import { PhotoSlot } from "@/components/cinematic/pixel-billboard";
 import { StageFit } from "@/components/cinematic/stage-fit";
 import { PixelArt, paintCake } from "@/components/cinematic/sprites/pixel-art";
 import { PixelCharacter, type CharacterKind } from "@/components/cinematic/sprites/pixel-character";
-import { cheerPose, idlePose } from "@/components/cinematic/sprites/poses";
+import { cheerPose } from "@/components/cinematic/sprites/poses";
 import {
   Halftone,
   PixelParticles,
@@ -113,7 +113,7 @@ export function BirthdayPartyScene({
           <PixelCharacter fps={16} height={3.1} kind={honoree} pose={(e) => cheerPose(e)} />
         </group>
         <group position={[2.1, 0.42, 0.5]}>
-          <PixelCharacter flip fps={12} height={3} kind={partner} pose={(e) => idlePose(e, 0.6)} />
+          <PixelCharacter flip fps={12} height={3} kind={partner} pose={(e) => cheerPose(e, 0.6)} />
         </group>
 
         {/* 사진과 효과음은 인물 머리 위 영역에만 둔다 */}

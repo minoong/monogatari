@@ -111,10 +111,10 @@ export function AdventureScene() {
 
       <group ref={runners}>
         <group position={[-1, 0, 0]}>
-          <PixelCharacter fps={16} height={2.6} kind="minu" pose={(e) => walkPose(e * 1.6)} />
+          <PixelCharacter fps={16} height={2.6} kind="minu" pose={(e) => walkPose(e * 1.6, 0, true)} />
         </group>
         <group position={[0.95, -0.02, 0.1]}>
-          <PixelCharacter fps={16} height={2.55} kind="gahyun" pose={(e) => walkPose(e * 1.6, 0.3)} />
+          <PixelCharacter fps={16} height={2.55} kind="gahyun" pose={(e) => walkPose(e * 1.6, 0.3, true)} />
         </group>
         <PixelArt height={40} cacheKey="suitcase" paint={paintSuitcase} position={[1.9, -0.6, 0.2]} size={0.9} width={40} />
       </group>

@@ -168,7 +168,10 @@ function drawCharacter(
     rect(ctx, hx + 1, headY + 11, 1, 8, p.outline);
     rect(ctx, hx + 22, headY + 11, 1, 8, p.outline);
     rect(ctx, hx + 10, headY + 13, 4, 1, p.outline);
-    if (!pose.blink) {
+    if (pose.hearts) {
+      drawHeartEye(ctx, hx + 4, headY + 12);
+      drawHeartEye(ctx, hx + 16, headY + 12);
+    } else if (!pose.blink) {
       rect(ctx, hx + 5, headY + 14, 2, 3, p.outline);
       rect(ctx, hx + 17, headY + 14, 2, 3, p.outline);
     } else {
