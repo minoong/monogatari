@@ -2,13 +2,12 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Button } from "@heroui/react";
-import { CalendarDays, ChevronLeft, Plus, RefreshCw } from "lucide-react";
+import { CalendarDays, Plus, RefreshCw } from "lucide-react";
 import ClickSpark from "@/components/ClickSpark";
 import { BottomNav } from "@/components/BottomNav";
 import { ScheduleCard } from "@/components/schedule/ScheduleCard";
@@ -51,7 +50,6 @@ const bangkokParts = () => new Intl.DateTimeFormat("en-CA", {
 }).formatToParts(new Date()).reduce<Record<string, string>>((result, part) => ({ ...result, [part.type]: part.value }), {});
 
 export const ScheduleActivity: React.FC = () => {
-  const { replace } = useFlow();
   const client = useQueryClient();
   const now = bangkokParts();
   const today = `${now.year}-${now.month}-${now.day}`;
@@ -142,7 +140,7 @@ export const ScheduleActivity: React.FC = () => {
   const openEdit = (item: ScheduleItem) => { setEditing(item); setDrawerSession((current) => current + 1); setDrawerOpen(true); };
 
   return (
-    <AppScreen appBar={{ title: "일정, 제대로 따라와!", renderLeft: () => <button type="button" aria-label="홈으로 돌아가기" className="grid size-10 place-items-center rounded-full transition active:bg-slate-100 dark:active:bg-slate-800" onClick={() => replace("HomeActivity", {}, { animate: false })}><ChevronLeft className="size-5" /></button> }}>
+    <AppScreen appBar={{ title: "일정, 제대로 따라와!" }}>
       <main ref={mainRef} className="min-h-full w-full max-w-full bg-gradient-to-b from-slate-50 to-white pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:from-slate-950 dark:to-slate-950">
         {!showInitialLoader && (
           <div className="sticky top-0 z-30 bg-slate-50/85 px-4 pb-2 pt-3 backdrop-blur-xl dark:bg-slate-950/85">
@@ -189,7 +187,7 @@ export const ScheduleActivity: React.FC = () => {
                         id: item.id,
                         time: item.start_time,
                         current: currentKeys.has(item.id),
-                        content: <ScheduleCard item={item} current={currentKeys.has(item.id)} cardRef={currentKeys.has(item.id) ? activeRef : undefined} onEdit={() => openEdit(item)} onDelete={() => setDeleting(item)} />,
+                        content: <ScheduleCard item={item} current={currentKeys.has(item.id)} showTime={false} cardRef={currentKeys.has(item.id) ? activeRef : undefined} onEdit={() => openEdit(item)} onDelete={() => setDeleting(item)} />,
                       }))}
                     />
                   </motion.section>

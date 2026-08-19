@@ -20,9 +20,11 @@ interface ScheduleCardProps {
   cardRef?: React.Ref<HTMLDivElement>;
   onEdit: () => void;
   onDelete: () => void;
+  /** 타임라인 좌측에 시간이 있으면 카드 안 시간은 숨긴다. */
+  showTime?: boolean;
 }
 
-export function ScheduleCard({ item, current, cardRef, onEdit, onDelete }: ScheduleCardProps) {
+export function ScheduleCard({ item, current, cardRef, onEdit, onDelete, showTime = true }: ScheduleCardProps) {
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
   const [zoomImageIndex, setZoomImageIndex] = useState(0);
   const prefersReducedMotion = useReducedMotion();
@@ -42,15 +44,17 @@ export function ScheduleCard({ item, current, cardRef, onEdit, onDelete }: Sched
     >
       <MorphingDialogTrigger
         ariaLabel={`${item.title} 자세히 보기`}
-        className={cn("group block min-h-28 w-full rounded-3xl p-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-blue-500", item.google_maps_url ? "pb-11" : "pb-4")}
+        className={cn("group block w-full rounded-3xl p-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-blue-500", item.google_maps_url ? "pb-11" : "pb-4", showTime ? "min-h-28" : "min-h-24")}
       >
         <div className="flex min-w-0 gap-3.5">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 text-[11px] font-bold tabular-nums text-slate-400 dark:text-slate-500">
-              <ClockIcon aria-hidden="true" className="text-slate-400 dark:text-slate-500" size={13} />
-              {item.start_time}
-            </div>
-            <div className="mt-1 flex min-w-0 items-start gap-2">
+            {showTime && (
+              <div className="flex items-center gap-1.5 text-[11px] font-bold tabular-nums text-slate-400 dark:text-slate-500">
+                <ClockIcon aria-hidden="true" className="text-slate-400 dark:text-slate-500" size={13} />
+                {item.start_time}
+              </div>
+            )}
+            <div className={cn("flex min-w-0 items-start gap-2", showTime ? "mt-1" : "mt-0")}>
               <MorphingDialogTitle className="min-w-0 flex-1">
                 <h2 className="break-words font-extrabold leading-snug text-slate-900 dark:text-white">{item.title}</h2>
               </MorphingDialogTitle>

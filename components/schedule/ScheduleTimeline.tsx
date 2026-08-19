@@ -9,6 +9,11 @@ import "./schedule-timeline.css";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
+const TIME_COL = "2.75rem";
+const DOT_COL = "0.625rem";
+const AVATAR_GUTTER = "2.125rem";
+const RAIL_LEFT = `calc(${TIME_COL} + 0.375rem + (${DOT_COL} / 2))`;
+
 /** 진행 게이지 끝점·노드 하이라이트가 같이 따라가는 읽기선 (뷰포트 비율) */
 const READING_LINE_RATIO = 0.3;
 
@@ -71,6 +76,17 @@ function syncTimelineProgress(
       overwrite: "auto",
     });
   });
+}
+
+function ScheduleTimeLabel({ time }: { time: string }) {
+  return (
+    <time
+      dateTime={time}
+      className="block self-start pt-[1.125rem] text-right text-[11px] font-extrabold leading-none tracking-tight text-slate-500 tabular-nums dark:text-slate-400"
+    >
+      {time}
+    </time>
+  );
 }
 
 export function ScheduleTimeline({ entries, railContent }: ScheduleTimelineProps) {
@@ -148,26 +164,54 @@ export function ScheduleTimeline({ entries, railContent }: ScheduleTimelineProps
   }, { scope: rootRef, dependencies: [entries.length, railHeight], revertOnUpdate: true });
 
   return (
-    <section ref={rootRef} className="relative w-full min-w-0 font-sans" aria-label="일정 타임라인">
+    <section
+      ref={rootRef}
+      className="schedule-timeline relative w-full min-w-0 font-sans"
+      style={{ paddingLeft: AVATAR_GUTTER }}
+      aria-label="일정 타임라인"
+    >
       {railContent && (
-        <aside className="pointer-events-none absolute inset-y-0 left-0 z-20 w-12 pt-9" aria-label="가현짱과 미누쿤의 여행 타임라인">
-          <div ref={avatarRef} className="sticky top-24 flex -space-x-2">{railContent}</div>
+        <aside
+          aria-label="가현짱과 미누쿤의 여행 타임라인"
+          className="pointer-events-none absolute inset-y-0 left-0 z-20"
+          style={{ width: AVATAR_GUTTER }}
+        >
+          <div ref={avatarRef} className="sticky top-24 flex flex-col items-end gap-1 pt-1.5 pr-0.5">
+            {railContent}
+          </div>
         </aside>
       )}
+
       <div ref={contentRef} className="relative min-w-0 pb-8">
-        <span aria-hidden="true" className="schedule-timeline-rail pointer-events-none absolute left-[3.62rem] top-0 w-[2px] rounded-full bg-slate-200/90 dark:bg-slate-700/90" style={{ height: railHeight }} />
-        <span aria-hidden="true" className="schedule-timeline-progress pointer-events-none absolute left-[3.62rem] top-0 w-[2px] rounded-full bg-gradient-to-b from-blue-500 to-sky-400" style={{ height: railHeight }} />
+        <span
+          aria-hidden="true"
+          className="schedule-timeline-rail pointer-events-none absolute top-0 w-0.5 -translate-x-1/2 rounded-full bg-slate-200/90 dark:bg-slate-700/90"
+          style={{ left: RAIL_LEFT, height: railHeight }}
+        />
+        <span
+          aria-hidden="true"
+          className="schedule-timeline-progress pointer-events-none absolute top-0 w-0.5 -translate-x-1/2 rounded-full bg-gradient-to-b from-blue-500 to-sky-400"
+          style={{ left: RAIL_LEFT, height: railHeight }}
+        />
+
         {entries.map((entry) => (
-          <div key={entry.id} data-schedule-entry className="relative grid min-w-0 grid-cols-[3rem_minmax(0,1fr)] gap-5 pb-4 pt-1">
-            <div className="min-w-0 pt-3 text-right text-xs font-extrabold tabular-nums text-slate-500 dark:text-slate-400">{entry.time}</div>
-            <span
-              aria-hidden="true"
-              data-current={entry.current ? "true" : "false"}
-              data-active="false"
-              className="schedule-timeline-dot absolute left-[3.3rem] top-4 z-10 grid size-3 place-items-center rounded-full border-[3px] border-slate-50 bg-white dark:border-slate-950 dark:bg-slate-900"
-            >
-              <span className="schedule-timeline-dot-core size-1.5 rounded-full bg-slate-300 dark:bg-slate-700" />
-            </span>
+          <div
+            key={entry.id}
+            data-schedule-entry
+            className="grid min-w-0 items-start gap-x-1.5 pb-4"
+            style={{ gridTemplateColumns: `${TIME_COL} ${DOT_COL} minmax(0, 1fr)` }}
+          >
+            <ScheduleTimeLabel time={entry.time} />
+            <div className="flex justify-center self-start pt-[1.2rem]">
+              <span
+                aria-hidden="true"
+                data-active="false"
+                data-current={entry.current ? "true" : "false"}
+                className="schedule-timeline-dot relative z-10 grid size-3 place-items-center rounded-full border-[3px] border-slate-50 bg-white dark:border-slate-950 dark:bg-slate-900"
+              >
+                <span className="schedule-timeline-dot-core size-1.5 rounded-full bg-slate-300 dark:bg-slate-700" />
+              </span>
+            </div>
             <div className="min-w-0">{entry.content}</div>
           </div>
         ))}
