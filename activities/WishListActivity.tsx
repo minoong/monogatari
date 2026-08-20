@@ -1,4 +1,4 @@
-import React, { useDeferredValue, useMemo, useState, type ReactNode } from "react";
+import React, { useDeferredValue, useMemo, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { ArrowUpRight, Image as ImageIcon, Link2, MapPin, Pencil, Plus, RefreshCw, RotateCcw, Store, Trash2, ZoomIn } from "lucide-react";
@@ -6,7 +6,7 @@ import { Button, Chip } from "@heroui/react";
 import { toast } from "sonner";
 import { WishDrawer } from "@/components/wish/WishDrawer";
 import { WishImageGallery } from "@/components/wish/WishImageGallery";
-import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
+import { ActivityRegisterFab } from "@/components/ui/activity-register-fab";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { GooeyInput } from "@/components/ui/gooey-input";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
@@ -70,6 +70,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const mainRef = useRef<HTMLElement>(null);
   const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes", type], queryFn: () => fetchWishes(type) });
   const showInitialLoader = useMinimumInitialLoading(isLoading);
   const deferredSearchQuery = useDeferredValue(searchQuery);
@@ -137,7 +138,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
 
   return (
     <AppScreen appBar={{ title: meta.activityTitle }}>
-      <main className="min-h-full w-full bg-white pb-12 dark:bg-slate-950">
+      <main ref={mainRef} className="min-h-full w-full bg-white pb-12 dark:bg-slate-950">
         {showInitialLoader ? (
           <ActivityFetchLoader messages={WISH_LOADING_MESSAGES[type]} />
         ) : <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-5 pt-5">
@@ -260,14 +261,12 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
             </div>
           )}
         </section>}
-        <div className="fixed bottom-6 right-5 z-40 h-14 min-w-14">
-          <Button aria-label={`${meta.title} 등록`} className="h-full w-full rounded-full px-5 shadow-xl" onPress={openCreateDrawer}><Plus className="size-5" /><span className="font-bold">등록</span></Button>
-          <NativeHapticSwitch
-            ariaLabel={`${meta.title} 등록`}
-            checked={drawerOpen}
-            onChange={openCreateDrawer}
-          />
-        </div>
+        <ActivityRegisterFab
+          ariaLabel={`${meta.title} 등록`}
+          drawerOpen={drawerOpen}
+          onPress={openCreateDrawer}
+          scrollAnchorRef={mainRef}
+        />
       </main>
       <WishDrawer key={drawerSession} initialType={type} open={drawerOpen} wish={editingWish} onOpenChange={(open) => {
         setDrawerOpen(open);

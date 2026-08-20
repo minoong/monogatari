@@ -3,18 +3,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "gsap";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Button } from "@heroui/react";
-import { CalendarDays, Plus, RefreshCw } from "lucide-react";
-import ClickSpark from "@/components/ClickSpark";
+import { CalendarDays, RefreshCw } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { ScheduleCard } from "@/components/schedule/ScheduleCard";
 import { ScheduleDateTabs } from "@/components/schedule/ScheduleDateTabs";
 import { ScheduleDrawer } from "@/components/schedule/ScheduleDrawer";
 import { ScheduleTimeline, type ScheduleTimelineEntry } from "@/components/schedule/ScheduleTimeline";
-import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
+import { ActivityRegisterFab } from "@/components/ui/activity-register-fab";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
 import { AlertDialog, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,11 +18,7 @@ import { formatLongTripDate, isTripDate, type ScheduleItem, type TripDate } from
 import { findScrollContainer } from "@/lib/scroll-container";
 import { supabase } from "@/lib/supabase";
 
-gsap.registerPlugin(useGSAP);
-
 type Filter = TripDate | null;
-
-const FAB_COMPACT_SCROLL_PX = 80;
 
 const STAGGER_PARENT = {
   hidden: {},
@@ -59,9 +51,7 @@ export const ScheduleActivity: React.FC = () => {
   const [drawerSession, setDrawerSession] = useState(0);
   const [editing, setEditing] = useState<ScheduleItem | null>(null);
   const [deleting, setDeleting] = useState<ScheduleItem | null>(null);
-  const [fabCompact, setFabCompact] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
-  const fabRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLDivElement>(null);
   const didScroll = useRef(false);
   const { data: items = [], isLoading, isError, refetch } = useQuery({ queryKey: ["schedule"], queryFn: fetchSchedule });
@@ -91,32 +81,6 @@ export const ScheduleActivity: React.FC = () => {
     const timer = window.setTimeout(() => activeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 480);
     return () => window.clearTimeout(timer);
   }, [currentKeys]);
-
-  // Stackflow 스크롤 컨테이너는 마운트 시점에 확정되지 않으므로 캡처 단계에서 받아 처리한다.
-  useEffect(() => {
-    let frame = 0;
-
-    const onScroll = (event: Event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLElement) || !mainRef.current || !target.contains(mainRef.current)) return;
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = 0;
-        setFabCompact(target.scrollTop > FAB_COMPACT_SCROLL_PX);
-      });
-    };
-
-    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
-    return () => {
-      document.removeEventListener("scroll", onScroll, { capture: true });
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  useGSAP(() => {
-    if (prefersReducedMotion || !fabRef.current) return;
-    gsap.from(fabRef.current, { scale: 0.4, autoAlpha: 0, duration: 0.5, ease: "back.out(1.7)", clearProps: "opacity,visibility,transform" });
-  }, { dependencies: [] });
 
   const grouped = useMemo(
     () => (activeDate ? [{ date: activeDate, items: items.filter((item) => item.schedule_date === activeDate) }] : []),
@@ -197,27 +161,13 @@ export const ScheduleActivity: React.FC = () => {
           </section>
         )}
       </main>
-      <div ref={fabRef} className="fixed bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),12px))] right-5 z-40 h-14 min-w-14">
-        <motion.div
-          className="relative h-full w-full"
-          animate={{ scale: fabCompact && !prefersReducedMotion ? 0.9 : 1 }}
-          transition={{ type: "spring", stiffness: 380, damping: 30 }}
-        >
-          <ClickSpark sparkColor="#60a5fa" sparkCount={10} sparkRadius={22}>
-            <Button aria-label="일정 등록" className="h-full w-full rounded-full px-5 shadow-xl" onPress={openCreate}>
-              <Plus className="size-5" />
-              <motion.span
-                className="inline-block overflow-hidden whitespace-nowrap font-bold"
-                animate={{ maxWidth: fabCompact ? 0 : 44, opacity: fabCompact ? 0 : 1, marginLeft: fabCompact ? 0 : 2 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
-              >
-                등록
-              </motion.span>
-            </Button>
-            <NativeHapticSwitch ariaLabel="일정 등록" checked={drawerOpen} onChange={openCreate} />
-          </ClickSpark>
-        </motion.div>
-      </div>
+      <ActivityRegisterFab
+        ariaLabel="일정 등록"
+        drawerOpen={drawerOpen}
+        onPress={openCreate}
+        placement="above-bottom-nav"
+        scrollAnchorRef={mainRef}
+      />
       <ScheduleDrawer key={drawerSession} open={drawerOpen} onOpenChange={(open) => { setDrawerOpen(open); if (!open) setEditing(null); }} item={editing} />
       <AlertDialog open={Boolean(deleting)} onOpenChange={(open) => !open && !remove.isPending && setDeleting(null)}><AlertDialogPopup><AlertDialogHeader><AlertDialogTitle>일정을 삭제할까요?</AlertDialogTitle><AlertDialogDescription><strong>{deleting?.title}</strong> 일정과 연결된 사진도 함께 삭제됩니다.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter className="grid grid-cols-2"><button className="h-11 rounded-xl bg-slate-100 font-bold" disabled={remove.isPending} onClick={() => setDeleting(null)}>취소</button><button className="h-11 rounded-xl bg-red-500 font-bold text-white" disabled={!deleting || remove.isPending} onClick={() => deleting && remove.mutate(deleting.id)}>{remove.isPending ? "삭제 중…" : "삭제"}</button></AlertDialogFooter></AlertDialogPopup></AlertDialog>
       <BottomNav active="schedule" />

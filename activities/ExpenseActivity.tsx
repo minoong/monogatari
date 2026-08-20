@@ -12,8 +12,8 @@ import { ExpenseDrawer } from "@/components/expense/ExpenseDrawer";
 import { ExpenseCurrencyPair, ExpenseDaySummary } from "@/components/expense/currency-display";
 import { ExpenseReceiptDetail } from "@/components/expense/ExpenseReceiptDetail";
 import { ExpenseSummaryHeader } from "@/components/expense/ExpenseSummaryHeader";
+import { ActivityRegisterFab } from "@/components/ui/activity-register-fab";
 import { CompactSegmentedTabsList } from "@/components/ui/compact-segmented-tabs";
-import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CalendarDaysIcon } from "@/components/ui/calendar-days";
 import { ClockIcon } from "@/components/ui/clock";
@@ -100,6 +100,7 @@ export const ExpenseActivity: React.FC = () => {
   const deferredSearch = useDeferredValue(search.trim().toLocaleLowerCase("ko-KR"));
   const query = useQuery({ queryKey: ["expenses"], queryFn: fetchExpenses });
   const listScrollRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const channel = supabase.channel("expenses_changes")
@@ -156,7 +157,7 @@ export const ExpenseActivity: React.FC = () => {
   const clearFilters = () => { setPerson("all"); setCategory("all"); setFrom(""); setTo(""); };
 
   return <AppScreen appBar={{ title: "가현짱, 렌탈 영수증 발행!" }}>
-    <main className="flex h-[calc(100svh-56px)] w-full max-w-full flex-col overflow-hidden bg-white dark:bg-slate-950">
+    <main ref={mainRef} className="flex h-[calc(100svh-56px)] w-full max-w-full flex-col overflow-hidden bg-white dark:bg-slate-950">
       <Tabs aria-label="가계부 보기" selectedKey={selectedTab} onSelectionChange={(key) => setSelectedTab(String(key))} className="flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col">
         <div className="z-30 shrink-0 border-b border-slate-200/80 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
           <CompactSegmentedTabsList ariaLabel="가계부 내역과 통계" items={[{ id: "list", label: "내역" }, { id: "stats", label: "통계" }]} />
@@ -178,7 +179,14 @@ export const ExpenseActivity: React.FC = () => {
         </Tabs.Panel>
       </Tabs>
     </main>
-    <div className="fixed bottom-[calc(1.5rem+max(env(safe-area-inset-bottom,0px),12px))] right-5 z-40 h-14 min-w-14"><Button aria-label="지출 등록" className="h-full w-full rounded-full px-5 shadow-xl" onPress={openCreate}><Plus className="size-5" /><span className="font-bold">등록</span></Button><NativeHapticSwitch ariaLabel="지출 등록" checked={drawerOpen} onChange={openCreate} /></div>
+    <ActivityRegisterFab
+      ariaLabel="지출 등록"
+      drawerOpen={drawerOpen}
+      onPress={openCreate}
+      scrollAnchorRef={mainRef}
+      scrollElementRef={listScrollRef}
+      scrollKey={`${selectedTab}-${query.isLoading ? "loading" : "ready"}`}
+    />
     <ExpenseDrawer key={`expense-${drawerSession}`} expense={editing} open={drawerOpen} onOpenChange={setDrawerOpen} />
     <FilterDrawer key={`filter-${filterSession}`} category={category} categoryOptions={categoryOptions} from={from} open={filterOpen} person={person} to={to} onApply={({ person: nextPerson, category: nextCategory, from: nextFrom, to: nextTo }) => { setPerson(nextPerson); setCategory(nextCategory); setFrom(nextFrom); setTo(nextTo); }} onOpenChange={setFilterOpen} />
     <AlertDialog open={Boolean(deleting)} onOpenChange={(next) => { if (!next && !remove.isPending) setDeleting(null); }}><AlertDialogPopup><AlertDialogHeader><div className="mx-auto grid size-12 place-items-center rounded-full bg-red-50 text-red-500"><Trash2 className="size-5" /></div><AlertDialogTitle>지출을 삭제할까요?</AlertDialogTitle><AlertDialogDescription><strong>{deleting?.item_name}</strong> 내역과 영수증 사진이 함께 삭제돼요.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter className="grid grid-cols-2"><button className="h-12 rounded-xl bg-white font-bold ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700" disabled={remove.isPending} onClick={() => setDeleting(null)} type="button">취소</button><button className="h-12 rounded-xl bg-red-500 font-bold text-white disabled:opacity-50" disabled={!deleting || remove.isPending} onClick={() => deleting && remove.mutate(deleting)} type="button">{remove.isPending ? "삭제 중…" : "삭제"}</button></AlertDialogFooter></AlertDialogPopup></AlertDialog>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
@@ -6,7 +6,7 @@ import { ArrowRight, Plus, RefreshCw } from "lucide-react";
 import { Button } from "@heroui/react";
 import { BottomNav, triggerHapticFeedback } from "@/components/BottomNav";
 import { WishDrawer } from "@/components/wish/WishDrawer";
-import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
+import { ActivityRegisterFab } from "@/components/ui/activity-register-fab";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
 import { WISH_TYPES, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
 
@@ -21,6 +21,7 @@ export const DiscoverActivity: React.FC = () => {
   const { push } = useFlow();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerSession, setDrawerSession] = useState(0);
+  const mainRef = useRef<HTMLElement>(null);
   const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes"], queryFn: fetchWishes });
   const showInitialLoader = useMinimumInitialLoading(isLoading);
   const openList = (type: WishType) => { triggerHapticFeedback(); push("WishListActivity", { type }); };
@@ -32,7 +33,7 @@ export const DiscoverActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "원하는 건 확실히 골라!" }}>
-      <main className="min-h-full w-full bg-white pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
+      <main ref={mainRef} className="min-h-full w-full bg-white pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] dark:bg-slate-950">
         {showInitialLoader ? (
           <ActivityFetchLoader messages={["위시를 확인하고 있어…", "원하는 걸 모아 보는 중이야…", "뭘 골랐는지 살펴볼게…"]} />
         ) : <section className="mx-auto w-full max-w-lg px-5 pt-6">
@@ -43,21 +44,13 @@ export const DiscoverActivity: React.FC = () => {
             return <button key={type} className="group w-full rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-100 transition-transform active:scale-[0.985] dark:bg-slate-900 dark:ring-slate-800" onClick={() => openList(type)} type="button"><div className="flex items-start gap-4"><span className={`flex size-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.accent} text-2xl shadow-md`}>{meta.icon}</span><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-3"><div><h2 className="font-bold text-slate-900 dark:text-white">{meta.title}</h2><p className="mt-0.5 text-xs text-slate-500">{items.length}개 등록됨</p></div><ArrowRight aria-hidden="true" className="size-5 text-slate-400 transition-transform group-hover:translate-x-0.5" /></div>{items.length > 0 ? <div className="mt-3 flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300"><span className="shrink-0 font-medium">최근</span><span className="shrink-0 text-slate-400">·</span><span className="truncate font-medium text-slate-700 dark:text-slate-200">{items[0].title}</span></div> : <p className="mt-3 text-sm text-slate-500">{meta.emptyMessage}</p>}</div></div>{items.length === 0 && <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-blue-600"><Plus className="size-4" /> 등록하기</span>}</button>;
           })}</div>}
         </section>}
-        <div className="fixed bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),12px))] right-5 z-40 h-14 min-w-14">
-          <Button
-            aria-label="위시 등록"
-            className="h-full w-full rounded-full px-5 shadow-xl"
-            onPress={openCreateDrawer}
-          >
-            <Plus className="size-5" />
-            <span className="font-bold">등록</span>
-          </Button>
-          <NativeHapticSwitch
-            ariaLabel="위시 등록"
-            checked={drawerOpen}
-            onChange={openCreateDrawer}
-          />
-        </div>
+        <ActivityRegisterFab
+          ariaLabel="위시 등록"
+          drawerOpen={drawerOpen}
+          onPress={openCreateDrawer}
+          placement="above-bottom-nav"
+          scrollAnchorRef={mainRef}
+        />
       </main>
       <WishDrawer
         key={drawerSession}
