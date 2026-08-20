@@ -5,10 +5,11 @@ import Image from "next/image";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { Button, Label, Radio, RadioGroup, Skeleton, Tabs } from "@heroui/react";
+import { Button, Label, Radio, RadioGroup, Tabs } from "@heroui/react";
 import { Filter, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { ExpenseDrawer } from "@/components/expense/ExpenseDrawer";
+import { ExpenseChartSkeleton, ExpenseListSkeleton } from "@/components/expense/ExpenseListSkeleton";
 import { ExpenseCurrencyPair, ExpenseDaySummary } from "@/components/expense/currency-display";
 import { ExpenseReceiptDetail } from "@/components/expense/ExpenseReceiptDetail";
 import { ExpenseSummaryHeader } from "@/components/expense/ExpenseSummaryHeader";
@@ -69,7 +70,7 @@ import { cn } from "@/lib/utils";
 
 const ExpenseCharts = dynamic(() => import("@/components/expense/ExpenseCharts").then((module) => module.ExpenseCharts), {
   ssr: false,
-  loading: () => <ChartSkeleton />,
+  loading: () => <ExpenseChartSkeleton />,
 });
 
 const fetchExpenses = async (): Promise<Expense[]> => {
@@ -163,7 +164,11 @@ export const ExpenseActivity: React.FC = () => {
           <CompactSegmentedTabsList ariaLabel="가계부 내역과 통계" items={[{ id: "list", label: "내역" }, { id: "stats", label: "통계" }]} />
         </div>
         <Tabs.Panel className="flex min-h-0 min-w-0 max-w-full flex-1 flex-col overflow-hidden !p-0" id="list">
-          {query.isLoading ? <ExpenseSkeleton /> : initialError ? <LoadError onRetry={() => query.refetch()} /> : <div ref={listScrollRef} className="expense-list-scroll flex-1 overflow-y-auto overscroll-contain pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))]">
+          {query.isLoading ? (
+            <div className="expense-list-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))]">
+              <ExpenseListSkeleton />
+            </div>
+          ) : initialError ? <LoadError onRetry={() => query.refetch()} /> : <div ref={listScrollRef} className="expense-list-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))]">
             <ExpenseSummaryHeader expenses={filtered} scrollRef={listScrollRef} />
             <section className="mx-auto w-full min-w-0 max-w-lg px-4 pb-4 pt-3">
             {query.isError && query.data && <div className="mb-3 flex items-center justify-between rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 dark:bg-amber-500/10 dark:text-amber-300"><span>최근 데이터를 표시 중이에요.</span><button className="min-h-8 px-2 font-bold" onClick={() => query.refetch()} type="button">다시 연결</button></div>}
@@ -175,7 +180,7 @@ export const ExpenseActivity: React.FC = () => {
           </section></div>}
         </Tabs.Panel>
         <Tabs.Panel className="min-h-0 min-w-0 max-w-full flex-1 overflow-y-auto overscroll-contain !p-0 pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))]" id="stats">
-          {selectedTab === "stats" && (query.isLoading ? <div className="mx-auto w-full min-w-0 max-w-lg px-4 py-4"><ChartSkeleton /></div> : initialError ? <LoadError onRetry={() => query.refetch()} /> : <section className="mx-auto w-full min-w-0 max-w-lg px-4 py-4">{expenses.length ? <ExpenseCharts expenses={filtered} /> : <EmptyState onCreate={openCreate} />}</section>)}
+          {selectedTab === "stats" && (query.isLoading ? <div className="mx-auto w-full min-w-0 max-w-lg px-4 py-4"><ExpenseChartSkeleton /></div> : initialError ? <LoadError onRetry={() => query.refetch()} /> : <section className="mx-auto w-full min-w-0 max-w-lg px-4 py-4">{expenses.length ? <ExpenseCharts expenses={filtered} /> : <EmptyState onCreate={openCreate} />}</section>)}
         </Tabs.Panel>
       </Tabs>
     </main>
@@ -286,5 +291,3 @@ function FilterPersonAvatar({ person, compact = false }: { person: ExpensePerson
 
 function EmptyState({ onCreate }: { onCreate: () => void }) { return <div className="flex min-h-72 flex-col items-center justify-center text-center"><div className="grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-900"><ReceiptIcon animateOnMount aria-hidden="true" size={24} /></div><h2 className="mt-4 font-extrabold">아직 지출 내역이 없어요</h2><p className="mt-1 text-sm text-slate-500">태국에서 쓴 첫 비용을 기록해 보세요.</p><Button className="mt-5" onPress={onCreate}><Plus className="size-4" />첫 지출 등록</Button></div>; }
 function LoadError({ onRetry }: { onRetry: () => void }) { return <div className="mx-auto flex min-h-80 max-w-lg flex-col items-center justify-center px-4 text-center"><p className="font-extrabold">지출 내역을 불러오지 못했어요.</p><p className="mt-1 text-sm text-slate-500">기존 데이터가 있다면 화면에 유지되고 다시 연결을 시도할 수 있어요.</p><Button className="mt-4" onPress={onRetry} variant="secondary"><RefreshCw className="size-4" />다시 시도</Button></div>; }
-function ExpenseSkeleton() { return <div className="mx-auto max-w-lg space-y-4 px-4 py-4"><Skeleton className="h-28 rounded-2xl" /><Skeleton className="h-11 rounded-xl" />{[0, 1, 2].map((item) => <div className="space-y-2" key={item}><Skeleton className="h-4 w-28 rounded-full" /><Skeleton className="h-[154px] rounded-2xl" /></div>)}</div>; }
-function ChartSkeleton() { return <div className="space-y-4">{[120, 240, 190, 220, 150].map((height, index) => <Skeleton className="rounded-2xl" key={index} style={{ height }} />)}</div>; }
