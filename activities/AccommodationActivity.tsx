@@ -4,10 +4,11 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Accessibility, AirVent, AlarmClock, Armchair, Baby, Banknote, Bath, BedDouble, Bike, Blinds, Building2, BusFront, CalendarDays, Camera, ChefHat, Cigarette, CigaretteOff, CircleParking, Clock3, Coffee, ConciergeBell, CookingPot, CreditCard, Dumbbell, ExternalLink, FireExtinguisher, Flame, Flower2, GlassWater, KeyRound, Languages, Laptop, Luggage, Map, MapPin, Microwave, Mountain, PackageCheck, PawPrint, PenOff, Plane, Refrigerator, Router, ShowerHead, ShieldCheck, Shirt, ShoppingBag, Snowflake, Sparkles, SprayCan, Star, TentTree, Thermometer, Ticket, Trash2, Trees, Tv, Utensils, Vault, WashingMachine, Waves, Wifi, Wine, Wrench, type LucideIcon } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { Tabs } from "@heroui/react";
 import { triggerHapticFeedback } from "../components/BottomNav";
-import { NativeHapticSwitch } from "../components/ui/native-haptic-switch";
-import { ACCOMMODATIONS, type Accommodation } from "../lib/accommodations";
+import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
+import { ACCOMMODATIONS, formatStayCheckDateTime, getStayCheckoutDate, type Accommodation } from "../lib/accommodations";
+import { cn } from "../lib/utils";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -106,146 +107,6 @@ const findScrollContainer = (element: HTMLElement | null) => {
 
 type StayFilter = "all" | Accommodation["id"];
 
-const useWindowSize = () => {
-  const [windowSize, setWindowSize] = React.useState<{ width: number | undefined; height: number | undefined }>({
-    width: undefined,
-    height: undefined,
-  });
-
-  React.useEffect(() => {
-    const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return windowSize;
-};
-
-interface StayAccordionProps {
-  initialOpenId: StayFilter;
-  onFilterChange: (filter: StayFilter) => void;
-}
-
-interface StayAccordionItem {
-  id: StayFilter;
-  title: string;
-  label: string;
-  imageUrl: string;
-  from: string;
-  to: string;
-}
-
-const getFollowingDate = (dateLabel: string) => {
-  const [month, day] = dateLabel.split("/").map(Number);
-  const date = new Date(Date.UTC(2026, month - 1, day + 1));
-  return `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
-};
-
-const formatAccordionDateTime = (dateTime: string) => dateTime.replace(" · ", " ");
-
-const STAY_ACCORDION_ITEMS: StayAccordionItem[] = [
-  {
-    id: "all",
-    title: "전체",
-    label: "ALL",
-    imageUrl: "/accommodation-overview.jpg",
-    from: `${ACCOMMODATIONS[0].date} · ${ACCOMMODATIONS[0].checkIn}`,
-    to: `${getFollowingDate(ACCOMMODATIONS[ACCOMMODATIONS.length - 1].date)} · ${ACCOMMODATIONS[ACCOMMODATIONS.length - 1].checkOut}`,
-  },
-  ...ACCOMMODATIONS.map((stay) => ({
-    id: stay.id,
-    title: stay.city,
-    label: stay.date,
-    imageUrl: stay.imageUrl,
-    from: `${stay.date} · ${stay.checkIn}`,
-    to: `${getFollowingDate(stay.date)} · ${stay.checkOut}`,
-  })),
-];
-
-const StayAccordion: React.FC<StayAccordionProps> = ({ initialOpenId, onFilterChange }) => {
-  const [openId, setOpenId] = React.useState<StayFilter>(initialOpenId);
-  const { width } = useWindowSize();
-  const accordionHeight = width && width >= 1024 ? 220 : 184;
-
-  const selectStay = (item: StayAccordionItem) => {
-    setOpenId(item.id);
-    onFilterChange(item.id);
-  };
-
-  return (
-    <section className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-[#1C1C1E] dark:ring-white/10">
-      <div
-        className="flex flex-row overflow-hidden"
-        style={{ height: accordionHeight }}
-      >
-        {STAY_ACCORDION_ITEMS.map((item) => {
-          const isOpen = item.id === openId;
-
-          return (
-            <React.Fragment key={item.id}>
-              <div className="relative z-10 w-11 shrink-0 lg:w-12">
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  aria-hidden="true"
-                  className={`group relative flex h-full w-full flex-col justify-end gap-1 border-r border-gray-100 px-2 py-2 text-left transition-colors dark:border-white/10 lg:w-12 ${
-                  isOpen
-                    ? "bg-gray-50 text-gray-950 dark:bg-white/10 dark:text-white"
-                    : "bg-white text-gray-800 hover:bg-gray-50 dark:bg-[#1C1C1E] dark:text-gray-100 dark:hover:bg-white/5"
-                }`}
-              >
-                <span className="text-[9px] font-medium tracking-tight text-gray-400 dark:text-gray-500">{item.label}</span>
-                <span className="text-[13px] font-semibold [writing-mode:vertical-rl]">{item.title}</span>
-                <span className="pointer-events-none absolute bottom-1/2 right-0 size-3 translate-x-1/2 translate-y-1/2 rotate-45 border-r border-t border-gray-100 bg-inherit dark:border-white/10" />
-              </button>
-                <NativeHapticSwitch
-                  ariaLabel={`${item.title} 숙소 보기`}
-                  checked={isOpen}
-                  onClick={() => {
-                    triggerHapticFeedback(10);
-                    selectStay(item);
-                  }}
-                  onChange={() => undefined}
-                />
-              </div>
-
-              <AnimatePresence initial={false}>
-                {isOpen ? (
-                  <motion.div
-                    key={item.id}
-                    initial={{ width: "0%" }}
-                    animate={{ width: "100%" }}
-                    exit={{ width: "0%" }}
-                    transition={{ type: "spring", stiffness: 280, damping: 28, mass: 0.75 }}
-                    className="relative flex h-full min-h-0 min-w-0 shrink items-end overflow-hidden bg-slate-950"
-                    style={{ backgroundImage: `linear-gradient(180deg, transparent 32%, rgba(0,0,0,.7)), url(${item.imageUrl})`, backgroundPosition: "center", backgroundSize: "cover" }}
-                  >
-                    <div className="absolute inset-x-0 bottom-0 grid h-[82px] grid-rows-[20px_1fr] bg-black/45 px-3 py-2.5 text-white backdrop-blur-sm">
-                      <p className="truncate text-sm font-bold leading-5">{item.title === "전체" ? "예약한 숙소" : item.title}</p>
-                      <div className="grid grid-cols-[minmax(0,1fr)_14px_minmax(0,1fr)] items-end gap-1.5">
-                        <div className="min-w-0">
-                          <p className="text-[9px] font-semibold leading-3 tracking-[0.08em] text-white/55">체크인</p>
-                          <p className="mt-0.5 whitespace-nowrap text-[11px] font-semibold leading-4 tabular-nums text-white/95">{formatAccordionDateTime(item.from)}</p>
-                        </div>
-                        <span className="mb-2 h-px bg-white/30" />
-                        <div className="min-w-0 text-right">
-                          <p className="text-[9px] font-semibold leading-3 tracking-[0.08em] text-white/55">체크아웃</p>
-                          <p className="mt-0.5 whitespace-nowrap text-[11px] font-semibold leading-4 tabular-nums text-white/95">{formatAccordionDateTime(item.to)}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
-            </React.Fragment>
-          );
-        })}
-      </div>
-    </section>
-  );
-};
-
 interface AccommodationActivityProps {
   params: { stayId?: string };
 }
@@ -305,16 +166,32 @@ export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ pa
 
   return (
     <AppScreen appBar={{ title: "숙소 자세히 보기" }}>
-      <div ref={amenitiesRef} className="min-h-full w-full bg-white px-4 pb-16 pt-4 dark:bg-black">
-        <StayAccordion initialOpenId={initialFilter} onFilterChange={setActiveFilter} />
+      <div ref={amenitiesRef} className="min-h-full w-full bg-white pb-16 dark:bg-black">
+        <Tabs
+          className="w-full"
+          selectedKey={activeFilter}
+          onSelectionChange={(key) => {
+            triggerHapticFeedback(10);
+            setActiveFilter(String(key) as StayFilter);
+          }}
+        >
+          <CompactSegmentedTabsList
+            ariaLabel="숙소 일정"
+            className="px-4 pb-3 pt-4"
+            listClassName="mx-auto w-full max-w-lg"
+            items={[
+              { id: "all", label: "전체" },
+              ...ACCOMMODATIONS.map((stay) => ({ id: stay.id, label: stay.city })),
+            ]}
+          />
 
-        <div className="mt-5 flex flex-col gap-5">
-          {visibleStays.map((stay) => (
-            <article key={stay.id} className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-[#1C1C1E] dark:ring-white/10">
+          <div className="mt-2 flex flex-col">
+          {visibleStays.map((stay, stayIndex) => (
+            <article key={stay.id} className={cn("flex flex-col", stayIndex > 0 && "mt-10 border-t border-gray-100 pt-10 dark:border-white/10")}>
               <div
                 role="img"
                 aria-label={`${stay.name} 대표 이미지`}
-                className="relative h-48 bg-cover bg-center"
+                className="relative h-52 bg-cover bg-center"
                 style={{ backgroundImage: `linear-gradient(180deg, transparent 45%, rgba(0,0,0,.58)), url(${stay.imageUrl})` }}
               >
                 <div className="absolute left-4 top-4 rounded-full bg-black/45 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
@@ -329,19 +206,19 @@ export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ pa
                 </div>
               </div>
 
-              <div className="p-4">
-                <div className="grid grid-cols-2 gap-2 rounded-2xl bg-gray-50 p-2 dark:bg-white/[0.06]">
-                  <div className="rounded-xl bg-white px-3 py-2.5 dark:bg-white/[0.06]">
+              <div className="divide-y divide-gray-100 dark:divide-white/10">
+                <div className="grid grid-cols-2 gap-4 px-4 py-3.5">
+                  <div className="min-w-0">
                     <span className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><CalendarDays size={13} /> 체크인</span>
-                    <p className="mt-1 text-sm font-bold text-gray-900 dark:text-gray-100">{stay.dateLabel} · {stay.checkIn}</p>
+                    <p className="mt-1 text-sm font-bold leading-5 text-gray-900 dark:text-gray-100">{formatStayCheckDateTime(stay.date, stay.checkIn)}</p>
                   </div>
-                  <div className="rounded-xl bg-white px-3 py-2.5 dark:bg-white/[0.06]">
+                  <div className="min-w-0">
                     <span className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><Clock3 size={13} /> 체크아웃</span>
-                    <p className="mt-1 text-sm font-bold text-gray-900 dark:text-gray-100">{getFollowingDate(stay.date)} · {stay.checkOut}</p>
+                    <p className="mt-1 text-sm font-bold leading-5 text-gray-900 dark:text-gray-100">{formatStayCheckDateTime(getStayCheckoutDate(stay.date), stay.checkOut)}</p>
                   </div>
                 </div>
 
-                <div className="mt-4 overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10">
+                <div>
                   <iframe
                     title={`${stay.name} Google 지도`}
                     src={`https://www.google.com/maps?q=${encodeURIComponent(stay.mapQuery)}&output=embed`}
@@ -349,82 +226,73 @@ export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ pa
                     className="h-44 w-full border-0"
                     referrerPolicy="no-referrer-when-downgrade"
                   />
-                  <div className="px-3 py-2.5">
-                    <p className="truncate text-xs text-gray-500 dark:text-gray-400"><MapPin className="mr-1 inline text-indigo-500" size={13} />{stay.address}</p>
-                  </div>
+                  <p className="px-4 py-3 text-xs leading-5 text-gray-500 dark:text-gray-400"><MapPin className="mr-1 inline text-indigo-500" size={13} />{stay.address}</p>
                 </div>
 
                 {stay.importantInfo ? (
-                  <section className="mt-3 overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-white/10 dark:bg-transparent">
-                    <div className="divide-y divide-gray-100 dark:divide-white/10">
-                      <div className="flex gap-3 px-3.5 py-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-500 dark:bg-white/5 dark:text-gray-400"><Coffee size={17} /></span>
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">조식</p>
-                          <p className="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{stay.importantInfo.breakfast.title}</p>
-                          <p className="mt-0.5 text-xs leading-5 text-gray-600 dark:text-gray-300">{stay.importantInfo.breakfast.details}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3 px-3.5 py-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-500 dark:bg-white/5 dark:text-gray-400"><Plane size={17} /></span>
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">셔틀</p>
-                          <p className="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{stay.importantInfo.shuttle.title}</p>
-                          <p className="mt-0.5 text-xs leading-5 text-gray-600 dark:text-gray-300">{stay.importantInfo.shuttle.details}</p>
-                        </div>
+                  <>
+                    <div className="flex gap-3 px-4 py-3.5">
+                      <span className="flex size-8 shrink-0 items-center justify-center text-gray-400 dark:text-gray-500"><Coffee size={16} /></span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">조식</p>
+                        <p className="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{stay.importantInfo.breakfast.title}</p>
+                        <p className="mt-0.5 text-xs leading-5 text-gray-600 dark:text-gray-300">{stay.importantInfo.breakfast.details}</p>
                       </div>
                     </div>
-                  </section>
+                    <div className="flex gap-3 px-4 py-3.5">
+                      <span className="flex size-8 shrink-0 items-center justify-center text-gray-400 dark:text-gray-500"><Plane size={16} /></span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">셔틀</p>
+                        <p className="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{stay.importantInfo.shuttle.title}</p>
+                        <p className="mt-0.5 text-xs leading-5 text-gray-600 dark:text-gray-300">{stay.importantInfo.shuttle.details}</p>
+                      </div>
+                    </div>
+                  </>
                 ) : null}
 
-                <section className="mt-3 rounded-2xl border border-gray-100 p-3 dark:border-white/10">
-                  <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400"><Coffee size={14} /></span>
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">식사 · 레스토랑</p>
-                      <p className="mt-0.5 text-sm font-semibold text-gray-800 dark:text-gray-100">{stay.dining.primary}</p>
-                      <div className="mt-1.5 flex flex-wrap gap-x-2 gap-y-1">
-                        {stay.dining.details.map((detail) => <span key={detail} className="text-xs text-gray-500 dark:text-gray-400">{detail}</span>)}
-                      </div>
-                    </div>
+                <div className="flex gap-3 px-4 py-3.5">
+                  <span className="flex size-8 shrink-0 items-center justify-center text-gray-400 dark:text-gray-500"><Coffee size={16} /></span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-bold tracking-wide text-gray-400 dark:text-gray-500">식사 · 레스토랑</p>
+                    <p className="mt-0.5 text-sm font-semibold text-gray-800 dark:text-gray-100">{stay.dining.primary}</p>
+                    <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">{stay.dining.details.join(" · ")}</p>
                   </div>
-                </section>
+                </div>
 
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stay.mapQuery)}`} target="_blank" rel="noreferrer" className="flex h-10 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700 transition-transform active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.05] dark:text-gray-100">
+                <div className="grid grid-cols-2 gap-2 px-4 py-3.5">
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stay.mapQuery)}`} target="_blank" rel="noreferrer" className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700 transition-transform active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.05] dark:text-gray-100">
                     Google 지도 <ExternalLink size={14} />
                   </a>
-                  <a href={stay.agodaUrl} target="_blank" rel="noreferrer" className="flex h-10 items-center justify-center gap-1.5 rounded-xl bg-[#5392f9] text-xs font-bold text-white transition-transform active:scale-[0.98]">
+                  <a href={stay.agodaUrl} target="_blank" rel="noreferrer" className="flex h-11 items-center justify-center gap-1.5 rounded-xl bg-[#5392f9] text-xs font-bold text-white transition-transform active:scale-[0.98]">
                     Agoda 예약 정보 <ExternalLink size={14} />
                   </a>
                 </div>
 
-                <section className="mt-5">
+                <section className="px-4 py-4">
                   <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">편의시설 · 서비스</h2>
-                  <div className="mt-3 columns-2 gap-x-5 sm:columns-3 lg:columns-4">
+                  <div className="mt-4 flex flex-col gap-5">
                     {stay.facilityGroups.map((group) => (
-                      <section key={group.title} className="mb-5 break-inside-avoid">
-                        <h3 className="text-xs font-bold text-gray-800 dark:text-gray-100">{group.title}</h3>
-                        <ul className="mt-2 space-y-2">
-                          {group.items.map((item) => {
-                            return (
-                              <li key={item} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-                                <AmenitySvgIcon item={item} />
-                                <span>{item}</span>
-                              </li>
-                            );
-                          })}
+                      <section key={group.title}>
+                        <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400">{group.title}</h3>
+                        <ul className="mt-2 divide-y divide-gray-100 dark:divide-white/10">
+                          {group.items.map((item) => (
+                            <li key={item} className="flex items-center gap-2.5 py-2.5 text-sm text-gray-700 dark:text-gray-300">
+                              <AmenitySvgIcon item={item} />
+                              <span className="min-w-0 flex-1">{item}</span>
+                            </li>
+                          ))}
                         </ul>
                       </section>
                     ))}
                   </div>
                 </section>
 
-                {stay.notice ? <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800 dark:bg-amber-400/10 dark:text-amber-200">{stay.notice}</p> : null}
+                {stay.notice ? <p className="px-4 pb-4 text-xs leading-5 text-amber-800 dark:text-amber-200">{stay.notice}</p> : null}
               </div>
             </article>
           ))}
         </div>
+        </Tabs>
       </div>
     </AppScreen>
   );

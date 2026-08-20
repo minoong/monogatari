@@ -19,7 +19,7 @@ type CompactSegmentedTabsListProps = {
 export function CompactSegmentedTabsList({ items, ariaLabel, className, listClassName }: CompactSegmentedTabsListProps) {
   return (
     <Tabs.ListContainer className={cn("bg-transparent p-0", className)}>
-      <Tabs.List aria-label={ariaLabel} className={cn("grid h-9 w-full gap-1 rounded-xl bg-slate-100 p-1 shadow-none ring-1 ring-inset ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800", items.length === 2 ? "grid-cols-2" : "grid-cols-3", listClassName)}>
+      <Tabs.List aria-label={ariaLabel} className={cn("grid h-9 w-full gap-1 rounded-xl bg-slate-100 p-1 shadow-none ring-1 ring-inset ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800", items.length === 2 ? "grid-cols-2" : items.length === 4 ? "grid-cols-4" : "grid-cols-3", listClassName)}>
         {items.map((item) => (
           <Tabs.Tab
             id={item.id}

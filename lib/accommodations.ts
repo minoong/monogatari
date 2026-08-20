@@ -145,3 +145,26 @@ export const ACCOMMODATIONS: Accommodation[] = [
     },
   },
 ];
+
+const TRIP_YEAR = 2026;
+
+const parseStayMdDate = (date: string) => {
+  const [month, day] = date.split("/").map(Number);
+  return new Date(TRIP_YEAR, month - 1, day);
+};
+
+export const formatStayDateWithWeekday = (date: string) =>
+  new Intl.DateTimeFormat("ko-KR", {
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  }).format(parseStayMdDate(date));
+
+export const formatStayCheckDateTime = (date: string, time: string) =>
+  `${formatStayDateWithWeekday(date)} · ${time}`;
+
+export const getStayCheckoutDate = (checkInDate: string) => {
+  const checkout = parseStayMdDate(checkInDate);
+  checkout.setDate(checkout.getDate() + 1);
+  return `${checkout.getMonth() + 1}/${checkout.getDate()}`;
+};
