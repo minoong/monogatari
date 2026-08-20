@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useStack } from "@stackflow/react";
 
 import { BottomNav, type BottomNavItem } from "@/components/BottomNav";
@@ -12,15 +13,39 @@ const ACTIVITY_TO_NAV: Record<string, BottomNavItem> = {
   UtilsActivity: "utils",
 };
 
-const TAB_ACTIVITIES = new Set(Object.keys(ACTIVITY_TO_NAV));
+function getTopVisibleActivityName(
+  activities: ReturnType<typeof useStack>["activities"],
+) {
+  for (let index = activities.length - 1; index >= 0; index -= 1) {
+    const activity = activities[index];
+    if (activity.transitionState === "exit-done") continue;
+    return activity.name;
+  }
+
+  return null;
+}
+
+const bottomNavHostState = {
+  lastActive: "home" as BottomNavItem,
+};
+
+function resolveBottomNavActive(activeNav: BottomNavItem | null): BottomNavItem {
+  if (activeNav) {
+    bottomNavHostState.lastActive = activeNav;
+  }
+
+  return activeNav ?? bottomNavHostState.lastActive;
+}
 
 export function BottomNavHost() {
   const { activities } = useStack();
-  const topActivity = activities.at(-1)?.name;
+  const topActivity = useMemo(() => getTopVisibleActivityName(activities), [activities]);
+  const activeNav = topActivity ? ACTIVITY_TO_NAV[topActivity] : null;
 
-  if (!topActivity || !TAB_ACTIVITIES.has(topActivity)) {
-    return null;
-  }
-
-  return <BottomNav active={ACTIVITY_TO_NAV[topActivity]} />;
+  return (
+    <BottomNav
+      active={resolveBottomNavActive(activeNav)}
+      visible={Boolean(activeNav)}
+    />
+  );
 }

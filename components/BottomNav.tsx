@@ -16,6 +16,7 @@ export type BottomNavItem = "home" | "schedule" | "wish" | "checklist" | "utils"
 
 interface BottomNavProps {
   active: BottomNavItem;
+  visible?: boolean;
 }
 
 type NavIconHandle =
@@ -63,9 +64,10 @@ export const triggerHapticFeedback = (duration = 15) => {
   }
 };
 
-export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
+export const BottomNav: React.FC<BottomNavProps> = ({ active, visible = true }) => {
   const { replace } = useFlow();
   const shouldEnter = !bottomNavState.hasEntered;
+  const isFirstEnter = shouldEnter && visible;
 
   const handleNavEnterComplete = useCallback(() => {
     bottomNavState.hasEntered = true;
@@ -86,15 +88,22 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
 
   return (
     <motion.nav
-      animate={{ y: 0, opacity: 1 }}
+      animate={{
+        y: visible ? 0 : "100%",
+        opacity: visible ? 1 : 0,
+      }}
+      aria-hidden={!visible}
       aria-label="하단 내비게이션"
-      className="fixed inset-x-0 bottom-0 z-50 overflow-hidden rounded-t-[24px] border-t border-slate-200/70 bg-white/95 pb-[max(env(safe-area-inset-bottom,0px),12px)] shadow-[0_-8px_32px_-12px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/95 dark:shadow-[0_-8px_32px_-12px_rgba(0,0,0,0.45)]"
-      initial={shouldEnter ? { y: 40, opacity: 0 } : false}
-      onAnimationComplete={shouldEnter ? handleNavEnterComplete : undefined}
+      className={cn(
+        "fixed inset-x-0 bottom-0 z-50 overflow-hidden rounded-t-[24px] border-t border-slate-200/70 bg-white/95 pb-[max(env(safe-area-inset-bottom,0px),12px)] shadow-[0_-8px_32px_-12px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/95 dark:shadow-[0_-8px_32px_-12px_rgba(0,0,0,0.45)]",
+        !visible && "pointer-events-none",
+      )}
+      initial={isFirstEnter ? { y: 40, opacity: 0 } : false}
+      onAnimationComplete={isFirstEnter ? handleNavEnterComplete : undefined}
       transition={
-        shouldEnter
+        isFirstEnter
           ? { type: "spring", stiffness: 340, damping: 30, mass: 0.9, delay: NAV_ENTER_DELAY_S }
-          : { duration: 0 }
+          : { duration: 0.28, ease: [0.22, 1, 0.36, 1] }
       }
     >
       <div className="mx-auto flex h-[50px] max-w-lg items-stretch justify-around px-1 pt-1">
@@ -105,7 +114,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active }) => {
             item={item}
             key={item.name}
             onNavigate={handleNav}
-            shouldEnter={shouldEnter}
+            shouldEnter={isFirstEnter}
           />
         ))}
       </div>
