@@ -19,8 +19,6 @@ import { type ReceiptScanResult } from "@/lib/receipt-scan";
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_META,
-  EXPENSE_PAYMENT_META,
-  EXPENSE_PAYMENT_METHODS,
   EXPENSE_PEOPLE,
   EXPENSE_PERSON_META,
   roundThb,
@@ -51,8 +49,8 @@ import { DrawerFieldLabel, drawerCancelButtonClass, drawerPrimaryButtonClass, sc
 import { Field } from "@/components/ui/field";
 import { CurrencyAmountField } from "@/components/ui/currency-amount-field";
 import { ExpenseReceiptPicker, type ReceiptScanStatus } from "@/components/expense/ExpenseReceiptPicker";
+import { ExpensePaymentMethodField } from "@/components/expense/ExpensePaymentMethodField";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
-import { cn } from "@/lib/utils";
 
 const nowInBangkok = () => {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -391,7 +389,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
           {participants.length === 2 && <Field className="gap-2"><DrawerFieldLabel icon={UsersRoundIcon} active={open}>공동 지출 분담</DrawerFieldLabel><div className="flex items-center justify-between gap-2"><p className="min-w-0 text-xs text-slate-500">기본은 반반, 1사땅 잔액은 결제자 몫이에요.</p><Button className="min-h-11 shrink-0 whitespace-nowrap px-1 text-[11px] font-bold text-blue-600" onPress={() => { if (!manualSplit) { setGahyunShare(String(automaticShares.gahyun)); setMinuShare(String(automaticShares.minu)); } setManualSplit((value) => !value); }} size="sm" type="button" variant="ghost">{manualSplit ? "반반으로" : "직접 나누기"}</Button></div>{manualSplit && <div className="mt-2 grid grid-cols-2 gap-2"><ShareInput label="가현쨩" value={gahyunShare} onChange={setGahyunShare} /><ShareInput label="미누쿤" value={minuShare} onChange={setMinuShare} /></div>}</Field>}
 
           <TextField value={merchant} onChange={setMerchant}><Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>상호 · 매장 (선택)</DrawerFieldLabel></Label><Input maxLength={100} onFocus={handleFieldFocus} placeholder="예: Terminal 21" /></TextField>
-          <RadioGroup className="gap-2" name="expense-payment-method" value={paymentMethod} onChange={(value) => setPaymentMethod(value as ExpensePaymentMethod)}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>결제 수단</DrawerFieldLabel></Label><div className="grid grid-cols-2 gap-2 min-[440px]:grid-cols-4">{EXPENSE_PAYMENT_METHODS.map((method) => <Radio className="min-w-0" key={method} value={method}><Radio.Content className={({ isSelected }) => choiceControlClass(isSelected, true)}><Radio.Control><Radio.Indicator /></Radio.Control><span>{EXPENSE_PAYMENT_META[method]}</span></Radio.Content></Radio>)}</div></RadioGroup>
+          <ExpensePaymentMethodField open={open} value={paymentMethod} onChange={setPaymentMethod} />
           {paymentMethod === "card" && <TextField value={actualKrw} onChange={setActualKrw}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>실제 카드 청구 원화 (선택)</DrawerFieldLabel></Label><Input inputMode="numeric" min="1" onFocus={handleFieldFocus} placeholder="승인 내역 확인 후 입력" type="number" /></TextField>}
 
           <div className="flex flex-col gap-2">
@@ -418,14 +416,6 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
     </DrawerPopup>
   </Drawer>;
 }
-
-const choiceControlClass = (selected: boolean, compact = false) => cn(
-  "flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border px-2 text-xs font-bold transition active:scale-[0.98]",
-  compact && "gap-1 px-1 text-[11px]",
-  selected
-    ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
-    : "border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900",
-);
 
 function PersonAvatar({ person }: { person: ExpensePerson }) {
   const meta = EXPENSE_PERSON_META[person];
