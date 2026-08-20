@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChangeEvent, MouseEventHandler } from "react";
+import type { ChangeEvent, MouseEventHandler, PointerEventHandler } from "react";
 import { cn } from "@/lib/utils";
 
 interface NativeHapticSwitchProps {
@@ -10,6 +10,10 @@ interface NativeHapticSwitchProps {
   disabled?: boolean;
   id?: string;
   onClick?: MouseEventHandler<HTMLInputElement>;
+  onPointerDown?: PointerEventHandler<HTMLInputElement>;
+  onPointerUp?: PointerEventHandler<HTMLInputElement>;
+  onPointerLeave?: PointerEventHandler<HTMLInputElement>;
+  onPointerCancel?: PointerEventHandler<HTMLInputElement>;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -24,6 +28,10 @@ export function NativeHapticSwitch({
   disabled = false,
   id,
   onClick,
+  onPointerDown,
+  onPointerUp,
+  onPointerLeave,
+  onPointerCancel,
   onChange,
 }: NativeHapticSwitchProps) {
   return (
@@ -40,13 +48,23 @@ export function NativeHapticSwitch({
       id={id}
       onClick={onClick}
       onChange={onChange}
+      onPointerCancel={(event) => {
+        onPointerCancel?.(event);
+      }}
       onPointerDown={(event) => {
+        onPointerDown?.(event);
         const input = event.currentTarget;
         window.requestAnimationFrame(() => {
           if (input.hasPointerCapture(event.pointerId)) {
             input.releasePointerCapture(event.pointerId);
           }
         });
+      }}
+      onPointerLeave={(event) => {
+        onPointerLeave?.(event);
+      }}
+      onPointerUp={(event) => {
+        onPointerUp?.(event);
       }}
       style={{ touchAction: "pan-y" }}
       type="checkbox"

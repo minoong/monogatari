@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CalendarDays, RefreshCw } from "lucide-react";
-import { BottomNav } from "@/components/BottomNav";
 import { ScheduleCard } from "@/components/schedule/ScheduleCard";
 import { ScheduleDateTabs } from "@/components/schedule/ScheduleDateTabs";
 import { ScheduleDrawer } from "@/components/schedule/ScheduleDrawer";
@@ -170,7 +169,6 @@ export const ScheduleActivity: React.FC = () => {
       />
       <ScheduleDrawer key={drawerSession} open={drawerOpen} onOpenChange={(open) => { setDrawerOpen(open); if (!open) setEditing(null); }} item={editing} />
       <AlertDialog open={Boolean(deleting)} onOpenChange={(open) => !open && !remove.isPending && setDeleting(null)}><AlertDialogPopup><AlertDialogHeader><AlertDialogTitle>일정을 삭제할까요?</AlertDialogTitle><AlertDialogDescription><strong>{deleting?.title}</strong> 일정과 연결된 사진도 함께 삭제됩니다.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter className="grid grid-cols-2"><button className="h-11 rounded-xl bg-slate-100 font-bold" disabled={remove.isPending} onClick={() => setDeleting(null)}>취소</button><button className="h-11 rounded-xl bg-red-500 font-bold text-white" disabled={!deleting || remove.isPending} onClick={() => deleting && remove.mutate(deleting.id)}>{remove.isPending ? "삭제 중…" : "삭제"}</button></AlertDialogFooter></AlertDialogPopup></AlertDialog>
-      <BottomNav active="schedule" />
     </AppScreen>
   );
 };

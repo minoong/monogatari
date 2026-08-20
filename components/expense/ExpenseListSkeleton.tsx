@@ -93,9 +93,9 @@ function ExpenseSummarySkeleton() {
             <span className="expense-summary-notch expense-summary-notch-right" />
           </div>
 
-          <p className="expense-summary-settle-copy">
+          <div className="expense-summary-settle-copy">
             <Skeleton className="h-2 w-24 rounded-full" />
-          </p>
+          </div>
 
           <div className="expense-summary-cluster">
             <span aria-hidden className="expense-summary-cluster-lead" />

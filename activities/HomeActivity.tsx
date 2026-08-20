@@ -3,7 +3,6 @@ import NumberFlow from "@number-flow/react";
 import { AnimatedContent } from "../components/ui/animated-content";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { BottomNav } from "../components/BottomNav";
 import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { Tabs } from "@heroui/react";
 import { ChevronRight, Hotel } from "lucide-react";
@@ -545,7 +544,6 @@ export const HomeActivity: React.FC = () => {
           </div>
         </Tabs>
       </div>
-      <BottomNav active="home" />
     </AppScreen>
   );
 };

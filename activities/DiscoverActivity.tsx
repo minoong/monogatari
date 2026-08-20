@@ -4,7 +4,7 @@ import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { ArrowRight, Plus, RefreshCw } from "lucide-react";
 import { Button } from "@heroui/react";
-import { BottomNav, triggerHapticFeedback } from "@/components/BottomNav";
+import { triggerHapticFeedback } from "@/components/BottomNav";
 import { WishDrawer } from "@/components/wish/WishDrawer";
 import { ActivityRegisterFab } from "@/components/ui/activity-register-fab";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
@@ -58,7 +58,6 @@ export const DiscoverActivity: React.FC = () => {
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
       />
-      <BottomNav active="wish" />
     </AppScreen>
   );
 };

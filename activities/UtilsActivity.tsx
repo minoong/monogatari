@@ -3,7 +3,7 @@ import Image from "next/image";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useFlow } from "@stackflow/react";
 import { ArrowRight } from "lucide-react";
-import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
+import { triggerHapticFeedback } from "../components/BottomNav";
 import { AnimatedContent } from "@/components/ui/animated-content";
 import { useExchangeRates } from "@/lib/exchange-rates";
 
@@ -153,7 +153,6 @@ export const UtilsActivity: React.FC = () => {
           </div>
         </div>
       </div>
-      <BottomNav active="utils" />
     </AppScreen>
   );
 };

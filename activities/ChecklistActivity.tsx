@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { BottomNav, triggerHapticFeedback } from "../components/BottomNav";
+import { triggerHapticFeedback } from "../components/BottomNav";
 import { Bell, ChevronDown, Trash2 } from "lucide-react";
 import { ChecklistDrawer } from "../components/checklist/ChecklistDrawer";
 import { ChecklistDeleteDrawer } from "../components/checklist/ChecklistDeleteDrawer";
@@ -1037,7 +1037,6 @@ export const ChecklistActivity: React.FC = () => {
           isDeleting={deleteMutation.isPending}
         />
       </div>
-      <BottomNav active="checklist" />
     </AppScreen>
   );
 };
