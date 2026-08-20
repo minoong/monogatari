@@ -19,13 +19,14 @@ import "./expense-summary-header.css";
 interface ExpenseSummaryHeaderProps {
   expenses: Expense[];
   scrollRef: RefObject<HTMLElement | null>;
+  scrollTrackingEnabled?: boolean;
 }
 
-export function ExpenseSummaryHeader({ expenses, scrollRef }: ExpenseSummaryHeaderProps) {
+export function ExpenseSummaryHeader({ expenses, scrollRef, scrollTrackingEnabled = true }: ExpenseSummaryHeaderProps) {
   const summary = useMemo(() => summarizeExpenses(expenses), [expenses]);
   const reduceMotion = useReducedMotion();
 
-  useScrollProgressVar(scrollRef, { enabled: !reduceMotion });
+  useScrollProgressVar(scrollRef, { enabled: scrollTrackingEnabled && !reduceMotion });
 
   const settlementAmount = summary.settlement?.amount ?? 0;
 

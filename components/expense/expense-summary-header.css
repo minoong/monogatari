@@ -7,6 +7,9 @@
       (var(--summary-expanded-h) - var(--summary-collapsed-h))
   );
   overflow-anchor: none;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  max-width: 100%;
 }
 
 .expense-summary-article {
@@ -86,6 +89,7 @@
 
 .expense-summary-amount {
   flex: 0 0 auto;
+  min-width: 9.75rem;
   transform: translate3d(0, calc((1 - var(--summary-p)) * 22px), 0)
     scale(calc(0.56 + (1 - var(--summary-p)) * 0.44));
   transform-origin: left center;

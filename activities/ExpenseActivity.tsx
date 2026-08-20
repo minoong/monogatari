@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Button, Label, Radio, RadioGroup, Tabs } from "@heroui/react";
@@ -66,6 +66,7 @@ import {
   type ExpensePerson,
 } from "@/lib/expenses";
 import { supabase } from "@/lib/supabase";
+import { useStackflowEnterDone } from "@/hooks/use-stackflow-enter-done";
 import { cn } from "@/lib/utils";
 
 const ExpenseCharts = dynamic(() => import("@/components/expense/ExpenseCharts").then((module) => module.ExpenseCharts), {
@@ -102,6 +103,18 @@ export const ExpenseActivity: React.FC = () => {
   const query = useQuery({ queryKey: ["expenses"], queryFn: fetchExpenses });
   const listScrollRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
+  const enterDone = useStackflowEnterDone(mainRef);
+
+  useLayoutEffect(() => {
+    const scroller = listScrollRef.current;
+    if (!scroller) return;
+    scroller.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!enterDone) return;
+    listScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [enterDone]);
 
   useEffect(() => {
     const channel = supabase.channel("expenses_changes")
@@ -136,6 +149,7 @@ export const ExpenseActivity: React.FC = () => {
   }, [filtered]);
   const filtersActive = person !== "all" || category !== "all" || Boolean(from) || Boolean(to);
   const initialError = query.isError && !query.data;
+  const showListContent = !query.isLoading && enterDone;
 
   const remove = useMutation({
     mutationFn: async (expense: Expense) => {
@@ -157,27 +171,25 @@ export const ExpenseActivity: React.FC = () => {
   const openFilters = () => { setFilterSession((value) => value + 1); setFilterOpen(true); };
   const clearFilters = () => { setPerson("all"); setCategory("all"); setFrom(""); setTo(""); };
 
-  return <AppScreen appBar={{ title: "가현짱, 렌탈 영수증 발행!" }}>
-    <main ref={mainRef} className="flex h-[calc(100svh-56px)] w-full max-w-full flex-col overflow-hidden bg-white dark:bg-slate-950">
+  return <AppScreen className="captured-scroll-screen" appBar={{ title: "가현짱, 렌탈 영수증 발행!" }}>
+    <main ref={mainRef} className="flex h-full min-h-0 w-full max-w-full flex-col overflow-hidden bg-white dark:bg-slate-950">
       <Tabs aria-label="가계부 보기" selectedKey={selectedTab} onSelectionChange={(key) => setSelectedTab(String(key))} className="flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col">
         <div className="z-30 shrink-0 border-b border-slate-200/80 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
           <CompactSegmentedTabsList ariaLabel="가계부 내역과 통계" items={[{ id: "list", label: "내역" }, { id: "stats", label: "통계" }]} />
         </div>
         <Tabs.Panel className="flex min-h-0 min-w-0 max-w-full flex-1 flex-col overflow-hidden !p-0" id="list">
-          {query.isLoading ? (
-            <div className="expense-list-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))]">
-              <ExpenseListSkeleton />
-            </div>
-          ) : initialError ? <LoadError onRetry={() => query.refetch()} /> : <div ref={listScrollRef} className="expense-list-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))]">
-            <ExpenseSummaryHeader expenses={filtered} scrollRef={listScrollRef} />
+          {initialError ? <LoadError onRetry={() => query.refetch()} /> : <div ref={listScrollRef} className="expense-list-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))]">
+            {!showListContent ? <ExpenseListSkeleton /> : <>
+            <ExpenseSummaryHeader expenses={filtered} scrollRef={listScrollRef} scrollTrackingEnabled={enterDone} />
             <section className="mx-auto w-full min-w-0 max-w-lg px-4 pb-4 pt-3">
             {query.isError && query.data && <div className="mb-3 flex items-center justify-between rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 dark:bg-amber-500/10 dark:text-amber-300"><span>최근 데이터를 표시 중이에요.</span><button className="min-h-8 px-2 font-bold" onClick={() => query.refetch()} type="button">다시 연결</button></div>}
             <div className="flex items-center gap-2">
               <label className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-900"><Search className="size-4 shrink-0 text-slate-400" /><input aria-label="지출 검색" className="min-w-0 flex-1 bg-transparent text-sm outline-none" onChange={(event) => setSearch(event.target.value)} placeholder="품목, 상호, 메모 검색" value={search} />{search && <button aria-label="검색어 지우기" className="grid size-8 shrink-0 place-items-center" onClick={() => setSearch("")} type="button"><X className="size-4" /></button>}</label>
               <button aria-label="지출 필터" className={cn("relative grid size-11 shrink-0 place-items-center rounded-xl border bg-white dark:bg-slate-900", filtersActive ? "border-blue-500 text-blue-600" : "border-slate-200 text-slate-500 dark:border-slate-800")} onClick={openFilters} type="button"><Filter className="size-4" />{filtersActive && <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-blue-500" />}</button>
             </div>
-            {expenses.length === 0 ? <EmptyState onCreate={openCreate} /> : filtered.length === 0 ? <div className="py-16 text-center"><p className="font-bold">조건에 맞는 지출이 없어요.</p><button className="mt-3 min-h-11 px-4 text-sm font-bold text-blue-600" onClick={clearFilters} type="button">필터 초기화</button></div> : <div className="mt-6 space-y-5">{grouped.map((group) => <section key={group.date}><ExpenseDayHeader items={group.items} /><div className="mt-2 overflow-hidden rounded-[18px] bg-white shadow-[0_10px_30px_-26px_rgba(15,23,42,0.55)] ring-1 ring-black/[0.055] dark:bg-slate-900 dark:ring-white/10">{group.items.map((expense, index) => <ExpenseRow expense={expense} key={expense.id} onDelete={() => setDeleting(expense)} onEdit={() => openEdit(expense)} showDivider={index < group.items.length - 1} />)}</div></section>)}</div>}
-          </section></div>}
+            {expenses.length === 0 ? <EmptyState onCreate={openCreate} /> : filtered.length === 0 ? <div className="py-16 text-center"><p className="font-bold">조건에 맞는 지출이 없어요.</p><button className="mt-3 min-h-11 px-4 text-sm font-bold text-blue-600" onClick={clearFilters} type="button">필터 초기화</button></div> : <div className="mt-6 flex flex-col">{grouped.map((group, groupIndex) => <section className={cn(groupIndex > 0 && "mt-8 border-t border-gray-100 pt-6 dark:border-white/10")} key={group.date}><ExpenseDayHeader items={group.items} /><ul className="divide-y divide-gray-100 dark:divide-white/10">{group.items.map((expense) => <li key={expense.id}><ExpenseRow expense={expense} onDelete={() => setDeleting(expense)} onEdit={() => openEdit(expense)} /></li>)}</ul></section>)}</div>}
+          </section></>}
+          </div>}
         </Tabs.Panel>
         <Tabs.Panel className="min-h-0 min-w-0 max-w-full flex-1 overflow-y-auto overscroll-contain !p-0 pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))]" id="stats">
           {selectedTab === "stats" && (query.isLoading ? <div className="mx-auto w-full min-w-0 max-w-lg px-4 py-4"><ExpenseChartSkeleton /></div> : initialError ? <LoadError onRetry={() => query.refetch()} /> : <section className="mx-auto w-full min-w-0 max-w-lg px-4 py-4">{expenses.length ? <ExpenseCharts expenses={filtered} /> : <EmptyState onCreate={openCreate} />}</section>)}
@@ -190,7 +202,7 @@ export const ExpenseActivity: React.FC = () => {
       onPress={openCreate}
       scrollAnchorRef={mainRef}
       scrollElementRef={listScrollRef}
-      scrollKey={`${selectedTab}-${query.isLoading ? "loading" : "ready"}`}
+      scrollKey={`${selectedTab}-${showListContent ? "ready" : "loading"}`}
     />
     <ExpenseDrawer key={`expense-${drawerSession}`} expense={editing} open={drawerOpen} onOpenChange={setDrawerOpen} />
     <FilterDrawer key={`filter-${filterSession}`} category={category} categoryOptions={categoryOptions} from={from} open={filterOpen} person={person} to={to} onApply={({ person: nextPerson, category: nextCategory, from: nextFrom, to: nextTo }) => { setPerson(nextPerson); setCategory(nextCategory); setFrom(nextFrom); setTo(nextTo); }} onOpenChange={setFilterOpen} />
@@ -200,20 +212,20 @@ export const ExpenseActivity: React.FC = () => {
 
 function ExpenseDayHeader({ items }: { items: Expense[] }) {
   const summary = summarizeExpenses(items);
-  return <header className="expense-day-header sticky z-20 -mx-1 flex min-w-0 items-center justify-between gap-3 rounded-xl bg-white px-2 py-1.5 dark:bg-slate-950">
+  return <header className="expense-day-header sticky z-20 flex min-w-0 items-center justify-between gap-3 bg-white py-2 dark:bg-slate-950">
     <h2 className="min-w-0 truncate text-[13px] font-extrabold tracking-[-0.01em] text-slate-800 dark:text-slate-100">{formatBangkokDate(items[0].purchased_at)}</h2>
     <ExpenseDaySummary count={summary.count} krw={summary.totalKrw} thb={summary.totalThb} />
   </header>;
 }
 
-function ExpenseRow({ expense, onEdit, onDelete, showDivider }: { expense: Expense; onEdit: () => void; onDelete: () => void; showDivider: boolean }) {
+function ExpenseRow({ expense, onEdit, onDelete }: { expense: Expense; onEdit: () => void; onDelete: () => void }) {
   const categoryLabel = getExpenseCategoryLabel(expense);
   const categoryColor = getExpenseCategoryColor(expense);
   const users = EXPENSE_PEOPLE.filter((person) => person === "gahyun" ? expense.share_gahyun_thb > 0 : expense.share_minu_thb > 0);
   const coverImage = expense.images[0];
   return <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.42 }}>
     <MorphingDialogTrigger ariaLabel={`${expense.item_name} 상세 보기`} className="group relative block w-full max-w-full text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500">
-      <article className="flex min-h-[80px] min-w-0 items-center gap-3 px-3.5 py-3 transition-[background-color,transform] duration-150 hover:bg-slate-50/80 active:scale-[0.995] active:bg-slate-100 motion-reduce:transition-none dark:hover:bg-white/5 dark:active:bg-white/10">
+      <article className="flex min-h-[80px] min-w-0 items-center gap-3 py-3.5 transition-[background-color,transform] duration-150 hover:bg-slate-50/80 active:scale-[0.995] active:bg-slate-100 motion-reduce:transition-none dark:hover:bg-white/5 dark:active:bg-white/10">
         <div className="relative size-11 shrink-0 overflow-hidden rounded-[11px]" style={{ backgroundColor: `${categoryColor}10`, color: categoryColor }}>
           {coverImage ? <Image alt="" className="size-full object-cover" height={88} src={coverImage.url} unoptimized width={88} /> : <div className="relative grid size-full place-items-center border border-dashed" style={{ borderColor: `${categoryColor}45` }}><ReceiptIcon animateOnMount aria-hidden="true" size={20} /><span aria-hidden="true" className="absolute inset-x-2 bottom-1.5 border-b border-dashed opacity-25" /></div>}
           {expense.images.length > 1 && <span className="absolute bottom-1 right-1 grid min-w-4 place-items-center rounded-full bg-slate-950/75 px-1 py-0.5 text-[8px] font-black leading-none text-white backdrop-blur">+{expense.images.length - 1}</span>}
@@ -236,7 +248,6 @@ function ExpenseRow({ expense, onEdit, onDelete, showDivider }: { expense: Expen
           <div aria-label={`구매 시간 ${formatBangkokTime(expense.purchased_at)}`} className="mt-auto flex items-center gap-1 text-[10px] font-semibold tabular-nums text-slate-400"><ClockIcon aria-hidden="true" size={10} /><span>{formatBangkokTime(expense.purchased_at)}</span></div>
         </div>
       </article>
-      {showDivider && <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-[4.75rem] right-3.5 h-px bg-slate-100 dark:bg-slate-800" />}
     </MorphingDialogTrigger>
     <MorphingDialogContainer>
       <MorphingDialogContent className="relative mx-3 flex max-h-[88dvh] w-[calc(100%_-_1.5rem)] max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-950">

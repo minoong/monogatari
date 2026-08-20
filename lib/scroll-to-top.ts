@@ -42,13 +42,9 @@ const frontmostRoot = () => {
   return screen?.querySelector<HTMLElement>("[data-part='paper'] > div") ?? screen ?? document.body;
 };
 
-const scrollBehavior = (): ScrollBehavior => {
-  if (typeof window === "undefined") return "auto";
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
-};
-
 const scrollElementToTop = (element: HTMLElement) => {
-  element.scrollTo({ top: 0, behavior: scrollBehavior() });
+  if (element.scrollTop <= 0) return;
+  element.scrollTo({ top: 0, behavior: "auto" });
 };
 
 export const scrollActiveScreenToTop = () => {

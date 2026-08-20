@@ -37,6 +37,9 @@ export function useScrollProgressVar(
       if (!frame) frame = requestAnimationFrame(update);
     };
 
+    container.scrollTop = 0;
+    last = 0;
+    container.style.setProperty(cssVarName, "0");
     update();
     container.addEventListener("scroll", onScroll, { passive: true });
 

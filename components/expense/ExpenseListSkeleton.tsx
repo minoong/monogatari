@@ -3,9 +3,9 @@
 import { Skeleton } from "@heroui/react";
 import "./expense-summary-header.css";
 
-function ExpenseRowSkeleton({ showDivider }: { showDivider?: boolean }) {
+function ExpenseRowSkeleton() {
   return (
-    <div className="relative flex min-h-[80px] items-center gap-3 px-3.5 py-3">
+    <li className="flex min-h-[80px] items-center gap-3 py-3.5">
       <Skeleton className="size-11 shrink-0 rounded-[11px]" />
       <div className="min-w-0 flex-1 space-y-2">
         <Skeleton className="h-4 w-[74%] max-w-52 rounded-md" />
@@ -21,20 +21,14 @@ function ExpenseRowSkeleton({ showDivider }: { showDivider?: boolean }) {
         <Skeleton className="h-3 w-12 rounded-md" />
         <Skeleton className="mt-auto h-3 w-10 rounded-full" />
       </div>
-      {showDivider && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 left-[4.75rem] right-3.5 h-px bg-slate-100 dark:bg-slate-800"
-        />
-      )}
-    </div>
+    </li>
   );
 }
 
-function ExpenseDayGroupSkeleton({ rows, fill }: { rows: number; fill?: boolean }) {
+function ExpenseDayGroupSkeleton({ rows, fill, bordered }: { rows: number; fill?: boolean; bordered?: boolean }) {
   return (
-    <section className={fill ? "flex min-h-0 flex-1 flex-col space-y-2" : "space-y-2"}>
-      <header className="flex min-w-0 shrink-0 items-center justify-between gap-3 px-2 py-1.5">
+    <section className={fill ? "flex min-h-0 flex-1 flex-col" : bordered ? "border-t border-gray-100 pt-6 dark:border-white/10" : undefined}>
+      <header className="flex min-w-0 shrink-0 items-center justify-between gap-3 py-2">
         <Skeleton className="h-4 w-24 rounded-full" />
         <div className="flex items-center gap-2">
           <Skeleton className="h-3.5 w-8 rounded-full" />
@@ -42,18 +36,12 @@ function ExpenseDayGroupSkeleton({ rows, fill }: { rows: number; fill?: boolean 
           <Skeleton className="h-3.5 w-14 rounded-full" />
         </div>
       </header>
-      <div
-        className={
-          fill
-            ? "flex min-h-0 flex-1 flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_10px_30px_-26px_rgba(15,23,42,0.55)] ring-1 ring-black/[0.055] dark:bg-slate-900 dark:ring-white/10"
-            : "overflow-hidden rounded-[18px] bg-white shadow-[0_10px_30px_-26px_rgba(15,23,42,0.55)] ring-1 ring-black/[0.055] dark:bg-slate-900 dark:ring-white/10"
-        }
-      >
+      <ul className={fill ? "flex min-h-0 flex-1 flex-col divide-y divide-gray-100 dark:divide-white/10" : "divide-y divide-gray-100 dark:divide-white/10"}>
         {Array.from({ length: rows }, (_, index) => (
-          <ExpenseRowSkeleton key={index} showDivider={index < rows - 1 || fill} />
+          <ExpenseRowSkeleton key={index} />
         ))}
-        {fill && <div aria-hidden="true" className="min-h-0 flex-1 bg-white dark:bg-slate-900" />}
-      </div>
+        {fill && <li aria-hidden="true" className="min-h-0 flex-1" />}
+      </ul>
     </section>
   );
 }
@@ -127,9 +115,9 @@ export function ExpenseListSkeleton() {
           <Skeleton className="size-11 shrink-0 rounded-xl" />
         </div>
 
-        <div className="mt-6 flex min-h-0 flex-1 flex-col gap-5">
+        <div className="mt-6 flex min-h-0 flex-1 flex-col">
           <ExpenseDayGroupSkeleton rows={2} />
-          <ExpenseDayGroupSkeleton fill rows={2} />
+          <ExpenseDayGroupSkeleton bordered fill rows={2} />
         </div>
       </section>
     </div>

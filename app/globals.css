@@ -252,9 +252,10 @@ html.ios-sb-scroll body {
 }
 
 /*
- * 별도로 스크롤하므로, iOS가 input 포커스 때 이 상위 컨테이너를 강제로 올리지 않게 막습니다.
+ * 내부 스크롤을 쓰는 2뎁스 화면은 Stackflow paper 스크롤을 끈다.
+ * iOS에서 paper + 내부 overflow-y-auto가 겹치면 진입 시 리스트가 덜컹거린다.
  */
-.dictionary-screen > [data-part="paper"] > div {
+.captured-scroll-screen > [data-part="paper"] > div {
   overflow: hidden;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: auto;
