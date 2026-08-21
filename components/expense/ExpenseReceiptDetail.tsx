@@ -10,6 +10,11 @@ import {
   ReceiptTotalBlock,
 } from "@/components/expense/receipt-ui";
 import { MorphingDialogClose, MorphingDialogDescription, MorphingDialogTitle } from "@/components/motion-primitives/morphing-dialog";
+import {
+  dialogFooterDangerIconButtonClass,
+  dialogFooterPrimaryButtonClass,
+  dialogFooterSecondaryButtonClass,
+} from "@/components/ui/drawer-form";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -164,20 +169,20 @@ export function ExpenseReceiptDetail({ expense, categoryColor, onDelete, onEdit 
       <div className="grid shrink-0 grid-cols-[44px_1fr_1fr] gap-2 border-t border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
         <MorphingDialogClose
           ariaLabel="지출 삭제"
-          className="static grid h-11 place-items-center rounded-xl border border-red-200 bg-red-50 text-red-500 dark:border-red-900/50 dark:bg-red-950/40"
+          className={cn("static", dialogFooterDangerIconButtonClass)}
           onClick={onDelete}
         >
           <Trash2 className="size-4" />
         </MorphingDialogClose>
         <MorphingDialogClose
           ariaLabel="상세 닫기"
-          className="static grid h-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          className={cn("static", dialogFooterSecondaryButtonClass)}
         >
           닫기
         </MorphingDialogClose>
         <MorphingDialogClose
           ariaLabel="지출 수정"
-          className="static flex h-11 items-center justify-center gap-1.5 rounded-xl bg-slate-900 text-sm font-bold text-white dark:bg-white dark:text-slate-900"
+          className={cn("static", dialogFooterPrimaryButtonClass)}
           onClick={onEdit}
         >
           <Pencil className="size-4" />

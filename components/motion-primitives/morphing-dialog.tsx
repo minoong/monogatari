@@ -20,6 +20,7 @@ import {
 import { createPortal } from 'react-dom';
 import { Button } from '@heroui/react';
 import { cn } from '@/lib/utils';
+import { dialogFooterButtonClass } from '@/components/ui/drawer-form';
 import { XIcon } from 'lucide-react';
 import useClickOutside from '@/components/motion-primitives/useClickOutside';
 
@@ -409,10 +410,17 @@ function MorphingDialogClose({
     onClick?.();
   }, [onClick, setIsOpen]);
 
+  const isFooterAction = Boolean(className?.includes('static'));
+
   return (
     <Button
       aria-label={ariaLabel}
-      className={cn('absolute top-6 right-6', className)}
+      fullWidth={isFooterAction}
+      className={cn(
+        !isFooterAction && 'absolute top-6 right-6',
+        isFooterAction && dialogFooterButtonClass,
+        className,
+      )}
       onPress={handlePress}
       type="button"
       variant="ghost"

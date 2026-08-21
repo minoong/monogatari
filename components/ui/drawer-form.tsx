@@ -20,6 +20,14 @@ export const rowNavButtonClass =
   "!flex !h-auto min-h-0 w-full flex-row items-center justify-between gap-3 whitespace-normal text-left";
 export const tileNavButtonClass =
   "!flex !h-auto min-h-0 w-full flex-col items-center justify-center gap-2 whitespace-normal";
+export const dialogFooterButtonClass =
+  "!flex !h-11 !w-full min-w-0 items-center justify-center gap-1.5 whitespace-normal rounded-xl text-sm font-bold [--button-bg:transparent] hover:[--button-bg:transparent] active:[--button-bg-pressed:transparent]";
+export const dialogFooterSecondaryButtonClass =
+  `${dialogFooterButtonClass} border border-slate-200 !bg-white text-slate-700 hover:!bg-slate-50 active:!bg-slate-100 dark:border-slate-700 dark:!bg-slate-800 dark:text-slate-200`;
+export const dialogFooterPrimaryButtonClass =
+  `${dialogFooterButtonClass} !bg-slate-900 text-white hover:!bg-slate-800 active:!bg-slate-950 dark:!bg-white dark:text-slate-900`;
+export const dialogFooterDangerIconButtonClass =
+  `${dialogFooterButtonClass} !w-full border border-red-200 !bg-red-50 text-red-500 hover:!bg-red-100 active:!bg-red-200 dark:border-red-900/50 dark:!bg-red-950/40`;
 
 export function DrawerIntro({ open, image, alt, title, description }: { open: boolean; image: string; alt: string; title?: string; description?: string }) {
   return <div className="flex flex-col items-center justify-center">

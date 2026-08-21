@@ -12,7 +12,7 @@ import { GooeyInput } from "@/components/ui/gooey-input";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { cn } from "@/lib/utils";
-import { drawerCancelButtonClass, drawerDangerButtonClass } from "@/components/ui/drawer-form";
+import { drawerCancelButtonClass, drawerDangerButtonClass, dialogFooterPrimaryButtonClass, dialogFooterSecondaryButtonClass } from "@/components/ui/drawer-form";
 import {
   AlertDialog,
   AlertDialogDescription,
@@ -492,13 +492,13 @@ function WishListItem({
               </Button>
               <MorphingDialogClose
                 ariaLabel="다이얼로그 닫기"
-                className="static flex h-11 flex-1 items-center justify-center rounded-xl bg-slate-100 font-semibold text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                className={cn("static flex-1", dialogFooterSecondaryButtonClass)}
               >
                 닫기
               </MorphingDialogClose>
               <MorphingDialogClose
                 ariaLabel={`${wish.title} 편집`}
-                className="static flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 font-bold text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                className={cn("static flex-1", dialogFooterPrimaryButtonClass)}
                 onClick={onEdit}
               >
                 <Pencil className="size-4" />
