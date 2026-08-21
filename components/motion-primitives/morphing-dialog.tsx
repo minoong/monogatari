@@ -16,6 +16,7 @@ import {
   MotionConfig,
   Transition,
   Variant,
+  useReducedMotion,
 } from 'motion/react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
@@ -403,6 +404,7 @@ function MorphingDialogClose({
   variants,
 }: MorphingDialogCloseProps) {
   const { setIsOpen, uniqueId } = useMorphingDialog();
+  const prefersReducedMotion = useReducedMotion();
 
   const handleClose = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setIsOpen(false);
@@ -420,6 +422,8 @@ function MorphingDialogClose({
       animate='animate'
       exit='exit'
       variants={variants}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.98, opacity: 0.9 }}
+      transition={{ type: 'spring', stiffness: 520, damping: 30 }}
     >
       {children || <XIcon size={24} />}
     </motion.button>
