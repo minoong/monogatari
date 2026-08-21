@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import ClickSpark from "@/components/ClickSpark";
 import ElectricBorder from "@/components/ElectricBorder";
+import { Button } from "@heroui/react";
 import { DrawerFieldLabel, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import { ScanTextIcon, type ScanTextIconHandle } from "@/components/ui/scan-text";
 import { cn } from "@/lib/utils";
@@ -274,22 +275,25 @@ export function ExpenseReceiptPicker({
                 initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                 transition={{ ...SPRING, delay: 0.18 }}
               >
-                <button
-                  className="flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-blue-500 text-sm font-bold text-white shadow-sm shadow-blue-500/25 transition hover:bg-blue-600 active:scale-[0.98]"
-                  onClick={openCameraPicker}
-                  type="button"
+                <Button
+                  className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-blue-500 text-sm font-bold text-white shadow-sm shadow-blue-500/25"
+                  fullWidth
+                  onPress={openCameraPicker}
+                  size="md"
                 >
                   <Camera className="size-4" strokeWidth={1.75} />
                   촬영
-                </button>
-                <button
-                  className="flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 active:scale-[0.98] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  onClick={openAlbumPicker}
-                  type="button"
+                </Button>
+                <Button
+                  className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  fullWidth
+                  onPress={openAlbumPicker}
+                  size="md"
+                  variant="secondary"
                 >
                   <Images className="size-4" strokeWidth={1.75} />
                   앨범
-                </button>
+                </Button>
               </motion.div>
             </motion.div>
           </motion.div>
@@ -352,35 +356,23 @@ export function ExpenseReceiptPicker({
             </div>
 
             <ClickSpark sparkColor={scanStatus === "error" ? "#fca5a5" : "#93c5fd"} sparkCount={scanStatus === "success" ? 14 : 10} sparkRadius={20}>
-              <motion.button
-                animate={
-                  scanStatus === "idle" && !reduceMotion
-                    ? { boxShadow: ["0 0 0 0 rgba(59,130,246,0)", "0 0 0 6px rgba(59,130,246,0.12)", "0 0 0 0 rgba(59,130,246,0)"] }
-                    : { boxShadow: "none" }
-                }
+              <Button
                 aria-busy={scanning}
                 aria-label={STATUS_COPY[scanStatus]}
                 className={cn(
-                  "relative flex min-h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl px-4 text-base font-bold transition-colors",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:ring-offset-2",
-                  "disabled:cursor-not-allowed",
+                  "relative min-h-12 w-full gap-2 overflow-hidden rounded-2xl text-base font-bold",
                   scanStatus === "success" && "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30",
                   scanStatus === "error" && "bg-red-500 text-white shadow-lg shadow-red-500/30",
                   scanning && "bg-blue-500 text-white shadow-lg shadow-blue-500/30",
                   scanStatus === "idle" && drawerPrimaryButtonClass,
                 )}
-                disabled={disabled || scanning || scanStatus === "success" || scanStatus === "error"}
-                onClick={() => {
+                fullWidth
+                isDisabled={disabled || scanning || scanStatus === "success" || scanStatus === "error"}
+                onPress={() => {
                   triggerHapticFeedback(10);
                   onScan();
                 }}
-                transition={
-                  scanStatus === "idle" && !reduceMotion
-                    ? { duration: 2.2, repeat: Infinity, ease: "easeInOut", type: "tween" }
-                    : { boxShadow: { duration: 0.2, type: "tween" }, ...SPRING }
-                }
-                type="button"
-                whileTap={reduceMotion || disabled || scanning ? undefined : { scale: 0.96 }}
+                size="lg"
               >
                 <StatusIcon scanStatus={scanStatus} scanning={scanning} />
                 <AnimatePresence initial={false} mode="wait">
@@ -394,7 +386,7 @@ export function ExpenseReceiptPicker({
                     {STATUS_COPY[scanStatus]}
                   </motion.span>
                 </AnimatePresence>
-              </motion.button>
+              </Button>
             </ClickSpark>
 
             <motion.p
@@ -632,14 +624,16 @@ function SortableThumb({
           transition={{ duration: 0.8, repeat: Infinity, type: "tween" }}
         />
       )}
-      <button
+      <Button
         aria-label={`영수증 ${index + 1} 삭제`}
-        className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm"
-        onClick={onRemove}
-        type="button"
+        className="absolute right-1 top-1 flex size-6 min-w-6 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm"
+        isIconOnly
+        onPress={onRemove}
+        size="sm"
+        variant="ghost"
       >
         <X className="size-3.5" strokeWidth={2.25} />
-      </button>
+      </Button>
       <button
         aria-label={`영수증 ${index + 1} 순서 변경`}
         className="absolute bottom-1 right-1 flex size-7 touch-none items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm select-none [-webkit-touch-callout:none]"

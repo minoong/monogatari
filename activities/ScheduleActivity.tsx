@@ -11,7 +11,9 @@ import { ScheduleDrawer } from "@/components/schedule/ScheduleDrawer";
 import { ScheduleTimeline, type ScheduleTimelineEntry } from "@/components/schedule/ScheduleTimeline";
 import { ActivityRegisterFab } from "@/components/ui/activity-register-fab";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
+import { Button } from "@heroui/react";
 import { AlertDialog, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { drawerCancelButtonClass, drawerDangerButtonClass } from "@/components/ui/drawer-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatLongTripDate, isTripDate, type ScheduleItem, type TripDate } from "@/lib/schedule";
 import { findScrollContainer } from "@/lib/scroll-container";
@@ -117,14 +119,14 @@ export const ScheduleActivity: React.FC = () => {
             {isError && (
               <motion.div className="rounded-3xl bg-white p-8 text-center shadow-sm dark:bg-slate-900" initial="hidden" animate="visible" variants={STAGGER_PARENT}>
                 <motion.p className="font-bold" variants={STAGGER_CHILD}>일정을 불러오지 못했어요.</motion.p>
-                <motion.button className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white dark:bg-white dark:text-slate-900" variants={STAGGER_CHILD} onClick={() => refetch()}><RefreshCw className="size-4" /> 다시 시도</motion.button>
+                <Button className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white dark:bg-white dark:text-slate-900" onPress={() => refetch()} size="md"><RefreshCw className="size-4" /> 다시 시도</Button>
               </motion.div>
             )}
             {!isLoading && !isError && items.length === 0 && (
               <motion.div className="rounded-3xl border border-dashed border-slate-300 p-10 text-center dark:border-slate-700" initial="hidden" animate="visible" variants={STAGGER_PARENT}>
                 <motion.div variants={STAGGER_CHILD}><CalendarDays className="mx-auto size-8 text-slate-400" /></motion.div>
                 <motion.p className="mt-3 font-bold" variants={STAGGER_CHILD}>아직 일정이 없어요</motion.p>
-                <motion.button className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white dark:bg-white dark:text-slate-900" variants={STAGGER_CHILD} onClick={openCreate}>첫 일정 등록</motion.button>
+                <Button className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white dark:bg-white dark:text-slate-900" onPress={openCreate} size="md">첫 일정 등록</Button>
               </motion.div>
             )}
             {!isLoading && !isError && (
@@ -168,7 +170,7 @@ export const ScheduleActivity: React.FC = () => {
         scrollAnchorRef={mainRef}
       />
       <ScheduleDrawer key={drawerSession} open={drawerOpen} onOpenChange={(open) => { setDrawerOpen(open); if (!open) setEditing(null); }} item={editing} />
-      <AlertDialog open={Boolean(deleting)} onOpenChange={(open) => !open && !remove.isPending && setDeleting(null)}><AlertDialogPopup><AlertDialogHeader><AlertDialogTitle>일정을 삭제할까요?</AlertDialogTitle><AlertDialogDescription><strong>{deleting?.title}</strong> 일정과 연결된 사진도 함께 삭제됩니다.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter className="grid grid-cols-2"><button className="h-11 rounded-xl bg-slate-100 font-bold" disabled={remove.isPending} onClick={() => setDeleting(null)}>취소</button><button className="h-11 rounded-xl bg-red-500 font-bold text-white" disabled={!deleting || remove.isPending} onClick={() => deleting && remove.mutate(deleting.id)}>{remove.isPending ? "삭제 중…" : "삭제"}</button></AlertDialogFooter></AlertDialogPopup></AlertDialog>
+      <AlertDialog open={Boolean(deleting)} onOpenChange={(open) => !open && !remove.isPending && setDeleting(null)}><AlertDialogPopup><AlertDialogHeader><AlertDialogTitle>일정을 삭제할까요?</AlertDialogTitle><AlertDialogDescription><strong>{deleting?.title}</strong> 일정과 연결된 사진도 함께 삭제됩니다.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter className="grid grid-cols-2"><Button fullWidth className={drawerCancelButtonClass} isDisabled={remove.isPending} onPress={() => setDeleting(null)} size="lg">취소</Button><Button fullWidth className={drawerDangerButtonClass} isDisabled={!deleting || remove.isPending} onPress={() => deleting && remove.mutate(deleting.id)} size="lg">{remove.isPending ? "삭제 중…" : "삭제"}</Button></AlertDialogFooter></AlertDialogPopup></AlertDialog>
     </AppScreen>
   );
 };

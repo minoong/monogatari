@@ -378,19 +378,20 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                   {WISH_CATEGORY_SUGGESTIONS[type].map((suggestion) => {
                     const isSelected = categories.includes(suggestion);
                     return (
-                      <button
+                      <Button
                         key={suggestion}
-                        className={`min-h-8 rounded-full border px-3 text-xs font-semibold transition-colors ${
+                        className={`min-h-8 rounded-full border px-3 text-xs font-semibold ${
                           isSelected
                             ? "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300"
                             : "border-gray-200 bg-white text-gray-500 hover:border-blue-300 dark:border-gray-700 dark:bg-white/5"
                         }`}
-                        disabled={isSelected}
-                        onClick={() => addCategory(suggestion)}
-                        type="button"
+                        isDisabled={isSelected}
+                        onPress={() => addCategory(suggestion)}
+                        size="sm"
+                        variant={isSelected ? "primary" : "secondary"}
                       >
                         {isSelected ? "✓ " : "+ "}{suggestion}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -608,14 +609,16 @@ function MultiValueField({
                   {formatLinkLabel(item)}
                 </span>
               </span>
-              <button
+              <Button
                 aria-label={`${label} ${index + 1} 삭제`}
-                className="flex size-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 dark:hover:bg-red-500/10"
-                onClick={() => onRemove(new Set([item]))}
-                type="button"
+                className="flex size-8 min-w-8 shrink-0 items-center justify-center rounded-full text-slate-400 dark:hover:bg-red-500/10"
+                isIconOnly
+                onPress={() => onRemove(new Set([item]))}
+                size="sm"
+                variant="ghost"
               >
                 <X className="size-4" />
-              </button>
+              </Button>
             </li>
           ))}
         </ul>

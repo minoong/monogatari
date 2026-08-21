@@ -8,6 +8,7 @@ import { triggerHapticFeedback } from "@/components/BottomNav";
 import { WishDrawer } from "@/components/wish/WishDrawer";
 import { ActivityRegisterFab } from "@/components/ui/activity-register-fab";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
+import { cardNavButtonClass } from "@/components/ui/drawer-form";
 import { WISH_TYPES, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
 
 const fetchWishes = async (): Promise<WishItem[]> => {
@@ -38,11 +39,61 @@ export const DiscoverActivity: React.FC = () => {
           <ActivityFetchLoader messages={["위시를 확인하고 있어…", "원하는 걸 모아 보는 중이야…", "뭘 골랐는지 살펴볼게…"]} />
         ) : <section className="mx-auto w-full max-w-lg px-5 pt-6">
           <header className="mb-5"><p className="text-sm font-semibold text-blue-600">NINO&apos;S WISH LIST</p><h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">원하는 건 전부 적어 둬</h1><p className="mt-2 text-sm leading-6 text-slate-500">사고 싶은 거든 먹고 싶은 거든, 나중에 딴소리하지 말고 지금 확실히 골라.</p></header>
-          {isError ? <div className="rounded-3xl border border-red-100 bg-white px-5 py-8 text-center shadow-sm dark:border-red-900/60 dark:bg-slate-900"><p className="font-semibold text-slate-800 dark:text-slate-100">위시를 불러오지 못했어요.</p><p className="mt-1 text-sm text-slate-500">데이터베이스 설정을 확인한 뒤 다시 시도해 주세요.</p><Button className="mt-4" variant="secondary" onPress={() => refetch()}><RefreshCw className="size-4" /> 다시 시도</Button></div> : <div className="flex flex-col gap-4">{WISH_TYPES.map((type) => {
-            const meta = WISH_TYPE_META[type];
-            const items = wishes.filter((wish) => wish.type === type);
-            return <button key={type} className="group w-full rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-100 transition-transform active:scale-[0.985] dark:bg-slate-900 dark:ring-slate-800" onClick={() => openList(type)} type="button"><div className="flex items-start gap-4"><span className={`flex size-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.accent} text-2xl shadow-md`}>{meta.icon}</span><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-3"><div><h2 className="font-bold text-slate-900 dark:text-white">{meta.title}</h2><p className="mt-0.5 text-xs text-slate-500">{items.length}개 등록됨</p></div><ArrowRight aria-hidden="true" className="size-5 text-slate-400 transition-transform group-hover:translate-x-0.5" /></div>{items.length > 0 ? <div className="mt-3 flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300"><span className="shrink-0 font-medium">최근</span><span className="shrink-0 text-slate-400">·</span><span className="truncate font-medium text-slate-700 dark:text-slate-200">{items[0].title}</span></div> : <p className="mt-3 text-sm text-slate-500">{meta.emptyMessage}</p>}</div></div>{items.length === 0 && <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-blue-600"><Plus className="size-4" /> 등록하기</span>}</button>;
-          })}</div>}
+          {isError ? (
+            <div className="rounded-3xl border border-red-100 bg-white px-5 py-8 text-center shadow-sm dark:border-red-900/60 dark:bg-slate-900">
+              <p className="font-semibold text-slate-800 dark:text-slate-100">위시를 불러오지 못했어요.</p>
+              <p className="mt-1 text-sm text-slate-500">데이터베이스 설정을 확인한 뒤 다시 시도해 주세요.</p>
+              <Button className="mt-4" variant="secondary" onPress={() => refetch()}>
+                <RefreshCw className="size-4" /> 다시 시도
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {WISH_TYPES.map((type) => {
+                const meta = WISH_TYPE_META[type];
+                const items = wishes.filter((wish) => wish.type === type);
+
+                return (
+                  <Button
+                    key={type}
+                    className={`group rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-100 dark:bg-slate-900 dark:ring-slate-800 ${cardNavButtonClass}`}
+                    fullWidth
+                    onPress={() => openList(type)}
+                    variant="secondary"
+                  >
+                    <div className="flex w-full items-start gap-4">
+                      <span className={`flex size-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.accent} text-2xl shadow-md`}>
+                        {meta.icon}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <h2 className="font-bold text-slate-900 dark:text-white">{meta.title}</h2>
+                            <p className="mt-0.5 text-xs text-slate-500">{items.length}개 등록됨</p>
+                          </div>
+                          <ArrowRight aria-hidden="true" className="size-5 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5" />
+                        </div>
+                        {items.length > 0 ? (
+                          <div className="mt-3 flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
+                            <span className="shrink-0 font-medium">최근</span>
+                            <span className="shrink-0 text-slate-400">·</span>
+                            <span className="truncate font-medium text-slate-700 dark:text-slate-200">{items[0].title}</span>
+                          </div>
+                        ) : (
+                          <p className="mt-3 text-sm text-slate-500">{meta.emptyMessage}</p>
+                        )}
+                      </div>
+                    </div>
+                    {items.length === 0 && (
+                      <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-blue-600">
+                        <Plus className="size-4" /> 등록하기
+                      </span>
+                    )}
+                  </Button>
+                );
+              })}
+            </div>
+          )}
         </section>}
         <ActivityRegisterFab
           ariaLabel="위시 등록"

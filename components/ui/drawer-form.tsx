@@ -14,6 +14,12 @@ export const drawerDangerButtonClass = "h-12 rounded-2xl bg-red-500 text-base fo
 export const dialogPrimaryButtonClass = "h-[50px] rounded-[13px] bg-[#007aff] text-[17px] font-semibold text-white active:opacity-80 dark:bg-[#0a84ff]";
 export const dialogSecondaryButtonClass = "h-[50px] rounded-[13px] bg-[#f2f2f7] text-[17px] font-semibold text-[#007aff] active:opacity-70 dark:bg-[#2c2c2e] dark:text-[#0a84ff]";
 export const dialogIconButtonClass = "size-8 min-w-8 rounded-full text-[#8e8e93] active:opacity-60 dark:text-[#98989d]";
+export const cardNavButtonClass =
+  "!flex !h-auto min-h-0 w-full flex-col items-stretch justify-start gap-0 whitespace-normal text-left";
+export const rowNavButtonClass =
+  "!flex !h-auto min-h-0 w-full flex-row items-center justify-between gap-3 whitespace-normal text-left";
+export const tileNavButtonClass =
+  "!flex !h-auto min-h-0 w-full flex-col items-center justify-center gap-2 whitespace-normal";
 
 export function DrawerIntro({ open, image, alt, title, description }: { open: boolean; image: string; alt: string; title?: string; description?: string }) {
   return <div className="flex flex-col items-center justify-center">

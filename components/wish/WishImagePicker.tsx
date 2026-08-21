@@ -4,6 +4,7 @@ import Image from "next/image";
 import { DndContext, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Button } from "@heroui/react";
 import { GripVertical, ImagePlus, Plus, Upload, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
@@ -88,7 +89,7 @@ function SortableImage({ image, index, itemLabel, onRemove }: { image: WishImage
   return <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={`relative aspect-square overflow-hidden rounded-2xl border bg-slate-100 ${isDragging ? "z-10 scale-105 opacity-70 shadow-xl" : "border-slate-200 dark:border-slate-700"}`}>
     <Image alt={index === 0 ? `대표 ${itemLabel}` : `${itemLabel} ${index + 1}`} className="object-cover" fill sizes="33vw" src={image.url} unoptimized />
     {index === 0 && <span className="absolute left-1.5 top-1.5 rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white">대표</span>}
-    <button aria-label={`${itemLabel} ${index + 1} 삭제`} className="absolute right-1.5 top-1.5 flex size-7 items-center justify-center rounded-full bg-black/65 text-white" onClick={onRemove} type="button"><X className="size-4" /></button>
+    <Button aria-label={`${itemLabel} ${index + 1} 삭제`} className="absolute right-1.5 top-1.5 flex size-7 min-w-7 items-center justify-center rounded-full bg-black/65 text-white" isIconOnly onPress={onRemove} size="sm" variant="ghost"><X className="size-4" /></Button>
     <button
       aria-label={`${itemLabel} ${index + 1} 순서 변경`}
       className="absolute bottom-1.5 right-1.5 flex size-8 touch-none items-center justify-center rounded-full bg-black/65 text-white select-none [-webkit-touch-callout:none]"

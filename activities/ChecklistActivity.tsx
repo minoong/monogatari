@@ -15,7 +15,7 @@ import {
   TabsContent as AnimateTabsContent,
   TabsContents as AnimateTabsContents,
 } from "../components/animate-ui/components/animate/tabs";
-import { Chip, Tabs as HeroTabs } from "@heroui/react";
+import { Button, Chip, Tabs as HeroTabs } from "@heroui/react";
 import { motion, AnimatePresence, useMotionValue, animate, useTransform, useReducedMotion } from "framer-motion";
 import { RingChart } from "../components/ui/ring-chart";
 import { useRef } from "react";
@@ -76,12 +76,13 @@ const ProgressIslandContent = ({
 
   return (
     <DynamicIsland id="progress-island">
-      <button
-        type="button"
+      <Button
         aria-controls="progress-island-content"
         aria-expanded={isExpanded}
-        onClick={toggleExpand}
-        className="w-full h-full flex flex-col p-4 cursor-pointer relative text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
+        className="relative h-full w-full flex-col p-4 text-left"
+        fullWidth
+        onPress={toggleExpand}
+        variant="ghost"
       >
         {/* Header */}
         <div className="flex items-center justify-between w-full h-[52px]">
@@ -172,7 +173,7 @@ const ProgressIslandContent = ({
             </motion.div>
           )}
         </AnimatePresence>
-      </button>
+      </Button>
     </DynamicIsland>
   );
 };

@@ -12,6 +12,7 @@ import { GooeyInput } from "@/components/ui/gooey-input";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { cn } from "@/lib/utils";
+import { drawerCancelButtonClass, drawerDangerButtonClass } from "@/components/ui/drawer-form";
 import {
   AlertDialog,
   AlertDialogDescription,
@@ -171,19 +172,20 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
                         ? selectedCategories.length === 0
                         : selectedCategories.includes(cat);
                     return (
-                      <button
+                      <Button
                         key={cat}
-                        onClick={() => handleCategoryToggle(cat)}
-                        type="button"
                         className={cn(
-                          "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95",
+                          "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold",
                           isSelected
                             ? "border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900"
                             : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400",
                         )}
+                        onPress={() => handleCategoryToggle(cat)}
+                        size="sm"
+                        variant={isSelected ? "primary" : "secondary"}
                       >
                         {cat}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -206,18 +208,19 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
                 </div>
 
                 {(searchQuery || selectedCategories.length > 0) && (
-                  <button
-                    onClick={() => {
+                  <Button
+                    className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400"
+                    onPress={() => {
                       triggerHapticFeedback(10);
                       setSearchQuery("");
                       setSelectedCategories([]);
                     }}
-                    type="button"
-                    className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                    size="sm"
+                    variant="ghost"
                   >
                     <RotateCcw className="size-3" />
                     필터 초기화
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -290,22 +293,24 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="grid grid-cols-2">
-            <button
-              className="h-12 rounded-xl bg-white font-semibold text-slate-600 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:bg-white/5 dark:text-slate-200 dark:ring-slate-700"
-              disabled={deleteMutation.isPending}
-              onClick={() => setDeletingWish(null)}
-              type="button"
+            <Button
+              fullWidth
+              className={drawerCancelButtonClass}
+              isDisabled={deleteMutation.isPending}
+              onPress={() => setDeletingWish(null)}
+              size="lg"
             >
               취소
-            </button>
-            <button
-              className="h-12 rounded-xl bg-red-500 font-bold text-white transition-colors hover:bg-red-600 disabled:opacity-50"
-              disabled={!deletingWish || deleteMutation.isPending}
-              onClick={() => deletingWish && deleteMutation.mutate(deletingWish.id)}
-              type="button"
+            </Button>
+            <Button
+              fullWidth
+              className={drawerDangerButtonClass}
+              isDisabled={!deletingWish || deleteMutation.isPending}
+              onPress={() => deletingWish && deleteMutation.mutate(deletingWish.id)}
+              size="lg"
             >
               {deleteMutation.isPending ? "삭제 중…" : "삭제"}
-            </button>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogPopup>
       </AlertDialog>
@@ -392,7 +397,7 @@ function WishListItem({
           <div className="flex-1 overflow-y-auto">
             <div className="relative">
               <WishImageGallery images={wish.images} title={wish.title} onImagePress={(index) => { setZoomImageIndex(index); setZoomModalOpen(true); }} />
-              {wish.images.length > 0 && <button type="button" onClick={() => { setZoomImageIndex(0); setZoomModalOpen(true); }} className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-full bg-black/65 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md shadow-md transition hover:bg-black/85"><ZoomIn className="size-3.5" /><span>탭하여 확대</span></button>}
+              {wish.images.length > 0 && <Button className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-full bg-black/65 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md shadow-md" onPress={() => { setZoomImageIndex(0); setZoomModalOpen(true); }} size="sm"><ZoomIn className="size-3.5" /><span>탭하여 확대</span></Button>}
             </div>
 
             <div className="px-5 py-4">
@@ -475,14 +480,16 @@ function WishListItem({
           {/* Fixed Footer */}
           <div className="shrink-0 border-t border-slate-100 bg-slate-50/70 p-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
             <div className="flex items-center gap-2">
-              <button
+              <Button
                 aria-label={`${wish.title} 삭제`}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400"
-                onClick={onDelete}
-                type="button"
+                className="flex h-11 w-11 min-w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500 dark:bg-red-500/10 dark:text-red-400"
+                isIconOnly
+                onPress={onDelete}
+                size="lg"
+                variant="ghost"
               >
                 <Trash2 className="size-4.5" />
-              </button>
+              </Button>
               <MorphingDialogClose
                 ariaLabel="다이얼로그 닫기"
                 className="static flex h-11 flex-1 items-center justify-center rounded-xl bg-slate-100 font-semibold text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"

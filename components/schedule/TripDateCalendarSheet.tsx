@@ -5,7 +5,6 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { Button as HeroButton } from "@heroui/react";
 import { ChevronLeft } from "lucide-react";
 import { ko } from "react-day-picker/locale";
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { DrawerIntro, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
 import {
@@ -146,23 +145,25 @@ export function TripDateCalendarSheet({
       >
         <DrawerHeader className="shrink-0 border-b px-5 pb-4 pt-6">
           <div className="flex items-center gap-3">
-            <button
-              type="button"
+            <HeroButton
               aria-label="날짜 선택 닫기"
-              className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-muted active:scale-95"
-              onClick={() => handleOpenChange(false)}
+              className="grid size-9 min-w-9 shrink-0 place-items-center rounded-full text-muted-foreground"
+              isIconOnly
+              onPress={() => handleOpenChange(false)}
+              size="sm"
+              variant="ghost"
             >
               <ChevronLeft className="size-5" />
-            </button>
+            </HeroButton>
             <DrawerTitle className="min-w-0 flex-1">날짜 선택</DrawerTitle>
-            <Button
-              type="button"
-              size="sm"
+            <HeroButton
               className="h-8 rounded-full px-3 text-sm"
-              onClick={selectToday}
+              onPress={selectToday}
+              size="sm"
+              variant="secondary"
             >
               오늘
-            </Button>
+            </HeroButton>
             <span
               aria-live="polite"
               className="inline-flex h-8 shrink-0 items-center rounded-full border border-border bg-muted px-3 text-sm font-bold text-foreground"

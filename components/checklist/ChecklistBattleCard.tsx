@@ -4,6 +4,7 @@ import NumberFlow from "@number-flow/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { josa } from "es-hangul";
 import { Crown, RotateCcw, Trophy } from "lucide-react";
+import { Button } from "@heroui/react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -254,13 +255,13 @@ export const ChecklistBattleCard = ({
       <section className="flex min-h-[264px] flex-col items-center justify-center rounded-[28px] border border-rose-200 bg-rose-50 px-6 text-center dark:border-rose-950 dark:bg-rose-950/20">
         <p className="font-black text-slate-900 dark:text-white">점수판 연결에 실패했어요</p>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">준비물 현황을 다시 집계해 볼게요.</p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-slate-950 px-5 text-sm font-bold text-white transition-transform active:scale-95 dark:bg-white dark:text-slate-950"
+        <Button
+          className="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-slate-950 px-5 text-sm font-bold text-white dark:bg-white dark:text-slate-950"
+          onPress={onRetry}
+          size="md"
         >
           <RotateCcw className="size-4" /> 다시 시도
-        </button>
+        </Button>
       </section>
     );
   }

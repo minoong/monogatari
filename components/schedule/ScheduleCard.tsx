@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, Pencil, Trash2, ZoomIn } from "lucide-react";
+import { Button } from "@heroui/react";
 import ElectricBorder from "@/components/ElectricBorder";
 import { ClockIcon } from "@/components/ui/clock-icon";
 import { MapPinIcon } from "@/components/ui/map-pin-icon";
@@ -111,9 +112,9 @@ export function ScheduleCard({ item, current, cardRef, onEdit, onDelete, showTim
               <div className="relative">
                 <WishImageGallery images={item.images} title={item.title} onImagePress={(index) => { setZoomImageIndex(index); setZoomModalOpen(true); }} />
                 {item.images.length > 0 && (
-                  <button type="button" onClick={() => { setZoomImageIndex(0); setZoomModalOpen(true); }} className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-full bg-black/65 px-3 py-1.5 text-xs font-medium text-white shadow-md backdrop-blur-md">
+                  <Button className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-full bg-black/65 px-3 py-1.5 text-xs font-medium text-white shadow-md backdrop-blur-md" onPress={() => { setZoomImageIndex(0); setZoomModalOpen(true); }} size="sm">
                     <ZoomIn className="size-3.5" /><span>탭하여 확대</span>
-                  </button>
+                  </Button>
                 )}
               </div>
               <div className="px-5 py-4">
@@ -134,7 +135,7 @@ export function ScheduleCard({ item, current, cardRef, onEdit, onDelete, showTim
             </div>
             <div className="shrink-0 border-t border-slate-100 bg-slate-50/70 p-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
               <div className="flex items-center gap-2">
-                <button aria-label={`${item.title} 삭제`} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400" onClick={onDelete} type="button"><Trash2 className="size-4.5" /></button>
+                <Button aria-label={`${item.title} 삭제`} className="flex h-11 w-11 min-w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500 dark:bg-red-500/10 dark:text-red-400" isIconOnly onPress={onDelete} size="lg" variant="ghost"><Trash2 className="size-4.5" /></Button>
                 <MorphingDialogClose ariaLabel="다이얼로그 닫기" className="static flex h-11 flex-1 items-center justify-center rounded-xl bg-slate-100 font-semibold text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300">닫기</MorphingDialogClose>
                 <MorphingDialogClose ariaLabel={`${item.title} 편집`} className="static flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 font-bold text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900" onClick={onEdit}><Pencil className="size-4" />편집</MorphingDialogClose>
               </div>

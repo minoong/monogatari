@@ -3,8 +3,10 @@ import Image from "next/image";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { useFlow } from "@stackflow/react";
 import { ArrowRight } from "lucide-react";
+import { Button } from "@heroui/react";
 import { triggerHapticFeedback } from "../components/BottomNav";
 import { AnimatedContent } from "@/components/ui/animated-content";
+import { cardNavButtonClass } from "@/components/ui/drawer-form";
 import { useExchangeRates } from "@/lib/exchange-rates";
 
 const utilityCards = [
@@ -72,15 +74,16 @@ export const UtilsActivity: React.FC = () => {
                   scale={0.97}
                   delay={base}
                 >
-                  <button
-                    type="button"
-                    onClick={() => {
+                  <Button
+                    className={`group w-full rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-900 dark:ring-slate-800 ${cardNavButtonClass}`}
+                    fullWidth
+                    onPress={() => {
                       triggerHapticFeedback();
                       push(card.activity, {});
                     }}
-                    className="group w-full rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-200/80 transition-transform active:scale-[0.985] dark:bg-slate-900 dark:ring-slate-800"
+                    variant="secondary"
                   >
-                    <div className="flex items-start gap-4">
+                    <div className="flex w-full items-start gap-4">
                       <AnimatedContent
                         distance={20}
                         direction="vertical"
@@ -146,7 +149,7 @@ export const UtilsActivity: React.FC = () => {
                         </AnimatedContent>
                       </div>
                     </div>
-                  </button>
+                  </Button>
                 </AnimatedContent>
               );
             })}

@@ -23,6 +23,7 @@ import {
   summarizeExpenses,
   type Expense,
 } from "@/lib/expenses";
+import { Button } from "@heroui/react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
@@ -56,7 +57,7 @@ export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
     </Card>
 
     <Card className="w-full min-w-0 max-w-full gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white py-0 dark:border-slate-800 dark:bg-slate-900">
-      <CardHeader className="mb-3 flex px-4 pt-4"><div className="min-w-0"><h2 className="truncate text-sm font-extrabold">사용자별 비교</h2><p className="mt-0.5 truncate text-[11px] text-slate-400">{personMode === "used" ? "각자 사용한 비용" : "각자 결제한 비용"}</p></div><div className="flex rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">{(["used", "paid"] as const).map((mode) => <button key={mode} className={cn("min-h-8 rounded-md px-3 text-[11px] font-bold", personMode === mode ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white" : "text-slate-500")} onClick={() => setPersonMode(mode)} type="button">{mode === "used" ? "사용액" : "결제액"}</button>)}</div></CardHeader>
+      <CardHeader className="mb-3 flex px-4 pt-4"><div className="min-w-0"><h2 className="truncate text-sm font-extrabold">사용자별 비교</h2><p className="mt-0.5 truncate text-[11px] text-slate-400">{personMode === "used" ? "각자 사용한 비용" : "각자 결제한 비용"}</p></div><div className="flex rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">{(["used", "paid"] as const).map((mode) => <Button key={mode} className={cn("min-h-8 rounded-md px-3 text-[11px] font-bold", personMode === mode ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white" : "text-slate-500")} onPress={() => setPersonMode(mode)} size="sm" variant={personMode === mode ? "primary" : "ghost"}>{mode === "used" ? "사용액" : "결제액"}</Button>)}</div></CardHeader>
       <CardContent className="px-4 pb-4">
       <div className="h-36 w-full min-w-0 max-w-full overflow-hidden" aria-hidden="true"><ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 320, height: 144 }}><BarChart data={people} layout="vertical" margin={{ left: 0, right: 12, top: 5, bottom: 5 }}><XAxis type="number" hide /><YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700 }} width={58} /><Tooltip formatter={(value) => formatKrw(Number(value))} /><Bar dataKey="value" fill="#0a84ff" radius={[0, 7, 7, 0]} isAnimationActive={!reduceMotion} animationDuration={animationDuration} /></BarChart></ResponsiveContainer></div>
       <AccessibleTable caption={`사용자별 ${personMode === "used" ? "사용액" : "결제액"}`} rows={people.map((item) => [item.name, formatKrw(item.value)])} />

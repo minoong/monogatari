@@ -16,9 +16,9 @@ import {
   MotionConfig,
   Transition,
   Variant,
-  useReducedMotion,
 } from 'motion/react';
 import { createPortal } from 'react-dom';
+import { Button } from '@heroui/react';
 import { cn } from '@/lib/utils';
 import { XIcon } from 'lucide-react';
 import useClickOutside from '@/components/motion-primitives/useClickOutside';
@@ -388,7 +388,7 @@ export type MorphingDialogCloseProps = {
   ariaLabel?: string;
   children?: React.ReactNode;
   className?: string;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  onClick?: () => void;
   variants?: {
     initial: Variant;
     animate: Variant;
@@ -401,32 +401,24 @@ function MorphingDialogClose({
   children,
   className,
   onClick,
-  variants,
 }: MorphingDialogCloseProps) {
-  const { setIsOpen, uniqueId } = useMorphingDialog();
-  const prefersReducedMotion = useReducedMotion();
+  const { setIsOpen } = useMorphingDialog();
 
-  const handleClose = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  const handlePress = useCallback(() => {
     setIsOpen(false);
-    onClick?.(event);
+    onClick?.();
   }, [onClick, setIsOpen]);
 
   return (
-    <motion.button
-      onClick={handleClose}
-      type='button'
+    <Button
       aria-label={ariaLabel}
-      key={`dialog-close-${uniqueId}`}
       className={cn('absolute top-6 right-6', className)}
-      initial='initial'
-      animate='animate'
-      exit='exit'
-      variants={variants}
-      whileTap={prefersReducedMotion ? undefined : { scale: 0.98, opacity: 0.9 }}
-      transition={{ type: 'spring', stiffness: 520, damping: 30 }}
+      onPress={handlePress}
+      type="button"
+      variant="ghost"
     >
       {children || <XIcon size={24} />}
-    </motion.button>
+    </Button>
   );
 }
 
@@ -440,4 +432,5 @@ export {
   MorphingDialogSubtitle,
   MorphingDialogDescription,
   MorphingDialogImage,
+  useMorphingDialog,
 };

@@ -352,7 +352,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
               <div className="flex min-w-0 flex-wrap gap-2">
                 {visibleCategorySuggestions.map((suggestion) => {
                   const isSelected = selectedCategoryTag === suggestion;
-                  return <button className={`min-h-8 max-w-full rounded-full border px-3 text-xs font-semibold transition-colors ${isSelected ? "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300" : "border-gray-200 bg-white text-gray-500 hover:border-blue-300 dark:border-gray-700 dark:bg-white/5"}`} disabled={isSelected} key={suggestion} onClick={() => selectCategoryTag(suggestion)} type="button"><span className="block max-w-full truncate">{isSelected ? "✓ " : "+ "}{suggestion}</span></button>;
+                  return <Button className={`min-h-8 max-w-full rounded-full border px-3 text-xs font-semibold ${isSelected ? "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300" : "border-gray-200 bg-white text-gray-500 hover:border-blue-300 dark:border-gray-700 dark:bg-white/5"}`} isDisabled={isSelected} key={suggestion} onPress={() => selectCategoryTag(suggestion)} size="sm" variant={isSelected ? "primary" : "secondary"}><span className="block max-w-full truncate">{isSelected ? "✓ " : "+ "}{suggestion}</span></Button>;
                 })}
               </div>
               <p className="mt-1 text-xs text-gray-400">하나 선택 가능 · 직접 입력은 최대 30자</p>

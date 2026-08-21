@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { Button } from "@heroui/react";
 import { ZoomIn, ZoomOut, RotateCcw, RotateCw, X } from "lucide-react";
 import {
   Dialog,
@@ -128,79 +129,61 @@ export function ImageZoomModal({
                   onTouchStart={handleStopPropagation}
                 >
                   <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/10 shadow-lg pointer-events-auto">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        zoomIn();
-                      }}
-                      onMouseDown={handleStopPropagation}
-                      onPointerDown={handleStopPropagation}
-                      onTouchStart={handleStopPropagation}
+                    <Button
                       aria-label="확대"
-                      type="button"
-                      className="p-2 text-white/80 hover:text-white rounded-full hover:bg-white/10 transition active:scale-95"
+                      className="p-2 text-white/80 rounded-full"
+                      isIconOnly
+                      onPress={() => zoomIn()}
+                      size="sm"
+                      variant="ghost"
                     >
                       <ZoomIn className="size-5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        zoomOut();
-                      }}
-                      onMouseDown={handleStopPropagation}
-                      onPointerDown={handleStopPropagation}
-                      onTouchStart={handleStopPropagation}
+                    </Button>
+                    <Button
                       aria-label="축소"
-                      type="button"
-                      className="p-2 text-white/80 hover:text-white rounded-full hover:bg-white/10 transition active:scale-95"
+                      className="p-2 text-white/80 rounded-full"
+                      isIconOnly
+                      onPress={() => zoomOut()}
+                      size="sm"
+                      variant="ghost"
                     >
                       <ZoomOut className="size-5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setRotation((prev) => (prev + 90) % 360);
-                      }}
-                      onMouseDown={handleStopPropagation}
-                      onPointerDown={handleStopPropagation}
-                      onTouchStart={handleStopPropagation}
+                    </Button>
+                    <Button
                       aria-label="90도 회전"
-                      title="90° 회전"
-                      type="button"
-                      className="p-2 text-white/80 hover:text-white rounded-full hover:bg-white/10 transition active:scale-95"
+                      className="p-2 text-white/80 rounded-full"
+                      isIconOnly
+                      onPress={() => setRotation((prev) => (prev + 90) % 360)}
+                      size="sm"
+                      variant="ghost"
                     >
                       <RotateCw className="size-4" />
-                    </button>
+                    </Button>
                     <div className="w-px h-4 bg-white/20 mx-1" />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
+                    <Button
+                      aria-label="원래 크기 및 방향으로"
+                      className="p-2 text-white/80 rounded-full"
+                      isIconOnly
+                      onPress={() => {
                         setRotation(0);
                         resetTransform();
                       }}
-                      onMouseDown={handleStopPropagation}
-                      onPointerDown={handleStopPropagation}
-                      onTouchStart={handleStopPropagation}
-                      aria-label="원래 크기 및 방향으로"
-                      title="초기화"
-                      type="button"
-                      className="p-2 text-white/80 hover:text-white rounded-full hover:bg-white/10 transition active:scale-95"
+                      size="sm"
+                      variant="ghost"
                     >
                       <RotateCcw className="size-4" />
-                    </button>
+                    </Button>
                     <div className="w-px h-4 bg-white/20 mx-1" />
-                    <button
-                      onClick={handleClose}
-                      onMouseDown={handleStopPropagation}
-                      onPointerDown={handleStopPropagation}
-                      onTouchStart={handleStopPropagation}
+                    <Button
                       aria-label="모달 닫기"
-                      title="닫기"
-                      type="button"
-                      className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition active:scale-95"
+                      className="p-2 text-white/80 rounded-full"
+                      isIconOnly
+                      onPress={() => handleClose()}
+                      size="sm"
+                      variant="ghost"
                     >
                       <X className="size-4" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </>

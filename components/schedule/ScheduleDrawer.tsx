@@ -177,15 +177,16 @@ export function ScheduleDrawer({
             <DrawerIntro open={open} image="/drawer-schedule-intro.jpg" alt="여행 일정을 정리하는 모습" title="저기… 일정, 제가 정해도 괜찮을까요?" />
             <section>
               <Label className="mb-2"><DrawerFieldLabel icon={CalendarDaysIcon} active={open} interactionSignal={dateInteraction}>날짜</DrawerFieldLabel></Label>
-              <button
-                type="button"
-                className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-slate-300 active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900"
-                onClick={() => setCalendarOpen(true)}
+              <Button
+                className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm dark:border-slate-700 dark:bg-slate-900"
+                fullWidth
+                onPress={() => setCalendarOpen(true)}
+                variant="secondary"
               >
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300"><CalendarDays className="size-5" /></span>
                 <span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-400">여행 날짜</span><span className="mt-0.5 block font-extrabold text-slate-900 dark:text-white">{formatLongTripDate(date)}</span></span>
                 <ChevronRight className="size-4 shrink-0 text-slate-400" />
-              </button>
+              </Button>
             </section>
 
             <section>

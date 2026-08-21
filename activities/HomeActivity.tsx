@@ -4,7 +4,7 @@ import { AnimatedContent } from "../components/ui/animated-content";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
-import { Tabs } from "@heroui/react";
+import { Button, Tabs } from "@heroui/react";
 import { ChevronRight, Hotel } from "lucide-react";
 import { MinimalCardExpand } from "../components/ui/minimal-card-expand";
 import { ACCOMMODATIONS, type Accommodation } from "../lib/accommodations";
@@ -20,6 +20,7 @@ import { ChecklistBattleCard } from "../components/checklist/ChecklistBattleCard
 import { fetchChecklist, getChecklistBattleStats, type PreparationItem } from "../lib/checklist";
 import { BeforeTripWeatherTicker, TravelWeatherWidget } from "../components/weather/TravelWeatherWidget";
 import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
+import { rowNavButtonClass, tileNavButtonClass } from "@/components/ui/drawer-form";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -286,11 +287,11 @@ const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }>
             <ChevronRight size={17} className="shrink-0" />
           </span>
         </div>
-        <button
-          type="button"
+        <Button
           aria-label="HP! 위치 찾기"
-          className="absolute inset-0 z-20 h-full w-full cursor-pointer opacity-[0.01]"
-          onClick={() => onOpen("all")}
+          className="absolute inset-0 z-20 h-full w-full opacity-[0.01]"
+          onPress={() => onOpen("all")}
+          variant="ghost"
         />
       </div>
     </section>
@@ -468,78 +469,84 @@ export const HomeActivity: React.FC = () => {
 
           <div className="flex flex-col gap-6 p-4">
             <Tabs.Panel className="!p-0" id="before">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-              <BeforeTripWeatherTicker />
+              {tripState === "before" && (
+                <div className="flex flex-col gap-4">
+                  <BeforeTripWeatherTicker />
 
-              <BangkokDepartureCard />
+                  <BangkokDepartureCard />
 
-              <ChecklistBattleCard
-                stats={checklistBattleStats}
-                isLoading={isChecklistLoading}
-                isError={isChecklistError}
-                onOpen={() => replace("ChecklistActivity", {}, { animate: false })}
-                onRetry={() => void refetchChecklist()}
-              />
+                  <ChecklistBattleCard
+                    stats={checklistBattleStats}
+                    isLoading={isChecklistLoading}
+                    isError={isChecklistError}
+                    onOpen={() => replace("ChecklistActivity", {}, { animate: false })}
+                    onRetry={() => void refetchChecklist()}
+                  />
 
-              <FlightWidget onOpen={(passengerId) => push("FlightActivity", { passengerId })} />
+                  <FlightWidget onOpen={(passengerId) => push("FlightActivity", { passengerId })} />
 
-              <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
-            </motion.div>
+                  <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
+                </div>
+              )}
             </Tabs.Panel>
 
             <Tabs.Panel className="!p-0" id="during">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-              <TravelWeatherWidget />
+              {tripState === "during" && (
+                <div className="flex flex-col gap-4">
+                  <TravelWeatherWidget />
 
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={() => replace("ScheduleActivity", {}, { animate: false })} className="p-4 bg-white dark:bg-gray-800 rounded-2xl border shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform">
-                  <span className="text-2xl">📅</span>
-                  <span className="font-semibold">오늘의 일정</span>
-                </button>
-                <button onClick={() => replace("DictionaryActivity", {}, { animate: false })} className="p-4 bg-white dark:bg-gray-800 rounded-2xl border shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform">
-                  <span className="text-2xl">🗣️</span>
-                  <span className="font-semibold">태국어 회화</span>
-                </button>
-              </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button className={`rounded-2xl border bg-white p-4 shadow-sm dark:bg-gray-800 ${tileNavButtonClass}`} fullWidth onPress={() => replace("ScheduleActivity", {}, { animate: false })} variant="secondary">
+                      <span className="text-2xl">📅</span>
+                      <span className="font-semibold">오늘의 일정</span>
+                    </Button>
+                    <Button className={`rounded-2xl border bg-white p-4 shadow-sm dark:bg-gray-800 ${tileNavButtonClass}`} fullWidth onPress={() => replace("DictionaryActivity", {}, { animate: false })} variant="secondary">
+                      <span className="text-2xl">🗣️</span>
+                      <span className="font-semibold">태국어 회화</span>
+                    </Button>
+                  </div>
 
-              <button onClick={() => push("ExpenseActivity", {})} className="flex min-h-16 items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left shadow-sm transition-transform active:scale-[0.98] dark:border-slate-800 dark:bg-slate-900">
-                <div>
-                  <h3 className="font-bold text-slate-900 dark:text-white">여행 가계부</h3>
-                  <p className="mt-0.5 text-sm text-slate-500">지출 등록 · 통계 · 자동 정산</p>
+                  <Button className={`min-h-16 rounded-2xl border border-slate-200 bg-white px-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 ${rowNavButtonClass}`} fullWidth onPress={() => push("ExpenseActivity", {})} variant="secondary">
+                    <div>
+                      <h3 className="font-bold text-slate-900 dark:text-white">여행 가계부</h3>
+                      <p className="mt-0.5 text-sm text-slate-500">지출 등록 · 통계 · 자동 정산</p>
+                    </div>
+                    <span className="text-2xl" aria-hidden="true">🧾</span>
+                  </Button>
+
+                  <Button className={`rounded-2xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/30 ${rowNavButtonClass}`} fullWidth onPress={() => push("ExchangeActivity", {})} variant="secondary">
+                    <div>
+                      <h3 className="font-bold">빠른 환율 계산</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">100바트 ≈ 3,800원</p>
+                    </div>
+                    <span className="text-2xl">👉</span>
+                  </Button>
+
+                  <FlightWidget onOpen={(passengerId) => push("FlightActivity", { passengerId })} />
+
+                  <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
                 </div>
-                <span className="text-2xl" aria-hidden="true">🧾</span>
-              </button>
-
-              <button onClick={() => push("ExchangeActivity", {})} className="p-4 bg-green-50 dark:bg-green-900/30 rounded-2xl border border-green-200 dark:border-green-800 flex justify-between items-center active:scale-95 transition-transform">
-                <div>
-                  <h3 className="font-bold">빠른 환율 계산</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">100바트 ≈ 3,800원</p>
-                </div>
-                <span className="text-2xl">👉</span>
-              </button>
-
-              <FlightWidget onOpen={(passengerId) => push("FlightActivity", { passengerId })} />
-
-              <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
-            </motion.div>
+              )}
             </Tabs.Panel>
 
             <Tabs.Panel className="!p-0" id="after">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-              <div className="bg-purple-100 dark:bg-purple-900 rounded-2xl p-6 text-center">
-                <span className="text-4xl">✈️</span>
-                <h2 className="text-xl font-bold mt-2">여행 끝! 일상으로</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">3박 4일의 방콕 여행 어떠셨나요?</p>
-              </div>
+              {tripState === "after" && (
+                <div className="flex flex-col gap-4">
+                  <div className="rounded-2xl bg-purple-100 p-6 text-center dark:bg-purple-900">
+                    <span className="text-4xl">✈️</span>
+                    <h2 className="mt-2 text-xl font-bold">여행 끝! 일상으로</h2>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">3박 4일의 방콕 여행 어떠셨나요?</p>
+                  </div>
 
-              <button onClick={() => push("DiscoverActivity", {})} className="p-4 bg-white dark:bg-gray-800 rounded-2xl border shadow-sm flex justify-between items-center active:scale-95 transition-transform">
-                <div>
-                  <h3 className="font-bold">내 쇼핑 리스트 복기</h3>
-                  <p className="text-sm text-gray-500">다 못 산 아이템이 있는지 확인해보세요</p>
+                  <Button className={`rounded-2xl border bg-white p-4 shadow-sm dark:bg-gray-800 ${rowNavButtonClass}`} fullWidth onPress={() => push("DiscoverActivity", {})} variant="secondary">
+                    <div>
+                      <h3 className="font-bold">내 쇼핑 리스트 복기</h3>
+                      <p className="text-sm text-gray-500">다 못 산 아이템이 있는지 확인해보세요</p>
+                    </div>
+                    <span className="text-2xl">🛍️</span>
+                  </Button>
                 </div>
-                <span className="text-2xl">🛍️</span>
-              </button>
-            </motion.div>
+              )}
             </Tabs.Panel>
           </div>
         </Tabs>

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { Button } from "@heroui/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Save, X } from "lucide-react";
 import NumberFlow from "@number-flow/react";
@@ -268,9 +269,7 @@ export const ExchangeActivity: React.FC = () => {
                         value={rates.THB}
                         onChange={(e) => setCustomRates((prev) => ({ ...prev, THB: parseFloat(e.target.value) || 0 }))}
                       />
-                      <button onClick={() => handleManualSave('THB', rates.THB.toString())} className="hover:text-indigo-500 transition ml-0.5 p-1">
-                        <Save className="w-3.5 h-3.5"/>
-                      </button>
+                      <Button className="ml-0.5 p-1" isIconOnly onPress={() => handleManualSave('THB', rates.THB.toString())} size="sm" variant="ghost"><Save className="w-3.5 h-3.5"/></Button>
                     </div>
                   </div>
                   <div className="text-3xl font-bold tracking-tight flex items-center justify-end gap-1.5 mt-0.5">
@@ -305,9 +304,7 @@ export const ExchangeActivity: React.FC = () => {
                         onChange={(e) => setCustomRates((prev) => ({ ...prev, USD: parseFloat(e.target.value) || 0 }))}
                       />
                       <span>KRW</span>
-                      <button onClick={() => handleManualSave('USD', rates.USD.toString())} className="hover:text-indigo-500 transition ml-0.5 p-1">
-                        <Save className="w-3.5 h-3.5"/>
-                      </button>
+                      <Button className="ml-0.5 p-1" isIconOnly onPress={() => handleManualSave('USD', rates.USD.toString())} size="sm" variant="ghost"><Save className="w-3.5 h-3.5"/></Button>
                     </div>
                   </div>
                   <div className="text-3xl font-bold tracking-tight flex items-center justify-end gap-1.5 mt-0.5">

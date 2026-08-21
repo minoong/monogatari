@@ -316,10 +316,10 @@ export function TravelWeatherWidget() {
     return (
       <section className="rounded-[28px] p-5 text-center" style={weatherSurfaceStyle} aria-live="polite">
         <p className="text-sm font-bold">날씨 정보를 불러오지 못했어요.</p>
-        <button type="button" onClick={() => void refetch()} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-2 text-xs font-bold text-white backdrop-blur active:scale-95">
+        <Button className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-2 text-xs font-bold text-white backdrop-blur" onPress={() => void refetch()} size="sm" variant="secondary">
           <RefreshCw size={14} aria-hidden="true" />
           다시 시도
-        </button>
+        </Button>
       </section>
     );
   }

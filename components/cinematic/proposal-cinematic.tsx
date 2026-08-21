@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@heroui/react";
 import { useReducedMotion } from "motion/react";
 import { ProposalCanvas } from "@/components/cinematic/proposal-canvas";
 import {
@@ -132,13 +133,14 @@ export function ProposalCinematic({ onComplete }: ProposalCinematicProps) {
           />
         </div>
 
-        <button
-          className="absolute right-4 top-[calc(1rem+env(safe-area-inset-top,0px))] z-20 border-[3px] border-black bg-white px-3 py-1 text-[11px] font-black text-black shadow-[3px_3px_0_rgba(0,0,0,0.85)] active:translate-y-[2px] active:shadow-[1px_1px_0_rgba(0,0,0,0.85)]"
-          onClick={finish}
-          type="button"
+        <Button
+          className="absolute right-4 top-[calc(1rem+env(safe-area-inset-top,0px))] z-20 border-[3px] border-black bg-white px-3 py-1 text-[11px] font-black text-black shadow-[3px_3px_0_rgba(0,0,0,0.85)]"
+          onPress={finish}
+          size="sm"
+          variant="secondary"
         >
           건너뛰기
-        </button>
+        </Button>
 
         <style>{`
           @keyframes cinematicPop {

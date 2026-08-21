@@ -619,24 +619,25 @@ export const DictionaryActivity: React.FC = () => {
               const meta = category === "전체" ? null : CATEGORY_META[category];
 
               return (
-                <button
+                <Button
                   key={category}
-                  type="button"
                   aria-pressed={isSelected}
-                  onClick={() => {
-                    if (isSelected) return;
-                    triggerHapticFeedback(10);
-                    setSelectedCategory(category);
-                  }}
                   className={cn(
-                    "touch-manipulation shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors duration-150",
+                    "touch-manipulation shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold",
                     isSelected
                       ? "border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900"
                       : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400",
                   )}
+                  isDisabled={isSelected}
+                  onPress={() => {
+                    triggerHapticFeedback(10);
+                    setSelectedCategory(category);
+                  }}
+                  size="sm"
+                  variant={isSelected ? "primary" : "secondary"}
                 >
                   <span>{meta?.label ?? "전체"}</span>
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -652,18 +653,19 @@ export const DictionaryActivity: React.FC = () => {
               )}
             </div>
             {(searchQuery || selectedCategory !== "전체") && (
-              <button
-                type="button"
-                className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
-                onClick={() => {
+              <Button
+                className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400"
+                onPress={() => {
                   triggerHapticFeedback(10);
                   setSearchQuery("");
                   setSelectedCategory("전체");
                 }}
+                size="sm"
+                variant="ghost"
               >
                 <RotateCcw className="size-3" />
                 <span>필터 초기화</span>
-              </button>
+              </Button>
             )}
           </div>
 
