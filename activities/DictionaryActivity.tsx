@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { Chip } from "@heroui/react";
+import { Button, Chip } from "@heroui/react";
 import {
   MorphingDialog,
   MorphingDialogClose,
@@ -59,8 +59,12 @@ import {
 } from "@/lib/phrase-speaker";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { GooeyInput } from "@/components/ui/gooey-input";
+import {
+  dialogIconButtonClass,
+  dialogPrimaryButtonClass,
+  dialogSecondaryButtonClass,
+} from "@/components/ui/drawer-form";
 import { WordRotate } from "@/components/ui/word-rotate";
-import { PressableButton } from "@/components/ui/pressable-button";
 import { cn } from "@/lib/utils";
 
 const RECENT_SEARCHES_KEY = "monogatari_recent_phrase_searches";
@@ -331,15 +335,16 @@ function DictionaryPhraseDetail({
               {isRotated ? "상대방 쪽으로 돌려 태국어를 보여주세요." : "정방향으로 확인 중이에요."}
             </p>
           </div>
-          <PressableButton
+          <Button
+            isIconOnly
             aria-pressed={isRotated}
             aria-label={isRotated ? "정방향으로 보기" : "180도 회전"}
-            onClick={toggleRotation}
-            whileTapScale={0.92}
-            className="mr-8 mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full text-[#8e8e93] dark:text-[#98989d]"
+            className={cn("mr-8 mt-0.5 shrink-0", dialogIconButtonClass)}
+            onPress={toggleRotation}
+            variant="ghost"
           >
             <RotateCwIcon ref={rotateIconRef} size={18} />
-          </PressableButton>
+          </Button>
         </div>
 
         <section className="mt-4 flex min-h-[min(44vh,360px)] flex-1 flex-col items-center justify-center rounded-[20px] bg-[#f2f2f7] px-5 py-8 text-center dark:bg-[#2c2c2e]">
@@ -366,16 +371,18 @@ function DictionaryPhraseDetail({
         </MorphingDialogDescription>
 
         <div className="mt-6 flex gap-2">
-          <PressableButton
-            onClick={handlePlayAudio}
-            className="flex h-[50px] min-w-0 flex-1 items-center justify-center gap-2 rounded-[13px] bg-[#007aff] px-4 text-[17px] font-semibold text-white dark:bg-[#0a84ff]"
+          <Button
+            fullWidth
+            className={dialogPrimaryButtonClass}
+            onPress={handlePlayAudio}
+            type="button"
           >
             <Volume2Icon ref={volumeIconRef} className="text-white" size={20} />
             <span>발음 듣기</span>
-          </PressableButton>
+          </Button>
           <MorphingDialogClose
             ariaLabel="다이얼로그 닫기"
-            className="static flex h-[50px] shrink-0 items-center justify-center rounded-[13px] bg-[#f2f2f7] px-5 text-[17px] font-semibold text-[#007aff] dark:bg-[#2c2c2e] dark:text-[#0a84ff]"
+            className={cn("static shrink-0 px-5", dialogSecondaryButtonClass)}
           >
             닫기
           </MorphingDialogClose>
