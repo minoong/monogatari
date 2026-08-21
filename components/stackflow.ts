@@ -6,6 +6,7 @@ import { stackflow } from "@stackflow/react";
 import { basicUIPlugin } from "@stackflow/plugin-basic-ui";
 import { basicRendererPlugin } from "@stackflow/plugin-renderer-basic";
 
+import { appBarTitlePlugin } from "./app-bar-title-plugin";
 import { bottomNavPlugin } from "./bottom-nav-plugin";
 
 import { HomeActivity } from "../activities/HomeActivity";
@@ -56,6 +57,7 @@ export const { Stack } = stackflow({
   plugins: [
     basicRendererPlugin(),
     bottomNavPlugin(),
+    appBarTitlePlugin(),
     basicUIPlugin({
       theme: "cupertino",
       backgroundColor: "#ffffff",

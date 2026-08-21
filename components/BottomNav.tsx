@@ -9,6 +9,7 @@ import { HeartIcon, type HeartIconHandle } from "@/components/ui/heart";
 import { HomeIcon, type HomeIconHandle } from "@/components/ui/home";
 import { LayoutGridIcon, type LayoutGridIconHandle } from "@/components/ui/layout-grid";
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
+import { enqueueActivityAppBarTitle } from "@/lib/app-bar-title-queue";
 import { scrollActiveScreenToTop } from "@/lib/scroll-to-top";
 import { cn } from "@/lib/utils";
 
@@ -83,6 +84,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active, visible = true }) 
       return;
     }
 
+    enqueueActivityAppBarTitle(item.activity);
     replace(item.activity, {}, { animate: false });
   };
 

@@ -10,7 +10,9 @@ type SlidingNumberProps = React.HTMLAttributes<HTMLSpanElement> & {
 };
 
 const DIGITS = Array.from({ length: 10 }, (_, index) => index);
-const DIGIT_LINE_HEIGHT = 1.12;
+export const SLIDING_LINE_HEIGHT = 1.12;
+export const SLIDING_SPRING = { type: "spring", stiffness: 220, damping: 24, mass: 0.5 } as const;
+const DIGIT_LINE_HEIGHT = SLIDING_LINE_HEIGHT;
 
 const SlidingDigit: React.FC<{ value: number }> = ({ value }) => (
   <span className="relative inline-block h-[1.12em] w-[0.72em] align-bottom [clip-path:inset(0_-0.12em)]" aria-hidden="true">
@@ -18,7 +20,7 @@ const SlidingDigit: React.FC<{ value: number }> = ({ value }) => (
       className="absolute inset-x-0 top-0 flex flex-col items-center"
       initial={false}
       animate={{ y: `-${value * DIGIT_LINE_HEIGHT}em` }}
-      transition={{ type: "spring", stiffness: 220, damping: 24, mass: 0.5 }}
+      transition={SLIDING_SPRING}
     >
       {DIGITS.map((digit) => (
         <span key={digit} className="flex h-[1.12em] items-center justify-center leading-none">
