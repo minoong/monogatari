@@ -1,6 +1,15 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Button, Chip } from "@heroui/react";
+import {
+  MorphingDialog,
+  MorphingDialogClose,
+  MorphingDialogContainer,
+  MorphingDialogContent,
+  MorphingDialogDescription,
+  MorphingDialogTitle,
+  MorphingDialogTrigger,
+} from "@/components/motion-primitives/morphing-dialog";
 import {
   ArrowLeftRight,
   BadgePercent,
@@ -107,7 +116,6 @@ const CATEGORY_META = {
 
 const CATEGORY_FILTERS = ["전체", "기본", "이동", "식당", "쇼핑", "마사지", "긴급"] as const;
 
-// 태국어 텍스트 시원하고 큼직한 가변 폰트 크기 계산 (항상 현지인이 잘 보이도록 대형 유지)
 const getDynamicThaiFontSize = (text: string) => {
   const len = text.length;
   if (len <= 14) return "text-4xl sm:text-5xl font-semibold";
@@ -167,106 +175,45 @@ function PhraseThumbnail({ id }: { id: number }) {
   );
 }
 
-function DictionaryPhraseRow({
+function DictionaryPhraseDetail({
   item,
   meta,
-  onSelect,
-  onPlayAudio,
-}: {
-  item: PhraseItem;
-  meta: (typeof CATEGORY_META)[PhraseItem["category"]];
-  onSelect: (item: PhraseItem) => void;
-  onPlayAudio: (text: string, event?: React.MouseEvent | unknown) => void;
-}) {
-  return (
-    <article
-      data-dictionary-entry
-      className="group relative flex min-h-20 cursor-pointer items-center gap-3.5 px-5 py-3.5 transition-colors hover:bg-slate-100/60 active:bg-slate-200/60 dark:hover:bg-white/5 dark:active:bg-white/10"
-      role="listitem"
-      onClick={() => onSelect(item)}
-    >
-      <PhraseThumbnail id={item.id} />
-      <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-start justify-between gap-2">
-          <span className="block truncate text-sm font-bold text-slate-900 dark:text-white">{item.ko}</span>
-          <span className="shrink-0 text-[11px] font-semibold text-slate-400">{meta.label}</span>
-        </div>
-        <span className="mt-1 block truncate font-thai text-base font-semibold leading-tight text-slate-700 dark:text-slate-200">{item.th}</span>
-        <span className="mt-1 block truncate text-xs text-slate-500 dark:text-slate-400">🗣️ {item.pron}</span>
-      </div>
-      <div className="flex shrink-0 flex-col gap-1">
-        <Button
-          isIconOnly
-          size="sm"
-          variant="secondary"
-          aria-label="발음 듣기"
-          onPress={(event) => onPlayAudio(item.th, event)}
-          className="size-8 rounded-xl text-slate-500 dark:text-slate-400"
-        >
-          <Volume2 className="size-4" />
-        </Button>
-      </div>
-    </article>
-  );
-}
-
-function DictionaryDetailModal({
-  item,
-  onClose,
+  onOpen,
   onPlayAudio,
   prefersReducedMotion,
 }: {
-  item: PhraseItem | null;
-  onClose: () => void;
+  item: PhraseItem;
+  meta: (typeof CATEGORY_META)[PhraseItem["category"]];
+  onOpen: () => void;
   onPlayAudio: (text: string) => void;
   prefersReducedMotion: boolean | null;
 }) {
   const [isRotated, setIsRotated] = useState(true);
 
-  if (!item) return null;
-  const meta = CATEGORY_META[item.category];
+  useEffect(() => {
+    onOpen();
+  }, [onOpen]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-      />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        transition={{ type: "spring", bounce: 0.08, duration: 0.35 }}
-        className="relative z-10 flex h-[82dvh] w-full max-w-md flex-col overflow-hidden rounded-[30px] border border-slate-200 bg-white p-5 text-slate-900 shadow-2xl dark:border-slate-800 dark:bg-slate-900 dark:text-white"
-      >
+    <>
+      <MorphingDialogClose className="right-4 top-4 z-10 flex size-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur" />
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-5 text-slate-900 dark:text-white">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
           <div>
             <span className="block text-[10px] font-black tracking-[0.16em] text-slate-400">SHOW LOCALLY</span>
             <span className="text-sm font-extrabold text-slate-900 dark:text-white">현지인에게 보여주기</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => {
-                triggerHapticFeedback(12);
-                setIsRotated((prev) => !prev);
-              }}
-              className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200"
-            >
-              <ArrowLeftRight className="size-3.5 text-blue-600 dark:text-blue-400" />
-              <span>{isRotated ? "180° 회전됨" : "정방향"}</span>
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              triggerHapticFeedback(12);
+              setIsRotated((prev) => !prev);
+            }}
+            className="mr-12 flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200"
+          >
+            <ArrowLeftRight className="size-3.5 text-blue-600 dark:text-blue-400" />
+            <span>{isRotated ? "180° 회전됨" : "정방향"}</span>
+          </button>
         </div>
 
         <div className="my-auto flex w-full flex-col items-center justify-center gap-6 py-6 text-center">
@@ -281,14 +228,16 @@ function DictionaryDetailModal({
             </motion.h2>
           </div>
 
-          <div className="flex flex-col items-center justify-center gap-2 px-2">
+          <MorphingDialogDescription disableLayoutAnimation className="flex flex-col items-center justify-center gap-2 px-2">
             <span className={cn("rounded-full px-2.5 py-1 text-[10px] font-black", meta.railClass)}>{meta.label}</span>
-            <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">{item.ko}</p>
+            <MorphingDialogTitle>
+              <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">{item.ko}</p>
+            </MorphingDialogTitle>
             <span className="inline-flex items-center gap-1 rounded-full border border-orange-200/80 bg-orange-50 px-3.5 py-1 text-xs font-bold text-orange-700 dark:border-orange-800/40 dark:bg-orange-950/60 dark:text-orange-300">
               <span>🗣️ 발음:</span>
               <span>{item.pron}</span>
             </span>
-          </div>
+          </MorphingDialogDescription>
         </div>
 
         <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
@@ -300,16 +249,80 @@ function DictionaryDetailModal({
             <Volume2 className="size-5" />
             <span>태국어 발음 듣기</span>
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 px-6 font-bold text-slate-700 transition hover:bg-slate-200 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200"
+          <MorphingDialogClose
+            ariaLabel="다이얼로그 닫기"
+            className="static flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 px-6 font-bold text-slate-700 transition hover:bg-slate-200 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200"
           >
             닫기
-          </button>
+          </MorphingDialogClose>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </>
+  );
+}
+
+function DictionaryPhraseRow({
+  item,
+  meta,
+  onOpen,
+  onPlayAudio,
+  prefersReducedMotion,
+}: {
+  item: PhraseItem;
+  meta: (typeof CATEGORY_META)[PhraseItem["category"]];
+  onOpen: () => void;
+  onPlayAudio: (text: string, event?: React.MouseEvent | unknown) => void;
+  prefersReducedMotion: boolean | null;
+}) {
+  return (
+    <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.42 }}>
+      <div
+        data-dictionary-entry
+        className="group relative flex min-h-20 items-center gap-3.5 transition-colors hover:bg-slate-100/60 dark:hover:bg-white/5"
+        role="listitem"
+      >
+        <MorphingDialogTrigger
+          ariaLabel={`${item.ko} 현지인에게 보여주기`}
+          className="flex min-w-0 flex-1 items-center gap-3.5 px-5 py-3.5 text-left outline-none transition-colors active:bg-slate-200/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:active:bg-white/10"
+        >
+          <PhraseThumbnail id={item.id} />
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-start justify-between gap-2">
+              <MorphingDialogTitle className="min-w-0">
+                <span className="block truncate text-sm font-bold text-slate-900 dark:text-white">{item.ko}</span>
+              </MorphingDialogTitle>
+              <span className="shrink-0 text-[11px] font-semibold text-slate-400">{meta.label}</span>
+            </div>
+            <span className="mt-1 block truncate font-thai text-base font-semibold leading-tight text-slate-700 dark:text-slate-200">{item.th}</span>
+            <span className="mt-1 block truncate text-xs text-slate-500 dark:text-slate-400">🗣️ {item.pron}</span>
+          </div>
+        </MorphingDialogTrigger>
+        <div className="flex shrink-0 flex-col gap-1 pr-5">
+          <Button
+            isIconOnly
+            size="sm"
+            variant="secondary"
+            aria-label="발음 듣기"
+            onPress={(event) => onPlayAudio(item.th, event)}
+            className="size-8 rounded-xl text-slate-500 dark:text-slate-400"
+          >
+            <Volume2 className="size-4" />
+          </Button>
+        </div>
+      </div>
+
+      <MorphingDialogContainer>
+        <MorphingDialogContent className="relative mx-4 flex max-h-[85dvh] w-[calc(100%-2rem)] max-w-md flex-col overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
+          <DictionaryPhraseDetail
+            item={item}
+            meta={meta}
+            onOpen={onOpen}
+            onPlayAudio={onPlayAudio}
+            prefersReducedMotion={prefersReducedMotion}
+          />
+        </MorphingDialogContent>
+      </MorphingDialogContainer>
+    </MorphingDialog>
   );
 }
 
@@ -317,7 +330,6 @@ export const DictionaryActivity: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("전체");
-  const [selectedPhrase, setSelectedPhrase] = useState<PhraseItem | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -557,11 +569,9 @@ export const DictionaryActivity: React.FC = () => {
                   key={item.id}
                   item={item}
                   meta={CATEGORY_META[item.category]}
-                  onSelect={(selected) => {
-                    handlePhraseOpen();
-                    setSelectedPhrase(selected);
-                  }}
+                  onOpen={handlePhraseOpen}
                   onPlayAudio={playAudio}
+                  prefersReducedMotion={prefersReducedMotion}
                 />
               ))
             )}
@@ -587,12 +597,6 @@ export const DictionaryActivity: React.FC = () => {
           />
         </div>
       </main>
-      <DictionaryDetailModal
-        item={selectedPhrase}
-        onClose={() => setSelectedPhrase(null)}
-        onPlayAudio={(text) => playAudio(text)}
-        prefersReducedMotion={prefersReducedMotion}
-      />
     </AppScreen>
   );
 };
