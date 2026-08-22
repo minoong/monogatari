@@ -56,3 +56,23 @@ export const formatLongTripDate = (date: TripDate) => {
   const local = new Date(`${date}T12:00:00+07:00`);
   return new Intl.DateTimeFormat("ko-KR", { month: "long", day: "numeric", weekday: "short" }).format(local);
 };
+
+export type ScheduleDateGroup = {
+  date: TripDate;
+  items: ScheduleItem[];
+};
+
+export const groupScheduleByDate = (items: ScheduleItem[]): ScheduleDateGroup[] => {
+  const dates = Array.from(new Set(items.map((item) => item.schedule_date))).sort();
+  return dates.map((date) => ({
+    date,
+    items: items
+      .filter((item) => item.schedule_date === date)
+      .sort((a, b) => a.start_time.localeCompare(b.start_time) || a.created_at.localeCompare(b.created_at)),
+  }));
+};
+
+export const getTripDayLabel = (date: TripDate) => {
+  const index = TRIP_DATES.findIndex((tripDate) => tripDate === date);
+  return index >= 0 ? `Day ${index + 1}` : formatTripDate(date);
+};

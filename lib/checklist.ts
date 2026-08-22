@@ -100,3 +100,46 @@ export const fetchChecklist = async (): Promise<PreparationItem[]> => {
   const json = await response.json() as { data?: PreparationItem[] };
   return json.data ?? [];
 };
+
+export type PrepMasonryItem = {
+  id: string;
+  title: string;
+  height: number;
+  gahyunDone: boolean;
+  minuDone: boolean;
+  importance: PreparationItem["importance"];
+};
+
+const PREP_MASONRY_HEIGHT: Record<PreparationItem["importance"], number> = {
+  high: 148,
+  normal: 128,
+  low: 112,
+};
+
+const isPrepDoneFor = (item: PreparationItem, user: ChecklistUser) =>
+  item.completed_by.includes(user) || item.completed_by.includes("all");
+
+export const getMergedPrepItems = (items: PreparationItem[]): PrepMasonryItem[] => {
+  const merged = new Map<string, PreparationItem>();
+
+  getChecklistItemsForUser(items, "gahyun").forEach((item) => merged.set(item.id, item));
+  getChecklistItemsForUser(items, "minu").forEach((item) => merged.set(item.id, item));
+
+  return Array.from(merged.values()).map((item) => ({
+    id: item.id,
+    title: item.title,
+    height: PREP_MASONRY_HEIGHT[item.importance],
+    gahyunDone: isPrepDoneFor(item, "gahyun"),
+    minuDone: isPrepDoneFor(item, "minu"),
+    importance: item.importance,
+  }));
+};
+
+export const shufflePrepItems = <T,>(items: T[]): T[] => {
+  const next = [...items];
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+  }
+  return next;
+};

@@ -1,11 +1,17 @@
 "use client";
 
-import { useRef, type ReactNode, type RefObject } from "react";
+import { useRef, useEffect, type ReactNode, type RefObject } from "react";
 import { useQuery } from "@tanstack/react-query";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { PostTripPrepMasonry } from "@/components/home/PostTripPrepMasonry";
+import { PostTripScheduleDriftWall } from "@/components/home/PostTripScheduleDriftWall";
+import { PostTripScheduleGlass } from "@/components/home/PostTripScheduleGlass";
+import { PostTripScheduleTimeline } from "@/components/home/PostTripScheduleTimeline";
 import { PostTripWishPinIndicator } from "@/components/home/PostTripWishPinIndicator";
+import type { ScheduleItem } from "@/lib/schedule";
+import { fetchChecklist } from "@/lib/checklist";
 import { TRIP_RETURN_FLIGHT } from "@/lib/trip-phase";
 import type { WishItem } from "@/lib/wishes";
 import "./post-trip-scroll-experience.css";
@@ -33,31 +39,7 @@ const CONTENT_PANELS: ContentPanel[] = [
     label: "일정",
     title: "4일의 리듬",
     tone: "sky",
-    body: (
-      <>
-        <p className="post-trip-panel-lead">
-          월요일엔 왓 아룬, 화요일엔 짜뚜짝 시장. 밤마다 다른 골목이 우리를 기다렸어요.
-        </p>
-        <ul className="post-trip-panel-list">
-          <li>
-            <span>Day 1</span>
-            <strong>수완나품 도착 · 카오산 로드 산책</strong>
-          </li>
-          <li>
-            <span>Day 2</span>
-            <strong>왓 포 · 왓 아룬 · 차오프라야 선셋</strong>
-          </li>
-          <li>
-            <span>Day 3</span>
-            <strong>짜뚜짝 주말시장 · 마사지 · 루프탑 바</strong>
-          </li>
-          <li>
-            <span>Day 4</span>
-            <strong>마지막 브런치 · 공항으로</strong>
-          </li>
-        </ul>
-      </>
-    ),
+    scrollable: true,
   },
   {
     id: "wish",
@@ -71,24 +53,6 @@ const CONTENT_PANELS: ContentPanel[] = [
     title: "떠나기 전 우리",
     tone: "amber",
     scrollable: true,
-    body: (
-      <>
-        <p className="post-trip-panel-lead">
-          여권, 환전, eSIM, 여행자 보험. 출발 전 체크리스트를 하나씩 지워내던 날들이 생각나요.
-        </p>
-        <ul className="post-trip-panel-checklist">
-          <li>여권 유효기간 확인</li>
-          <li>태국 바트 환전 · 카드 알림 설정</li>
-          <li>항공권 · 숙소 예약서 저장</li>
-          <li>여행자 보험 가입</li>
-          <li>짐 싸기 · 멀티탭 · 선크림</li>
-          <li>공항 이동 · 태국 입국 카드 작성</li>
-          <li>일정표 공유 · 비상 연락처 정리</li>
-          <li>마지막으로, 설레는 마음 챙기기</li>
-        </ul>
-        <p className="post-trip-panel-note">준비가 길었을수록, 현지에서의 하루가 더 반짝였을 거예요.</p>
-      </>
-    ),
   },
   {
     id: "letter",
@@ -244,9 +208,19 @@ function layoutStickyTrack(panel: HTMLElement, viewportHeight: number, holdDista
   return { track, stickyDistance, innerDuration, holdDistance: roundedHold };
 }
 
-function createStickyTimeline(track: HTMLElement, scroller: HTMLElement, stickyDistance: number) {
+function createStickyTimeline(
+  track: HTMLElement,
+  scroller: HTMLElement,
+  stickyDistance: number,
+  scrollTriggerId?: string,
+) {
+  if (scrollTriggerId) {
+    ScrollTrigger.getById(scrollTriggerId)?.kill();
+  }
+
   return gsap.timeline({
     scrollTrigger: {
+      id: scrollTriggerId,
       trigger: track,
       scroller,
       start: "top top",
@@ -282,12 +256,17 @@ function setupStickyOverscrollPanel(
   content: HTMLElement,
   scroller: HTMLElement,
   viewportHeight: number,
+  scrollTriggerId?: string,
 ) {
+  if (scrollTriggerId) {
+    gsap.set(inner, { y: 0, clearProps: "transform" });
+  }
+
   const holdDistance = measureInnerOverflow(inner, viewportHeight);
   const layout = layoutStickyTrack(panel, viewportHeight, holdDistance);
   if (!layout) return;
 
-  const timeline = createStickyTimeline(layout.track, scroller, layout.stickyDistance);
+  const timeline = createStickyTimeline(layout.track, scroller, layout.stickyDistance, scrollTriggerId);
 
   if (layout.holdDistance > 0) {
     timeline.to(inner, {
@@ -317,7 +296,21 @@ function setupPinnedPanels(scroller: HTMLElement, panels: HTMLElement[], viewpor
       return;
     }
 
-    setupStickyOverscrollPanel(panel, inner, content, scroller, viewportHeight);
+    const isPrepPanel = Boolean(panel.querySelector(".post-trip-panel-inner--prep"));
+    const isSchedulePanel = Boolean(panel.querySelector(".post-trip-panel-inner--schedule"));
+    const scrollTriggerId = isPrepPanel
+      ? "post-trip-prep"
+      : isSchedulePanel
+        ? "post-trip-schedule"
+        : undefined;
+    setupStickyOverscrollPanel(
+      panel,
+      inner,
+      content,
+      scroller,
+      viewportHeight,
+      scrollTriggerId,
+    );
   });
 }
 
@@ -332,12 +325,24 @@ const fetchWishes = async (): Promise<WishItem[]> => {
   return payload.data;
 };
 
+const fetchSchedule = async (): Promise<ScheduleItem[]> => {
+  const response = await fetch("/api/schedule");
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error ?? "일정을 불러오지 못했어요.");
+  return payload.data;
+};
+
 export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollExperienceProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const heroTrackRef = useRef<HTMLDivElement>(null);
   const panelRefs = useRef<(HTMLElement | null)[]>([]);
+  const refreshPrepScrollRef = useRef<(() => void) | null>(null);
+  const refreshScheduleScrollRef = useRef<(() => void) | null>(null);
+  const prepRevealRef = useRef<HTMLDivElement>(null);
   const returnFlight = TRIP_RETURN_FLIGHT;
   const { data: wishes = [] } = useQuery({ queryKey: ["wishes"], queryFn: fetchWishes });
+  const { data: checklistItems = [] } = useQuery({ queryKey: ["checklist"], queryFn: fetchChecklist });
+  const { data: scheduleItems = [] } = useQuery({ queryKey: ["schedule"], queryFn: fetchSchedule });
 
   useGSAP(
     () => {
@@ -364,6 +369,45 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
         }
         setupHeroExpand(scroller, heroTrack, viewportHeight);
         setupPinnedPanels(scroller, panels, viewportHeight);
+
+        const prepPanel = panels.find((panel) => panel.querySelector(".post-trip-panel-inner--prep"));
+        if (prepPanel) {
+          const inner = prepPanel.querySelector<HTMLElement>(".post-trip-panel-inner");
+          const content = prepPanel.querySelector<HTMLElement>(".post-trip-panel-content");
+          if (inner && content) {
+            refreshPrepScrollRef.current = () => {
+              setupStickyOverscrollPanel(
+                prepPanel,
+                inner,
+                content,
+                scroller,
+                Math.round(scroller.clientHeight),
+                "post-trip-prep",
+              );
+              ScrollTrigger.refresh();
+            };
+          }
+        }
+
+        const schedulePanel = panels.find((panel) => panel.querySelector(".post-trip-panel-inner--schedule"));
+        if (schedulePanel) {
+          const inner = schedulePanel.querySelector<HTMLElement>(".post-trip-panel-inner");
+          const content = schedulePanel.querySelector<HTMLElement>(".post-trip-panel-content");
+          if (inner && content) {
+            refreshScheduleScrollRef.current = () => {
+              setupStickyOverscrollPanel(
+                schedulePanel,
+                inner,
+                content,
+                scroller,
+                Math.round(scroller.clientHeight),
+                "post-trip-schedule",
+              );
+              ScrollTrigger.refresh();
+            };
+          }
+        }
+
         ScrollTrigger.refresh();
       };
 
@@ -375,6 +419,12 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
     },
     { scope: wrapperRef, dependencies: [scrollContainerRef] },
   );
+
+  useEffect(() => {
+    if (!scheduleItems.length) return;
+    const frame = requestAnimationFrame(() => refreshScheduleScrollRef.current?.());
+    return () => cancelAnimationFrame(frame);
+  }, [scheduleItems]);
 
   return (
     <div ref={wrapperRef} className="post-trip-scroll-experience w-full">
@@ -417,10 +467,47 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
               }}
               className={`post-trip-panel${section.scrollable ? " post-trip-panel--scrollable" : ""}`}
             >
-              <div className={`post-trip-panel-content post-trip-panel--${section.tone}`}>
-                {section.id === "wish" ? (
+              <div
+                className={`post-trip-panel-content post-trip-panel--${section.tone}${
+                  section.id === "schedule" ? " post-trip-panel-content--schedule" : ""
+                }`}
+              >
+                {section.id === "schedule" ? (
+                  <>
+                    <PostTripScheduleDriftWall scheduleItems={scheduleItems} />
+                    <div className="post-trip-schedule-stack">
+                      <PostTripScheduleGlass />
+                      <div className="post-trip-panel-inner post-trip-panel-inner--schedule">
+                        <p className="post-trip-panel-eyebrow">{section.label}</p>
+                        <h2 className="post-trip-panel-title">{section.title}</h2>
+                        <p className="post-trip-panel-lead">
+                          월요일엔 왓 아룬, 화요일엔 짜뚜짝 시장. 밤마다 다른 골목이 우리를 기다렸어요.
+                        </p>
+                        <PostTripScheduleTimeline
+                          items={scheduleItems}
+                          scrollContainerRef={scrollContainerRef}
+                          onLayoutChange={() => refreshScheduleScrollRef.current?.()}
+                        />
+                      </div>
+                    </div>
+                  </>
+                ) : section.id === "wish" ? (
                   <div className="post-trip-panel-inner post-trip-panel-inner--wish">
                     <PostTripWishPinIndicator wishes={wishes} />
+                  </div>
+                ) : section.id === "prep" ? (
+                  <div ref={prepRevealRef} className="post-trip-panel-inner post-trip-panel-inner--prep">
+                    <p className="post-trip-panel-eyebrow">{section.label}</p>
+                    <h2 className="post-trip-panel-title">{section.title}</h2>
+                    <p className="post-trip-panel-lead">
+                      여권, 환전, eSIM, 여행자 보험. 출발 전 체크리스트를 하나씩 지워내던 날들이 생각나요.
+                    </p>
+                    <PostTripPrepMasonry
+                      items={checklistItems}
+                      revealTargetRef={prepRevealRef}
+                      scrollContainerRef={scrollContainerRef}
+                      onLayoutChange={() => refreshPrepScrollRef.current?.()}
+                    />
                   </div>
                 ) : (
                   <div className="post-trip-panel-inner">

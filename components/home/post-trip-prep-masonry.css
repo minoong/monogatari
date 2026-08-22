@@ -1,0 +1,154 @@
+.prep-masonry {
+  width: 100%;
+  padding-top: 0.35rem;
+}
+
+.prep-masonry-empty {
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.prep-masonry-card {
+  position: relative;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 22px -16px rgba(120, 53, 15, 0.45);
+}
+
+.prep-masonry-card--pending {
+  filter: grayscale(1) saturate(0.35);
+}
+
+.prep-masonry-card-zones {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.prep-masonry-zone {
+  flex: 1;
+  transition: filter 0.35s ease, opacity 0.35s ease;
+}
+
+.prep-masonry-zone--left {
+  border-right: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.prep-masonry-zone--gahyun {
+  background: linear-gradient(145deg, #fb7185 0%, #f472b6 48%, #fda4af 100%);
+}
+
+.prep-masonry-zone--minu {
+  background: linear-gradient(215deg, #8b5cf6 0%, #7c3aed 52%, #a78bfa 100%);
+}
+
+.prep-masonry-zone--idle {
+  background: linear-gradient(180deg, rgba(120, 113, 108, 0.42) 0%, rgba(87, 83, 78, 0.58) 100%);
+  filter: grayscale(1) saturate(0.2);
+  opacity: 0.72;
+}
+
+.prep-masonry-card-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.45rem 0.5rem 0.55rem;
+}
+
+.prep-masonry-card-avatars {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prep-masonry-avatar {
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08);
+}
+
+.prep-masonry-avatar--gahyun {
+  box-shadow: 0 0 0 2px rgba(244, 114, 182, 0.55), 0 0 14px rgba(244, 114, 182, 0.35);
+}
+
+.prep-masonry-avatar--minu {
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.55), 0 0 14px rgba(139, 92, 246, 0.35);
+}
+
+.prep-masonry-avatar--idle {
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+
+.prep-masonry-card-title {
+  margin: auto 0 0;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+  color: #fff;
+  text-align: left;
+  text-shadow: 0 1px 10px rgba(15, 23, 42, 0.28);
+}
+
+.prep-masonry-card-badge {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 0.12rem 0.38rem;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #92400e;
+}
+
+.prep-masonry-card--done .prep-masonry-card-badge {
+  animation: prep-masonry-badge-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes prep-masonry-badge-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
+
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.45);
+  }
+}
+
+.post-trip-panel-inner--prep {
+  max-width: none;
+  align-items: stretch;
+  height: auto;
+  overflow: visible;
+  padding: 0 0 1.5rem;
+  text-align: left;
+}
+
+.post-trip-panel-inner--prep .post-trip-panel-eyebrow,
+.post-trip-panel-inner--prep .post-trip-panel-title,
+.post-trip-panel-inner--prep .post-trip-panel-lead {
+  width: 100%;
+  text-align: left;
+}
+
+.post-trip-panel-inner--prep .post-trip-panel-lead {
+  margin-top: 0.85rem;
+}
