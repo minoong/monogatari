@@ -1,0 +1,190 @@
+.post-trip-pinned-panels {
+  position: relative;
+  width: 100%;
+}
+
+.post-trip-panel {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  overflow: hidden;
+  text-align: center;
+}
+
+.post-trip-panel-content {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 0 1.25rem;
+}
+
+.post-trip-panel-inner {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  max-width: 32rem;
+  margin: 0 auto;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  padding: 1.75rem 0 2rem;
+}
+
+.post-trip-panel--scrollable .post-trip-panel-inner {
+  height: auto;
+  padding-bottom: 20vh;
+}
+
+.post-trip-panel-eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.post-trip-panel-title {
+  margin: 0.5rem 0 0;
+  font-size: clamp(2rem, 9vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.post-trip-panel-lead {
+  margin: 1.25rem 0 0;
+  max-width: 28ch;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.7;
+  opacity: 0.88;
+}
+
+.post-trip-panel-list {
+  margin: 1.5rem 0 0;
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+
+.post-trip-panel-list li {
+  display: grid;
+  gap: 0.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 0.85rem 0;
+}
+
+.post-trip-panel-list li span {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  opacity: 0.65;
+  text-transform: uppercase;
+}
+
+.post-trip-panel-list li strong {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.post-trip-panel-stats {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.post-trip-panel-stats div {
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.9rem 1rem;
+}
+
+.post-trip-panel-stats p {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0.72;
+}
+
+.post-trip-panel-stats strong {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.post-trip-panel-checklist {
+  margin: 1.25rem 0 0;
+  width: 100%;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.post-trip-panel-checklist li {
+  position: relative;
+  padding: 0.7rem 0 0.7rem 1.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.post-trip-panel-checklist li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  opacity: 0.55;
+}
+
+.post-trip-panel-note,
+.post-trip-panel-letter {
+  margin: 1.25rem 0 0;
+  max-width: 34ch;
+  font-size: 0.9rem;
+  line-height: 1.75;
+}
+
+.post-trip-panel-letter {
+  text-align: left;
+}
+
+.post-trip-panel-sign {
+  margin: 2rem 0 0;
+  width: 100%;
+  text-align: right;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+.post-trip-panel--sky {
+  background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%);
+  color: #0c4a6e;
+}
+
+.post-trip-panel--emerald {
+  background: linear-gradient(180deg, #d1fae5 0%, #6ee7b7 100%);
+  color: #065f46;
+}
+
+.post-trip-panel--amber {
+  background: linear-gradient(180deg, #fef3c7 0%, #fcd34d 100%);
+  color: #92400e;
+}
+
+.post-trip-panel--rose {
+  background: linear-gradient(180deg, #ffe4e6 0%, #fda4af 100%);
+  color: #9f1239;
+}

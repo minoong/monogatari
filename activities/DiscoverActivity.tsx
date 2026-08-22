@@ -9,8 +9,11 @@ import { WishDrawer } from "@/components/wish/WishDrawer";
 import { ActivityRegisterFab } from "@/components/ui/activity-register-fab";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { WishGoalRings } from "@/components/home/WishGoalRings";
 import { cardNavButtonClass } from "@/components/ui/drawer-form";
-import { WISH_TYPES, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
+import { WishTypeIcon } from "@/components/wish/WishTypeIcon";
+import { getWishProgress, WISH_TYPES, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
+import { cn } from "@/lib/utils";
 
 const fetchWishes = async (): Promise<WishItem[]> => {
   const response = await fetch("/api/wishes");
@@ -66,30 +69,51 @@ export const DiscoverActivity: React.FC = () => {
             </div>
           ) : (
             <div className="flex flex-col gap-4">
+              {wishes.length > 0 && (
+                <WishGoalRings onTypePress={openList} wishes={wishes} />
+              )}
               {WISH_TYPES.map((type) => {
                 const meta = WISH_TYPE_META[type];
                 const items = wishes.filter((wish) => wish.type === type);
+                const progress = getWishProgress(wishes, type);
 
                 return (
                   <Button
                     key={type}
-                    className={`group rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-100 dark:bg-slate-900 dark:ring-slate-800 ${cardNavButtonClass}`}
+                    className={`group rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-slate-100 dark:bg-slate-900 dark:ring-slate-800 ${cardNavButtonClass}`}
                     fullWidth
                     onPress={() => openList(type)}
                     variant="secondary"
                   >
                     <div className="flex w-full items-start gap-4">
-                      <span className={`flex size-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.accent} text-2xl shadow-md`}>
-                        {meta.icon}
-                      </span>
+                      <WishTypeIcon
+                        className={cn("size-13 bg-gradient-to-br shadow-md", meta.accent)}
+                        iconClassName="text-white"
+                        size={22}
+                        tone="dark"
+                        type={type}
+                      />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-3">
                           <div>
                             <h2 className="font-bold text-slate-900 dark:text-white">{meta.title}</h2>
-                            <p className="mt-0.5 text-xs text-slate-500">{items.length}개 등록됨</p>
+                            <p className="mt-0.5 text-xs text-slate-500 tabular-nums">
+                              {progress.completed}/{progress.total} 완료 · {items.length}개 등록
+                            </p>
                           </div>
                           <ArrowRight aria-hidden="true" className="size-5 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5" />
                         </div>
+                        {items.length > 0 && (
+                          <div
+                            aria-hidden="true"
+                            className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"
+                          >
+                            <div
+                              className="h-full rounded-full bg-blue-500 transition-[width] duration-500"
+                              style={{ width: `${progress.progress}%` }}
+                            />
+                          </div>
+                        )}
                         {items.length > 0 ? (
                           <div className="mt-3 flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
                             <span className="shrink-0 font-medium">최근</span>

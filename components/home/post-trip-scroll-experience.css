@@ -1,0 +1,56 @@
+@import "./post-trip-pinned-panels.css";
+
+.post-trip-scroll-experience {
+  position: relative;
+  width: 100%;
+}
+
+.post-trip-hero-track {
+  position: relative;
+  width: 100%;
+}
+
+.post-trip-hero-stage {
+  position: sticky;
+  top: 0;
+  min-height: 420px;
+}
+
+.post-trip-hero-frame {
+  clip-path: inset(21% 29% 21% 29% round 24px);
+  will-change: clip-path;
+}
+
+.post-trip-hero-image {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  transform-origin: center;
+  will-change: transform;
+  user-select: none;
+}
+
+.post-trip-hero-scrim {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.1) 45%, rgba(0, 0, 0, 0.35));
+  pointer-events: none;
+}
+
+.post-trip-hero-title {
+  font-size: clamp(2rem, 7.5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+  will-change: opacity, transform;
+}
+
+.post-trip-hero-hint {
+  will-change: opacity, transform;
+}
+
+.post-trip-hero-overlay {
+  will-change: opacity, transform;
+}

@@ -20,6 +20,8 @@ import { ChecklistBattleCard } from "../components/checklist/ChecklistBattleCard
 import { fetchChecklist, getChecklistBattleStats, type PreparationItem } from "../lib/checklist";
 import { BeforeTripWeatherTicker, TravelWeatherWidget } from "../components/weather/TravelWeatherWidget";
 import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
+import { PostTripSection } from "@/components/home/PostTripSection";
+import { getTripPhase } from "@/lib/trip-phase";
 import { rowNavButtonClass, tileNavButtonClass } from "@/components/ui/drawer-form";
 
 dayjs.extend(utc);
@@ -435,7 +437,7 @@ const BangkokDepartureCard: React.FC = () => {
 
 export const HomeActivity: React.FC = () => {
   const { push, replace } = useFlow();
-  const [tripState, setTripState] = useState<"before" | "during" | "after">("before");
+  const [tripState, setTripState] = useState<"before" | "during" | "after">(() => getTripPhase());
   const {
     data: checklistItems = [],
     isLoading: isChecklistLoading,
@@ -449,8 +451,14 @@ export const HomeActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "태국 여행 2026" }}>
-      <div className="flex flex-col min-h-full w-full pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] overflow-y-auto">
-        <WorldClockCard />
+      <div
+        className={
+          tripState === "after"
+            ? "flex min-h-full w-full flex-col overflow-hidden pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))]"
+            : "flex min-h-full w-full flex-col overflow-y-auto pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))]"
+        }
+      >
+        {tripState !== "after" && <WorldClockCard />}
         <Tabs
           className="w-full"
           onSelectionChange={(key) => setTripState(String(key) as typeof tripState)}
@@ -467,7 +475,7 @@ export const HomeActivity: React.FC = () => {
             ]}
           />
 
-          <div className="flex flex-col gap-6 p-4">
+          <div className={tripState === "after" ? "flex flex-col" : "flex flex-col gap-6 p-4"}>
             <Tabs.Panel className="!p-0" id="before">
               {tripState === "before" && (
                 <div className="flex flex-col gap-4">
@@ -530,23 +538,7 @@ export const HomeActivity: React.FC = () => {
             </Tabs.Panel>
 
             <Tabs.Panel className="!p-0" id="after">
-              {tripState === "after" && (
-                <div className="flex flex-col gap-4">
-                  <div className="rounded-2xl bg-purple-100 p-6 text-center dark:bg-purple-900">
-                    <span className="text-4xl">✈️</span>
-                    <h2 className="mt-2 text-xl font-bold">여행 끝! 일상으로</h2>
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">3박 4일의 방콕 여행 어떠셨나요?</p>
-                  </div>
-
-                  <Button className={`rounded-2xl border bg-white p-4 shadow-sm dark:bg-gray-800 ${rowNavButtonClass}`} fullWidth onPress={() => push("DiscoverActivity", {})} variant="secondary">
-                    <div>
-                      <h3 className="font-bold">내 쇼핑 리스트 복기</h3>
-                      <p className="text-sm text-gray-500">다 못 산 아이템이 있는지 확인해보세요</p>
-                    </div>
-                    <span className="text-2xl">🛍️</span>
-                  </Button>
-                </div>
-              )}
+              {tripState === "after" && <PostTripSection />}
             </Tabs.Panel>
           </div>
         </Tabs>

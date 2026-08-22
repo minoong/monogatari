@@ -4,7 +4,8 @@ import { cn } from "../../lib/utils";
 
 export interface RingData {
   progress: number; // 0 to 100
-  color: string;    // CSS color hex or var
+  color: string; // CSS color hex or var
+  trackColor?: string;
 }
 
 interface RingChartProps {
@@ -42,9 +43,10 @@ export const RingChart: React.FC<RingChartProps> = ({
                 cy={center}
                 r={radius}
                 fill="transparent"
-                stroke="currentColor"
+                stroke={ring.trackColor ?? ring.color}
+                strokeOpacity={ring.trackColor ? 1 : 0.12}
                 strokeWidth={strokeWidth}
-                className="text-gray-100 dark:text-gray-800"
+                className={ring.trackColor ? undefined : "text-current"}
               />
               {/* Progress Ring */}
               <motion.circle
@@ -56,6 +58,7 @@ export const RingChart: React.FC<RingChartProps> = ({
                 strokeWidth={strokeWidth}
                 strokeLinecap="round"
                 strokeDasharray={circumference}
+                style={{ filter: `drop-shadow(0 0 4px ${ring.color}66)` }}
                 initial={{ strokeDashoffset: circumference }}
                 animate={{ strokeDashoffset: circumference - (clampedProgress / 100) * circumference }}
                 transition={{ duration: 1.2, ease: "easeOut" }}

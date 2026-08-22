@@ -1,0 +1,278 @@
+.post-trip-wish-track {
+  position: relative;
+  width: 100%;
+}
+
+.post-trip-wish-track .post-trip-panel {
+  position: sticky;
+  top: 0;
+}
+
+.wish-pin {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  text-align: left;
+}
+
+.wish-pin-header {
+  flex: none;
+  padding: 0 0.25rem;
+}
+
+.wish-pin-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.wish-pin-title {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1.65rem, 6vw, 2.15rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.wish-pin-overall {
+  margin: 0;
+  flex: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.48);
+  padding: 0.22rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  tabular-nums: true;
+  font-variant-numeric: tabular-nums;
+}
+
+.wish-pin-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  align-items: stretch;
+  gap: 0.35rem;
+  margin-top: 1rem;
+}
+
+.wish-pin-rail {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  width: 5.25rem;
+  padding: 0.15rem 0 0.15rem 0.15rem;
+}
+
+.wish-pin-track {
+  position: absolute;
+  top: 0.55rem;
+  bottom: 0.55rem;
+  left: 0.15rem;
+  width: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(6, 95, 70, 0.16);
+}
+
+.wish-pin-fill {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(180deg, #047857 0%, #10b981 100%);
+  transform-origin: top center;
+  backface-visibility: hidden;
+}
+
+.wish-pin-list {
+  display: flex;
+  height: 100%;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 0;
+  list-style: none;
+  padding: 0.2rem 0 0.2rem 0.85rem;
+}
+
+.wish-pin-item {
+  color: rgba(6, 95, 70, 0.38);
+  font-size: clamp(1.05rem, 4.4vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.wish-pin-right {
+  position: relative;
+  min-width: 0;
+  flex: 1;
+}
+
+.wish-pin-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.wish-pin-slide-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.wish-pin-kind {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  background: rgba(6, 95, 70, 0.12);
+  padding: 0.22rem 0.6rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.wish-pin-count {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  opacity: 0.72;
+  font-variant-numeric: tabular-nums;
+}
+
+.wish-pin-count strong {
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  opacity: 1;
+}
+
+.wish-pin-meter {
+  height: 4px;
+  margin-top: 0.7rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(6, 95, 70, 0.14);
+}
+
+.wish-pin-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #047857, #34d399);
+}
+
+.wish-pin-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wish-pin-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+  border-radius: 1.05rem;
+  background: rgba(255, 255, 255, 0.58);
+  padding: 0.5rem 0.7rem 0.5rem 0.5rem;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.wish-pin-entry img,
+.wish-pin-entry-fallback {
+  height: 2.65rem;
+  width: 2.65rem;
+  flex: none;
+  border-radius: 0.8rem;
+  object-fit: cover;
+}
+
+.wish-pin-entry-fallback {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.wish-pin-entry-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.wish-pin-entry-copy strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.wish-pin-entry-copy span {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  opacity: 0.55;
+}
+
+.wish-pin-entry-mark {
+  display: grid;
+  height: 1.35rem;
+  width: 1.35rem;
+  flex: none;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(6, 95, 70, 0.12);
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #047857;
+}
+
+.wish-pin-entry.is-pending {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.wish-pin-entry.is-pending .wish-pin-entry-mark {
+  background: rgba(6, 95, 70, 0.06);
+  box-shadow: inset 0 0 0 1.5px rgba(6, 95, 70, 0.18);
+}
+
+.wish-pin-entry.is-done .wish-pin-entry-mark {
+  background: #047857;
+  color: #ecfdf5;
+}
+
+.wish-pin-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 1.1rem 0 0;
+}
+
+.wish-pin-empty p {
+  margin: 0;
+  max-width: 12rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+  opacity: 0.72;
+}
+
+.post-trip-panel-inner--wish {
+  max-width: none;
+  align-items: stretch;
+  height: 100%;
+  overflow: hidden;
+  padding: 1.35rem 0 1.5rem;
+}

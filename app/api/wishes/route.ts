@@ -8,6 +8,8 @@ type WishRow = Omit<WishItem, "images"> & { image_path?: string | null; wish_ima
 
 const withImages = (item: WishRow): WishItem => ({
   ...item,
+  is_completed: item.is_completed ?? false,
+  completed_at: item.completed_at ?? null,
   images: (item.wish_images?.length ? item.wish_images : item.image_path ? [{ id: `legacy-${item.id}`, storage_path: item.image_path, sort_order: 0 }] : []).sort((a, b) => a.sort_order - b.sort_order).map((image): WishImage => ({
     id: image.id,
     path: image.storage_path,
@@ -123,7 +125,47 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const id = wishIdValue(new URL(request.url).searchParams.get("id")); if (!id) return NextResponse.json({ error: "Invalid wish id" }, { status: 400 });
-    const input = wishInputValue(await request.json()); if (!input.data) return NextResponse.json({ error: input.error }, { status: 400 });
+    const body = await request.json() as Record<string, unknown>;
+
+    if (Object.keys(body).length === 1 && "is_completed" in body) {
+      if (typeof body.is_completed !== "boolean") {
+        return NextResponse.json({ error: "is_completed must be a boolean" }, { status: 400 });
+      }
+      const isCompleted = body.is_completed;
+      const completedAt = isCompleted ? new Date().toISOString() : null;
+      const { data: saved, error } = await supabase
+        .from("wish_items")
+        .update({
+          is_completed: isCompleted,
+          completed_at: completedAt,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select(selectWish)
+        .single();
+      if (error) {
+        if (missingGalleryTable(error)) {
+          const legacy = await supabase
+            .from("wish_items")
+            .update({
+              is_completed: isCompleted,
+              completed_at: completedAt,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", id)
+            .select("*")
+            .single();
+          if (legacy.error) {
+            return NextResponse.json({ error: legacy.error.code === "PGRST116" ? "Wish not found" : legacy.error.message }, { status: legacy.error.code === "PGRST116" ? 404 : 500 });
+          }
+          return NextResponse.json({ data: withImages(legacy.data as WishRow) });
+        }
+        return NextResponse.json({ error: error.code === "PGRST116" ? "Wish not found" : error.message }, { status: error.code === "PGRST116" ? 404 : 500 });
+      }
+      return NextResponse.json({ data: withImages(saved as WishRow) });
+    }
+
+    const input = wishInputValue(body); if (!input.data) return NextResponse.json({ error: input.error }, { status: 400 });
     let { data: current, error: currentError } = await supabase.from("wish_items").select(selectWish).eq("id", id).single();
     const isLegacyGallery = galleryUnavailable(currentError);
     if (isLegacyGallery) {

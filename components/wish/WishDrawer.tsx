@@ -55,6 +55,7 @@ import {
   isGoogleMapsUrl,
   normalizeExternalUrl,
   WISH_CATEGORY_SUGGESTIONS,
+  WISH_COMPLETION_LABEL,
   WISH_TYPES,
   WISH_TYPE_META,
   type WishItem,
@@ -281,6 +282,11 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
         <Form ref={formRef} aria-label={isEditing ? "위시 편집" : "위시 등록"} className="flex min-h-0 w-full flex-1 flex-col overflow-hidden" onSubmit={handleSubmit} validationBehavior="native">
           <DrawerHeader className="px-6 pb-1 pt-6 text-center">
             <DrawerTitle>{isEditing ? "위시 편집" : "위시 등록"}</DrawerTitle>
+            {wish?.is_completed && (
+              <p className="mt-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                ✓ {WISH_COMPLETION_LABEL[wish.type]} 완료됨 · 리스트에서 변경할 수 있어요
+              </p>
+            )}
           </DrawerHeader>
 
           <DrawerPanel

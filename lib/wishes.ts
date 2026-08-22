@@ -13,6 +13,8 @@ export interface WishItem {
   images: WishImage[];
   locations: string[];
   links: string[];
+  is_completed: boolean;
+  completed_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -68,6 +70,42 @@ export const WISH_TYPE_META: Record<WishType, {
 
 export const isWishType = (value: unknown): value is WishType =>
   typeof value === "string" && WISH_TYPES.includes(value as WishType);
+
+export const WISH_COMPLETION_LABEL: Record<WishType, string> = {
+  shopping: "샀어요",
+  restaurant: "갔어요",
+  menu: "먹었어요",
+  snack: "먹었어요",
+};
+
+export const WISH_RING_COLORS: Record<WishType, string> = {
+  shopping: "#8b5cf6",
+  restaurant: "#f43f5e",
+  menu: "#f97316",
+  snack: "#fbbf24",
+};
+
+export type WishProgress = {
+  completed: number;
+  total: number;
+  progress: number;
+};
+
+export const getWishProgress = (wishes: WishItem[], type?: WishType): WishProgress => {
+  const filtered = type ? wishes.filter((wish) => wish.type === type) : wishes;
+  const total = filtered.length;
+  const completed = filtered.filter((wish) => wish.is_completed).length;
+  return {
+    completed,
+    total,
+    progress: total === 0 ? 0 : Math.round((completed / total) * 100),
+  };
+};
+
+export type WishCompletionFilter = "all" | "completed" | "pending";
+
+export const isWishCompletionFilter = (value: unknown): value is WishCompletionFilter =>
+  value === "all" || value === "completed" || value === "pending";
 
 export const WISH_CATEGORY_SUGGESTIONS: Record<WishType, string[]> = {
   shopping: ["기념품", "약국", "패션", "생활용품", "뷰티"],
