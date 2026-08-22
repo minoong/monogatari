@@ -21,8 +21,10 @@ import { fetchChecklist, getChecklistBattleStats, type PreparationItem } from ".
 import { BeforeTripWeatherTicker, TravelWeatherWidget } from "../components/weather/TravelWeatherWidget";
 import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
 import { PostTripSection } from "@/components/home/PostTripSection";
+import { WishGoalRings } from "@/components/home/WishGoalRings";
 import { getTripPhase } from "@/lib/trip-phase";
 import { rowNavButtonClass, tileNavButtonClass } from "@/components/ui/drawer-form";
+import type { WishItem, WishType } from "@/lib/wishes";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -448,6 +450,19 @@ export const HomeActivity: React.FC = () => {
     queryFn: fetchChecklist,
   });
   const checklistBattleStats = getChecklistBattleStats(checklistItems);
+  const { data: wishes = [] } = useQuery<WishItem[]>({
+    queryKey: ["wishes"],
+    queryFn: async () => {
+      const response = await fetch("/api/wishes");
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "위시를 불러오지 못했습니다.");
+      return payload.data;
+    },
+  });
+
+  const openWishType = (type: WishType) => {
+    push("WishListActivity", { type });
+  };
 
   return (
     <AppScreen appBar={{ title: "태국 여행 2026" }}>
@@ -502,6 +517,10 @@ export const HomeActivity: React.FC = () => {
               {tripState === "during" && (
                 <div className="flex flex-col gap-4">
                   <TravelWeatherWidget />
+
+                  {wishes.length > 0 && (
+                    <WishGoalRings onTypePress={openWishType} wishes={wishes} />
+                  )}
 
                   <div className="grid grid-cols-2 gap-3">
                     <Button className={`rounded-2xl border bg-white p-4 shadow-sm dark:bg-gray-800 ${tileNavButtonClass}`} fullWidth onPress={() => replace("ScheduleActivity", {}, { animate: false })} variant="secondary">

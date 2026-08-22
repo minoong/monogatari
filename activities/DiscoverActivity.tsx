@@ -9,7 +9,6 @@ import { WishDrawer } from "@/components/wish/WishDrawer";
 import { ActivityRegisterFab } from "@/components/ui/activity-register-fab";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { WishGoalRings } from "@/components/home/WishGoalRings";
 import { cardNavButtonClass } from "@/components/ui/drawer-form";
 import { WishTypeIcon } from "@/components/wish/WishTypeIcon";
 import { getWishProgress, WISH_TYPES, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
@@ -69,9 +68,6 @@ export const DiscoverActivity: React.FC = () => {
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {wishes.length > 0 && (
-                <WishGoalRings onTypePress={openList} wishes={wishes} />
-              )}
               {WISH_TYPES.map((type) => {
                 const meta = WISH_TYPE_META[type];
                 const items = wishes.filter((wish) => wish.type === type);
