@@ -13,9 +13,9 @@ const utilityCards = [
   {
     activity: "ExpenseActivity" as const,
     title: "가현짱, 렌탈 영수증 발행!",
-    description: "쓴 돈을 바로 기록하고, 둘이 얼마를 정산할지 한눈에 확인해요.",
+    description: "오마에!! 렌탈 비용은 영수증으로 발행!! 평점은 🌟🌟🌟🌟🌟 주지 않으면 더 이상의 렌탈은 끝이에요!!!",
     meta: "지출 · 통계 · 자동 정산",
-    imageSrc: "/card-exchange-ruka.jpg",
+    imageSrc: "/card-utils-rental.jpg",
     baseDelay: 0.08,
   },
   {
