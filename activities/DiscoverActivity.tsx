@@ -8,6 +8,7 @@ import { triggerHapticFeedback } from "@/components/BottomNav";
 import { WishDrawer } from "@/components/wish/WishDrawer";
 import { ActivityRegisterFab } from "@/components/ui/activity-register-fab";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cardNavButtonClass } from "@/components/ui/drawer-form";
 import { WISH_TYPES, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
 
@@ -38,7 +39,23 @@ export const DiscoverActivity: React.FC = () => {
         {showInitialLoader ? (
           <ActivityFetchLoader messages={["위시를 확인하고 있어…", "원하는 걸 모아 보는 중이야…", "뭘 골랐는지 살펴볼게…"]} />
         ) : <section className="mx-auto w-full max-w-lg px-5 pt-6">
-          <header className="mb-5"><p className="text-sm font-semibold text-blue-600">NINO&apos;S WISH LIST</p><h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">원하는 건 전부 적어 둬</h1><p className="mt-2 text-sm leading-6 text-slate-500">사고 싶은 거든 먹고 싶은 거든, 나중에 딴소리하지 말고 지금 확실히 골라.</p></header>
+          <header className="mb-5">
+            <p className="flex items-center gap-2 text-sm font-semibold text-blue-600">
+              <span className="flex items-center -space-x-2">
+                <Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950">
+                  <AvatarImage alt="가현쨩" src="/avatars/gahyun.webp" />
+                  <AvatarFallback>가</AvatarFallback>
+                </Avatar>
+                <Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950">
+                  <AvatarImage alt="미누쿤" src="/avatars/minu.webp" />
+                  <AvatarFallback>미</AvatarFallback>
+                </Avatar>
+              </span>
+              <span>의 위시 리스트!!</span>
+            </p>
+            <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">원하는 건 전부 적어 둬</h1>
+            <p className="mt-2 text-sm leading-6 text-slate-500">사고 싶은 거든 먹고 싶은 거든, 나중에 딴소리하지 말고 지금 확실히 골라.</p>
+          </header>
           {isError ? (
             <div className="rounded-3xl border border-red-100 bg-white px-5 py-8 text-center shadow-sm dark:border-red-900/60 dark:bg-slate-900">
               <p className="font-semibold text-slate-800 dark:text-slate-100">위시를 불러오지 못했어요.</p>
