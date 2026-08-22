@@ -3,11 +3,6 @@
   width: 100%;
 }
 
-.post-trip-wish-track .post-trip-panel {
-  position: sticky;
-  top: 0;
-}
-
 .wish-pin {
   display: flex;
   height: 100%;

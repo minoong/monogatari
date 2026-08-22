@@ -12,6 +12,7 @@ import "./post-trip-scroll-experience.css";
 import "./post-trip-wish-pin.css";
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 const HERO_IMAGE = "/images/post-trip-scroll.jpg";
 const HERO_SCROLL_DISTANCE = 1.2;
@@ -94,7 +95,6 @@ const CONTENT_PANELS: ContentPanel[] = [
     label: "편지",
     title: "다음 여행에게",
     tone: "rose",
-    scrollable: true,
   },
 ];
 
@@ -165,8 +165,12 @@ const WISH_IDLE_COLOR = "rgba(6, 95, 70, 0.38)";
 
 function appendOverscrollExit(timeline: gsap.core.Timeline, content: HTMLElement) {
   timeline
-    .fromTo(content, { scale: 1, opacity: 1 }, { scale: 0.7, opacity: 0.5, duration: 0.9 })
-    .to(content, { opacity: 0, duration: 0.1 });
+    .fromTo(
+      content,
+      { scale: 1, opacity: 1 },
+      { scale: 0.7, opacity: 0.5, duration: 0.9, force3D: false },
+    )
+    .to(content, { opacity: 0, duration: 0.1, force3D: false });
 }
 
 function setupWishLateralAct(panel: HTMLElement, timeline: gsap.core.Timeline, innerDuration: number) {
@@ -214,26 +218,34 @@ function setupWishLateralAct(panel: HTMLElement, timeline: gsap.core.Timeline, i
   timeline.to({}, { duration: 0.01 }, innerDuration);
 }
 
-function setupWishStickyPanel(panel: HTMLElement, content: HTMLElement, scroller: HTMLElement, viewportHeight: number) {
-  const listItems = gsap.utils.toArray(".wish-pin-item", panel);
-  const track = panel.parentElement;
-  if (!listItems.length || !track?.classList.contains("post-trip-wish-track")) return;
+function isPanelTrack(element: HTMLElement | null): element is HTMLElement {
+  return Boolean(
+    element?.classList.contains("post-trip-panel-track") || element?.classList.contains("post-trip-wish-track"),
+  );
+}
 
-  const lateralDistance = listItems.length * 0.5 * viewportHeight;
+function layoutStickyTrack(panel: HTMLElement, viewportHeight: number, holdDistance: number) {
+  const track = panel.parentElement;
+  if (!isPanelTrack(track)) return null;
+
+  const roundedHold = Math.max(0, Math.round(holdDistance));
   const exitDistance = viewportHeight;
-  const stickyDistance = lateralDistance + exitDistance;
-  const fakeScrollRatio = stickyDistance > 0 ? lateralDistance / stickyDistance : 0;
+  const stickyDistance = roundedHold + exitDistance;
+  const fakeScrollRatio = stickyDistance > 0 ? roundedHold / stickyDistance : 0;
   const innerDuration = fakeScrollRatio ? 1 / (1 - fakeScrollRatio) - 1 : 0;
   const nextPanel = track.nextElementSibling;
 
   gsap.set(track, { height: viewportHeight + stickyDistance });
   gsap.set(panel, { height: viewportHeight, marginBottom: 0, top: 0 });
   if (nextPanel instanceof HTMLElement) {
-    // Pull the next overscroll panel into the exit range so it slides over the sticky wish.
     gsap.set(nextPanel, { marginTop: -exitDistance });
   }
 
-  const timeline = gsap.timeline({
+  return { track, stickyDistance, innerDuration, holdDistance: roundedHold };
+}
+
+function createStickyTimeline(track: HTMLElement, scroller: HTMLElement, stickyDistance: number) {
+  return gsap.timeline({
     scrollTrigger: {
       trigger: track,
       scroller,
@@ -242,46 +254,47 @@ function setupWishStickyPanel(panel: HTMLElement, content: HTMLElement, scroller
       scrub: true,
     },
   });
+}
 
-  setupWishLateralAct(panel, timeline, innerDuration);
+function setupWishStickyPanel(panel: HTMLElement, content: HTMLElement, scroller: HTMLElement, viewportHeight: number) {
+  const listItems = gsap.utils.toArray(".wish-pin-item", panel);
+  if (!listItems.length) return;
+
+  const layout = layoutStickyTrack(panel, viewportHeight, listItems.length * 0.5 * viewportHeight);
+  if (!layout) return;
+
+  const timeline = createStickyTimeline(layout.track, scroller, layout.stickyDistance);
+  setupWishLateralAct(panel, timeline, layout.innerDuration);
   appendOverscrollExit(timeline, content);
 }
 
-function setupOverscrollPanel(
+function measureInnerOverflow(inner: HTMLElement, viewportHeight: number) {
+  const previousHeight = inner.style.height;
+  inner.style.height = "auto";
+  const innerHeight = Math.round(inner.scrollHeight);
+  inner.style.height = previousHeight;
+  return Math.max(0, innerHeight - viewportHeight);
+}
+
+function setupStickyOverscrollPanel(
   panel: HTMLElement,
   inner: HTMLElement,
   content: HTMLElement,
   scroller: HTMLElement,
   viewportHeight: number,
 ) {
-  panel.style.height = `${viewportHeight}px`;
+  const holdDistance = measureInnerOverflow(inner, viewportHeight);
+  const layout = layoutStickyTrack(panel, viewportHeight, holdDistance);
+  if (!layout) return;
 
-  const panelHeight = inner.scrollHeight;
-  const difference = panelHeight - viewportHeight;
-  const fakeScrollRatio = difference > 0 ? difference / (difference + viewportHeight) : 0;
+  const timeline = createStickyTimeline(layout.track, scroller, layout.stickyDistance);
 
-  if (fakeScrollRatio) {
-    panel.style.marginBottom = `${panelHeight * fakeScrollRatio}px`;
-  }
-
-  const timeline = gsap.timeline({
-    scrollTrigger: {
-      trigger: panel,
-      scroller,
-      start: "bottom bottom",
-      end: () => (fakeScrollRatio ? `+=${panelHeight}` : "bottom top"),
-      pinSpacing: false,
-      pin: true,
-      scrub: true,
-    },
-  });
-
-  if (fakeScrollRatio) {
+  if (layout.holdDistance > 0) {
     timeline.to(inner, {
-      yPercent: -100,
-      y: viewportHeight,
-      duration: 1 / (1 - fakeScrollRatio) - 1,
+      y: -layout.holdDistance,
+      duration: layout.innerDuration,
       ease: "none",
+      force3D: false,
     });
   }
 
@@ -290,25 +303,21 @@ function setupOverscrollPanel(
 
 function setupPinnedPanels(scroller: HTMLElement, panels: HTMLElement[], viewportHeight: number) {
   panels.forEach((panel, index) => {
-    const stackRoot = panel.parentElement?.classList.contains("post-trip-wish-track")
-      ? panel.parentElement
-      : panel;
-    gsap.set(stackRoot, { zIndex: 10 + index });
-  });
-
-  const pinPanels = panels.slice(0, -1);
-
-  pinPanels.forEach((panel) => {
     const inner = panel.querySelector<HTMLElement>(".post-trip-panel-inner");
     const content = panel.querySelector<HTMLElement>(".post-trip-panel-content");
     if (!inner || !content) return;
+
+    if (index === panels.length - 1) {
+      gsap.set(panel, { height: viewportHeight });
+      return;
+    }
 
     if (panel.querySelector(".wish-pin")) {
       setupWishStickyPanel(panel, content, scroller, viewportHeight);
       return;
     }
 
-    setupOverscrollPanel(panel, inner, content, scroller, viewportHeight);
+    setupStickyOverscrollPanel(panel, inner, content, scroller, viewportHeight);
   });
 }
 
@@ -341,7 +350,7 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
         const heroTrack = heroTrackRef.current;
         const panels = panelRefs.current.filter((panel): panel is HTMLElement => panel !== null);
 
-        const viewportHeight = scroller ? Math.round(scroller.getBoundingClientRect().height) : 0;
+        const viewportHeight = scroller ? Math.round(scroller.clientHeight) : 0;
 
         if (
           !scroller ||
@@ -424,12 +433,16 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
             </section>
           );
 
-          return section.id === "wish" ? (
-            <div className="post-trip-wish-track" key={section.id}>
+          const isLast = index === CONTENT_PANELS.length - 1;
+          if (isLast) return panel;
+
+          return (
+            <div
+              className={`post-trip-panel-track${section.id === "wish" ? " post-trip-wish-track" : ""}`}
+              key={section.id}
+            >
               {panel}
             </div>
-          ) : (
-            panel
           );
         })}
       </div>

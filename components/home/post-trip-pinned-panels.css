@@ -3,6 +3,16 @@
   width: 100%;
 }
 
+.post-trip-panel-track {
+  position: relative;
+  width: 100%;
+}
+
+.post-trip-panel-track .post-trip-panel {
+  position: sticky;
+  top: 0;
+}
+
 .post-trip-panel {
   position: relative;
   box-sizing: border-box;
@@ -34,7 +44,7 @@
 
 .post-trip-panel--scrollable .post-trip-panel-inner {
   height: auto;
-  padding-bottom: 20vh;
+  padding-bottom: 2rem;
 }
 
 .post-trip-panel-eyebrow {
