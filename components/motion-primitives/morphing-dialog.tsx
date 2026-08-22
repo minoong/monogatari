@@ -389,6 +389,7 @@ export type MorphingDialogCloseProps = {
   ariaLabel?: string;
   children?: React.ReactNode;
   className?: string;
+  footerAction?: boolean;
   onClick?: () => void;
   variants?: {
     initial: Variant;
@@ -401,6 +402,7 @@ function MorphingDialogClose({
   ariaLabel = '상세 닫기',
   children,
   className,
+  footerAction = false,
   onClick,
 }: MorphingDialogCloseProps) {
   const { setIsOpen } = useMorphingDialog();
@@ -410,15 +412,15 @@ function MorphingDialogClose({
     onClick?.();
   }, [onClick, setIsOpen]);
 
-  const isFooterAction = Boolean(className?.includes('static'));
+  const isInline = Boolean(className?.includes('static'));
 
   return (
     <Button
       aria-label={ariaLabel}
-      fullWidth={isFooterAction}
+      fullWidth={footerAction}
       className={cn(
-        !isFooterAction && 'absolute top-6 right-6',
-        isFooterAction && dialogFooterButtonClass,
+        !isInline && 'absolute top-6 right-6',
+        footerAction && dialogFooterButtonClass,
         className,
       )}
       onPress={handlePress}

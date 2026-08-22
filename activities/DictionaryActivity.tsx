@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Button, Chip } from "@heroui/react";
 import {
@@ -63,6 +63,9 @@ import {
   dialogIconButtonClass,
   dialogPrimaryButtonClass,
   dialogSecondaryButtonClass,
+  filterChipButtonClass,
+  filterChipSelectedClass,
+  filterChipUnselectedClass,
 } from "@/components/ui/drawer-form";
 import { WordRotate } from "@/components/ui/word-rotate";
 import { cn } from "@/lib/utils";
@@ -131,6 +134,13 @@ const CATEGORY_META = {
 }>;
 
 const CATEGORY_FILTERS = ["전체", "기본", "이동", "식당", "쇼핑", "마사지", "긴급"] as const;
+
+function hasNextVisiblePhrase(fromIndex: number, visibleIds: ReadonlySet<number>) {
+  for (let index = fromIndex + 1; index < THAI_PHRASES.length; index += 1) {
+    if (visibleIds.has(THAI_PHRASES[index].id)) return true;
+  }
+  return false;
+}
 
 const getShowLocallyThaiFontSize = (text: string) => {
   const len = text.length;
@@ -392,7 +402,7 @@ function DictionaryPhraseDetail({
   );
 }
 
-function DictionaryPhraseRow({
+const DictionaryPhraseRow = React.memo(function DictionaryPhraseRow({
   item,
   meta,
   onOpen,
@@ -400,6 +410,7 @@ function DictionaryPhraseRow({
   prefersReducedMotion,
   showDivider,
   speakerGender,
+  hidden = false,
 }: {
   item: PhraseItem;
   meta: (typeof CATEGORY_META)[PhraseItem["category"]];
@@ -408,12 +419,13 @@ function DictionaryPhraseRow({
   prefersReducedMotion: boolean | null;
   showDivider: boolean;
   speakerGender: SpeakerGender;
+  hidden?: boolean;
 }) {
   const resolved = resolvePhraseForSpeaker(item, speakerGender);
 
   return (
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.42 }}>
-      <div data-dictionary-entry role="listitem">
+      <div className={cn(hidden && "hidden")} data-dictionary-entry role="listitem">
         <MorphingDialogTrigger
           ariaLabel={`${item.ko} 현지인에게 보여주기`}
           className="flex w-full items-start gap-3 px-4 py-3.5 text-left outline-none transition-colors active:bg-black/[0.04] focus-visible:bg-black/[0.03] dark:active:bg-white/[0.06] dark:focus-visible:bg-white/[0.04]"
@@ -461,7 +473,7 @@ function DictionaryPhraseRow({
       </MorphingDialogContainer>
     </MorphingDialog>
   );
-}
+});
 
 export const DictionaryActivity: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -558,22 +570,31 @@ export const DictionaryActivity: React.FC = () => {
   };
 
   // 필터링된 회화 데이터
-  const filteredPhrases = useMemo(() => {
-    return THAI_PHRASES.filter((phrase) => {
+  const visiblePhraseIds = useMemo(() => {
+    const ids = new Set<number>();
+    for (const phrase of THAI_PHRASES) {
       const matchesCat =
         selectedCategory === "전체" || phrase.category === selectedCategory;
       const matchesSearch = matchKoreanSearch(phrase, searchQuery);
-      return matchesCat && matchesSearch;
-    });
+      if (matchesCat && matchesSearch) {
+        ids.add(phrase.id);
+      }
+    }
+    return ids;
   }, [searchQuery, selectedCategory]);
 
+  const filteredPhrases = useMemo(
+    () => THAI_PHRASES.filter((phrase) => visiblePhraseIds.has(phrase.id)),
+    [visiblePhraseIds],
+  );
+
   // 카드 탭 시 최근 검색어 저장 및 햅틱 피드백
-  const handlePhraseOpen = () => {
+  const handlePhraseOpen = useCallback(() => {
     triggerHapticFeedback(15);
     if (searchQuery.trim()) {
       saveRecentSearch(searchQuery);
     }
-  };
+  }, [searchQuery]);
 
   const handleSpeakerGenderChange = (gender: SpeakerGender) => {
     if (gender === speakerGender) return;
@@ -583,7 +604,7 @@ export const DictionaryActivity: React.FC = () => {
   };
 
   // 태국어 음성 읽기 (TTS)
-  const playAudio = (text: string, e?: React.MouseEvent | unknown) => {
+  const playAudio = useCallback((text: string, e?: React.MouseEvent | unknown) => {
     if (e && typeof e === "object" && "stopPropagation" in e) {
       (e as React.MouseEvent).stopPropagation();
     }
@@ -598,7 +619,7 @@ export const DictionaryActivity: React.FC = () => {
       utterance.lang = "th-TH";
       window.speechSynthesis.speak(utterance);
     }
-  };
+  }, []);
 
   return (
     <AppScreen className="dictionary-screen captured-scroll-screen" appBar={{ title: "태국어 사전... 당황하지 말라고!" }}>
@@ -623,18 +644,18 @@ export const DictionaryActivity: React.FC = () => {
                   key={category}
                   aria-pressed={isSelected}
                   className={cn(
-                    "touch-manipulation shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold",
-                    isSelected
-                      ? "border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900"
-                      : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400",
+                    filterChipButtonClass,
+                    isSelected ? filterChipSelectedClass : filterChipUnselectedClass,
                   )}
-                  isDisabled={isSelected}
                   onPress={() => {
+                    if (isSelected) return;
                     triggerHapticFeedback(10);
-                    setSelectedCategory(category);
+                    startTransition(() => {
+                      setSelectedCategory(category);
+                    });
                   }}
                   size="sm"
-                  variant={isSelected ? "primary" : "secondary"}
+                  variant="ghost"
                 >
                   <span>{meta?.label ?? "전체"}</span>
                 </Button>
@@ -716,15 +737,16 @@ export const DictionaryActivity: React.FC = () => {
                 <p className="mt-1 text-[15px] text-[#3c3c4399] dark:text-[#ebebf599]">다른 단어 또는 초성으로 다시 찾아보세요.</p>
               </div>
             ) : (
-              filteredPhrases.map((item, index) => (
+              THAI_PHRASES.map((item, index) => (
                 <DictionaryPhraseRow
                   key={item.id}
+                  hidden={!visiblePhraseIds.has(item.id)}
                   item={item}
                   meta={CATEGORY_META[item.category]}
                   onOpen={handlePhraseOpen}
                   onPlayAudio={playAudio}
                   prefersReducedMotion={prefersReducedMotion}
-                  showDivider={index < filteredPhrases.length - 1}
+                  showDivider={visiblePhraseIds.has(item.id) && hasNextVisiblePhrase(index, visiblePhraseIds)}
                   speakerGender={speakerGender}
                 />
               ))

@@ -170,6 +170,7 @@ export function ExpenseReceiptDetail({ expense, categoryColor, onDelete, onEdit 
         <MorphingDialogClose
           ariaLabel="지출 삭제"
           className={cn("static", dialogFooterDangerIconButtonClass)}
+          footerAction
           onClick={onDelete}
         >
           <Trash2 className="size-4" />
@@ -177,12 +178,14 @@ export function ExpenseReceiptDetail({ expense, categoryColor, onDelete, onEdit 
         <MorphingDialogClose
           ariaLabel="상세 닫기"
           className={cn("static", dialogFooterSecondaryButtonClass)}
+          footerAction
         >
           닫기
         </MorphingDialogClose>
         <MorphingDialogClose
           ariaLabel="지출 수정"
           className={cn("static", dialogFooterPrimaryButtonClass)}
+          footerAction
           onClick={onEdit}
         >
           <Pencil className="size-4" />

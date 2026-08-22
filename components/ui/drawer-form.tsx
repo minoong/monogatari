@@ -12,7 +12,7 @@ export const drawerCancelButtonClass = "h-12 rounded-2xl bg-slate-100 text-base 
 export const drawerPrimaryButtonClass = "h-12 rounded-2xl bg-blue-500 text-base font-bold text-white shadow-sm hover:bg-blue-600 active:bg-blue-700 disabled:bg-blue-200 disabled:text-white/80 disabled:shadow-none";
 export const drawerDangerButtonClass = "h-12 rounded-2xl bg-red-500 text-base font-bold text-white shadow-sm hover:bg-red-600 active:bg-red-700 disabled:bg-red-200 disabled:text-white/80 disabled:shadow-none";
 export const dialogPrimaryButtonClass = "h-[50px] rounded-[13px] bg-[#007aff] text-[17px] font-semibold text-white active:opacity-80 dark:bg-[#0a84ff]";
-export const dialogSecondaryButtonClass = "h-[50px] rounded-[13px] bg-[#f2f2f7] text-[17px] font-semibold text-[#007aff] active:opacity-70 dark:bg-[#2c2c2e] dark:text-[#0a84ff]";
+export const dialogSecondaryButtonClass = "h-[50px] shrink-0 rounded-[13px] bg-[#f2f2f7] px-5 text-[17px] font-semibold text-[#007aff] active:opacity-70 dark:bg-[#2c2c2e] dark:text-[#0a84ff] !w-auto !min-w-0";
 export const dialogIconButtonClass = "size-8 min-w-8 rounded-full text-[#8e8e93] active:opacity-60 dark:text-[#98989d]";
 export const cardNavButtonClass =
   "!flex !h-auto min-h-0 w-full flex-col items-stretch justify-start gap-0 whitespace-normal text-left";
@@ -28,6 +28,12 @@ export const dialogFooterPrimaryButtonClass =
   `${dialogFooterButtonClass} !bg-slate-900 text-white hover:!bg-slate-800 active:!bg-slate-950 dark:!bg-white dark:text-slate-900`;
 export const dialogFooterDangerIconButtonClass =
   `${dialogFooterButtonClass} !w-full border border-red-200 !bg-red-50 text-red-500 hover:!bg-red-100 active:!bg-red-200 dark:border-red-900/50 dark:!bg-red-950/40`;
+export const filterChipButtonClass =
+  "touch-manipulation !h-auto min-h-0 shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold shadow-none [--button-bg:transparent] hover:[--button-bg:transparent] active:[--button-bg-pressed:transparent]";
+export const filterChipSelectedClass =
+  "border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900";
+export const filterChipUnselectedClass =
+  "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400";
 
 export function DrawerIntro({ open, image, alt, title, description }: { open: boolean; image: string; alt: string; title?: string; description?: string }) {
   return <div className="flex flex-col items-center justify-center">

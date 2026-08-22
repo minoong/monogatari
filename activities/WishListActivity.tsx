@@ -12,7 +12,7 @@ import { GooeyInput } from "@/components/ui/gooey-input";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { cn } from "@/lib/utils";
-import { drawerCancelButtonClass, drawerDangerButtonClass, dialogFooterPrimaryButtonClass, dialogFooterSecondaryButtonClass } from "@/components/ui/drawer-form";
+import { drawerCancelButtonClass, drawerDangerButtonClass, dialogFooterPrimaryButtonClass, dialogFooterSecondaryButtonClass, filterChipButtonClass, filterChipSelectedClass, filterChipUnselectedClass } from "@/components/ui/drawer-form";
 import {
   AlertDialog,
   AlertDialogDescription,
@@ -175,14 +175,12 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
                       <Button
                         key={cat}
                         className={cn(
-                          "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold",
-                          isSelected
-                            ? "border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900"
-                            : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400",
+                          filterChipButtonClass,
+                          isSelected ? filterChipSelectedClass : filterChipUnselectedClass,
                         )}
                         onPress={() => handleCategoryToggle(cat)}
                         size="sm"
-                        variant={isSelected ? "primary" : "secondary"}
+                        variant="ghost"
                       >
                         {cat}
                       </Button>
@@ -493,12 +491,14 @@ function WishListItem({
               <MorphingDialogClose
                 ariaLabel="다이얼로그 닫기"
                 className={cn("static flex-1", dialogFooterSecondaryButtonClass)}
+                footerAction
               >
                 닫기
               </MorphingDialogClose>
               <MorphingDialogClose
                 ariaLabel={`${wish.title} 편집`}
                 className={cn("static flex-1", dialogFooterPrimaryButtonClass)}
+                footerAction
                 onClick={onEdit}
               >
                 <Pencil className="size-4" />

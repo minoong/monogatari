@@ -137,8 +137,8 @@ export function ScheduleCard({ item, current, cardRef, onEdit, onDelete, showTim
             <div className="shrink-0 border-t border-slate-100 bg-slate-50/70 p-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
               <div className="flex items-center gap-2">
                 <Button aria-label={`${item.title} 삭제`} className="flex h-11 w-11 min-w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500 dark:bg-red-500/10 dark:text-red-400" isIconOnly onPress={onDelete} size="lg" variant="ghost"><Trash2 className="size-4.5" /></Button>
-                <MorphingDialogClose ariaLabel="다이얼로그 닫기" className={cn("static flex-1", dialogFooterSecondaryButtonClass)}>닫기</MorphingDialogClose>
-                <MorphingDialogClose ariaLabel={`${item.title} 편집`} className={cn("static flex-1", dialogFooterPrimaryButtonClass)} onClick={onEdit}><Pencil className="size-4" />편집</MorphingDialogClose>
+                <MorphingDialogClose ariaLabel="다이얼로그 닫기" className={cn("static flex-1", dialogFooterSecondaryButtonClass)} footerAction>닫기</MorphingDialogClose>
+                <MorphingDialogClose ariaLabel={`${item.title} 편집`} className={cn("static flex-1", dialogFooterPrimaryButtonClass)} footerAction onClick={onEdit}><Pencil className="size-4" />편집</MorphingDialogClose>
               </div>
             </div>
           </MorphingDialogContent>
