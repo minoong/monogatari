@@ -1,15 +1,14 @@
 "use client";
 
-import { useRef, useEffect, type ReactNode, type RefObject } from "react";
+import { useRef, type ReactNode, type RefObject } from "react";
 import { useQuery } from "@tanstack/react-query";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { PostTripPrepMasonry } from "@/components/home/PostTripPrepMasonry";
 import { PostTripScheduleDriftWall } from "@/components/home/PostTripScheduleDriftWall";
-import { PostTripScheduleGlass } from "@/components/home/PostTripScheduleGlass";
-import { PostTripScheduleTimeline } from "@/components/home/PostTripScheduleTimeline";
 import { PostTripWishPinIndicator } from "@/components/home/PostTripWishPinIndicator";
+import ScrollFloat from "@/components/ScrollFloat";
 import type { ScheduleItem } from "@/lib/schedule";
 import { fetchChecklist } from "@/lib/checklist";
 import { TRIP_RETURN_FLIGHT } from "@/lib/trip-phase";
@@ -39,7 +38,6 @@ const CONTENT_PANELS: ContentPanel[] = [
     label: "일정",
     title: "4일의 리듬",
     tone: "sky",
-    scrollable: true,
   },
   {
     id: "wish",
@@ -282,9 +280,25 @@ function setupStickyOverscrollPanel(
 
 function setupPinnedPanels(scroller: HTMLElement, panels: HTMLElement[], viewportHeight: number) {
   panels.forEach((panel, index) => {
-    const inner = panel.querySelector<HTMLElement>(".post-trip-panel-inner");
     const content = panel.querySelector<HTMLElement>(".post-trip-panel-content");
-    if (!inner || !content) return;
+    if (!content) return;
+
+    if (panel.querySelector(".post-trip-panel-content--schedule")) {
+      const layout = layoutStickyTrack(panel, viewportHeight, 0);
+      if (!layout) return;
+
+      const timeline = createStickyTimeline(
+        layout.track,
+        scroller,
+        layout.stickyDistance,
+        "post-trip-schedule",
+      );
+      appendOverscrollExit(timeline, content);
+      return;
+    }
+
+    const inner = panel.querySelector<HTMLElement>(".post-trip-panel-inner");
+    if (!inner) return;
 
     if (index === panels.length - 1) {
       gsap.set(panel, { height: viewportHeight });
@@ -297,12 +311,7 @@ function setupPinnedPanels(scroller: HTMLElement, panels: HTMLElement[], viewpor
     }
 
     const isPrepPanel = Boolean(panel.querySelector(".post-trip-panel-inner--prep"));
-    const isSchedulePanel = Boolean(panel.querySelector(".post-trip-panel-inner--schedule"));
-    const scrollTriggerId = isPrepPanel
-      ? "post-trip-prep"
-      : isSchedulePanel
-        ? "post-trip-schedule"
-        : undefined;
+    const scrollTriggerId = isPrepPanel ? "post-trip-prep" : undefined;
     setupStickyOverscrollPanel(
       panel,
       inner,
@@ -337,7 +346,6 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
   const heroTrackRef = useRef<HTMLDivElement>(null);
   const panelRefs = useRef<(HTMLElement | null)[]>([]);
   const refreshPrepScrollRef = useRef<(() => void) | null>(null);
-  const refreshScheduleScrollRef = useRef<(() => void) | null>(null);
   const prepRevealRef = useRef<HTMLDivElement>(null);
   const returnFlight = TRIP_RETURN_FLIGHT;
   const { data: wishes = [] } = useQuery({ queryKey: ["wishes"], queryFn: fetchWishes });
@@ -389,25 +397,6 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
           }
         }
 
-        const schedulePanel = panels.find((panel) => panel.querySelector(".post-trip-panel-inner--schedule"));
-        if (schedulePanel) {
-          const inner = schedulePanel.querySelector<HTMLElement>(".post-trip-panel-inner");
-          const content = schedulePanel.querySelector<HTMLElement>(".post-trip-panel-content");
-          if (inner && content) {
-            refreshScheduleScrollRef.current = () => {
-              setupStickyOverscrollPanel(
-                schedulePanel,
-                inner,
-                content,
-                scroller,
-                Math.round(scroller.clientHeight),
-                "post-trip-schedule",
-              );
-              ScrollTrigger.refresh();
-            };
-          }
-        }
-
         ScrollTrigger.refresh();
       };
 
@@ -419,12 +408,6 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
     },
     { scope: wrapperRef, dependencies: [scrollContainerRef] },
   );
-
-  useEffect(() => {
-    if (!scheduleItems.length) return;
-    const frame = requestAnimationFrame(() => refreshScheduleScrollRef.current?.());
-    return () => cancelAnimationFrame(frame);
-  }, [scheduleItems]);
 
   return (
     <div ref={wrapperRef} className="post-trip-scroll-experience w-full">
@@ -475,20 +458,19 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
                 {section.id === "schedule" ? (
                   <>
                     <PostTripScheduleDriftWall scheduleItems={scheduleItems} />
-                    <div className="post-trip-schedule-stack">
-                      <PostTripScheduleGlass />
-                      <div className="post-trip-panel-inner post-trip-panel-inner--schedule">
-                        <p className="post-trip-panel-eyebrow">{section.label}</p>
-                        <h2 className="post-trip-panel-title">{section.title}</h2>
-                        <p className="post-trip-panel-lead">
-                          월요일엔 왓 아룬, 화요일엔 짜뚜짝 시장. 밤마다 다른 골목이 우리를 기다렸어요.
-                        </p>
-                        <PostTripScheduleTimeline
-                          items={scheduleItems}
-                          scrollContainerRef={scrollContainerRef}
-                          onLayoutChange={() => refreshScheduleScrollRef.current?.()}
-                        />
-                      </div>
+                    <div className="post-trip-schedule-title">
+                      <ScrollFloat
+                        scrollContainerRef={scrollContainerRef}
+                        containerClassName="post-trip-schedule-title__float"
+                        textClassName="post-trip-schedule-title__text"
+                        animationDuration={1}
+                        ease="back.inOut(2)"
+                        scrollStart="center bottom+=50%"
+                        scrollEnd="bottom bottom-=40%"
+                        stagger={0.03}
+                      >
+                        {section.title}
+                      </ScrollFloat>
                     </div>
                   </>
                 ) : section.id === "wish" ? (

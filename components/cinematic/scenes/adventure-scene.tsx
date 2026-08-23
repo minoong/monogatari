@@ -15,13 +15,24 @@ import {
   PixelShout,
   SkyBackdrop,
 } from "@/components/cinematic/effects/comic";
-import { STAGE_HEIGHT, STAGE_WIDTH, seg, smooth } from "@/components/cinematic/scene-utils";
+import { STAGE_HEIGHT, STAGE_WIDTH, easeOutBack, seg, smooth } from "@/components/cinematic/scene-utils";
 
-const SLOTS = [
-  { url: "/cinematic/adventure/01.jpg", label: "모험 01", x: -2.05, y: 2.4, tilt: 0.14 },
-  { url: "/cinematic/adventure/02.jpg", label: "모험 02", x: 2.05, y: 1.1, tilt: -0.12 },
-  { url: "/cinematic/adventure/03.jpg", label: "모험 03", x: -1.5, y: -0.6, tilt: -0.08 },
-];
+const PHOTO_COUNT = 28;
+const GRID_COLS = 7;
+
+const MONTAGE_PHOTOS = Array.from({ length: PHOTO_COUNT }, (_, i) => {
+  const col = i % GRID_COLS;
+  const row = Math.floor(i / GRID_COLS);
+  const num = String(i + 1).padStart(2, "0");
+  return {
+    url: `/cinematic/adventure/${num}.jpg`,
+    label: `모험 ${num}`,
+    x: -3.12 + col * 1.04,
+    y: 3.9 - row * 1.02,
+    tilt: ((i % 3) - 1) * 0.06,
+    appear: 0.03 + i * 0.018,
+  };
+});
 
 export function AdventureScene() {
   const clock = useCutClock();
@@ -37,14 +48,14 @@ export function AdventureScene() {
 
     cards.current.forEach((card, i) => {
       if (!card) return;
-      const from = 0.08 + i * 0.16;
-      const enter = smooth(seg(p, from, from + 0.22));
+      const slot = MONTAGE_PHOTOS[i];
+      const enter = smooth(seg(p, slot.appear, slot.appear + 0.07));
       card.visible = enter > 0.01;
       const dir = i % 2 === 0 ? -1 : 1;
-      card.position.x = SLOTS[i].x + dir * 6 * (1 - enter);
-      card.position.y = SLOTS[i].y + Math.sin(t * 1.4 + i) * 0.09;
-      card.rotation.z = SLOTS[i].tilt * enter + Math.sin(t * 1.1 + i) * 0.02;
-      card.scale.setScalar(0.8 + enter * 0.2);
+      card.position.x = slot.x + dir * 3.2 * (1 - enter);
+      card.position.y = slot.y + Math.sin(t * 1.3 + i) * 0.04;
+      card.rotation.z = slot.tilt * enter + Math.sin(t * 1.1 + i) * 0.012;
+      card.scale.setScalar(0.76 + enter * 0.24);
     });
 
     if (runners.current) {
@@ -64,10 +75,10 @@ export function AdventureScene() {
       });
     }
 
+    const shoutIn = smooth(seg(p, 0.72, 0.86));
     if (shout.current) {
-      const show = seg(p, 0.68, 0.86);
-      shout.current.visible = show > 0.02;
-      shout.current.scale.setScalar(0.7 + show * 0.4);
+      shout.current.visible = shoutIn > 0.02;
+      shout.current.scale.setScalar(0.58 + easeOutBack(shoutIn) * 0.42);
       shout.current.rotation.z = Math.sin(t * 5) * 0.05;
     }
   });
@@ -83,19 +94,19 @@ export function AdventureScene() {
         <PixelArt height={24} opacity={0.55} cacheKey="cloud" paint={paintCloud} position={[0, -0.9, 0]} size={1.4} width={40} />
       </group>
 
-      {SLOTS.map((slot, i) => (
+      {MONTAGE_PHOTOS.map((slot, i) => (
         <group
           key={slot.url}
+          position={[slot.x, slot.y, 1.3]}
           ref={(node) => {
             cards.current[i] = node;
           }}
           visible={false}
         >
-          <PhotoSlot height={3} label={slot.label} resolution={132} url={slot.url} />
+          <PhotoSlot height={0.92} label={slot.label} resolution={92} url={slot.url} />
         </group>
       ))}
 
-      {/* 달리는 길 */}
       <mesh position={[0, -5.2, -2]}>
         <planeGeometry args={[20, 3.6]} />
         <meshBasicMaterial color="#2b7a4b" toneMapped={false} />
@@ -123,15 +134,7 @@ export function AdventureScene() {
         <PixelShout color="#ffe45e" height={0.9} text="계속 모험 중!" wobble={0.02} />
       </group>
 
-      <PixelParticles
-        area={[8, 12]}
-        color="#ffffff"
-        count={18}
-        shape="star"
-        size={0.2}
-        speed={1.2}
-        z={1.6}
-      />
+      <PixelParticles area={[8, 12]} color="#ffffff" count={18} shape="star" size={0.2} speed={1.2} z={1.6} />
     </StageFit>
   );
 }

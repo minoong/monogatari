@@ -186,7 +186,35 @@
 
 .post-trip-panel-content--schedule {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
+}
+
+.post-trip-schedule-title {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 0 1.25rem;
+  pointer-events: none;
+}
+
+.post-trip-schedule-title__float {
+  margin: 0;
+  width: 100%;
+}
+
+.post-trip-schedule-title__text {
+  width: 100%;
+  font-size: clamp(2rem, 9vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: #0c4a6e;
+  text-shadow:
+    0 1px 18px rgba(224, 242, 254, 0.95),
+    0 0 1px rgba(255, 255, 255, 0.8);
 }
 
 .post-trip-schedule-drift {
@@ -199,42 +227,6 @@
 .post-trip-schedule-drift__wall {
   height: 100%;
   background: #bae6fd;
-}
-
-.post-trip-schedule-stack {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 28rem;
-  margin-inline: auto;
-}
-
-.post-trip-panel-inner--schedule {
-  position: relative;
-  z-index: 2;
-  align-items: stretch;
-  max-width: none;
-  width: 100%;
-  text-align: left;
-  overflow: visible;
-}
-
-.post-trip-panel--scrollable.post-trip-panel .post-trip-panel-inner--schedule {
-  height: auto;
-  min-height: 100%;
-}
-
-.post-trip-panel-inner--schedule .post-trip-panel-eyebrow,
-.post-trip-panel-inner--schedule .post-trip-panel-title,
-.post-trip-panel-inner--schedule .post-trip-panel-lead {
-  text-align: center;
-  text-shadow: 0 1px 18px rgba(224, 242, 254, 0.95), 0 0 1px rgba(255, 255, 255, 0.8);
-}
-
-.post-trip-panel-inner--schedule .post-trip-panel-lead {
-  margin-top: 0.85rem;
-  color: #4a5568;
-  opacity: 1;
 }
 
 .post-trip-panel--emerald {

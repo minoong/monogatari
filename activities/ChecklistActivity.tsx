@@ -15,7 +15,8 @@ import {
   TabsContent as AnimateTabsContent,
   TabsContents as AnimateTabsContents,
 } from "../components/animate-ui/components/animate/tabs";
-import { Button, Chip, Tabs as HeroTabs } from "@heroui/react";
+import { Chip, Tabs as HeroTabs } from "@heroui/react";
+import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, useMotionValue, animate, useTransform, useReducedMotion } from "framer-motion";
 import { RingChart } from "../components/ui/ring-chart";
 import { useRef } from "react";
@@ -64,80 +65,78 @@ const ProgressIslandContent = ({
 }) => {
   const { setSize, state } = useDynamicIslandSize();
   const isExpanded = state.size === SIZE_PRESETS.PROGRESS_EXPANDED;
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
   const toggleExpand = () => {
     if (isExpanded) {
+      setDetailsOpen(false);
+      return;
+    }
+
+    setSize(SIZE_PRESETS.PROGRESS_EXPANDED);
+    setDetailsOpen(true);
+  };
+
+  const handleDetailsExitComplete = () => {
+    if (!detailsOpen && isExpanded) {
       setSize(SIZE_PRESETS.PROGRESS_COLLAPSED);
-    } else {
-      setSize(SIZE_PRESETS.PROGRESS_EXPANDED);
     }
   };
 
   return (
     <DynamicIsland id="progress-island">
-      <Button
+      <button
+        type="button"
         aria-controls="progress-island-content"
         aria-expanded={isExpanded}
-        className="relative h-full w-full flex-col p-4 text-left"
-        fullWidth
-        onPress={toggleExpand}
-        variant="ghost"
+        onClick={toggleExpand}
+        className={cn(
+          "flex h-full w-full min-h-0 flex-col items-stretch overflow-hidden rounded-[inherit] bg-transparent px-4 text-left outline-none transition-colors hover:bg-black/[0.02] active:bg-black/[0.04] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:hover:bg-white/[0.04] dark:active:bg-white/[0.06]",
+          isExpanded ? "justify-start" : "justify-center",
+        )}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between w-full h-[52px]">
-          <div className="flex items-center gap-3">
-            <RingChart rings={rings} size={52} strokeWidth={6} gap={2.5} />
-            <div className="text-left flex flex-col justify-center">
-              <h2 className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-0.5">진행 상황</h2>
-              <span className="text-gray-900 dark:text-gray-100 font-extrabold flex items-center text-xl tracking-tight leading-none">
-                <AnimatedNumber value={progress} />%
-              </span>
-            </div>
+        <div className="flex w-full shrink-0 items-center gap-2.5">
+          <RingChart rings={rings} size={40} strokeWidth={4.5} gap={1.5} className="shrink-0 [&_circle]:[filter:none]" />
+          <div className="min-w-0 flex-1 text-left">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              진행 상황
+            </p>
+            <p className="mt-0.5 text-[1.35rem] font-extrabold leading-none tracking-tight text-gray-900 dark:text-gray-100">
+              <AnimatedNumber value={progress} />%
+            </p>
           </div>
-          
-          <motion.div animate={{ rotate: prefersReducedMotion ? 0 : isExpanded ? 180 : 0 }}>
-            <ChevronDown aria-hidden="true" size={20} className="text-neutral-500" />
+          <motion.div
+            animate={{ rotate: prefersReducedMotion ? 0 : isExpanded ? 180 : 0 }}
+            className="flex size-5 shrink-0 items-center justify-center text-neutral-400"
+          >
+            <ChevronDown aria-hidden="true" size={16} />
           </motion.div>
         </div>
 
         {/* Expanded Content */}
-        <AnimatePresence>
-          {isExpanded && (
+        <AnimatePresence onExitComplete={handleDetailsExitComplete}>
+          {detailsOpen && (
             <motion.div
               id="progress-island-content"
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: prefersReducedMotion ? undefined : { staggerChildren: 0.1 },
-                },
-                exit: {
-                  opacity: 0,
-                  transition: { duration: prefersReducedMotion ? 0 : 0.1 },
-                },
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+                transition: { duration: prefersReducedMotion ? 0 : 0.18, ease: "easeOut" },
               }}
-              className="w-full flex flex-col mt-4 overflow-hidden"
+              exit={{
+                opacity: 0,
+                transition: { duration: prefersReducedMotion ? 0 : 0.14, ease: "easeIn" },
+              }}
+              className="mt-2 flex w-full flex-col overflow-hidden pb-3"
             >
-              <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-3 w-full text-left">
+              <div className="flex w-full flex-col gap-3 border-t border-gray-100 pt-3 text-left dark:border-gray-800">
                 {[
                   { id: "all", label: "전체", progress, text: "text-blue-500", bg: "bg-blue-500", avatar: null },
                   { id: "gahyun", label: "가현쨩", progress: gahyunProgress, text: "text-pink-500", bg: "bg-pink-500", avatar: "gahyun" as const },
                   { id: "minu", label: "미누쿤", progress: minuProgress, text: "text-emerald-500", bg: "bg-emerald-500", avatar: "minu" as const },
                 ].map((item, i) => (
-                  <motion.div
-                    key={item.id}
-                    variants={{
-                      hidden: { opacity: 0, y: 20 },
-                      visible: { opacity: 1, y: 0 },
-                      exit: { opacity: 0, y: prefersReducedMotion ? 0 : 10, transition: { duration: prefersReducedMotion ? 0 : 0.1 } },
-                    }}
-                    transition={{ duration: prefersReducedMotion ? 0 : 0.4, ease: "easeOut" }}
-                    className="space-y-1"
-                  >
+                  <div key={item.id} className="space-y-1">
                     <div className="flex justify-between items-center text-[11px]">
                       <div className="flex items-center gap-1.5">
                         {item.avatar && (
@@ -167,13 +166,13 @@ const ProgressIslandContent = ({
                         transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.2 + i * 0.1, ease: "easeOut" }}
                       />
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </Button>
+      </button>
     </DynamicIsland>
   );
 };

@@ -21,9 +21,9 @@ import { fetchChecklist, getChecklistBattleStats, type PreparationItem } from ".
 import { BeforeTripWeatherTicker, TravelWeatherWidget } from "../components/weather/TravelWeatherWidget";
 import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
 import { PostTripSection } from "@/components/home/PostTripSection";
+import { DuringTripShortcutCards } from "@/components/home/DuringTripShortcutCards";
 import { WishGoalRings } from "@/components/home/WishGoalRings";
 import { getTripPhase } from "@/lib/trip-phase";
-import { rowNavButtonClass, tileNavButtonClass } from "@/components/ui/drawer-form";
 import type { WishItem, WishType } from "@/lib/wishes";
 
 dayjs.extend(utc);
@@ -438,7 +438,7 @@ const BangkokDepartureCard: React.FC = () => {
 };
 
 export const HomeActivity: React.FC = () => {
-  const { push, replace } = useFlow();
+  const { push } = useFlow();
   const [tripState, setTripState] = useState<"before" | "during" | "after">(() => getTripPhase());
   const {
     data: checklistItems = [],
@@ -502,7 +502,7 @@ export const HomeActivity: React.FC = () => {
                     stats={checklistBattleStats}
                     isLoading={isChecklistLoading}
                     isError={isChecklistError}
-                    onOpen={() => replace("ChecklistActivity", {}, { animate: false })}
+                    onOpen={() => push("ChecklistActivity", {})}
                     onRetry={() => void refetchChecklist()}
                   />
 
@@ -522,32 +522,12 @@ export const HomeActivity: React.FC = () => {
                     <WishGoalRings onTypePress={openWishType} wishes={wishes} />
                   )}
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button className={`rounded-2xl border bg-white p-4 shadow-sm dark:bg-gray-800 ${tileNavButtonClass}`} fullWidth onPress={() => replace("ScheduleActivity", {}, { animate: false })} variant="secondary">
-                      <span className="text-2xl">📅</span>
-                      <span className="font-semibold">오늘의 일정</span>
-                    </Button>
-                    <Button className={`rounded-2xl border bg-white p-4 shadow-sm dark:bg-gray-800 ${tileNavButtonClass}`} fullWidth onPress={() => replace("DictionaryActivity", {}, { animate: false })} variant="secondary">
-                      <span className="text-2xl">🗣️</span>
-                      <span className="font-semibold">태국어 회화</span>
-                    </Button>
-                  </div>
-
-                  <Button className={`min-h-16 rounded-2xl border border-slate-200 bg-white px-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 ${rowNavButtonClass}`} fullWidth onPress={() => push("ExpenseActivity", {})} variant="secondary">
-                    <div>
-                      <h3 className="font-bold text-slate-900 dark:text-white">여행 가계부</h3>
-                      <p className="mt-0.5 text-sm text-slate-500">지출 등록 · 통계 · 자동 정산</p>
-                    </div>
-                    <span className="text-2xl" aria-hidden="true">🧾</span>
-                  </Button>
-
-                  <Button className={`rounded-2xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/30 ${rowNavButtonClass}`} fullWidth onPress={() => push("ExchangeActivity", {})} variant="secondary">
-                    <div>
-                      <h3 className="font-bold">빠른 환율 계산</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">100바트 ≈ 3,800원</p>
-                    </div>
-                    <span className="text-2xl">👉</span>
-                  </Button>
+                  <DuringTripShortcutCards
+                    onOpenSchedule={() => push("ScheduleActivity", {})}
+                    onOpenDictionary={() => push("DictionaryActivity", {})}
+                    onOpenExpense={() => push("ExpenseActivity", {})}
+                    onOpenExchange={() => push("ExchangeActivity", {})}
+                  />
 
                   <FlightWidget onOpen={(passengerId) => push("FlightActivity", { passengerId })} />
 

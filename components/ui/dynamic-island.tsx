@@ -383,22 +383,22 @@ const DynamicIslandContent = ({
 }) => {
   const { state, presets } = useDynamicIslandSize()
   const currentSize = presets[state.size]
-
+  const previousPreset = state.previousSize ? presets[state.previousSize] : currentSize
   const dimensions = calculateDimensions(state.size, screenSize, currentSize)
+  const previousDimensions = calculateDimensions(state.previousSize ?? state.size, screenSize, previousPreset)
+  const isShrinking = dimensions.height < previousDimensions.height
 
   return (
     <motion.div
       id={id}
-      className="mx-auto h-0 w-0 overflow-hidden items-center justify-center border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm transition duration-300 ease-in-out hover:shadow-md"
+      className="mx-auto flex h-0 w-0 flex-col overflow-hidden border border-gray-100 bg-white shadow-sm transition duration-300 ease-in-out hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
       animate={{
         width: dimensions.width,
         height: dimensions.height,
         borderRadius: currentSize.borderRadius,
-        transition: {
-          type: "spring",
-          stiffness,
-          damping,
-        },
+        transition: isShrinking
+          ? { type: "tween", duration: 0.28, ease: [0.4, 0, 0.2, 1] }
+          : { type: "spring", stiffness, damping },
       }}
       style={{ willChange }}
       {...props}

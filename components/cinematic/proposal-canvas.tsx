@@ -10,6 +10,10 @@ import { disposeLoadedTextures } from "@/components/cinematic/pixel-billboard";
 import { AdventureScene } from "@/components/cinematic/scenes/adventure-scene";
 import { BirthdayPartyScene } from "@/components/cinematic/scenes/birthday-party-scene";
 import { DatingStartScene } from "@/components/cinematic/scenes/dating-start-scene";
+import { FirstDateScene } from "@/components/cinematic/scenes/first-date-scene";
+import { FukuokaTripScene } from "@/components/cinematic/scenes/fukuoka-trip-scene";
+import { GahyunBdayScene } from "@/components/cinematic/scenes/gahyun-bday-scene";
+import { MinuBday2026Scene } from "@/components/cinematic/scenes/minu-bday-2026-scene";
 import { FlightScene } from "@/components/cinematic/scenes/flight-scene";
 import { GTowerScene } from "@/components/cinematic/scenes/g-tower-scene";
 import { ProposalScene } from "@/components/cinematic/scenes/proposal-scene";
@@ -39,22 +43,26 @@ function ActiveScene({ cutId }: { cutId: CutId }) {
       return <GTowerScene />;
     case "minu-bday-2025":
       return (
-        <BirthdayPartyScene honoree="minu" label="2025.05.27" photoUrl="/cinematic/birthday/minu-2025.jpg" />
+        <BirthdayPartyScene
+          honoree="minu-bday"
+          label="2025.05.27"
+          photoUrl="/cinematic/birthday/minu-2025.jpg"
+        />
       );
     case "dating-start":
       return <DatingStartScene />;
+    case "first-date-2025":
+      return <FirstDateScene />;
     case "wotagei":
       return <WotageiScene />;
+    case "fukuoka-2025":
+      return <FukuokaTripScene />;
     case "gahyun-bday":
-      return (
-        <BirthdayPartyScene honoree="gahyun" label="2025.10.31" photoUrl="/cinematic/birthday/gahyun-2025.jpg" />
-      );
+      return <GahyunBdayScene />;
     case "adventure":
       return <AdventureScene />;
     case "minu-bday-2026":
-      return (
-        <BirthdayPartyScene honoree="minu" label="2026.05.27" photoUrl="/cinematic/birthday/minu-2026.jpg" />
-      );
+      return <MinuBday2026Scene />;
     case "flight-out":
       return <FlightScene heading="out" />;
     case "proposal":

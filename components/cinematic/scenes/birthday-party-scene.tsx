@@ -8,7 +8,7 @@ import { PhotoSlot } from "@/components/cinematic/pixel-billboard";
 import { StageFit } from "@/components/cinematic/stage-fit";
 import { PixelArt, paintCake } from "@/components/cinematic/sprites/pixel-art";
 import { PixelCharacter, type CharacterKind } from "@/components/cinematic/sprites/pixel-character";
-import { cheerPose } from "@/components/cinematic/sprites/poses";
+import { birthdayCheerPose, cheerPose } from "@/components/cinematic/sprites/poses";
 import {
   Halftone,
   PixelParticles,
@@ -67,7 +67,8 @@ export function BirthdayPartyScene({
     }
   });
 
-  const partner: CharacterKind = honoree === "minu" ? "gahyun" : "minu";
+  const partner: CharacterKind = honoree === "gahyun" ? "minu" : "gahyun";
+  const honoreePose = honoree === "minu-bday" ? birthdayCheerPose : cheerPose;
 
   return (
     <StageFit height={STAGE_HEIGHT} width={STAGE_WIDTH}>
@@ -110,7 +111,7 @@ export function BirthdayPartyScene({
         </group>
 
         <group position={[-2.1, 0.5, 0.6]}>
-          <PixelCharacter fps={16} height={3.1} kind={honoree} pose={(e) => cheerPose(e)} />
+          <PixelCharacter fps={16} height={3.1} kind={honoree} pose={(e) => honoreePose(e)} />
         </group>
         <group position={[2.1, 0.42, 0.5]}>
           <PixelCharacter flip fps={12} height={3} kind={partner} pose={(e) => cheerPose(e, 0.6)} />

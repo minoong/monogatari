@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useCutClock } from "@/components/cinematic/cinematic-clock";
-import { PixelBillboard } from "@/components/cinematic/pixel-billboard";
+import { PhotoSlot, PixelBillboard } from "@/components/cinematic/pixel-billboard";
 import { StageCover, StageFit } from "@/components/cinematic/stage-fit";
 import { PixelCharacter } from "@/components/cinematic/sprites/pixel-character";
 import { idlePose, leanInPose, walkPose } from "@/components/cinematic/sprites/poses";
@@ -19,6 +19,11 @@ import { STAGE_HEIGHT, STAGE_WIDTH, easeOutBack, seg, smooth } from "@/component
 const MIKU_W = 6.82;
 const MIKU_H = 10.24;
 
+const DATING_PHOTOS = {
+  minu: "/cinematic/dating/minu.jpg",
+  gahyun: "/cinematic/dating/gahyun.jpg",
+} as const;
+
 export function DatingStartScene() {
   const clock = useCutClock();
   const minu = useRef<THREE.Group>(null);
@@ -27,12 +32,13 @@ export function DatingStartScene() {
   const shout = useRef<THREE.Group>(null);
   const rays = useRef<THREE.Group>(null);
   const backdrop = useRef<THREE.Group>(null);
+  const photoMinu = useRef<THREE.Group>(null);
+  const photoGahyun = useRef<THREE.Group>(null);
 
   useFrame((state) => {
     const p = clock.current.progress;
     const t = state.clock.elapsedTime;
 
-    // 배경 미쿠 타페스트리가 아주 천천히 밀려 들어온다
     if (backdrop.current) {
       backdrop.current.position.y = -0.25 + p * 0.5;
       backdrop.current.scale.setScalar(1.06 - p * 0.06);
@@ -41,6 +47,18 @@ export function DatingStartScene() {
     const close = smooth(seg(p, 0.05, 0.55));
     if (minu.current) minu.current.position.x = -2.9 + 2.0 * close;
     if (gahyun.current) gahyun.current.position.x = 2.9 - 2.0 * close;
+
+    const photoIn = smooth(seg(p, 0.42, 0.72));
+    if (photoMinu.current) {
+      photoMinu.current.position.y = 3.75 + (1 - photoIn) * 0.6;
+      photoMinu.current.rotation.z = (1 - photoIn) * -0.2 + Math.sin(t * 1.4) * 0.02;
+      photoMinu.current.visible = photoIn > 0.01;
+    }
+    if (photoGahyun.current) {
+      photoGahyun.current.position.y = 3.75 + (1 - photoIn) * 0.6;
+      photoGahyun.current.rotation.z = (1 - photoIn) * 0.2 + Math.sin(t * 1.4 + 0.5) * 0.02;
+      photoGahyun.current.visible = photoIn > 0.01;
+    }
 
     const bloom = seg(p, 0.55, 0.85);
     if (heart.current) {
@@ -61,12 +79,13 @@ export function DatingStartScene() {
     const p = clock.current.progress;
     if (p < 0.5) return walkPose(elapsed, offset);
     if (p < 0.62) return idlePose(elapsed, offset);
-    return leanInPose(elapsed, smooth(seg(p, 0.62, 0.85)), offset > 0 ? -1 : 1);
+    const lean = leanInPose(elapsed, smooth(seg(p, 0.62, 0.85)), offset > 0 ? -1 : 1);
+    lean.hearts = true;
+    return lean;
   };
 
   return (
     <>
-      {/* 도트로 갈아낸 미쿠짱 타페스트리 배경 */}
       <StageCover height={MIKU_H} width={MIKU_W} z={-6}>
         <group ref={backdrop}>
           <PixelBillboard
@@ -97,7 +116,6 @@ export function DatingStartScene() {
           <SpeedLines color="#ffffff" count={52} inner={0.24} opacity={0.2} size={34} spin={0.32} z={-3.2} />
         </group>
 
-        {/* 하트는 인물 뒤에 두어 얼굴을 가리지 않게 한다 */}
         <group position={[0, -0.2, -1.2]} ref={heart} visible={false}>
           <PixelParticles
             area={[3.4, 3]}
@@ -111,10 +129,17 @@ export function DatingStartScene() {
         </group>
 
         <group position={[-2.9, -1.2, 1]} ref={minu}>
-          <PixelCharacter fps={13} height={3.1} kind="minu" pose={pose(0)} />
+          <PixelCharacter fps={13} height={3.1} kind="minu-dating" pose={pose(0)} />
         </group>
         <group position={[2.9, -1.24, 1]} ref={gahyun}>
-          <PixelCharacter flip fps={13} height={3.04} kind="gahyun" pose={pose(0.5)} />
+          <PixelCharacter flip fps={13} height={3.04} kind="gahyun-dating" pose={pose(0.5)} />
+        </group>
+
+        <group position={[-2.35, 3.75, 1.2]} ref={photoMinu} visible={false}>
+          <PhotoSlot height={1.85} label="2025.08.31" resolution={118} url={DATING_PHOTOS.minu} />
+        </group>
+        <group position={[2.35, 3.75, 1.2]} ref={photoGahyun} visible={false}>
+          <PhotoSlot height={1.85} label="2025.08.31" resolution={118} url={DATING_PHOTOS.gahyun} />
         </group>
 
         <group position={[0, 4.2, 1.6]} ref={shout} visible={false}>
