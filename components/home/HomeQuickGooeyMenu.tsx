@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useId, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useStack } from "@stackflow/react";
 import { ChevronRight } from "lucide-react";
 import { triggerHapticFeedback } from "@/components/BottomNav";
+import { useFabEnterAnimation } from "@/components/ui/activity-register-fab";
 import { useExchangeRates } from "@/lib/exchange-rates";
 import { UTILITY_CARDS, type UtilityActivity } from "@/lib/utility-cards";
 import { cn } from "@/lib/utils";
@@ -135,6 +136,7 @@ export function HomeQuickGooeyMenu({ onNavigate }: HomeQuickGooeyMenuProps) {
   const filterId = `home-gooey-${reactId.replace(/:/g, "")}`;
   const { activities } = useStack();
   const homeOnTop = useMemo(() => isHomeActivityOnTop(activities), [activities]);
+  const fabRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [fabPressed, setFabPressed] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -142,6 +144,7 @@ export function HomeQuickGooeyMenu({ onNavigate }: HomeQuickGooeyMenuProps) {
   const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const { data: exchangeData } = useExchangeRates();
   const thbRate = exchangeData?.THB ?? 42.8;
+  useFabEnterAnimation(fabRef, homeOnTop);
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -201,7 +204,10 @@ export function HomeQuickGooeyMenu({ onNavigate }: HomeQuickGooeyMenuProps) {
         />
       ) : null}
 
-      <div className="pointer-events-none fixed right-5 z-[70] bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),12px))]">
+      <div
+        ref={fabRef}
+        className="pointer-events-none fixed right-5 z-[70] bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),12px))]"
+      >
         <GooeyFilter filterId={filterId} />
 
         <div className="relative size-12">

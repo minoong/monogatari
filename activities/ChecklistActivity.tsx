@@ -30,6 +30,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { NativeHapticSwitch } from "../components/ui/native-haptic-switch";
 import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
+import { useFabEnterAnimation } from "@/components/ui/activity-register-fab";
 import {
   fetchChecklist,
   getChecklistBattleStats,
@@ -511,6 +512,8 @@ export const ChecklistActivity: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
   const locallyUpdatingKeys = useRef(new Set<string>());
   const toggleEntriesRef = useRef(new Map<string, ToggleEntry>());
+  const fabRef = useRef<HTMLDivElement>(null);
+  useFabEnterAnimation(fabRef);
   const [sortCompletedMap, setSortCompletedMap] = useState<Record<string, boolean>>({});
   const sortTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
@@ -983,7 +986,10 @@ export const ChecklistActivity: React.FC = () => {
         </div>
 
         {/* Floating Action Button */}
-        <div className="fixed right-6 z-50 h-14 w-14 bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),12px))]">
+        <div
+          ref={fabRef}
+          className="fixed right-6 z-50 h-14 w-14 bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),12px))]"
+        >
           <NeumorphButton
             aria-hidden="true"
             type="button"

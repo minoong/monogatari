@@ -14,6 +14,26 @@ gsap.registerPlugin(useGSAP);
 
 const FAB_COMPACT_SCROLL_PX = 80;
 
+export function useFabEnterAnimation(
+  fabRef: RefObject<HTMLElement | null>,
+  enabled = true,
+) {
+  const prefersReducedMotion = useReducedMotion();
+
+  useGSAP(() => {
+    if (prefersReducedMotion || !enabled || !fabRef.current) return;
+    gsap.from(fabRef.current, {
+      scale: 0.4,
+      autoAlpha: 0,
+      duration: 0.5,
+      ease: "back.out(1.7)",
+      clearProps: "opacity,visibility,transform",
+    });
+  }, { dependencies: [enabled, prefersReducedMotion] });
+
+  return prefersReducedMotion;
+}
+
 function isScrollRelevant(target: HTMLElement, anchor: HTMLElement) {
   return target === anchor || anchor.contains(target) || target.contains(anchor);
 }
@@ -60,6 +80,7 @@ export function ActivityRegisterFab({
   const prefersReducedMotion = useReducedMotion();
   const fabRef = useRef<HTMLDivElement>(null);
   const [fabCompact, setFabCompact] = useState(false);
+  useFabEnterAnimation(fabRef);
 
   useEffect(() => {
     let frame = 0;
@@ -138,17 +159,6 @@ export function ActivityRegisterFab({
       if (frame) cancelAnimationFrame(frame);
     };
   }, [scrollAnchorRef, scrollElementRef, scrollKey]);
-
-  useGSAP(() => {
-    if (prefersReducedMotion || !fabRef.current) return;
-    gsap.from(fabRef.current, {
-      scale: 0.4,
-      autoAlpha: 0,
-      duration: 0.5,
-      ease: "back.out(1.7)",
-      clearProps: "opacity,visibility,transform",
-    });
-  }, { dependencies: [prefersReducedMotion] });
 
   return (
     <div
