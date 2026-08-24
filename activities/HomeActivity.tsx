@@ -22,6 +22,7 @@ import { BeforeTripWeatherTicker, TravelWeatherWidget } from "../components/weat
 import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
 import { PostTripSection } from "@/components/home/PostTripSection";
 import { DuringTripShortcutCards } from "@/components/home/DuringTripShortcutCards";
+import { HomeQuickGooeyMenu } from "@/components/home/HomeQuickGooeyMenu";
 import { WishGoalRings } from "@/components/home/WishGoalRings";
 import { getTripPhase } from "@/lib/trip-phase";
 import type { WishItem, WishType } from "@/lib/wishes";
@@ -542,6 +543,12 @@ export const HomeActivity: React.FC = () => {
           </div>
         </Tabs>
       </div>
+
+      {tripState !== "after" && (
+        <HomeQuickGooeyMenu
+          onNavigate={(activity) => push(activity, {})}
+        />
+      )}
     </AppScreen>
   );
 };
