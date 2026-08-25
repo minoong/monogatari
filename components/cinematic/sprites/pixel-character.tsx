@@ -400,19 +400,40 @@ function drawShoppingBag(ctx: CanvasRenderingContext2D, x: number, y: number, ac
   rect(ctx, x + 2, y + 4, 6, 3, accent);
 }
 
-function drawMasterSword(
+function drawKnife(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
+  angle: number,
   blade: string,
   outline: string,
 ) {
-  rect(ctx, x, y, 4, 18, "#c9a227");
-  rect(ctx, x - 2, y + 16, 8, 3, "#8b6914");
-  rect(ctx, x - 6, y + 18, 16, 3, "#5fd0ff");
-  rect(ctx, x - 1, y - 14, 6, 16, blade);
-  rect(ctx, x, y - 16, 4, 3, "#e8f7ff");
-  rect(ctx, x - 1, y - 14, 6, 1, outline);
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  const perpX = -sin;
+  const perpY = cos;
+
+  for (let i = 0; i < 4; i += 1) {
+    const gripX = x - cos * i;
+    const gripY = y - sin * i;
+    rect(ctx, gripX - 1, gripY - 1, 3, 3, "#5c3d1e");
+    rect(ctx, gripX - 1, gripY + 1, 3, 1, outline);
+  }
+
+  rect(ctx, x + perpX * 2 - 1, y + perpY * 2 - 1, 3, 3, "#8b6914");
+  rect(ctx, x - perpX * 2 - 1, y - perpY * 2 - 1, 3, 3, "#8b6914");
+
+  for (let i = 1; i <= 13; i += 1) {
+    const size = i < 10 ? 4 : 3;
+    const bladeX = x + cos * (i + 2);
+    const bladeY = y + sin * (i + 2);
+    rect(ctx, bladeX - Math.floor(size / 2), bladeY - Math.floor(size / 2), size, size, i < 11 ? blade : "#eef6ff");
+    if (i === 4 || i === 8) {
+      rect(ctx, bladeX + perpX - 1, bladeY + perpY - 1, 1, 2, "#ffffff");
+    }
+  }
+
+  rect(ctx, x + cos * 16, y + sin * 16, 2, 2, outline);
 }
 
 function drawHeartEye(ctx: CanvasRenderingContext2D, x: number, y: number) {
@@ -663,7 +684,8 @@ function drawCharacter(
   }
 
   if (kind === "gahyun-dating") {
-    drawMasterSword(ctx, handR.x - 2, handR.y - 10, p.accent, p.outline);
+    const armAngle = Math.PI / 2 - pose.armRight;
+    drawKnife(ctx, handR.x + 2, handR.y + 2, armAngle, "#c8d4e0", p.outline);
   }
 
   if (pose.penlight || kind === "minu-dating") {
