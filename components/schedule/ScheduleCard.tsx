@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight, Pencil, Trash2, ZoomIn } from "lucide-react";
+import { ArrowUpRight, ImagePlus, Pencil, Trash2, ZoomIn } from "lucide-react";
 import { Button } from "@heroui/react";
 import ElectricBorder from "@/components/ElectricBorder";
 import { ClockIcon } from "@/components/ui/clock-icon";
@@ -16,17 +16,21 @@ import { cn } from "@/lib/utils";
 
 const CURRENT_ACCENT = "#3b82f6";
 
+const actionButtonClass =
+  "relative inline-flex size-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-200";
+
 interface ScheduleCardProps {
   item: ScheduleItem;
   current: boolean;
   cardRef?: React.Ref<HTMLDivElement>;
   onEdit: () => void;
   onDelete: () => void;
+  onPhotos: () => void;
   /** 타임라인 좌측에 시간이 있으면 카드 안 시간은 숨긴다. */
   showTime?: boolean;
 }
 
-export function ScheduleCard({ item, current, cardRef, onEdit, onDelete, showTime = true }: ScheduleCardProps) {
+export function ScheduleCard({ item, current, cardRef, onEdit, onDelete, onPhotos, showTime = true }: ScheduleCardProps) {
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
   const [zoomImageIndex, setZoomImageIndex] = useState(0);
   const prefersReducedMotion = useReducedMotion();
@@ -46,7 +50,7 @@ export function ScheduleCard({ item, current, cardRef, onEdit, onDelete, showTim
     >
       <MorphingDialogTrigger
         ariaLabel={`${item.title} 자세히 보기`}
-        className={cn("group block w-full rounded-3xl p-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-blue-500", item.google_maps_url ? "pb-11" : "pb-4", showTime ? "min-h-28" : "min-h-24")}
+        className={cn("group block w-full rounded-3xl p-4 pb-11 text-left outline-none focus-visible:ring-2 focus-visible:ring-blue-500", showTime ? "min-h-28" : "min-h-24")}
       >
         <div className="flex min-w-0 gap-3.5">
           <div className="min-w-0 flex-1">
@@ -81,17 +85,38 @@ export function ScheduleCard({ item, current, cardRef, onEdit, onDelete, showTim
           )}
         </div>
       </MorphingDialogTrigger>
-      {item.google_maps_url && (
-        <a
-          aria-label={`${item.title} Google Maps 열기`}
-          href={item.google_maps_url}
-          target="_blank"
-          rel="noreferrer"
-          className="absolute bottom-3 right-4 z-10 inline-flex size-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+      <div className="absolute bottom-3 right-4 z-10 flex items-center gap-0.5">
+        <button
+          aria-label={`${item.title} 사진 올리기`}
+          className={actionButtonClass}
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onPhotos();
+          }}
+          onPointerDown={(event) => event.stopPropagation()}
         >
-          <MapPinIcon size={18} />
-        </a>
-      )}
+          <ImagePlus size={18} />
+          {item.tripImages?.length > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 min-w-3.5 rounded-full bg-blue-500 px-1 text-center text-[9px] font-bold leading-4 text-white">
+              {item.tripImages.length}
+            </span>
+          )}
+        </button>
+        {item.google_maps_url && (
+          <a
+            aria-label={`${item.title} Google Maps 열기`}
+            href={item.google_maps_url}
+            target="_blank"
+            rel="noreferrer"
+            className={actionButtonClass}
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <MapPinIcon size={18} />
+          </a>
+        )}
+      </div>
     </motion.article>
   );
 

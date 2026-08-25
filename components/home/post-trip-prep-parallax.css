@@ -1,0 +1,111 @@
+.post-trip-panel-content--prep {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  text-align: left;
+}
+
+.post-trip-prep-intro {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 2;
+  width: 100%;
+  padding: 1.75rem 1.25rem 3rem;
+  background: linear-gradient(180deg, #fef3c7 0%, rgba(254, 243, 199, 0.92) 52%, rgba(254, 243, 199, 0));
+  pointer-events: none;
+}
+
+.post-trip-prep-intro .post-trip-panel-eyebrow,
+.post-trip-prep-intro .post-trip-panel-title,
+.post-trip-prep-intro .post-trip-panel-lead {
+  width: 100%;
+  max-width: 32rem;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+
+.post-trip-prep-intro .post-trip-panel-lead {
+  margin-top: 0.85rem;
+  max-width: 32rem;
+}
+
+.post-trip-prep-parallax {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  box-sizing: border-box;
+  display: flex;
+  min-height: 175%;
+  gap: 2vw;
+  overflow: hidden;
+  padding: 2vw;
+}
+
+.post-trip-prep-parallax__column {
+  position: relative;
+  display: flex;
+  width: 25%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2vw;
+  will-change: transform;
+}
+
+.post-trip-prep-parallax__column:nth-child(1),
+.post-trip-prep-parallax__column:nth-child(3) {
+  top: -45%;
+}
+
+.post-trip-prep-parallax__column:nth-child(2) {
+  top: -95%;
+}
+
+.post-trip-prep-parallax__column:nth-child(4) {
+  top: -75%;
+}
+
+.post-trip-prep-parallax__tile {
+  position: relative;
+  flex: 0 0 auto;
+  height: 34vh;
+  min-height: 12rem;
+  width: 100%;
+  overflow: hidden;
+  background: rgba(146, 64, 14, 0.08);
+}
+
+.post-trip-prep-parallax__tile img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+.post-trip-prep-parallax__caption {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 1.75rem 0.7rem 0.6rem;
+  background: linear-gradient(to top, rgba(69, 26, 3, 0.82), rgba(69, 26, 3, 0));
+  color: #fffbeb;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: left;
+  text-shadow: 0 1px 8px rgba(69, 26, 3, 0.35);
+}
+
+.post-trip-prep-parallax__empty {
+  position: relative;
+  z-index: 1;
+  margin: 8rem auto 0;
+  padding: 0 1.25rem;
+}

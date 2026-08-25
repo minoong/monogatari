@@ -178,13 +178,17 @@ export function ScheduleDrawer({
             <section>
               <Label className="mb-2"><DrawerFieldLabel icon={CalendarDaysIcon} active={open} interactionSignal={dateInteraction}>날짜</DrawerFieldLabel></Label>
               <Button
-                className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm dark:border-slate-700 dark:bg-slate-900"
-                fullWidth
+                className="h-auto min-h-16 w-full justify-start gap-3 whitespace-normal rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm dark:border-slate-700 dark:bg-slate-900"
                 onPress={() => setCalendarOpen(true)}
                 variant="secondary"
               >
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300"><CalendarDays className="size-5" /></span>
-                <span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-400">여행 날짜</span><span className="mt-0.5 block font-extrabold text-slate-900 dark:text-white">{formatLongTripDate(date)}</span></span>
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300">
+                  <CalendarDays className="size-5" />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="text-xs font-semibold text-slate-400">여행 날짜</span>
+                  <span className="font-extrabold leading-tight text-slate-900 dark:text-white">{formatLongTripDate(date)}</span>
+                </span>
                 <ChevronRight className="size-4 shrink-0 text-slate-400" />
               </Button>
             </section>
@@ -246,8 +250,8 @@ export function ScheduleDrawer({
             <div className="grid gap-2"><Label htmlFor="schedule-title"><DrawerFieldLabel icon={ScanTextIcon} active={open}>제목</DrawerFieldLabel></Label><Input id="schedule-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={100} placeholder="예: 호텔 체크인" /></div>
             <div className="grid gap-2"><Label htmlFor="schedule-subtitle"><DrawerFieldLabel icon={FileTextIcon} active={open}>서브타이틀</DrawerFieldLabel></Label><TextArea id="schedule-subtitle" value={subtitle} onChange={(event) => setSubtitle(event.target.value)} maxLength={500} placeholder="메모나 이동 정보" /></div>
             <div className="grid gap-2"><Label htmlFor="schedule-map"><DrawerFieldLabel icon={LinkIcon} active={open}>Google Maps 링크</DrawerFieldLabel></Label><Input id="schedule-map" value={mapUrl} onChange={(event) => setMapUrl(event.target.value)} placeholder="https://maps.app.goo.gl/..." /></div>
-            <DrawerFieldLabel icon={GalleryThumbnailsIcon} active={open}>사진</DrawerFieldLabel>
-            <WishImagePicker images={images} onChange={setImages} />
+            <DrawerFieldLabel icon={GalleryThumbnailsIcon} active={open}>대표 사진</DrawerFieldLabel>
+            <WishImagePicker description="일정 카드에 보여요. 여행에서 찍은 사진은 카드의 사진 버튼으로 올려 주세요." images={images} onChange={setImages} />
             {error && <p className="text-sm font-medium text-red-500">{error}</p>}
           </DrawerPanel>
           <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">

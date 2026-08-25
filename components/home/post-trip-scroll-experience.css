@@ -5,15 +5,28 @@
   width: 100%;
 }
 
+.post-trip-scroll-experience:not(.is-ready) .post-trip-pinned-panels {
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.post-trip-scroll-experience.is-ready .post-trip-pinned-panels {
+  visibility: visible;
+}
+
 .post-trip-hero-track {
   position: relative;
   width: 100%;
+  min-height: calc(max(420px, 100svh - 10rem) * 2.55);
 }
 
 .post-trip-hero-stage {
   position: sticky;
   top: 0;
-  min-height: 420px;
+  height: max(420px, calc(100svh - 10rem));
+  min-height: max(420px, calc(100svh - 10rem));
 }
 
 .post-trip-hero-frame {

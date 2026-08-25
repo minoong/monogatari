@@ -24,6 +24,10 @@ export function PostTripScheduleDriftWall({ scheduleItems }: PostTripScheduleDri
     preloadDriftImages(items.map((item) => item.image));
   }, [items]);
 
+  if (items.length === 0) {
+    return <div className="post-trip-schedule-drift" aria-hidden />;
+  }
+
   return (
     <div className="post-trip-schedule-drift" aria-hidden>
       <DriftWall

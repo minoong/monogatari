@@ -466,7 +466,7 @@ export const HomeActivity: React.FC = () => {
   };
 
   return (
-    <AppScreen appBar={{ title: "태국 여행 2026" }}>
+    <AppScreen appBar={{ title: "태국을 점령하라!" }}>
       <div
         className={
           tripState === "after"

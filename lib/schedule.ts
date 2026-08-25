@@ -5,6 +5,8 @@ export type TripDate = string;
 export const TRIP_START_DATE: TripDate = TRIP_DATES[0];
 export const TRIP_END_DATE: TripDate = TRIP_DATES[TRIP_DATES.length - 1];
 
+export type ScheduleImageKind = "cover" | "trip";
+
 export interface ScheduleImage {
   id: string;
   path: string;
@@ -19,9 +21,11 @@ export interface ScheduleItem {
   title: string;
   subtitle: string | null;
   google_maps_url: string | null;
+  trip_memo: string | null;
   created_at: string;
   updated_at: string;
   images: ScheduleImage[];
+  tripImages: ScheduleImage[];
 }
 
 export const isTripDate = (value: unknown): value is TripDate =>

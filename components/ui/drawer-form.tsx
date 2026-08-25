@@ -35,9 +35,9 @@ export const filterChipSelectedClass =
 export const filterChipUnselectedClass =
   "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400";
 
-export function DrawerIntro({ open, image, alt, title, description }: { open: boolean; image: string; alt: string; title?: string; description?: string }) {
+export function DrawerIntro({ open, image, alt, title, description, imageClassName }: { open: boolean; image: string; alt: string; title?: string; description?: string; imageClassName?: string }) {
   return <div className="flex flex-col items-center justify-center">
-    <div className="relative my-1 h-32 w-full max-w-[280px] overflow-hidden rounded-2xl border border-slate-100 shadow-sm">
+    <div className={cn("relative my-1 h-32 w-full max-w-[280px] overflow-hidden rounded-2xl border border-slate-100 shadow-sm", imageClassName)}>
       <Image src={image} alt={alt} fill className="object-cover" sizes="280px" />
     </div>
     {title && <TextEffect as="p" per="char" preset="fade" trigger={open} className="mt-2 text-center text-sm font-medium text-slate-800">{title}</TextEffect>}

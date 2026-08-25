@@ -132,23 +132,3 @@
     box-shadow: 0 0 18px rgba(255, 255, 255, 0.45);
   }
 }
-
-.post-trip-panel-inner--prep {
-  max-width: none;
-  align-items: stretch;
-  height: auto;
-  overflow: visible;
-  padding: 0 0 1.5rem;
-  text-align: left;
-}
-
-.post-trip-panel-inner--prep .post-trip-panel-eyebrow,
-.post-trip-panel-inner--prep .post-trip-panel-title,
-.post-trip-panel-inner--prep .post-trip-panel-lead {
-  width: 100%;
-  text-align: left;
-}
-
-.post-trip-panel-inner--prep .post-trip-panel-lead {
-  margin-top: 0.85rem;
-}

@@ -1,7 +1,7 @@
 import { isWishType, WISH_TYPE_META } from "@/lib/wishes";
 
 export const ACTIVITY_APP_BAR_TITLES = {
-  HomeActivity: "태국 여행 2026",
+  HomeActivity: "태국을 점령하라!",
   ExchangeActivity: "환율 계산기... 바가지 쓰지 마!",
   DictionaryActivity: "태국어 사전... 당황하지 말라고!",
   ScheduleActivity: "일정, 제대로 따라와!",

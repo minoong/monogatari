@@ -7,6 +7,8 @@ import { isBeforeReturnBoarding } from "@/lib/trip-phase";
 
 const SCROLL_HEIGHT = "calc(100svh - 10rem)";
 const WAITING_MEDIA_SRC = "/home/213121.gif";
+/** 여행 후 화면 개발용. 끝나면 true로 되돌린다. */
+const SHOW_RETURN_WAITING = false;
 
 function PostTripWaitingMedia() {
   return (
@@ -28,10 +30,12 @@ function PostTripWaitingMedia() {
 
 export function PostTripSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [isWaiting, setIsWaiting] = useState(isBeforeReturnBoarding);
+  const [isWaiting, setIsWaiting] = useState(
+    () => SHOW_RETURN_WAITING && isBeforeReturnBoarding(),
+  );
 
   useEffect(() => {
-    if (!isWaiting) return;
+    if (!SHOW_RETURN_WAITING || !isWaiting) return;
 
     const sync = () => {
       if (!isBeforeReturnBoarding()) setIsWaiting(false);

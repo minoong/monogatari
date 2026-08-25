@@ -1,16 +1,15 @@
 "use client";
 
-import { useRef, type ReactNode, type RefObject } from "react";
+import { useLayoutEffect, useRef, type ReactNode, type RefObject } from "react";
 import { useQuery } from "@tanstack/react-query";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { PostTripPrepMasonry } from "@/components/home/PostTripPrepMasonry";
+import { PostTripLetterTimeline } from "@/components/home/PostTripLetterTimeline";
+import { PostTripPrepPhotoParallax } from "@/components/home/PostTripPrepPhotoParallax";
 import { PostTripScheduleDriftWall } from "@/components/home/PostTripScheduleDriftWall";
 import { PostTripWishPinIndicator } from "@/components/home/PostTripWishPinIndicator";
 import ScrollFloat from "@/components/ScrollFloat";
 import type { ScheduleItem } from "@/lib/schedule";
-import { fetchChecklist } from "@/lib/checklist";
 import { TRIP_RETURN_FLIGHT } from "@/lib/trip-phase";
 import type { WishItem } from "@/lib/wishes";
 import "./post-trip-scroll-experience.css";
@@ -22,6 +21,15 @@ ScrollTrigger.config({ ignoreMobileResize: true });
 const HERO_IMAGE = "/images/post-trip-scroll.jpg";
 const HERO_SCROLL_DISTANCE = 1.2;
 const HERO_HOLD_DISTANCE = 0.35;
+const HERO_TRACK_HEIGHT_RATIO = 1 + HERO_SCROLL_DISTANCE + HERO_HOLD_DISTANCE;
+
+function primeHeroLayout(heroTrack: HTMLElement, viewportHeight: number) {
+  const stage = heroTrack.querySelector<HTMLElement>(".post-trip-hero-stage");
+  if (!stage || viewportHeight < 200) return;
+
+  stage.style.height = `${viewportHeight}px`;
+  heroTrack.style.height = `${viewportHeight * HERO_TRACK_HEIGHT_RATIO}px`;
+}
 
 type ContentPanel = {
   id: string;
@@ -50,7 +58,6 @@ const CONTENT_PANELS: ContentPanel[] = [
     label: "준비",
     title: "떠나기 전 우리",
     tone: "amber",
-    scrollable: true,
   },
   {
     id: "letter",
@@ -78,8 +85,7 @@ function setupHeroExpand(scroller: HTMLElement, heroTrack: HTMLElement, viewport
 
   if (!stage || !frame || !image || !title || !hint || !scrim || !overlay) return;
 
-  stage.style.height = `${viewportHeight}px`;
-  heroTrack.style.height = `${viewportHeight * (1 + HERO_SCROLL_DISTANCE + HERO_HOLD_DISTANCE)}px`;
+  primeHeroLayout(heroTrack, viewportHeight);
 
   const startWidth = 42;
   const startHeight = 58;
@@ -186,24 +192,37 @@ function isPanelTrack(element: HTMLElement | null): element is HTMLElement {
   );
 }
 
-function layoutStickyTrack(panel: HTMLElement, viewportHeight: number, holdDistance: number) {
+function resolveInnerDuration(
+  includeExit: boolean,
+  roundedHold: number,
+  stickyDistance: number,
+  fakeScrollRatio: number,
+) {
+  if (roundedHold <= 0 || stickyDistance <= 0) return 0;
+  if (!includeExit) return 1;
+  if (fakeScrollRatio >= 1) return 0;
+  return 1 / (1 - fakeScrollRatio) - 1;
+}
+
+function layoutStickyTrack(panel: HTMLElement, viewportHeight: number, holdDistance: number, isLastPanel = false) {
   const track = panel.parentElement;
   if (!isPanelTrack(track)) return null;
 
+  const includeExit = !isLastPanel && track.nextElementSibling !== null;
   const roundedHold = Math.max(0, Math.round(holdDistance));
-  const exitDistance = viewportHeight;
+  const exitDistance = includeExit ? viewportHeight : 0;
   const stickyDistance = roundedHold + exitDistance;
   const fakeScrollRatio = stickyDistance > 0 ? roundedHold / stickyDistance : 0;
-  const innerDuration = fakeScrollRatio ? 1 / (1 - fakeScrollRatio) - 1 : 0;
+  const innerDuration = resolveInnerDuration(includeExit, roundedHold, stickyDistance, fakeScrollRatio);
   const nextPanel = track.nextElementSibling;
 
   gsap.set(track, { height: viewportHeight + stickyDistance });
   gsap.set(panel, { height: viewportHeight, marginBottom: 0, top: 0 });
-  if (nextPanel instanceof HTMLElement) {
+  if (includeExit && nextPanel instanceof HTMLElement) {
     gsap.set(nextPanel, { marginTop: -exitDistance });
   }
 
-  return { track, stickyDistance, innerDuration, holdDistance: roundedHold };
+  return { track, stickyDistance, innerDuration, holdDistance: roundedHold, includeExit };
 }
 
 function createStickyTimeline(
@@ -228,16 +247,29 @@ function createStickyTimeline(
   });
 }
 
-function setupWishStickyPanel(panel: HTMLElement, content: HTMLElement, scroller: HTMLElement, viewportHeight: number) {
+function setupWishStickyPanel(
+  panel: HTMLElement,
+  content: HTMLElement,
+  scroller: HTMLElement,
+  viewportHeight: number,
+  isLastPanel = false,
+) {
   const listItems = gsap.utils.toArray(".wish-pin-item", panel);
   if (!listItems.length) return;
 
-  const layout = layoutStickyTrack(panel, viewportHeight, listItems.length * 0.5 * viewportHeight);
+  const layout = layoutStickyTrack(
+    panel,
+    viewportHeight,
+    listItems.length * 0.5 * viewportHeight,
+    isLastPanel,
+  );
   if (!layout) return;
 
   const timeline = createStickyTimeline(layout.track, scroller, layout.stickyDistance);
   setupWishLateralAct(panel, timeline, layout.innerDuration);
-  appendOverscrollExit(timeline, content);
+  if (layout.includeExit) {
+    appendOverscrollExit(timeline, content);
+  }
 }
 
 function measureInnerOverflow(inner: HTMLElement, viewportHeight: number) {
@@ -248,6 +280,48 @@ function measureInnerOverflow(inner: HTMLElement, viewportHeight: number) {
   return Math.max(0, innerHeight - viewportHeight);
 }
 
+function measureLetterHoldDistance(panel: HTMLElement, inner: HTMLElement, viewportHeight: number) {
+  const chrome = panel.querySelector<HTMLElement>(".post-trip-letter-timeline__chrome");
+  const chromeHeight = chrome?.offsetHeight ?? 0;
+  const visibleBodyHeight = Math.max(0, viewportHeight - chromeHeight);
+
+  const previousHeight = inner.style.height;
+  inner.style.height = "auto";
+  const innerHeight = Math.round(inner.scrollHeight);
+  inner.style.height = previousHeight;
+
+  return Math.max(0, innerHeight - visibleBodyHeight);
+}
+
+function setupLetterStickyPanel(
+  panel: HTMLElement,
+  inner: HTMLElement,
+  content: HTMLElement,
+  scroller: HTMLElement,
+  viewportHeight: number,
+) {
+  ScrollTrigger.getById("post-trip-letter")?.kill();
+  gsap.set(content, { scale: 1, opacity: 1, clearProps: "transform,opacity" });
+  gsap.set(inner, { y: 0, clearProps: "transform" });
+
+  const holdDistance = measureLetterHoldDistance(panel, inner, viewportHeight);
+  const layout = layoutStickyTrack(panel, viewportHeight, holdDistance, true);
+  if (!layout || layout.holdDistance <= 0) return;
+
+  const timeline = createStickyTimeline(layout.track, scroller, layout.stickyDistance, "post-trip-letter");
+
+  timeline.to(inner, {
+    y: -layout.holdDistance,
+    duration: 1,
+    ease: "none",
+    force3D: false,
+  });
+
+  timeline.eventCallback("onUpdate", () => {
+    gsap.set(content, { scale: 1, opacity: 1, force3D: false });
+  });
+}
+
 function setupStickyOverscrollPanel(
   panel: HTMLElement,
   inner: HTMLElement,
@@ -255,13 +329,14 @@ function setupStickyOverscrollPanel(
   scroller: HTMLElement,
   viewportHeight: number,
   scrollTriggerId?: string,
+  isLastPanel = false,
 ) {
   if (scrollTriggerId) {
     gsap.set(inner, { y: 0, clearProps: "transform" });
   }
 
   const holdDistance = measureInnerOverflow(inner, viewportHeight);
-  const layout = layoutStickyTrack(panel, viewportHeight, holdDistance);
+  const layout = layoutStickyTrack(panel, viewportHeight, holdDistance, isLastPanel);
   if (!layout) return;
 
   const timeline = createStickyTimeline(layout.track, scroller, layout.stickyDistance, scrollTriggerId);
@@ -275,16 +350,89 @@ function setupStickyOverscrollPanel(
     });
   }
 
-  appendOverscrollExit(timeline, content);
+  if (layout.includeExit) {
+    appendOverscrollExit(timeline, content);
+  }
+}
+
+const PREP_HOLD_RATIO = 1.75;
+const PREP_PARALLAX_MULTIPLIERS = [2, 3.3, 1.25, 3];
+
+function measurePrepHoldDistance(panel: HTMLElement, viewportHeight: number) {
+  const columns = gsap.utils.toArray<HTMLElement>(".post-trip-prep-parallax__column", panel);
+  if (!columns.length) return 0;
+
+  const minHold = Math.round(viewportHeight * PREP_HOLD_RATIO);
+  const maxColumnHeight = Math.max(...columns.map((column) => column.scrollHeight));
+  const overflow = Math.max(0, maxColumnHeight - viewportHeight);
+
+  return minHold + overflow;
+}
+
+function setupPrepParallaxPanel(
+  panel: HTMLElement,
+  content: HTMLElement,
+  scroller: HTMLElement,
+  viewportHeight: number,
+  isLastPanel = false,
+) {
+  const columns = gsap.utils.toArray<HTMLElement>(".post-trip-prep-parallax__column", panel);
+  const holdDistance = columns.length > 0 ? measurePrepHoldDistance(panel, viewportHeight) : 0;
+  const layout = layoutStickyTrack(panel, viewportHeight, holdDistance, isLastPanel);
+  if (!layout) return;
+
+  ScrollTrigger.getById("post-trip-prep")?.kill();
+
+  columns.forEach((column) => gsap.set(column, { y: 0, force3D: true }));
+  gsap.set(content, { scale: 1, opacity: 1 });
+
+  const { track, stickyDistance, holdDistance: hold } = layout;
+  const holdRatio = stickyDistance > 0 ? hold / stickyDistance : 0;
+
+  ScrollTrigger.create({
+    id: "post-trip-prep",
+    trigger: track,
+    scroller,
+    start: "top top",
+    end: () => `+=${stickyDistance}`,
+    scrub: true,
+    invalidateOnRefresh: true,
+    onUpdate(self) {
+      const progress = self.progress;
+      const parallaxProgress = holdRatio > 0 ? clamp(progress / holdRatio, 0, 1) : 0;
+
+      columns.forEach((column, index) => {
+        const multiplier = PREP_PARALLAX_MULTIPLIERS[index] ?? PREP_PARALLAX_MULTIPLIERS[0];
+        gsap.set(column, {
+          y: viewportHeight * multiplier * parallaxProgress,
+          force3D: true,
+        });
+      });
+
+      if (holdRatio >= 1 || !layout.includeExit) return;
+
+      const exitProgress = clamp((progress - holdRatio) / (1 - holdRatio), 0, 1);
+      const easedExit = smoothstep(0, 1, exitProgress);
+      gsap.set(content, {
+        scale: 1 - 0.3 * easedExit,
+        opacity: easedExit >= 0.95 ? 0 : 1 - 0.5 * easedExit,
+        force3D: false,
+      });
+    },
+  });
 }
 
 function setupPinnedPanels(scroller: HTMLElement, panels: HTMLElement[], viewportHeight: number) {
+  const lastPanelIndex = panels.length - 1;
+
   panels.forEach((panel, index) => {
     const content = panel.querySelector<HTMLElement>(".post-trip-panel-content");
     if (!content) return;
 
+    const isLastPanel = index === lastPanelIndex;
+
     if (panel.querySelector(".post-trip-panel-content--schedule")) {
-      const layout = layoutStickyTrack(panel, viewportHeight, 0);
+      const layout = layoutStickyTrack(panel, viewportHeight, 0, isLastPanel);
       if (!layout) return;
 
       const timeline = createStickyTimeline(
@@ -293,33 +441,34 @@ function setupPinnedPanels(scroller: HTMLElement, panels: HTMLElement[], viewpor
         layout.stickyDistance,
         "post-trip-schedule",
       );
-      appendOverscrollExit(timeline, content);
+      if (layout.includeExit) {
+        appendOverscrollExit(timeline, content);
+      }
+      return;
+    }
+
+    if (panel.querySelector(".post-trip-panel-content--prep")) {
+      setupPrepParallaxPanel(panel, content, scroller, viewportHeight, isLastPanel);
+      return;
+    }
+
+    if (panel.querySelector(".post-trip-panel-content--letter")) {
+      const inner = panel.querySelector<HTMLElement>(".post-trip-letter-timeline__body");
+      if (!inner) return;
+
+      setupLetterStickyPanel(panel, inner, content, scroller, viewportHeight);
       return;
     }
 
     const inner = panel.querySelector<HTMLElement>(".post-trip-panel-inner");
     if (!inner) return;
 
-    if (index === panels.length - 1) {
-      gsap.set(panel, { height: viewportHeight });
-      return;
-    }
-
     if (panel.querySelector(".wish-pin")) {
-      setupWishStickyPanel(panel, content, scroller, viewportHeight);
+      setupWishStickyPanel(panel, content, scroller, viewportHeight, isLastPanel);
       return;
     }
 
-    const isPrepPanel = Boolean(panel.querySelector(".post-trip-panel-inner--prep"));
-    const scrollTriggerId = isPrepPanel ? "post-trip-prep" : undefined;
-    setupStickyOverscrollPanel(
-      panel,
-      inner,
-      content,
-      scroller,
-      viewportHeight,
-      scrollTriggerId,
-    );
+    setupStickyOverscrollPanel(panel, inner, content, scroller, viewportHeight, undefined, isLastPanel);
   });
 }
 
@@ -345,69 +494,108 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
   const wrapperRef = useRef<HTMLDivElement>(null);
   const heroTrackRef = useRef<HTMLDivElement>(null);
   const panelRefs = useRef<(HTMLElement | null)[]>([]);
-  const refreshPrepScrollRef = useRef<(() => void) | null>(null);
-  const prepRevealRef = useRef<HTMLDivElement>(null);
   const returnFlight = TRIP_RETURN_FLIGHT;
-  const { data: wishes = [] } = useQuery({ queryKey: ["wishes"], queryFn: fetchWishes });
-  const { data: checklistItems = [] } = useQuery({ queryKey: ["checklist"], queryFn: fetchChecklist });
-  const { data: scheduleItems = [] } = useQuery({ queryKey: ["schedule"], queryFn: fetchSchedule });
-
-  useGSAP(
-    () => {
-      let cancelled = false;
-
-      const init = () => {
-        if (cancelled) return;
-
-        const scroller = scrollContainerRef.current;
-        const heroTrack = heroTrackRef.current;
-        const panels = panelRefs.current.filter((panel): panel is HTMLElement => panel !== null);
-
-        const viewportHeight = scroller ? Math.round(scroller.clientHeight) : 0;
-
-        if (
-          !scroller ||
-          !heroTrack ||
-          viewportHeight < 200 ||
-          viewportHeight > window.innerHeight ||
-          panels.length !== CONTENT_PANELS.length
-        ) {
-          requestAnimationFrame(init);
-          return;
-        }
-        setupHeroExpand(scroller, heroTrack, viewportHeight);
-        setupPinnedPanels(scroller, panels, viewportHeight);
-
-        const prepPanel = panels.find((panel) => panel.querySelector(".post-trip-panel-inner--prep"));
-        if (prepPanel) {
-          const inner = prepPanel.querySelector<HTMLElement>(".post-trip-panel-inner");
-          const content = prepPanel.querySelector<HTMLElement>(".post-trip-panel-content");
-          if (inner && content) {
-            refreshPrepScrollRef.current = () => {
-              setupStickyOverscrollPanel(
-                prepPanel,
-                inner,
-                content,
-                scroller,
-                Math.round(scroller.clientHeight),
-                "post-trip-prep",
-              );
-              ScrollTrigger.refresh();
-            };
-          }
-        }
-
-        ScrollTrigger.refresh();
-      };
-
-      requestAnimationFrame(init);
-
-      return () => {
-        cancelled = true;
-      };
-    },
-    { scope: wrapperRef, dependencies: [scrollContainerRef] },
+  const { data: wishes = [], isFetched: isWishesFetched } = useQuery({ queryKey: ["wishes"], queryFn: fetchWishes });
+  const { data: scheduleItems = [], isFetched: isScheduleFetched } = useQuery({
+    queryKey: ["schedule"],
+    queryFn: fetchSchedule,
+  });
+  const tripPhotoCount = scheduleItems.reduce((count, item) => count + item.tripImages.length, 0);
+  const tripMemoCount = scheduleItems.reduce(
+    (count, item) => count + (item.trip_memo?.trim() ? 1 : 0),
+    0,
   );
+
+  useLayoutEffect(() => {
+    let cancelled = false;
+    let resizeObserver: ResizeObserver | null = null;
+    let context: gsap.Context | null = null;
+
+    wrapperRef.current?.classList.remove("is-ready");
+
+    const resolveScroller = () =>
+      scrollContainerRef.current ??
+      wrapperRef.current?.closest<HTMLElement>(".post-trip-scroll") ??
+      null;
+
+    const prime = (): boolean => {
+      if (cancelled) return true;
+
+      const heroTrack = heroTrackRef.current;
+      const scroller = resolveScroller();
+      const viewportHeight = scroller ? Math.round(scroller.clientHeight) : 0;
+
+      if (!scroller || !heroTrack || viewportHeight < 200) return false;
+
+      primeHeroLayout(heroTrack, viewportHeight);
+      return true;
+    };
+
+    const init = (): boolean => {
+      if (cancelled) return true;
+
+      const heroTrack = heroTrackRef.current;
+      const wrapper = wrapperRef.current;
+      const scroller = resolveScroller();
+      const panels = wrapper ? gsap.utils.toArray<HTMLElement>(".post-trip-panel", wrapper) : [];
+      const viewportHeight = scroller ? Math.round(scroller.clientHeight) : 0;
+
+      if (
+        !scroller ||
+        !heroTrack ||
+        !wrapper ||
+        viewportHeight < 200 ||
+        panels.length !== CONTENT_PANELS.length ||
+        !isScheduleFetched ||
+        !isWishesFetched
+      ) {
+        prime();
+        return false;
+      }
+
+      try {
+        context?.revert();
+        context = gsap.context(() => {
+          setupHeroExpand(scroller, heroTrack, viewportHeight);
+          setupPinnedPanels(scroller, panels, viewportHeight);
+          ScrollTrigger.refresh();
+        }, wrapper);
+
+        resizeObserver?.disconnect();
+        resizeObserver = new ResizeObserver(() => ScrollTrigger.refresh());
+        resizeObserver.observe(scroller);
+        resizeObserver.observe(wrapper);
+        if (!cancelled) wrapper.classList.add("is-ready");
+      } catch (error) {
+        console.error("PostTripScrollExperience GSAP init failed", error);
+      }
+
+      return true;
+    };
+
+    if (!prime()) {
+      const retryPrime = () => {
+        if (cancelled || prime()) return;
+        requestAnimationFrame(retryPrime);
+      };
+      requestAnimationFrame(retryPrime);
+    }
+
+    if (!init()) {
+      const retry = () => {
+        if (cancelled || init()) return;
+        requestAnimationFrame(retry);
+      };
+      requestAnimationFrame(retry);
+    }
+
+    return () => {
+      cancelled = true;
+      resizeObserver?.disconnect();
+      context?.revert();
+      wrapperRef.current?.classList.remove("is-ready");
+    };
+  }, [scrollContainerRef, tripPhotoCount, tripMemoCount, wishes.length, isScheduleFetched, isWishesFetched]);
 
   return (
     <div ref={wrapperRef} className="post-trip-scroll-experience w-full">
@@ -453,6 +641,8 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
               <div
                 className={`post-trip-panel-content post-trip-panel--${section.tone}${
                   section.id === "schedule" ? " post-trip-panel-content--schedule" : ""
+                }${section.id === "prep" ? " post-trip-panel-content--prep" : ""}${
+                  section.id === "letter" ? " post-trip-panel-content--letter" : ""
                 }`}
               >
                 {section.id === "schedule" ? (
@@ -478,19 +668,23 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
                     <PostTripWishPinIndicator wishes={wishes} />
                   </div>
                 ) : section.id === "prep" ? (
-                  <div ref={prepRevealRef} className="post-trip-panel-inner post-trip-panel-inner--prep">
-                    <p className="post-trip-panel-eyebrow">{section.label}</p>
-                    <h2 className="post-trip-panel-title">{section.title}</h2>
-                    <p className="post-trip-panel-lead">
-                      여권, 환전, eSIM, 여행자 보험. 출발 전 체크리스트를 하나씩 지워내던 날들이 생각나요.
-                    </p>
-                    <PostTripPrepMasonry
-                      items={checklistItems}
-                      revealTargetRef={prepRevealRef}
-                      scrollContainerRef={scrollContainerRef}
-                      onLayoutChange={() => refreshPrepScrollRef.current?.()}
-                    />
-                  </div>
+                  <>
+                    <PostTripPrepPhotoParallax scheduleItems={scheduleItems} />
+                    <div className="post-trip-prep-intro">
+                      <p className="post-trip-panel-eyebrow">{section.label}</p>
+                      <h2 className="post-trip-panel-title">{section.title}</h2>
+                      <p className="post-trip-panel-lead">
+                        일정 카드에서 올린 여행 사진이, 그때의 순간을 다시 불러와요.
+                      </p>
+                    </div>
+                  </>
+                ) : section.id === "letter" ? (
+                  <PostTripLetterTimeline
+                    scheduleItems={scheduleItems}
+                    scrollContainerRef={scrollContainerRef}
+                    label={section.label}
+                    title={section.title}
+                  />
                 ) : (
                   <div className="post-trip-panel-inner">
                     <p className="post-trip-panel-eyebrow">{section.label}</p>
@@ -502,12 +696,11 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
             </section>
           );
 
-          const isLast = index === CONTENT_PANELS.length - 1;
-          if (isLast) return panel;
-
           return (
             <div
-              className={`post-trip-panel-track${section.id === "wish" ? " post-trip-wish-track" : ""}`}
+              className={`post-trip-panel-track${
+                section.id === "wish" ? " post-trip-wish-track" : ""
+              }${section.id === "letter" ? " post-trip-letter-track" : ""}`}
               key={section.id}
             >
               {panel}

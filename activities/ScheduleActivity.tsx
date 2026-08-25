@@ -8,6 +8,7 @@ import { CalendarDays, RefreshCw } from "lucide-react";
 import { ScheduleCard } from "@/components/schedule/ScheduleCard";
 import { ScheduleDateTabs } from "@/components/schedule/ScheduleDateTabs";
 import { ScheduleDrawer } from "@/components/schedule/ScheduleDrawer";
+import { SchedulePhotoDrawer } from "@/components/schedule/SchedulePhotoDrawer";
 import { ScheduleTimeline, type ScheduleTimelineEntry } from "@/components/schedule/ScheduleTimeline";
 import { ActivityRegisterFab } from "@/components/ui/activity-register-fab";
 import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/activity-fetch-loader";
@@ -51,6 +52,8 @@ export const ScheduleActivity: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerSession, setDrawerSession] = useState(0);
   const [editing, setEditing] = useState<ScheduleItem | null>(null);
+  const [photosItem, setPhotosItem] = useState<ScheduleItem | null>(null);
+  const [photosSession, setPhotosSession] = useState(0);
   const [deleting, setDeleting] = useState<ScheduleItem | null>(null);
   const mainRef = useRef<HTMLElement>(null);
   const activeRef = useRef<HTMLDivElement>(null);
@@ -101,8 +104,9 @@ export const ScheduleActivity: React.FC = () => {
     const scroller = findScrollContainer(mainRef.current);
     if (scroller) scroller.scrollTop = 0;
   };
-  const openCreate = () => { setEditing(null); setDrawerSession((current) => current + 1); setDrawerOpen(true); };
-  const openEdit = (item: ScheduleItem) => { setEditing(item); setDrawerSession((current) => current + 1); setDrawerOpen(true); };
+  const openCreate = () => { setPhotosItem(null); setEditing(null); setDrawerSession((current) => current + 1); setDrawerOpen(true); };
+  const openEdit = (item: ScheduleItem) => { setPhotosItem(null); setEditing(item); setDrawerSession((current) => current + 1); setDrawerOpen(true); };
+  const openPhotos = (item: ScheduleItem) => { setDrawerOpen(false); setEditing(null); setPhotosItem(item); setPhotosSession((current) => current + 1); };
 
   return (
     <AppScreen appBar={{ title: "일정, 제대로 따라와!" }}>
@@ -152,7 +156,7 @@ export const ScheduleActivity: React.FC = () => {
                         id: item.id,
                         time: item.start_time,
                         current: currentKeys.has(item.id),
-                        content: <ScheduleCard item={item} current={currentKeys.has(item.id)} showTime={false} cardRef={currentKeys.has(item.id) ? activeRef : undefined} onEdit={() => openEdit(item)} onDelete={() => setDeleting(item)} />,
+                        content: <ScheduleCard item={item} current={currentKeys.has(item.id)} showTime={false} cardRef={currentKeys.has(item.id) ? activeRef : undefined} onEdit={() => openEdit(item)} onDelete={() => setDeleting(item)} onPhotos={() => openPhotos(item)} />,
                       }))}
                     />
                   </motion.section>
@@ -164,12 +168,13 @@ export const ScheduleActivity: React.FC = () => {
       </main>
       <ActivityRegisterFab
         ariaLabel="일정 등록"
-        drawerOpen={drawerOpen}
+        drawerOpen={drawerOpen || Boolean(photosItem)}
         onPress={openCreate}
         placement="above-bottom-nav"
         scrollAnchorRef={mainRef}
       />
-      <ScheduleDrawer key={drawerSession} open={drawerOpen} onOpenChange={(open) => { setDrawerOpen(open); if (!open) setEditing(null); }} item={editing} />
+      <ScheduleDrawer key={`schedule-edit-${drawerSession}`} open={drawerOpen} onOpenChange={(open) => { setDrawerOpen(open); if (!open) setEditing(null); }} item={editing} />
+      <SchedulePhotoDrawer key={`schedule-photos-${photosSession}`} open={Boolean(photosItem)} onOpenChange={(open) => { if (!open) setPhotosItem(null); }} item={photosItem} />
       <AlertDialog open={Boolean(deleting)} onOpenChange={(open) => !open && !remove.isPending && setDeleting(null)}><AlertDialogPopup><AlertDialogHeader><AlertDialogTitle>일정을 삭제할까요?</AlertDialogTitle><AlertDialogDescription><strong>{deleting?.title}</strong> 일정과 연결된 사진도 함께 삭제됩니다.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter className="grid grid-cols-2"><Button fullWidth className={drawerCancelButtonClass} isDisabled={remove.isPending} onPress={() => setDeleting(null)} size="lg">취소</Button><Button fullWidth className={drawerDangerButtonClass} isDisabled={!deleting || remove.isPending} onPress={() => deleting && remove.mutate(deleting.id)} size="lg">{remove.isPending ? "삭제 중…" : "삭제"}</Button></AlertDialogFooter></AlertDialogPopup></AlertDialog>
     </AppScreen>
   );
