@@ -1,12 +1,50 @@
 "use client";
 
-import { useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import Image from "next/image";
 import { PostTripScrollExperience } from "@/components/home/PostTripScrollExperience";
+import { isBeforeReturnBoarding } from "@/lib/trip-phase";
 
 const SCROLL_HEIGHT = "calc(100svh - 10rem)";
+const WAITING_MEDIA_SRC = "/home/213121.gif";
+
+function PostTripWaitingMedia() {
+  return (
+    <div
+      className="relative w-full overflow-hidden bg-black"
+      style={{ height: SCROLL_HEIGHT, minHeight: 420 } as CSSProperties}
+    >
+      <Image
+        alt="오는 편 탑승 전까지 대기 중"
+        className="object-cover object-center"
+        fill
+        sizes="100vw"
+        src={WAITING_MEDIA_SRC}
+        unoptimized
+      />
+    </div>
+  );
+}
 
 export function PostTripSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isWaiting, setIsWaiting] = useState(isBeforeReturnBoarding);
+
+  useEffect(() => {
+    if (!isWaiting) return;
+
+    const sync = () => {
+      if (!isBeforeReturnBoarding()) setIsWaiting(false);
+    };
+
+    sync();
+    const timer = window.setInterval(sync, 1_000);
+    return () => window.clearInterval(timer);
+  }, [isWaiting]);
+
+  if (isWaiting) {
+    return <PostTripWaitingMedia />;
+  }
 
   return (
     <div
