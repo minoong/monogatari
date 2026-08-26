@@ -133,7 +133,7 @@ export function SchedulePhotoDrawer({
   };
 
   const busy = save.isPending || compressing;
-  const canSubmit = Boolean(item) && (images.length > 0 || tripMemo.trim().length > 0);
+  const canSubmit = Boolean(item) && images.length > 0;
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -149,7 +149,6 @@ export function SchedulePhotoDrawer({
               alt="카메라를 들고 있는 캐릭터"
               imageClassName="h-44"
               title="증거로 다 기록하고 있으니까, 여행 사진을 빠짐없이 올려 두세요!"
-              description="나중에 못 찍었다고 거짓말해도 소용없다고요! 여행 후 「떠나기 전 우리」에 모여요."
             />
             {item ? (
               <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">{item.title}</p>
