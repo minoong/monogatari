@@ -147,11 +147,82 @@ export const ACCOMMODATIONS: Accommodation[] = [
 ];
 
 const TRIP_YEAR = 2026;
+const BANGKOK_TIME_ZONE = "Asia/Bangkok";
 
 const parseStayMdDate = (date: string) => {
   const [month, day] = date.split("/").map(Number);
   return new Date(TRIP_YEAR, month - 1, day);
 };
+
+const toBangkokIsoDateTime = (month: number, day: number, hour: number, minute: number) => {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return new Date(`${TRIP_YEAR}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}:00+07:00`);
+};
+
+/** Bangkok 현지 시각으로 숙소 체크인/체크아웃 시점을 만든다. */
+export function parseStayDateTime(date: string, time: string) {
+  const [month, day] = date.split("/").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  return toBangkokIsoDateTime(month, day, hour, minute);
+}
+
+export function getStayCheckInAt(stay: Accommodation) {
+  return parseStayDateTime(stay.date, stay.checkIn);
+}
+
+export function getStayCheckOutAt(stay: Accommodation) {
+  return parseStayDateTime(getStayCheckoutDate(stay.date), stay.checkOut);
+}
+
+export function getActiveTripDate(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: BANGKOK_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+
+  const year = parts.find((part) => part.type === "year")?.value ?? "2026";
+  const month = parts.find((part) => part.type === "month")?.value ?? "01";
+  const day = parts.find((part) => part.type === "day")?.value ?? "01";
+
+  return `${year}-${month}-${day}`;
+}
+
+export function getActiveAccommodationId(now = new Date()): Accommodation["id"] | null {
+  for (let index = 0; index < ACCOMMODATIONS.length; index += 1) {
+    const stay = ACCOMMODATIONS[index];
+    const checkInAt = getStayCheckInAt(stay);
+    const checkOutAt = getStayCheckOutAt(stay);
+
+    if (now >= checkInAt && now < checkOutAt) {
+      return stay.id;
+    }
+  }
+
+  const firstStay = ACCOMMODATIONS[0];
+  if (now < getStayCheckInAt(firstStay)) {
+    return firstStay.id;
+  }
+
+  for (let index = 0; index < ACCOMMODATIONS.length - 1; index += 1) {
+    const currentStay = ACCOMMODATIONS[index];
+    const nextStay = ACCOMMODATIONS[index + 1];
+    const checkOutAt = getStayCheckOutAt(currentStay);
+    const nextCheckInAt = getStayCheckInAt(nextStay);
+
+    if (now >= checkOutAt && now < nextCheckInAt) {
+      return nextStay.id;
+    }
+  }
+
+  const lastStay = ACCOMMODATIONS[ACCOMMODATIONS.length - 1];
+  if (now >= getStayCheckOutAt(lastStay)) {
+    return null;
+  }
+
+  return null;
+}
 
 export const formatStayDateWithWeekday = (date: string) =>
   new Intl.DateTimeFormat("ko-KR", {
@@ -168,3 +239,78 @@ export const getStayCheckoutDate = (checkInDate: string) => {
   checkout.setDate(checkout.getDate() + 1);
   return `${checkout.getMonth() + 1}/${checkout.getDate()}`;
 };
+
+const TICKER_START_TIME = "23:00";
+const DURING_TRIP_STAY_TICKER_STORAGE_KEY = "during-trip-stay-ticker-dismissed";
+
+export interface DuringTripStayTickerInfo {
+  tripDate: string;
+  currentStay: Accommodation;
+  checkoutTime: string;
+  nextStay: Accommodation | null;
+  nextCheckInTime: string | null;
+}
+
+const getStayTickerStartAt = (stay: Accommodation) => {
+  const checkoutDateMd = getStayCheckoutDate(stay.date);
+  const previousDay = parseStayMdDate(checkoutDateMd);
+  previousDay.setDate(previousDay.getDate() - 1);
+  const previousDayMd = `${previousDay.getMonth() + 1}/${previousDay.getDate()}`;
+  return parseStayDateTime(previousDayMd, TICKER_START_TIME);
+};
+
+const getCheckoutTripDate = (stay: Accommodation) => {
+  const [month, day] = getStayCheckoutDate(stay.date).split("/").map(Number);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${TRIP_YEAR}-${pad(month)}-${pad(day)}`;
+};
+
+/** Bangkok 기준 체크아웃 전날 23:00 ~ 체크아웃 시각 사이에만 숙소 전환 안내를 반환한다. */
+export function getDuringTripStayTickerInfo(now = new Date()): DuringTripStayTickerInfo | null {
+  for (let index = 0; index < ACCOMMODATIONS.length; index += 1) {
+    const stay = ACCOMMODATIONS[index];
+    const startAt = getStayTickerStartAt(stay);
+    const checkOutAt = getStayCheckOutAt(stay);
+
+    if (now < startAt || now >= checkOutAt) continue;
+
+    const nextStay = ACCOMMODATIONS[index + 1] ?? null;
+    return {
+      tripDate: getCheckoutTripDate(stay),
+      currentStay: stay,
+      checkoutTime: stay.checkOut,
+      nextStay,
+      nextCheckInTime: nextStay?.checkIn ?? null,
+    };
+  }
+
+  return null;
+}
+
+const readDismissedDates = (): Record<string, boolean> => {
+  if (typeof window === "undefined") return {};
+
+  try {
+    const raw = window.localStorage.getItem(DURING_TRIP_STAY_TICKER_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as unknown;
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, boolean>) : {};
+  } catch {
+    return {};
+  }
+};
+
+export function isDuringTripStayTickerDismissed(tripDate: string) {
+  return readDismissedDates()[tripDate] === true;
+}
+
+export function dismissDuringTripStayTicker(tripDate: string) {
+  if (typeof window === "undefined") return;
+
+  try {
+    const next = { ...readDismissedDates(), [tripDate]: true };
+    window.localStorage.setItem(DURING_TRIP_STAY_TICKER_STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // localStorage 에러 무시
+  }
+}

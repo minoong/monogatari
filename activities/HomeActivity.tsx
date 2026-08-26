@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import NumberFlow from "@number-flow/react";
 import { AnimatedContent } from "../components/ui/animated-content";
 import { useFlow } from "@stackflow/react";
@@ -7,7 +7,7 @@ import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { Button, Tabs } from "@heroui/react";
 import { ChevronRight, Hotel } from "lucide-react";
 import { MinimalCardExpand } from "../components/ui/minimal-card-expand";
-import { ACCOMMODATIONS, type Accommodation } from "../lib/accommodations";
+import { ACCOMMODATIONS, getActiveAccommodationId, type Accommodation } from "../lib/accommodations";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { SlidingNumber } from "../components/core/sliding-number";
 import dayjs from "dayjs";
@@ -22,9 +22,10 @@ import { BeforeTripWeatherTicker, TravelWeatherWidget } from "../components/weat
 import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
 import { PostTripSection } from "@/components/home/PostTripSection";
 import { DuringTripShortcutCards } from "@/components/home/DuringTripShortcutCards";
+import { DuringTripStayTicker } from "@/components/home/DuringTripStayTicker";
 import { HomeQuickGooeyMenu } from "@/components/home/HomeQuickGooeyMenu";
 import { WishGoalRings } from "@/components/home/WishGoalRings";
-import { getTripPhase } from "@/lib/trip-phase";
+import { getTripPhase, isBeforeOutboundDeparture, OUTBOUND_DEPARTURE } from "@/lib/trip-phase";
 import type { WishItem, WishType } from "@/lib/wishes";
 
 dayjs.extend(utc);
@@ -210,8 +211,36 @@ const AutoImageRoll: React.FC<{ imageUrls: readonly (string | null)[] } & Automa
 
 type StaySelection = "all" | Accommodation["id"];
 
-const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }> = ({ onOpen }) => {
+const useActiveAccommodationId = (enabled: boolean) => {
+  const [activeStayId, setActiveStayId] = useState<Accommodation["id"] | null>(() =>
+    enabled ? getActiveAccommodationId() : null,
+  );
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const syncActiveStay = () => {
+      setActiveStayId(getActiveAccommodationId());
+    };
+
+    syncActiveStay();
+    const interval = window.setInterval(syncActiveStay, 60_000);
+    return () => window.clearInterval(interval);
+  }, [enabled]);
+
+  return activeStayId;
+};
+
+const ReservationStayCard: React.FC<{
+  activeStayId?: Accommodation["id"] | null;
+  autoSelectStay?: boolean;
+  onOpen: (stayId: StaySelection) => void;
+}> = ({ activeStayId = null, autoSelectStay = false, onOpen }) => {
   const automaticRoll = useAutomaticRoll(ACCOMMODATIONS.length + 1);
+  const activeStay = ACCOMMODATIONS.find((stay) => stay.id === activeStayId) ?? null;
+  const ctaLabel = activeStay?.name ?? "HP! 위치 찾기!";
+  const ctaImageUrl = activeStay?.imageUrl ?? "/accommodation-overview.jpg";
+  const openStayId: StaySelection = activeStay?.id ?? "all";
 
   return (
     <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -234,6 +263,7 @@ const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }>
 
       <MinimalCardExpand
         className="h-[300px]"
+        activeExpandedId={autoSelectStay ? activeStayId : undefined}
         onExpandedClick={(id) => onOpen(id === "stay-summary" ? "all" : id as Accommodation["id"])}
         items={[
           {
@@ -286,16 +316,30 @@ const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }>
 
       <div className="group relative mt-3">
         <div aria-hidden="true" className="relative flex h-11 w-full items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-sm font-bold text-white transition-transform duration-150 ease-out group-active:scale-[0.98]">
-          <AutoImageRoll imageUrls={["/accommodation-overview.jpg", ...ACCOMMODATIONS.map((stay) => stay.imageUrl)]} {...automaticRoll} />
+          {autoSelectStay ? (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage: `linear-gradient(90deg, rgba(20, 30, 66, 0.6), rgba(20, 30, 66, 0.32)), url(${ctaImageUrl})`,
+              }}
+            />
+          ) : (
+            <AutoImageRoll imageUrls={["/accommodation-overview.jpg", ...ACCOMMODATIONS.map((stay) => stay.imageUrl)]} {...automaticRoll} />
+          )}
           <span className="relative z-10 flex w-64 max-w-[calc(100%-1rem)] items-center gap-1 drop-shadow-sm">
-            <AutoTextRoll labels={["HP! 위치 찾기!", ...ACCOMMODATIONS.map((stay) => stay.name)]} {...automaticRoll} />
+            {autoSelectStay ? (
+              <span className="min-w-0 flex-1 truncate text-center leading-none">{ctaLabel}</span>
+            ) : (
+              <AutoTextRoll labels={["HP! 위치 찾기!", ...ACCOMMODATIONS.map((stay) => stay.name)]} {...automaticRoll} />
+            )}
             <ChevronRight size={17} className="shrink-0" />
           </span>
         </div>
         <Button
           aria-label="HP! 위치 찾기"
           className="absolute inset-0 z-20 h-full w-full opacity-[0.01]"
-          onPress={() => onOpen("all")}
+          onPress={() => onOpen(autoSelectStay ? openStayId : "all")}
           variant="ghost"
         />
       </div>
@@ -304,14 +348,20 @@ const ReservationStayCard: React.FC<{ onOpen: (stayId: StaySelection) => void }>
 };
 
 const BangkokDepartureCard: React.FC = () => {
-  const DEPARTURE_TIME = "2026-08-29 09:45:00";
+  const [visible, setVisible] = useState(() => isBeforeOutboundDeparture());
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   React.useEffect(() => {
     const updateCountdown = () => {
       const now = dayjs().tz("Asia/Seoul");
-      const target = dayjs.tz(DEPARTURE_TIME, "Asia/Seoul");
-      const diffSec = Math.max(0, target.diff(now, "second"));
+      const target = dayjs(OUTBOUND_DEPARTURE).tz("Asia/Seoul");
+
+      if (!now.isBefore(target)) {
+        setVisible(false);
+        return;
+      }
+
+      const diffSec = target.diff(now, "second");
 
       const days = Math.floor(diffSec / (24 * 3600));
       const hours = Math.floor((diffSec % (24 * 3600)) / 3600);
@@ -325,6 +375,8 @@ const BangkokDepartureCard: React.FC = () => {
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  if (!visible) return null;
 
   return (
     <section style={{ fontFamily: "var(--font-korean-air)" }} className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-[#F8FAFC] text-slate-900 shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-white">
@@ -440,7 +492,38 @@ const BangkokDepartureCard: React.FC = () => {
 
 export const HomeActivity: React.FC = () => {
   const { push } = useFlow();
+  const phaseRef = useRef(getTripPhase());
   const [tripState, setTripState] = useState<"before" | "during" | "after">(() => getTripPhase());
+  const activeStayId = useActiveAccommodationId(tripState === "during");
+
+  useEffect(() => {
+    const syncTripPhase = () => {
+      const phase = getTripPhase();
+      phaseRef.current = phase;
+      setTripState(phase);
+    };
+
+    syncTripPhase();
+
+    const interval = window.setInterval(() => {
+      const phase = getTripPhase();
+      if (phase === phaseRef.current) return;
+      phaseRef.current = phase;
+      setTripState(phase);
+    }, 1000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        syncTripPhase();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
   const {
     data: checklistItems = [],
     isLoading: isChecklistLoading,
@@ -507,7 +590,7 @@ export const HomeActivity: React.FC = () => {
                     onRetry={() => void refetchChecklist()}
                   />
 
-                  <FlightWidget onOpen={(passengerId) => push("FlightActivity", { passengerId })} />
+                  <FlightWidget onOpen={({ passengerId, segmentId }) => push("FlightActivity", { passengerId, segmentId })} />
 
                   <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
                 </div>
@@ -517,22 +600,31 @@ export const HomeActivity: React.FC = () => {
             <Tabs.Panel className="!p-0" id="during">
               {tripState === "during" && (
                 <div className="flex flex-col gap-4">
-                  <TravelWeatherWidget />
+                  <DuringTripStayTicker />
+
+                  <TravelWeatherWidget preferredCityId={activeStayId} />
 
                   {wishes.length > 0 && (
                     <WishGoalRings onTypePress={openWishType} wishes={wishes} />
                   )}
 
                   <DuringTripShortcutCards
-                    onOpenSchedule={() => push("ScheduleActivity", {})}
                     onOpenDictionary={() => push("DictionaryActivity", {})}
-                    onOpenExpense={() => push("ExpenseActivity", {})}
                     onOpenExchange={() => push("ExchangeActivity", {})}
+                    onOpenExpense={() => push("ExpenseActivity", {})}
+                    onOpenSchedule={() => push("ScheduleActivity", {})}
                   />
 
-                  <FlightWidget onOpen={(passengerId) => push("FlightActivity", { passengerId })} />
+                  <FlightWidget
+                    defaultSegmentId="return"
+                    onOpen={({ passengerId, segmentId }) => push("FlightActivity", { passengerId, segmentId })}
+                  />
 
-                  <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
+                  <ReservationStayCard
+                    activeStayId={activeStayId}
+                    autoSelectStay
+                    onOpen={(stayId) => push("AccommodationActivity", { stayId })}
+                  />
                 </div>
               )}
             </Tabs.Panel>

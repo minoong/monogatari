@@ -147,9 +147,13 @@ const PassengerTicket: React.FC<{ flight: FlightSegment }> = ({ flight }) => {
   </article>;
 };
 
-export const FlightActivity: React.FC = () => {
+export const FlightActivity: React.FC<{ params: { passengerId?: string; segmentId?: string } }> = ({ params }) => {
   const screenRef = React.useRef<HTMLDivElement>(null);
-  const [selectedFlight, setSelectedFlight] = React.useState(() => getDefaultFlightSegmentId());
+  const initialSegmentId =
+    params.segmentId === "outbound" || params.segmentId === "return"
+      ? params.segmentId
+      : getDefaultFlightSegmentId();
+  const [selectedFlight, setSelectedFlight] = React.useState(initialSegmentId);
   const outboundTickets = FLIGHT_TICKETS["gahyun"];
 
   useGSAP(() => {

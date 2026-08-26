@@ -1,8 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRightLeft, CalendarDays, ChevronRight, Languages, Receipt } from "lucide-react";
 import { useExchangeRates } from "@/lib/exchange-rates";
+import { getUpcomingSchedulePreview, type ScheduleItem } from "@/lib/schedule";
 import { cn } from "@/lib/utils";
 
 type DuringTripShortcutCardsProps = {
@@ -48,7 +50,7 @@ function ShortcutTile({
       </div>
       <div className="relative z-[1]">
         <p className="text-[15px] font-bold tracking-[-0.02em] text-slate-900 dark:text-white">{title}</p>
-        <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">{description}</p>
+        <p className="mt-1 line-clamp-2 text-xs font-medium text-slate-500 dark:text-slate-400">{description}</p>
       </div>
       <ChevronRight
         aria-hidden
@@ -104,6 +106,13 @@ function ShortcutRow({
   );
 }
 
+const fetchSchedule = async (): Promise<ScheduleItem[]> => {
+  const response = await fetch("/api/schedule");
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error ?? "일정을 불러오지 못했어요.");
+  return payload.data;
+};
+
 export function DuringTripShortcutCards({
   onOpenSchedule,
   onOpenDictionary,
@@ -111,15 +120,20 @@ export function DuringTripShortcutCards({
   onOpenExchange,
 }: DuringTripShortcutCardsProps) {
   const { data: exchangeData } = useExchangeRates();
+  const { data: scheduleItems = [] } = useQuery({
+    queryKey: ["schedule"],
+    queryFn: fetchSchedule,
+  });
   const thbRate = exchangeData?.THB ?? 42.8;
   const exchangePreview = `100바트 ≈ ${Math.round(thbRate * 100).toLocaleString("ko-KR")}원`;
+  const schedulePreview = getUpcomingSchedulePreview(scheduleItems) ?? "타임라인 보기";
 
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-3">
         <ShortcutTile
           title="오늘의 일정"
-          description="타임라인 보기"
+          description={schedulePreview}
           icon={<CalendarDays className="size-5 text-sky-600 dark:text-sky-300" strokeWidth={2.2} />}
           iconWrapClassName="bg-white/80 dark:bg-sky-950/50"
           surfaceClassName="bg-gradient-to-br from-sky-100 via-white to-blue-50 dark:from-sky-950/80 dark:via-slate-900 dark:to-blue-950/60"

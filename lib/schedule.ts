@@ -80,3 +80,53 @@ export const getTripDayLabel = (date: TripDate) => {
   const index = TRIP_DATES.findIndex((tripDate) => tripDate === date);
   return index >= 0 ? `Day ${index + 1}` : formatTripDate(date);
 };
+
+const getBangkokNowParts = (now = new Date()) =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  })
+    .formatToParts(now)
+    .reduce<Record<string, string>>((result, part) => ({ ...result, [part.type]: part.value }), {});
+
+export const getBangkokTripDate = (now = new Date()) => {
+  const parts = getBangkokNowParts(now);
+  return `${parts.year}-${parts.month}-${parts.day}` as TripDate;
+};
+
+export const getBangkokTime = (now = new Date()) => {
+  const parts = getBangkokNowParts(now);
+  return `${parts.hour}:${parts.minute}`;
+};
+
+export const getFirstScheduleOnDate = (items: ScheduleItem[], date: TripDate) =>
+  items
+    .filter((item) => item.schedule_date === date)
+    .sort((a, b) => a.start_time.localeCompare(b.start_time) || a.created_at.localeCompare(b.created_at))[0] ?? null;
+
+export const getUpcomingSchedulePreview = (items: ScheduleItem[], now = new Date()) => {
+  const parts = getBangkokNowParts(now);
+  const today = `${parts.year}-${parts.month}-${parts.day}`;
+  const currentTime = `${parts.hour}:${parts.minute}`;
+
+  const todayItems = items
+    .filter((item) => item.schedule_date === today)
+    .sort((a, b) => a.start_time.localeCompare(b.start_time) || a.created_at.localeCompare(b.created_at));
+
+  const upcoming = todayItems.find((item) => item.start_time >= currentTime);
+  if (upcoming) {
+    return `${upcoming.start_time} · ${upcoming.title}`;
+  }
+
+  const latest = todayItems.filter((item) => item.start_time <= currentTime).at(-1);
+  if (latest) {
+    return `${latest.start_time} · ${latest.title}`;
+  }
+
+  return null;
+};

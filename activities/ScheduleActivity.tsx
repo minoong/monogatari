@@ -16,7 +16,7 @@ import { Button } from "@heroui/react";
 import { AlertDialog, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { drawerCancelButtonClass, drawerDangerButtonClass } from "@/components/ui/drawer-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatLongTripDate, isTripDate, type ScheduleItem, type TripDate } from "@/lib/schedule";
+import { formatLongTripDate, getBangkokTime, getBangkokTripDate, isTripDate, type ScheduleItem, type TripDate } from "@/lib/schedule";
 import { findScrollContainer } from "@/lib/scroll-container";
 import { supabase } from "@/lib/supabase";
 
@@ -39,14 +39,10 @@ const fetchSchedule = async (): Promise<ScheduleItem[]> => {
   return payload.data;
 };
 
-const bangkokParts = () => new Intl.DateTimeFormat("en-CA", {
-  timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
-}).formatToParts(new Date()).reduce<Record<string, string>>((result, part) => ({ ...result, [part.type]: part.value }), {});
-
 export const ScheduleActivity: React.FC = () => {
   const client = useQueryClient();
-  const now = bangkokParts();
-  const today = `${now.year}-${now.month}-${now.day}`;
+  const [today, setToday] = useState(() => getBangkokTripDate());
+  const todayRef = useRef(today);
   const prefersReducedMotion = useReducedMotion();
   const [filter, setFilter] = useState<Filter>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -62,7 +58,35 @@ export const ScheduleActivity: React.FC = () => {
   const showInitialLoader = useMinimumInitialLoading(isLoading);
 
   const tabDates = useMemo(() => Array.from(new Set(items.map((item) => item.schedule_date))).sort(), [items]);
-  const activeDate = filter && tabDates.includes(filter) ? filter : tabDates.find((date) => date === today) ?? tabDates[0] ?? null;
+  const activeDate = filter && tabDates.includes(filter) ? filter : tabDates.includes(today) ? today : tabDates[0] ?? null;
+
+  useEffect(() => {
+    const syncToday = () => {
+      const nextToday = getBangkokTripDate();
+      const dayChanged = nextToday !== todayRef.current;
+      todayRef.current = nextToday;
+      setToday(nextToday);
+
+      if (dayChanged) {
+        setFilter(nextToday);
+        didScroll.current = false;
+      }
+    };
+
+    syncToday();
+    const interval = window.setInterval(syncToday, 60_000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        syncToday();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
 
   useEffect(() => {
     const channel = supabase.channel("schedule_items_changes")
@@ -73,10 +97,10 @@ export const ScheduleActivity: React.FC = () => {
 
   const currentKeys = useMemo(() => {
     if (!isTripDate(today)) return new Set<string>();
-    const currentTime = `${now.hour}:${now.minute}`;
+    const currentTime = getBangkokTime();
     const current = items.filter((item) => item.schedule_date === today && item.start_time <= currentTime).map((item) => item.start_time).sort().at(-1);
     return new Set(items.filter((item) => item.schedule_date === today && item.start_time === current).map((item) => item.id));
-  }, [items, now.hour, now.minute, today]);
+  }, [items, today]);
 
   useEffect(() => {
     if (didScroll.current || !currentKeys.size) return;

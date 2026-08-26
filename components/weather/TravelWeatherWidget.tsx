@@ -305,10 +305,27 @@ export function BeforeTripWeatherTicker() {
   );
 }
 
-export function TravelWeatherWidget() {
+export function TravelWeatherWidget({ preferredCityId = null }: { preferredCityId?: string | null }) {
   const { data: cities, isPending, isError, isFetching, refetch } = useWeather();
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
   const [isDailyExpanded, setIsDailyExpanded] = useState(false);
+  const userPickedRef = useRef(false);
+  const lastPreferredCityIdRef = useRef<string | null | undefined>(preferredCityId);
+
+  useEffect(() => {
+    if (!preferredCityId) return;
+
+    const preferredChanged = lastPreferredCityIdRef.current !== preferredCityId;
+    lastPreferredCityIdRef.current = preferredCityId;
+
+    if (preferredChanged) {
+      userPickedRef.current = false;
+    }
+
+    if (userPickedRef.current) return;
+
+    setSelectedCityId(preferredCityId);
+  }, [preferredCityId]);
 
   if (isPending) return <WeatherSkeleton />;
 
@@ -330,7 +347,14 @@ export function TravelWeatherWidget() {
   return (
     <section className="relative overflow-hidden rounded-3xl p-3" style={weatherSurfaceStyle} aria-label="여행지 실시간 날씨">
       <div className="relative">
-        <Tabs selectedKey={selectedCity.id} onSelectionChange={(key) => setSelectedCityId(String(key))} className="w-full">
+        <Tabs
+          selectedKey={selectedCity.id}
+          onSelectionChange={(key) => {
+            userPickedRef.current = true;
+            setSelectedCityId(String(key));
+          }}
+          className="w-full"
+        >
           <CompactSegmentedTabsList
             ariaLabel="여행지 선택"
             items={cities.map((city) => {

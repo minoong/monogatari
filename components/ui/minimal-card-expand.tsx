@@ -30,6 +30,7 @@ interface MinimalCardExpandProps {
   ];
   className?: string;
   initialExpandedId?: string | null;
+  activeExpandedId?: string | null;
   onExpandedChange?: (id: string | null) => void;
   onExpandedClick?: (id: string) => void;
   autoCycle?: boolean;
@@ -120,6 +121,7 @@ export function MinimalCardExpand({
   items,
   className,
   initialExpandedId = null,
+  activeExpandedId,
   onExpandedChange,
   onExpandedClick,
   autoCycle = false,
@@ -131,6 +133,8 @@ export function MinimalCardExpand({
   const activeCardRef = React.useRef<HTMLButtonElement | null>(null);
   const cycleIndexRef = React.useRef(0);
   const resumeTimerRef = React.useRef<number | null>(null);
+  const userPickedRef = React.useRef(false);
+  const lastActiveExpandedIdRef = React.useRef<string | null | undefined>(activeExpandedId);
   const prefersReducedMotion = useReducedMotion();
 
   const setExpanded = React.useCallback((id: string | null) => {
@@ -144,6 +148,7 @@ export function MinimalCardExpand({
       return;
     }
 
+    userPickedRef.current = true;
     setExpanded(id);
     if (!autoCycle) return;
 
@@ -157,6 +162,21 @@ export function MinimalCardExpand({
       resumeTimerRef.current = null;
     }, USER_INTERACTION_PAUSE_MS);
   }, [autoCycle, expandedId, items, onExpandedClick, setExpanded]);
+
+  React.useEffect(() => {
+    if (activeExpandedId === undefined) return;
+
+    const activeChanged = lastActiveExpandedIdRef.current !== activeExpandedId;
+    lastActiveExpandedIdRef.current = activeExpandedId;
+
+    if (activeChanged) {
+      userPickedRef.current = false;
+    }
+
+    if (userPickedRef.current) return;
+
+    setExpanded(activeExpandedId);
+  }, [activeExpandedId, setExpanded]);
 
   React.useEffect(() => {
     if (!autoCycle || !containerRef.current) return;

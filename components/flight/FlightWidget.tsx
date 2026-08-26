@@ -4,13 +4,14 @@ import React from "react";
 import { Button, Card, Tabs } from "@heroui/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { ArrowUpRight } from "lucide-react";
-import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, getDefaultFlightSegmentId, type FlightPassengerId } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, getDefaultFlightSegmentId, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StateTextRoll } from "@/components/core/state-text-roll";
 import { SlidingNumber } from "@/components/core/sliding-number";
 
 interface FlightWidgetProps {
-  onOpen: (passengerId: FlightPassengerId) => void;
+  defaultSegmentId?: FlightSegment["id"];
+  onOpen: (payload: { passengerId: FlightPassengerId; segmentId: FlightSegment["id"] }) => void;
 }
 
 const A330_SEAT_MAP_URL = "https://www.koreanair.com/contents/plan-your-travel/in-flight-experience/fleet/a330/300-276/seat-map";
@@ -36,10 +37,12 @@ function FlightTime({ value, align = "left" }: { value: string; align?: "left" |
   );
 }
 
-export function FlightWidget({ onOpen }: FlightWidgetProps) {
+export function FlightWidget({ defaultSegmentId, onOpen }: FlightWidgetProps) {
   const selectedPassenger: FlightPassengerId = "gahyun";
   const tickets = FLIGHT_TICKETS[selectedPassenger];
-  const [selectedFlight, setSelectedFlight] = React.useState(() => getDefaultFlightSegmentId());
+  const [selectedFlight, setSelectedFlight] = React.useState(
+    () => defaultSegmentId ?? getDefaultFlightSegmentId(),
+  );
   const [transitionKey, setTransitionKey] = React.useState(0);
   const flight = tickets.find((item) => item.id === selectedFlight) ?? tickets[0];
   const ticketNumber = FLIGHT_TICKET_NUMBERS[selectedPassenger];
@@ -168,7 +171,7 @@ export function FlightWidget({ onOpen }: FlightWidgetProps) {
                   variant="ghost"
                   size="sm"
                   className="!h-6 !min-h-0 !px-2 text-xs font-bold text-[#135ba9] hover:bg-sky-50 hover:text-[#0b3478]"
-                  onPress={() => onOpen("gahyun")}
+                  onPress={() => onOpen({ passengerId: "gahyun", segmentId: selectedFlight })}
                 >
                   티켓 상세 보기 <ArrowUpRight className="size-3.5" aria-hidden="true" />
                 </Button>
