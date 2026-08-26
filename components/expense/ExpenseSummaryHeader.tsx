@@ -1,15 +1,13 @@
 "use client";
 
-import NumberFlow from "@number-flow/react";
 import { motion, useReducedMotion } from "framer-motion";
-import { useEffect, useMemo, useState, type RefObject } from "react";
+import { useMemo, type RefObject } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WalletIcon } from "@/components/ui/wallet";
+import { AnimatedKrw, AnimatedThb } from "@/components/expense/animated-expense-amount";
 import { useScrollProgressVar } from "@/hooks/use-scroll-progress-var";
 import {
   EXPENSE_PERSON_META,
-  formatKrw,
-  formatThb,
   summarizeExpenses,
   type Expense,
   type ExpensePerson,
@@ -96,51 +94,6 @@ export function ExpenseSummaryHeader({ expenses, scrollRef, scrollTrackingEnable
         </div>
       </article>
     </header>
-  );
-}
-
-function useCountUp(value: number) {
-  const reduceMotion = useReducedMotion();
-  const [shown, setShown] = useState(0);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setShown(value), 40);
-    return () => window.clearTimeout(timer);
-  }, [value]);
-
-  return reduceMotion ? value : shown;
-}
-
-function AnimatedKrw({ value }: { value: number }) {
-  const reduceMotion = useReducedMotion();
-  const shown = useCountUp(Math.round(value));
-  if (reduceMotion) return <>{formatKrw(value)}</>;
-  return (
-    <NumberFlow
-      className="number-flow-wrap"
-      format={{ notation: "standard", minimumFractionDigits: 0, maximumFractionDigits: 0 }}
-      locales="ko-KR"
-      prefix="₩"
-      spinTiming={{ duration: 900, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }}
-      transformTiming={{ duration: 600, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }}
-      value={shown}
-    />
-  );
-}
-
-function AnimatedThb({ value }: { value: number }) {
-  const reduceMotion = useReducedMotion();
-  const shown = useCountUp(value);
-  if (reduceMotion) return <>{formatThb(value)}</>;
-  return (
-    <NumberFlow
-      format={{ notation: "standard", minimumFractionDigits: 0, maximumFractionDigits: 2 }}
-      locales="ko-KR"
-      prefix="฿"
-      spinTiming={{ duration: 900, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }}
-      transformTiming={{ duration: 600, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }}
-      value={shown}
-    />
   );
 }
 

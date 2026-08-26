@@ -566,7 +566,7 @@ export const HomeActivity: React.FC = () => {
         >
           <CompactSegmentedTabsList
             ariaLabel="여행 단계"
-            className="px-4 pb-3 pt-2"
+            className="px-4 pb-2 pt-2"
             listClassName="mx-auto max-w-sm"
             items={[
               { id: "before", label: "여행 전" },
@@ -575,7 +575,7 @@ export const HomeActivity: React.FC = () => {
             ]}
           />
 
-          <div className={tripState === "after" ? "flex flex-col" : "flex flex-col gap-6 p-4"}>
+          <div className={tripState === "after" ? "flex flex-col" : "flex flex-col gap-6 px-4 pb-4 pt-2"}>
             <Tabs.Panel className="!p-0" id="before">
               {tripState === "before" && (
                 <div className="flex flex-col gap-4">
@@ -610,21 +610,19 @@ export const HomeActivity: React.FC = () => {
                   )}
 
                   <DuringTripShortcutCards
-                    onOpenDictionary={() => push("DictionaryActivity", {})}
                     onOpenExchange={() => push("ExchangeActivity", {})}
                     onOpenExpense={() => push("ExpenseActivity", {})}
-                    onOpenSchedule={() => push("ScheduleActivity", {})}
-                  />
-
-                  <FlightWidget
-                    defaultSegmentId="return"
-                    onOpen={({ passengerId, segmentId }) => push("FlightActivity", { passengerId, segmentId })}
                   />
 
                   <ReservationStayCard
                     activeStayId={activeStayId}
                     autoSelectStay
                     onOpen={(stayId) => push("AccommodationActivity", { stayId })}
+                  />
+
+                  <FlightWidget
+                    defaultSegmentId="return"
+                    onOpen={({ passengerId, segmentId }) => push("FlightActivity", { passengerId, segmentId })}
                   />
                 </div>
               )}

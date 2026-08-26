@@ -205,6 +205,18 @@ export const summarizeExpenses = (expenses: Expense[]) => {
   return { totalThb, totalKrw, count: expenses.length, paid, used, settlement };
 };
 
+/** 여행 중 숏컷용 — Bangkok 기준 오늘·총 지출 원화 */
+export const getExpenseShortcutAmounts = (expenses: Expense[], now = new Date()) => {
+  const todayKey = formatBangkokDateKey(now.toISOString());
+  const todayKrw = sum(
+    expenses
+      .filter((expense) => formatBangkokDateKey(expense.purchased_at) === todayKey)
+      .map(getEffectiveKrw),
+  );
+  const { totalKrw } = summarizeExpenses(expenses);
+  return { todayKrw, totalKrw };
+};
+
 export const aggregateExpensesByDate = (expenses: Expense[]) => {
   const totals = new Map<string, number>();
   expenses.forEach((expense) => {

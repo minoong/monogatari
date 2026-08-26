@@ -51,10 +51,7 @@ export function WishGoalRings({ wishes, className, onTypePress }: WishGoalRingsP
 
       <div className="relative flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-white/45">
-            Wish Goals
-          </p>
-          <h3 className="mt-0.5 text-[15px] font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <h3 className="text-[15px] font-extrabold tracking-tight text-slate-900 dark:text-white">
             위시 목표 달성
           </h3>
         </div>
