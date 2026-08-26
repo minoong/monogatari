@@ -16,7 +16,7 @@ import { Button } from "@heroui/react";
 import { AlertDialog, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { drawerCancelButtonClass, drawerDangerButtonClass } from "@/components/ui/drawer-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatLongTripDate, getBangkokTime, getBangkokTripDate, isTripDate, type ScheduleItem, type TripDate } from "@/lib/schedule";
+import { formatLongTripDate, getBangkokTripDate, getScheduleItemsForDate, getScheduleNow, getScheduleSegmentProgress, hasScheduleTimelineProgress, type ScheduleItem, type TripDate } from "@/lib/schedule";
 import { findScrollContainer } from "@/lib/scroll-container";
 import { supabase } from "@/lib/supabase";
 
@@ -41,8 +41,9 @@ const fetchSchedule = async (): Promise<ScheduleItem[]> => {
 
 export const ScheduleActivity: React.FC = () => {
   const client = useQueryClient();
-  const [today, setToday] = useState(() => getBangkokTripDate());
-  const todayRef = useRef(today);
+  const [progressTick, setProgressTick] = useState(0);
+  const tripToday = useMemo(() => getBangkokTripDate(getScheduleNow()), [progressTick]);
+  const todayRef = useRef(tripToday);
   const prefersReducedMotion = useReducedMotion();
   const [filter, setFilter] = useState<Filter>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -58,14 +59,14 @@ export const ScheduleActivity: React.FC = () => {
   const showInitialLoader = useMinimumInitialLoading(isLoading);
 
   const tabDates = useMemo(() => Array.from(new Set(items.map((item) => item.schedule_date))).sort(), [items]);
-  const activeDate = filter && tabDates.includes(filter) ? filter : tabDates.includes(today) ? today : tabDates[0] ?? null;
+  const activeDate = filter && tabDates.includes(filter) ? filter : tabDates.includes(tripToday) ? tripToday : tabDates[0] ?? null;
 
   useEffect(() => {
     const syncToday = () => {
-      const nextToday = getBangkokTripDate();
+      const nextToday = getBangkokTripDate(getScheduleNow());
       const dayChanged = nextToday !== todayRef.current;
       todayRef.current = nextToday;
-      setToday(nextToday);
+      setProgressTick((tick) => tick + 1);
 
       if (dayChanged) {
         setFilter(nextToday);
@@ -95,23 +96,36 @@ export const ScheduleActivity: React.FC = () => {
     return () => { supabase.removeChannel(channel); };
   }, [client]);
 
+  const dayStatus = useMemo(() => {
+    if (!activeDate) return null;
+    return getScheduleSegmentProgress(items, activeDate, getScheduleNow());
+    // progressTick: 분 단위로 구간 진행률 갱신
+  }, [activeDate, items, progressTick]);
+
+  const liveProgress = useMemo(() => {
+    if (!dayStatus || !hasScheduleTimelineProgress(dayStatus)) return null;
+    return dayStatus;
+  }, [dayStatus]);
+
+  const focusItemId = liveProgress?.activeItemId ?? liveProgress?.waitingAtItemId ?? null;
+
   const currentKeys = useMemo(() => {
-    if (!isTripDate(today)) return new Set<string>();
-    const currentTime = getBangkokTime();
-    const current = items.filter((item) => item.schedule_date === today && item.start_time <= currentTime).map((item) => item.start_time).sort().at(-1);
-    return new Set(items.filter((item) => item.schedule_date === today && item.start_time === current).map((item) => item.id));
-  }, [items, today]);
+    if (!dayStatus?.activeItemId) return new Set<string>();
+    return new Set([dayStatus.activeItemId]);
+  }, [dayStatus]);
+
+  const pastKeys = useMemo(() => new Set(dayStatus?.pastItemIds ?? []), [dayStatus]);
 
   useEffect(() => {
-    if (didScroll.current || !currentKeys.size) return;
+    if (didScroll.current || !focusItemId) return;
     didScroll.current = true;
     // 타임라인 등장 스태거가 끝난 뒤에 위치를 잡아야 최종 좌표로 스크롤된다.
     const timer = window.setTimeout(() => activeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 480);
     return () => window.clearTimeout(timer);
-  }, [currentKeys]);
+  }, [focusItemId]);
 
   const grouped = useMemo(
-    () => (activeDate ? [{ date: activeDate, items: items.filter((item) => item.schedule_date === activeDate) }] : []),
+    () => (activeDate ? [{ date: activeDate, items: getScheduleItemsForDate(items, activeDate) }] : []),
     [activeDate, items],
   );
   const remove = useMutation({
@@ -137,7 +151,7 @@ export const ScheduleActivity: React.FC = () => {
       <main ref={mainRef} className="min-h-full w-full max-w-full bg-gradient-to-b from-slate-50 to-white pb-[calc(6rem+max(env(safe-area-inset-bottom,0px),12px))] dark:from-slate-950 dark:to-slate-950">
         {!showInitialLoader && (
           <div className="sticky top-0 z-30 bg-slate-50/85 px-4 pb-2 pt-3 backdrop-blur-xl dark:bg-slate-950/85">
-            <ScheduleDateTabs activeDate={activeDate} dates={tabDates} today={today} onChange={selectDate} />
+            <ScheduleDateTabs activeDate={activeDate} dates={tabDates} today={tripToday} onChange={selectDate} />
           </div>
         )}
         {showInitialLoader ? (
@@ -169,18 +183,29 @@ export const ScheduleActivity: React.FC = () => {
                   >
                     <div className="mb-4 flex items-center gap-2">
                       <span className="text-sm font-extrabold text-slate-900 dark:text-white">{formatLongTripDate(group.date)}</span>
-                      {group.date === today && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">오늘</span>}
                     </div>
                     <ScheduleTimeline
                       railContent={<>
-                        <Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="가현짱" src="/avatars/gahyun.webp" /><AvatarFallback>가</AvatarFallback></Avatar>
-                        <Avatar className="size-7 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="미누쿤" src="/avatars/minu.webp" /><AvatarFallback>미</AvatarFallback></Avatar>
+                        <Avatar className="relative z-20 size-5 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="가현짱" src="/avatars/gahyun.webp" /><AvatarFallback>가</AvatarFallback></Avatar>
+                        <Avatar className="relative z-10 size-5 border-2 border-white shadow-sm dark:border-slate-950"><AvatarImage alt="미누쿤" src="/avatars/minu.webp" /><AvatarFallback>미</AvatarFallback></Avatar>
                       </>}
+                      liveProgress={liveProgress}
                       entries={group.items.map((item): ScheduleTimelineEntry => ({
                         id: item.id,
                         time: item.start_time,
                         current: currentKeys.has(item.id),
-                        content: <ScheduleCard item={item} current={currentKeys.has(item.id)} showTime={false} cardRef={currentKeys.has(item.id) ? activeRef : undefined} onEdit={() => openEdit(item)} onDelete={() => setDeleting(item)} onPhotos={() => openPhotos(item)} />,
+                        content: (
+                          <ScheduleCard
+                            item={item}
+                            current={currentKeys.has(item.id)}
+                            past={pastKeys.has(item.id)}
+                            showTime={false}
+                            cardRef={focusItemId === item.id ? activeRef : undefined}
+                            onEdit={() => openEdit(item)}
+                            onDelete={() => setDeleting(item)}
+                            onPhotos={() => openPhotos(item)}
+                          />
+                        ),
                       }))}
                     />
                   </motion.section>

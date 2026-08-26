@@ -48,7 +48,7 @@ export function ScheduleDateTabs({ dates, activeDate, today, onChange }: Schedul
               >
                 <span className="flex items-center justify-center gap-1.5">
                   {formatTripDate(date)}
-                  {date === today && (
+                  {dates.includes(today) && date === today && (
                     <span
                       aria-label="오늘"
                       role="img"

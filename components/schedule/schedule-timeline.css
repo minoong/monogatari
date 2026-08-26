@@ -1,11 +1,13 @@
-.schedule-timeline-rail,
-.schedule-timeline-progress {
+.schedule-timeline-rail {
   transform-origin: top center;
 }
 
-/* GSAP이 인라인 transform으로 덮어쓴다. reduced motion에서는 계속 숨겨진 상태로 남는다. */
 .schedule-timeline-progress {
-  transform: scaleY(0);
+  transition: height 0.65s ease;
+}
+
+.schedule-timeline-avatars {
+  transition: top 0.65s ease;
 }
 
 .schedule-timeline-dot {
@@ -14,23 +16,62 @@
 
 .schedule-timeline-dot-core {
   transform-origin: center center;
-  transition: background-color 260ms ease, box-shadow 260ms ease;
+  transition: background-color 260ms ease;
 }
 
-.schedule-timeline-dot[data-active="true"] .schedule-timeline-dot-core {
-  background-color: var(--color-blue-500);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue-500) 20%, transparent);
+.schedule-timeline-dot[data-past="true"] .schedule-timeline-dot-core {
+  background-color: var(--color-blue-400);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-blue-400) 22%, transparent);
 }
 
-@keyframes schedule-dot-pulse {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.45);
-  }
+.schedule-timeline-dot[data-past="true"] {
+  border-color: color-mix(in srgb, var(--color-blue-300) 35%, var(--color-slate-50));
+}
+
+.dark .schedule-timeline-dot[data-past="true"] {
+  border-color: color-mix(in srgb, var(--color-blue-500) 28%, var(--color-slate-950));
 }
 
 .schedule-timeline-dot[data-current="true"] .schedule-timeline-dot-core {
-  animation: schedule-dot-pulse 1.15s ease-in-out infinite alternate;
+  background-color: var(--color-blue-500);
+  animation: schedule-timeline-dot-pulse 2s ease-in-out infinite;
+}
+
+.schedule-timeline-dot[data-waiting="true"] .schedule-timeline-dot-core {
+  background-color: var(--color-sky-400);
+  animation: schedule-timeline-dot-pulse-wait 2.6s ease-in-out infinite;
+}
+
+@keyframes schedule-timeline-dot-pulse-wait {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-sky-400) 35%, transparent);
+  }
+
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-sky-400) 0%, transparent);
+  }
+}
+
+@keyframes schedule-timeline-dot-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-blue-500) 40%, transparent);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-blue-500) 0%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .schedule-timeline-dot[data-current="true"] .schedule-timeline-dot-core {
+    animation: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-blue-500) 30%, transparent);
+  }
+
+  .schedule-timeline-dot[data-waiting="true"] .schedule-timeline-dot-core {
+    animation: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-sky-400) 28%, transparent);
+  }
 }

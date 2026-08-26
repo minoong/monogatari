@@ -99,9 +99,113 @@ export const getBangkokTripDate = (now = new Date()) => {
   return `${parts.year}-${parts.month}-${parts.day}` as TripDate;
 };
 
+/** 개발 미리보기 시각 (Bangkok). null이면 실제 시각. URL `?scheduleAt=`으로도 지정 가능. */
+export const SCHEDULE_PREVIEW_AT: string | null = null;
+
+export const getScheduleNow = (): Date => {
+  if (typeof window !== "undefined") {
+    const queryAt = new URLSearchParams(window.location.search).get("scheduleAt");
+    if (queryAt) return new Date(queryAt);
+  }
+  if (SCHEDULE_PREVIEW_AT) return new Date(SCHEDULE_PREVIEW_AT);
+  return new Date();
+};
+
 export const getBangkokTime = (now = new Date()) => {
   const parts = getBangkokNowParts(now);
   return `${parts.hour}:${parts.minute}`;
+};
+
+export const timeToMinutes = (time: string) => {
+  const [hour, minute] = time.split(":").map(Number);
+  return hour * 60 + minute;
+};
+
+export type ScheduleSegmentProgress = {
+  activeItemId: string | null;
+  /** 현재 구간 안에서의 진행률 (0~1) */
+  segmentProgress: number;
+  /** 이미 지나간 일정 id */
+  pastItemIds: string[];
+  /** 첫 일정 시작 전, 해당 일정 닷에서 대기 중 */
+  waitingAtItemId?: string;
+};
+
+const sortDayItems = (items: ScheduleItem[], date: TripDate) =>
+  items
+    .filter((item) => item.schedule_date === date)
+    .sort((a, b) => a.start_time.localeCompare(b.start_time) || a.created_at.localeCompare(b.created_at));
+
+export const getScheduleItemsForDate = (items: ScheduleItem[], date: TripDate) => sortDayItems(items, date);
+
+const waitAtFirstSchedule = (dayItems: ScheduleItem[]): ScheduleSegmentProgress => ({
+  activeItemId: null,
+  segmentProgress: 0,
+  pastItemIds: [],
+  waitingAtItemId: dayItems[0].id,
+});
+
+export const hasScheduleTimelineProgress = (progress: ScheduleSegmentProgress) =>
+  Boolean(progress.activeItemId || progress.waitingAtItemId || progress.pastItemIds.length > 0);
+
+/** Bangkok 기준 해당 날짜에서 현재 시간이 속한 일정 구간과 구간 내 진행률을 반환한다. */
+export const getScheduleSegmentProgress = (
+  items: ScheduleItem[],
+  date: TripDate,
+  now = getScheduleNow(),
+): ScheduleSegmentProgress => {
+  const tripDate = getBangkokTripDate(now);
+  const dayItems = sortDayItems(items, date);
+  if (dayItems.length === 0) return { activeItemId: null, segmentProgress: 0, pastItemIds: [] };
+
+  if (date < tripDate) {
+    return {
+      activeItemId: null,
+      segmentProgress: 1,
+      pastItemIds: dayItems.map((item) => item.id),
+    };
+  }
+
+  if (date > tripDate) {
+    if (date === TRIP_START_DATE) {
+      return waitAtFirstSchedule(dayItems);
+    }
+    return { activeItemId: null, segmentProgress: 0, pastItemIds: [] };
+  }
+
+  const currentTime = getBangkokTime(now);
+  const currentMinutes = timeToMinutes(currentTime);
+  const active = dayItems.filter((item) => item.start_time <= currentTime).at(-1);
+  if (!active) {
+    return waitAtFirstSchedule(dayItems);
+  }
+
+  const activeIndex = dayItems.findIndex((item) => item.id === active.id);
+  const lastItem = dayItems.at(-1)!;
+
+  if (active.id === lastItem.id && currentMinutes > timeToMinutes(lastItem.start_time)) {
+    return {
+      activeItemId: null,
+      segmentProgress: 1,
+      pastItemIds: dayItems.map((item) => item.id),
+    };
+  }
+
+  const pastItemIds = activeIndex > 0 ? dayItems.slice(0, activeIndex).map((item) => item.id) : [];
+  const next = dayItems[activeIndex + 1];
+  const startMinutes = timeToMinutes(active.start_time);
+  const endMinutes = next ? timeToMinutes(next.start_time) : 24 * 60;
+
+  if (endMinutes <= startMinutes) {
+    return { activeItemId: active.id, segmentProgress: 1, pastItemIds };
+  }
+
+  const segmentProgress = (currentMinutes - startMinutes) / (endMinutes - startMinutes);
+  return {
+    activeItemId: active.id,
+    segmentProgress: Math.max(0, Math.min(1, segmentProgress)),
+    pastItemIds,
+  };
 };
 
 export const getFirstScheduleOnDate = (items: ScheduleItem[], date: TripDate) =>

@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, ImagePlus, Pencil, Trash2, ZoomIn } from "lucide-react";
 import { Button } from "@heroui/react";
-import ElectricBorder from "@/components/ElectricBorder";
 import { ClockIcon } from "@/components/ui/clock-icon";
 import { MapPinIcon } from "@/components/ui/map-pin-icon";
 import { ImageZoomModal } from "@/components/ui/image-zoom-modal";
@@ -14,14 +13,13 @@ import { dialogFooterPrimaryButtonClass, dialogFooterSecondaryButtonClass } from
 import type { ScheduleItem } from "@/lib/schedule";
 import { cn } from "@/lib/utils";
 
-const CURRENT_ACCENT = "#3b82f6";
-
 const actionButtonClass =
   "relative inline-flex size-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-200";
 
 interface ScheduleCardProps {
   item: ScheduleItem;
   current: boolean;
+  past?: boolean;
   cardRef?: React.Ref<HTMLDivElement>;
   onEdit: () => void;
   onDelete: () => void;
@@ -30,20 +28,18 @@ interface ScheduleCardProps {
   showTime?: boolean;
 }
 
-export function ScheduleCard({ item, current, cardRef, onEdit, onDelete, onPhotos, showTime = true }: ScheduleCardProps) {
+export function ScheduleCard({ item, current, past = false, cardRef, onEdit, onDelete, onPhotos, showTime = true }: ScheduleCardProps) {
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
   const [zoomImageIndex, setZoomImageIndex] = useState(0);
   const prefersReducedMotion = useReducedMotion();
-  const electric = current && !prefersReducedMotion;
 
   const card = (
     <motion.article
       className={cn(
-        "relative overflow-hidden rounded-3xl border bg-white shadow-[0_14px_30px_-24px_rgba(15,23,42,0.5)] dark:bg-slate-900",
-        current
-          ? "border-blue-300 dark:border-blue-500/60"
-          : "border-slate-200 dark:border-slate-800",
-        !current && "opacity-95",
+        "relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_14px_30px_-24px_rgba(15,23,42,0.5)] dark:border-slate-800 dark:bg-slate-900",
+        past && "bg-gradient-to-br from-blue-50/40 via-white to-slate-50/90 dark:from-blue-500/5 dark:via-slate-900 dark:to-slate-900/80",
+        past && "opacity-[0.92]",
+        !current && !past && "opacity-95",
       )}
       whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
       transition={{ type: "spring", stiffness: 520, damping: 32 }}
@@ -62,17 +58,19 @@ export function ScheduleCard({ item, current, cardRef, onEdit, onDelete, onPhoto
             )}
             <div className={cn("flex min-w-0 items-start gap-2", showTime ? "mt-1" : "mt-0")}>
               <MorphingDialogTitle className="min-w-0 flex-1">
-                <h2 className="break-words font-extrabold leading-snug text-slate-900 dark:text-white">{item.title}</h2>
-              </MorphingDialogTitle>
-              {current && (
-                <motion.span
-                  className="mt-0.5 shrink-0 rounded-full bg-blue-500 px-2 py-0.5 text-[10px] font-extrabold text-white shadow-sm"
-                  initial={prefersReducedMotion ? false : { scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 480, damping: 22, delay: 0.15 }}
+                <h2
+                  className={cn(
+                    "break-words font-extrabold leading-snug",
+                    past ? "text-slate-500 dark:text-slate-400" : "text-slate-900 dark:text-white",
+                  )}
                 >
-                  지금
-                </motion.span>
+                  {item.title}
+                </h2>
+              </MorphingDialogTitle>
+              {past && !current && (
+                <span aria-hidden="true" className="mt-0.5 shrink-0 text-sm leading-none">
+                  🐾
+                </span>
               )}
             </div>
             {item.subtitle && <p className="mt-1.5 line-clamp-3 break-words whitespace-pre-wrap text-sm leading-5 text-slate-500 dark:text-slate-400">{item.subtitle}</p>}
@@ -123,13 +121,7 @@ export function ScheduleCard({ item, current, cardRef, onEdit, onDelete, onPhoto
   return (
     <div ref={cardRef} className="min-w-0">
       <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.45 }}>
-        {electric ? (
-          <ElectricBorder borderRadius={24} chaos={0.08} color={CURRENT_ACCENT} speed={0.9}>
-            {card}
-          </ElectricBorder>
-        ) : (
-          <div className={cn(current && "rounded-3xl ring-2 ring-blue-200 dark:ring-blue-500/30")}>{card}</div>
-        )}
+        {card}
 
         <MorphingDialogContainer>
           <MorphingDialogContent className="relative mx-4 flex max-h-[85dvh] w-[calc(100%-2rem)] max-w-md flex-col overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
