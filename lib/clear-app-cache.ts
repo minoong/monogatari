@@ -27,6 +27,7 @@ export async function clearAppCache(): Promise<ClearAppCacheResult> {
 
   try {
     sessionStorage.clear();
+    localStorage.clear();
   } catch {
     // storage가 막혀 있으면 무시한다.
   }

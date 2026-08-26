@@ -7,6 +7,7 @@ import { CheckCircle2, CircleDashed } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
 import { triggerHapticFeedback } from "@/components/BottomNav";
+import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { clearAppCache } from "@/lib/clear-app-cache";
 
 type ClearCacheStatus = "idle" | "loading" | "success";
@@ -41,47 +42,55 @@ export function ClearCacheUtilityCard() {
 
   return (
     <section className="flex shrink-0 flex-col gap-2 pb-2">
-      <Button
-        fullWidth
-        className={CACHE_BUTTON_CLASS}
-        isPending={status === "loading"}
-        onPress={() => {
-          triggerHapticFeedback(15);
-          void handleClear();
-        }}
-        variant="secondary"
-      >
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span
-            key={status}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-center gap-2"
-            exit={{ opacity: 0, y: 15 }}
-            initial={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.075 }}
-          >
-            {status === "loading" ? (
-              <>
-                <CircleDashed className="size-4 animate-spin" />
-                지우는 중…
-              </>
-            ) : status === "success" ? (
-              <>
-                <motion.span
-                  animate={{ scale: 1 }}
-                  initial={{ scale: 0 }}
-                  transition={{ delay: 0.075, type: "spring" }}
-                >
-                  <CheckCircle2 className="size-4" />
-                </motion.span>
-                완료
-              </>
-            ) : (
-              "캐시 지우기"
-            )}
-          </motion.span>
-        </AnimatePresence>
-      </Button>
+      <div className="relative min-h-[53px]">
+        <Button
+          fullWidth
+          aria-hidden
+          className={`pointer-events-none ${CACHE_BUTTON_CLASS}`}
+          isPending={status === "loading"}
+          variant="secondary"
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={status}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center justify-center gap-2"
+              exit={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.075 }}
+            >
+              {status === "loading" ? (
+                <>
+                  <CircleDashed className="size-4 animate-spin" />
+                  지우는 중…
+                </>
+              ) : status === "success" ? (
+                <>
+                  <motion.span
+                    animate={{ scale: 1 }}
+                    initial={{ scale: 0 }}
+                    transition={{ delay: 0.075, type: "spring" }}
+                  >
+                    <CheckCircle2 className="size-4" />
+                  </motion.span>
+                  완료
+                </>
+              ) : (
+                "캐시 지우기"
+              )}
+            </motion.span>
+          </AnimatePresence>
+        </Button>
+        <NativeHapticSwitch
+          ariaLabel="캐시 지우기"
+          checked={false}
+          disabled={status !== "idle"}
+          onChange={() => {
+            triggerHapticFeedback(15);
+            void handleClear();
+          }}
+        />
+      </div>
       <p className="px-3 text-center text-xs leading-5 text-slate-500 dark:text-slate-400">
         임시 데이터를 지워요. 지출·일정·위시 기록은 그대로 남아요.
       </p>
