@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
@@ -5,6 +7,7 @@ import { useFlow } from "@stackflow/react";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@heroui/react";
 import { triggerHapticFeedback } from "../components/BottomNav";
+import { ClearCacheUtilityCard } from "@/components/utils/ClearCacheUtilityCard";
 import { AnimatedContent } from "@/components/ui/animated-content";
 import { cardNavButtonClass } from "@/components/ui/drawer-form";
 import { useExchangeRates } from "@/lib/exchange-rates";
@@ -17,9 +20,10 @@ export const UtilsActivity: React.FC = () => {
 
   return (
     <AppScreen appBar={{ title: "유틸 도구... 실수하지 마!" }}>
-      <div className="flex min-h-full w-full flex-col overflow-y-auto bg-white px-4 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] pt-5 dark:bg-slate-950">
-        <div className="mx-auto flex w-full max-w-lg flex-col gap-5">
-          <header>
+      <div className="flex min-h-full w-full flex-col bg-white dark:bg-slate-950">
+        <div className="flex-1 overflow-y-auto px-4 pt-5">
+          <div className="mx-auto w-full max-w-lg">
+          <header className="shrink-0">
             <AnimatedContent
               distance={30}
               direction="vertical"
@@ -34,7 +38,7 @@ export const UtilsActivity: React.FC = () => {
             </AnimatedContent>
           </header>
 
-          <div className="flex flex-col gap-4">
+          <div className="mt-5 flex shrink-0 flex-col gap-4">
             {UTILITY_CARDS.map((card) => {
               const base = card.baseDelay;
 
@@ -127,6 +131,13 @@ export const UtilsActivity: React.FC = () => {
                 </AnimatedContent>
               );
             })}
+          </div>
+          </div>
+        </div>
+
+        <div className="shrink-0 px-4 pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))] pt-2">
+          <div className="mx-auto w-full max-w-lg">
+            <ClearCacheUtilityCard />
           </div>
         </div>
       </div>

@@ -62,13 +62,15 @@ const createTextEffectVariants = ({
 
 interface PwaIntroProps {
   onComplete: () => void;
+  onSkip: () => void;
   onExitStart: () => void;
 }
 
-export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
+export function PwaIntro({ onComplete, onSkip, onExitStart }: PwaIntroProps) {
   const prefersReducedMotion = useReducedMotion() ?? false;
   const durationMs = prefersReducedMotion ? reducedMotionCountUpDurationMs : countUpDurationMs;
   const completedRef = React.useRef(false);
+  const exitReasonRef = React.useRef<"complete" | "skip">("complete");
   const [stage, setStage] = React.useState<"play" | "exit">("play");
   const [lastImageReady, setLastImageReady] = React.useState(false);
   const [flashStartedAt, setFlashStartedAt] = React.useState<number | null>(null);
@@ -89,12 +91,24 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
   const datingDayCount = React.useMemo(() => getDatingDayCount(), []);
   const [displayedDayCount, setDisplayedDayCount] = React.useState(0);
 
-  const beginExit = React.useCallback(() => {
-    if (completedRef.current) return;
-    completedRef.current = true;
-    onExitStart();
-    setStage("exit");
-  }, [onExitStart]);
+  const beginExit = React.useCallback(
+    (reason: "complete" | "skip" = "complete") => {
+      if (completedRef.current) return;
+      completedRef.current = true;
+      exitReasonRef.current = reason;
+      onExitStart();
+      setStage("exit");
+    },
+    [onExitStart],
+  );
+
+  const handleZoomComplete = React.useCallback(() => {
+    if (exitReasonRef.current === "skip") {
+      onSkip();
+      return;
+    }
+    onComplete();
+  }, [onComplete, onSkip]);
 
   React.useEffect(() => {
     void preloadIntroImages(introImages.map((image) => image.src));
@@ -121,7 +135,7 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
     const elapsedSinceFlashMs = Date.now() - flashStartedAt;
     const remainingFlashMs = Math.max(0, flashCompleteMs - elapsedSinceFlashMs);
     const exitDelayMs = Math.max(remainingFlashMs, countCompleteMs) + lastImageHoldMs;
-    const timer = window.setTimeout(beginExit, exitDelayMs);
+    const timer = window.setTimeout(() => beginExit("complete"), exitDelayMs);
 
     return () => window.clearTimeout(timer);
   }, [beginExit, durationMs, flashStartedAt, lastImageReady]);
@@ -133,7 +147,7 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
           images={introImages}
           onFirstImageReady={handleFirstImageReady}
           onLastImageReady={handleLastImageReady}
-          onZoomComplete={onComplete}
+          onZoomComplete={handleZoomComplete}
           reducedMotion={prefersReducedMotion}
           stage={stage}
         />
@@ -196,7 +210,7 @@ export function PwaIntro({ onComplete, onExitStart }: PwaIntroProps) {
           <button
             aria-label="인트로 건너뛰기"
             className="absolute inset-0 z-20 cursor-default"
-            onClick={beginExit}
+            onClick={() => beginExit("skip")}
             type="button"
           />
         ) : null}
