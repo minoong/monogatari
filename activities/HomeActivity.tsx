@@ -22,6 +22,7 @@ import { BeforeTripWeatherTicker, TravelWeatherWidget } from "../components/weat
 import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
 import { PostTripSection } from "@/components/home/PostTripSection";
 import { DuringTripShortcutCards } from "@/components/home/DuringTripShortcutCards";
+import { DuringTripScheduleFloatingBar } from "@/components/home/DuringTripScheduleFloatingBar";
 import { DuringTripStayTicker } from "@/components/home/DuringTripStayTicker";
 import { HomeQuickGooeyMenu } from "@/components/home/HomeQuickGooeyMenu";
 import { WishGoalRings } from "@/components/home/WishGoalRings";
@@ -599,7 +600,7 @@ export const HomeActivity: React.FC = () => {
 
             <Tabs.Panel className="!p-0" id="during">
               {tripState === "during" && (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 pb-24">
                   <DuringTripStayTicker />
 
                   <TravelWeatherWidget preferredCityId={activeStayId} />
@@ -635,6 +636,10 @@ export const HomeActivity: React.FC = () => {
           </div>
         </Tabs>
       </div>
+
+      {tripState === "during" && (
+        <DuringTripScheduleFloatingBar onOpenSchedule={() => push("ScheduleActivity", {})} />
+      )}
 
       {tripState !== "after" && (
         <HomeQuickGooeyMenu

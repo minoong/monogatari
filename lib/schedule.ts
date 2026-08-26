@@ -130,3 +130,52 @@ export const getUpcomingSchedulePreview = (items: ScheduleItem[], now = new Date
 
   return null;
 };
+
+export type TodayScheduleFocus = {
+  date: TripDate;
+  dateLabel: string;
+  current: ScheduleItem | null;
+  next: ScheduleItem | null;
+  /** 오늘 일정이 끝난 뒤 내일 첫 일정을 다음으로 보여줄 때 */
+  nextIsTomorrow?: boolean;
+};
+
+const getNextTripDate = (date: TripDate): TripDate | null => {
+  const index = TRIP_DATES.findIndex((tripDate) => tripDate === date);
+  if (index < 0 || index >= TRIP_DATES.length - 1) return null;
+  return TRIP_DATES[index + 1];
+};
+
+/** Bangkok 기준 오늘 일정에서 진행 중·다음 일정을 반환한다. */
+export const getTodayScheduleFocus = (items: ScheduleItem[], now = new Date()): TodayScheduleFocus | null => {
+  const date = getBangkokTripDate(now);
+  const currentTime = getBangkokTime(now);
+  const todayItems = items
+    .filter((item) => item.schedule_date === date)
+    .sort((a, b) => a.start_time.localeCompare(b.start_time) || a.created_at.localeCompare(b.created_at));
+
+  if (todayItems.length === 0) return null;
+
+  const current = todayItems.filter((item) => item.start_time <= currentTime).at(-1) ?? null;
+  let next = todayItems.find((item) => item.start_time > currentTime) ?? null;
+  let nextIsTomorrow = false;
+
+  if (!next) {
+    const nextDate = getNextTripDate(date);
+    if (nextDate) {
+      const tomorrowFirst = getFirstScheduleOnDate(items, nextDate);
+      if (tomorrowFirst) {
+        next = tomorrowFirst;
+        nextIsTomorrow = true;
+      }
+    }
+  }
+
+  return {
+    date,
+    dateLabel: formatTripDate(date),
+    current,
+    next,
+    nextIsTomorrow: nextIsTomorrow || undefined,
+  };
+};
