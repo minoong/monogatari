@@ -4,7 +4,7 @@ import type { TripConfig } from "./types";
  * 2026-12-18 ~ 12-21 일본 요나고(돗토리현) 온천과 돗토리 사구 여행.
  *
  * - 일본(JST, UTC+9)은 한국(KST)과 시차가 없다.
- * - 항공사는 에어서울이고 좌석은 아직 고르기 전이다. 가현쨩과 같은 항공편이다.
+ * - 항공사는 에어서울이고 좌석은 당일 선택한다. 항공권 번호는 아직 모른다. 가현쨩과 같은 항공편이다.
  * - 여행 단계는 가는 편 출발(인천 12/18 13:20)부터 오는 편 출발(요나고 12/21 15:50)까지를 during으로 본다.
  *   두 공항 모두 UTC+9라 시각 계산에 시차 보정이 필요 없다.
  * - 숙소 정보는 2026-11-15 아고다 상세 페이지에서 확인한 값이다. 객실 타입, 식사 포함 여부 등은
@@ -51,7 +51,7 @@ export const JAPAN_YONAGO_TRIP: TripConfig = {
       departure: { code: "ICN", city: "인천", airport: "서울 인천", utcOffset: "+09:00", time: "13:20" },
       arrival: { code: "YGJ", city: "요나고", airport: "돗토리 요나고", utcOffset: "+09:00", time: "14:50" },
       detail: "에어서울",
-      seatStatus: "좌석 선택 전",
+      seatStatus: "좌석은 당일 선택",
     },
     {
       id: "return",
@@ -60,7 +60,7 @@ export const JAPAN_YONAGO_TRIP: TripConfig = {
       departure: { code: "YGJ", city: "요나고", airport: "돗토리 요나고", utcOffset: "+09:00", time: "15:50" },
       arrival: { code: "ICN", city: "인천", airport: "서울 인천", utcOffset: "+09:00", time: "17:40" },
       detail: "에어서울",
-      seatStatus: "좌석 선택 전",
+      seatStatus: "좌석은 당일 선택",
     },
   ],
   stays: [
