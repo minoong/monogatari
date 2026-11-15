@@ -5,8 +5,18 @@ import { parseReceiptScanJson, RECEIPT_SCAN_MODEL } from "@/lib/receipt-scan";
 import { getTripBySlug, type TripConfig } from "@/lib/trips";
 
 const RECEIPT_HINTS = {
-  THB: { description: "a Thai receipt (THB, baht, ฿, VAT, PromptPay/QR)", currency: "THB", hint: "Use THB for Thai baht receipts." },
-  JPY: { description: "a Japanese receipt (JPY, yen, 円, ¥, 税込, 消費税, レシート, PayPay/IC card)", currency: "JPY", hint: "Use JPY for Japanese yen receipts. Prefer the tax-included (税込) total." },
+  THB: {
+    description: "a Thai receipt (THB, baht, ฿, VAT, PromptPay/QR)",
+    currency: "THB",
+    hint: "Use THB for Thai baht receipts.",
+    paymentHint: 'PromptPay and other QR payments are "qr".',
+  },
+  JPY: {
+    description: "a Japanese receipt (JPY, yen, 円, ¥, 税込, 消費税, レシート, PayPay/IC card)",
+    currency: "JPY",
+    hint: "Use JPY for Japanese yen receipts. Prefer the tax-included (税込) total.",
+    paymentHint: 'Smartphone wallet payments such as PayPay, au PAY, d払い, 楽天ペイ and QR codes are "qr". Suica, ICOCA and other transit IC cards are "ic_card". 現金/お預り is "cash". Credit and debit cards are "card".',
+  },
 } as const;
 
 const buildReceiptPrompt = (trip: TripConfig) => {
@@ -34,7 +44,7 @@ Rules:
 - amount is the grand total as a number, or null. Prefer the final payable total, not a subtotal.
 - currency is "${hints.currency}" or "KRW" or null. ${hints.hint}
 - purchased_date is "YYYY-MM-DD" or null. purchased_time is "HH:mm" 24-hour or null.
-- payment_method is ${trip.paymentMethods.map((method) => `"${method}"`).join(" | ")} or null.
+- payment_method is ${trip.paymentMethods.map((method) => `"${method}"`).join(" | ")} or null. ${hints.paymentHint}
 - category is one of ${categoryGuide}, or null.
 - custom_category is a Korean tag max 30 chars only if no preset fits, otherwise null.
 - If the image is not a receipt or invoice, set is_receipt to false and all other fields to null.
@@ -57,7 +67,7 @@ const groqContent = (payload: unknown) => {
   return (payload as { choices?: { message?: { content?: unknown } }[] }).choices?.[0]?.message?.content;
 };
 
-const requestGroq = async (apiKey: string, imageUrl: string, jsonMode: boolean, prompt: string) => {
+const requestGroq = async (apiKey: string, imageUrl: string, jsonMode: boolean, prompt: string, model: string) => {
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -65,7 +75,7 @@ const requestGroq = async (apiKey: string, imageUrl: string, jsonMode: boolean, 
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: RECEIPT_SCAN_MODEL,
+      model,
       temperature: 0.2,
       max_completion_tokens: 2048,
       reasoning_effort: "none",
@@ -97,6 +107,7 @@ export async function POST(request: Request) {
     const trip = getTripBySlug(String(formData.get("trip") ?? ""));
     if (!trip) return NextResponse.json({ error: "여행 정보를 확인해 주세요." }, { status: 400 });
     const prompt = buildReceiptPrompt(trip);
+    const model = process.env.GROQ_RECEIPT_MODEL?.trim() || RECEIPT_SCAN_MODEL;
     const file = formData.get("image");
     if (!(file instanceof File)) return NextResponse.json({ error: "사진이 필요해요." }, { status: 400 });
     if (!isAcceptedImageFile(file)) return NextResponse.json({ error: "JPG, PNG, WEBP, HEIC 사진만 인식할 수 있어요." }, { status: 400 });
@@ -104,12 +115,16 @@ export async function POST(request: Request) {
 
     const mimeType = normalizeImageMimeType(file);
     const imageUrl = await toDataUrl(file, mimeType);
-    let { response: groqResponse, payload: groqPayload } = await requestGroq(apiKey, imageUrl, true, prompt);
+    let { response: groqResponse, payload: groqPayload } = await requestGroq(apiKey, imageUrl, true, prompt, model);
     if (!groqResponse.ok && groqErrorCode(groqPayload) === "json_validate_failed") {
-      ({ response: groqResponse, payload: groqPayload } = await requestGroq(apiKey, imageUrl, false, prompt));
+      ({ response: groqResponse, payload: groqPayload } = await requestGroq(apiKey, imageUrl, false, prompt, model));
     }
     if (!groqResponse.ok) {
-      console.error("Groq receipt scan failed", groqResponse.status, groqPayload);
+      console.error("Groq receipt scan failed", groqResponse.status, groqErrorCode(groqPayload), model);
+      if (groqResponse.status === 404 || groqErrorCode(groqPayload) === "model_not_found") {
+        // 모델이 내려갔거나 접근 권한이 없다. 사용자가 다시 시도해도 소용없으니 원인을 알려 준다.
+        return NextResponse.json({ error: "영수증 인식 모델을 지금 쓸 수 없어요. 설정을 확인해야 해요." }, { status: 503 });
+      }
       return NextResponse.json({ error: "영수증을 인식하지 못했어요." }, { status: groqResponse.status === 429 ? 429 : 502 });
     }
 

@@ -7,7 +7,11 @@ import {
 import { CURRENCY_INFO, type LocalCurrencyCode } from "@/lib/currency";
 import { type InputCurrency } from "@/lib/exchange-rates";
 
-export const RECEIPT_SCAN_MODEL = "qwen/qwen3.6-27b";
+/**
+ * Groq 비전 모델. 이전 모델(qwen/qwen3.6-27b)이 Groq에서 내려가 404(model_not_found)가 나서 3.8로 바꿨다.
+ * 모델이 또 바뀌면 코드를 고치지 않고 서버 환경변수 GROQ_RECEIPT_MODEL로 덮어쓸 수 있다.
+ */
+export const RECEIPT_SCAN_MODEL = "qwen/qwen3.8-27b";
 
 export interface ReceiptScanResult {
   item_name: string | null;
@@ -102,19 +106,10 @@ export const parseReceiptScanJson = (
       : undefined;
   if (purchasedTime === undefined) return { error: "영수증 내용을 확인해 주세요." };
 
-  const paymentMethod = isExpensePaymentMethod(body.payment_method)
-    ? body.payment_method
-    : body.payment_method == null || body.payment_method === ""
-      ? null
-      : undefined;
-  if (paymentMethod === undefined) return { error: "영수증 내용을 확인해 주세요." };
-
-  const category = isExpenseCategory(body.category)
-    ? body.category
-    : body.category == null || body.category === ""
-      ? null
-      : undefined;
-  if (category === undefined) return { error: "영수증 내용을 확인해 주세요." };
+  // 결제수단과 카테고리는 모델이 허용 목록 밖의 말(예: "au PAY")을 돌려줘도 스캔 전체를 버리지 않고 비워 둔다.
+  // 금액·날짜·상호를 제대로 읽었는데 부가 정보 한 칸 때문에 실패하는 쪽이 사용자에게 더 나쁘다.
+  const paymentMethod = isExpensePaymentMethod(body.payment_method) ? body.payment_method : null;
+  const category = isExpenseCategory(body.category) ? body.category : null;
 
   return {
     data: {
