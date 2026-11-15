@@ -48,6 +48,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
+import { useTrip } from "@/components/providers/trip-provider";
 import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
 import {
   getSpeakerGenderLabel,
@@ -476,6 +477,7 @@ const DictionaryPhraseRow = React.memo(function DictionaryPhraseRow({
 });
 
 export const DictionaryActivity: React.FC = () => {
+  const { trip } = useTrip();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("전체");
@@ -622,7 +624,7 @@ export const DictionaryActivity: React.FC = () => {
   }, []);
 
   return (
-    <AppScreen className="dictionary-screen captured-scroll-screen" appBar={{ title: "태국어 사전... 당황하지 말라고!" }}>
+    <AppScreen className="dictionary-screen captured-scroll-screen" appBar={{ title: trip.copy.dictionaryTitle }}>
       <main ref={mainRef} className="relative flex h-[calc(100svh-56px)] w-full flex-col overflow-hidden bg-white dark:bg-slate-950">
         <div
           ref={scrollRef}

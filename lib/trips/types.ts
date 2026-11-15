@@ -63,6 +63,8 @@ export interface TripDayTripSeed {
 export interface TripFlightEndpoint {
   /** IATA 공항 코드 */
   code: string;
+  /** 짧은 도시명. 보딩패스 카드 등 좁은 곳에 쓴다. */
+  city: string;
   airport: string;
   /** 해당 공항 현지 시각(HH:mm) */
   time: string;
@@ -75,6 +77,14 @@ export interface TripFlightSeed {
   date: string;
   departure: TripFlightEndpoint;
   arrival: TripFlightEndpoint;
+  /** 항공사·기종처럼 확인된 부가 정보. 모르면 생략한다. */
+  detail?: string;
+}
+
+/** 앱바 제목처럼 여행마다 달라지는 문구 */
+export interface TripCopy {
+  homeTitle: string;
+  dictionaryTitle: string;
 }
 
 /** 여행별 분위기. 색은 `--trip-accent`, `--trip-tint` CSS 변수로 노출된다. */
@@ -115,6 +125,7 @@ export interface TripConfig {
   phaseStartsAt: string;
   /** 여행 단계(during -> after)가 바뀌는 시각. 보통 오는 항공편 출발 시각. */
   phaseEndsAt: string;
+  copy: TripCopy;
   theme: TripTheme;
   currency: TripCurrency;
   language: TripLanguage;

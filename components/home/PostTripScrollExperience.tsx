@@ -11,7 +11,7 @@ import { PostTripWishPinIndicator } from "@/components/home/PostTripWishPinIndic
 import ScrollFloat from "@/components/ScrollFloat";
 import { useTrip } from "@/components/providers/trip-provider";
 import type { ScheduleItem } from "@/lib/schedule";
-import { TRIP_RETURN_FLIGHT } from "@/lib/trip-phase";
+import { formatFlightDate, getFlight, getTripNightsLabel } from "@/lib/trips";
 import type { WishItem } from "@/lib/wishes";
 import "./post-trip-scroll-experience.css";
 import "./post-trip-wish-pin.css";
@@ -495,8 +495,8 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
   const wrapperRef = useRef<HTMLDivElement>(null);
   const heroTrackRef = useRef<HTMLDivElement>(null);
   const panelRefs = useRef<(HTMLElement | null)[]>([]);
-  const returnFlight = TRIP_RETURN_FLIGHT;
   const { trip } = useTrip();
+  const returnFlight = getFlight(trip, "return");
   const { data: wishes = [], isFetched: isWishesFetched } = useQuery({ queryKey: ["wishes"], queryFn: fetchWishes });
   const { data: scheduleItems = [], isFetched: isScheduleFetched } = useQuery({
     queryKey: ["schedule", trip.id],
@@ -615,9 +615,9 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
               </h2>
               <p className="mt-3 max-w-xs text-sm leading-6 text-white/85">
                 {returnFlight
-                  ? `${returnFlight.flightNumber} · ${returnFlight.date} ${returnFlight.departure.time} BKK 출발. `
+                  ? `${returnFlight.flightNumber} · ${formatFlightDate(returnFlight.date)} ${returnFlight.departure.time} ${returnFlight.departure.code} 출발. `
                   : ""}
-                3박 4일 방콕, 위시 목표를 얼마나 채웠는지 같이 돌아봐요.
+                {getTripNightsLabel(trip)} {trip.shortName}, 위시 목표를 얼마나 채웠는지 같이 돌아봐요.
               </p>
             </div>
           </div>

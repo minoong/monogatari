@@ -21,10 +21,10 @@ const formatRange = (trip: TripConfig) => {
   return `${startYear}.${startMonth}.${startDay} – ${end}`;
 };
 
-/** 출발 전이면 D-day, 아니면 null. */
+/** 출발 전이면 D-day, 아니면 null. 홈의 보딩패스 카드와 같게 남은 시간을 내림해서 센다. */
 const getDDay = (trip: TripConfig, now: Date) => {
-  const days = Math.ceil((new Date(trip.phaseStartsAt).getTime() - now.getTime()) / 86_400_000);
-  return days > 0 ? `D-${days}` : null;
+  const remaining = new Date(trip.phaseStartsAt).getTime() - now.getTime();
+  return remaining > 0 ? `D-${Math.floor(remaining / 86_400_000)}` : null;
 };
 
 /** 항공편이 있으면 출발-도착 공항, 없으면 도시 목록. */

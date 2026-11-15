@@ -2,7 +2,8 @@
 
 import type { RefObject } from "react";
 import ScrollExpand from "@/components/ScrollExpand";
-import { TRIP_RETURN_FLIGHT } from "@/lib/trip-phase";
+import { useTrip } from "@/components/providers/trip-provider";
+import { formatFlightDate, getFlight, getTripNightsLabel } from "@/lib/trips";
 import "./post-trip-scroll-expand.css";
 
 const POST_TRIP_IMAGE = "/images/post-trip-scroll.jpg";
@@ -12,7 +13,8 @@ type PostTripHeroProps = {
 };
 
 export function PostTripHero({ scrollContainerRef }: PostTripHeroProps) {
-  const returnFlight = TRIP_RETURN_FLIGHT;
+  const { trip } = useTrip();
+  const returnFlight = getFlight(trip, "return");
 
   return (
     <div className="post-trip-scroll-expand w-full">
@@ -39,9 +41,9 @@ export function PostTripHero({ scrollContainerRef }: PostTripHeroProps) {
         </h2>
         <p className="mt-3 max-w-xs text-sm leading-6 text-white/85">
           {returnFlight
-            ? `${returnFlight.flightNumber} · ${returnFlight.date} ${returnFlight.departure.time} BKK 출발. `
+            ? `${returnFlight.flightNumber} · ${formatFlightDate(returnFlight.date)} ${returnFlight.departure.time} ${returnFlight.departure.code} 출발. `
             : ""}
-          3박 4일 방콕, 위시 목표를 얼마나 채웠는지 같이 돌아봐요.
+          {getTripNightsLabel(trip)} {trip.shortName}, 위시 목표를 얼마나 채웠는지 같이 돌아봐요.
         </p>
       </ScrollExpand>
     </div>

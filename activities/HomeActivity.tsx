@@ -28,7 +28,8 @@ import { DuringTripScheduleFloatingBar } from "@/components/home/DuringTripSched
 import { DuringTripStayTicker } from "@/components/home/DuringTripStayTicker";
 import { HomeQuickGooeyMenu } from "@/components/home/HomeQuickGooeyMenu";
 import { WishGoalRings } from "@/components/home/WishGoalRings";
-import { getTripPhase, isBeforeOutboundDeparture, OUTBOUND_DEPARTURE } from "@/lib/trip-phase";
+import { useTrip } from "@/components/providers/trip-provider";
+import { formatFlightDeparture, getFlight, getTripPhase, type TripConfig } from "@/lib/trips";
 import type { WishItem, WishType } from "@/lib/wishes";
 
 dayjs.extend(utc);
@@ -86,12 +87,15 @@ const TravelClock: React.FC<TravelClockProps> = ({ city, zone, flagCode }) => {
   );
 };
 
-const WorldClockCard: React.FC = () => (
+/** 서울과 여행지의 시차가 없으면(예: 일본) 시계 카드는 의미가 없어 숨긴다. */
+const hasTimeDifferenceFromSeoul = (timeZone: string) => dayjs().tz(timeZone).utcOffset() !== dayjs().tz("Asia/Seoul").utcOffset();
+
+const WorldClockCard: React.FC<{ trip: TripConfig }> = ({ trip }) => (
   <section className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 px-2 py-1 shadow-[0_6px_18px_-18px_rgba(15,23,42,0.55)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90" aria-label="한국과 태국의 현재 시각">
     <div className="flex gap-2 px-2 py-1.5">
       <TravelClock city="서울" zone="Asia/Seoul" flagCode="KR" />
       <div className="w-px self-stretch bg-slate-200 dark:bg-slate-800" aria-hidden="true" />
-      <TravelClock city="방콕" zone="Asia/Bangkok" flagCode="TH" />
+      <TravelClock city={trip.shortName} zone={trip.timeZone} flagCode={trip.countryCode} />
     </div>
   </section>
 );
@@ -350,14 +354,15 @@ const ReservationStayCard: React.FC<{
   );
 };
 
-const BangkokDepartureCard: React.FC = () => {
-  const [visible, setVisible] = useState(() => isBeforeOutboundDeparture());
+const DepartureBoardingCard: React.FC<{ trip: TripConfig }> = ({ trip }) => {
+  const flight = getFlight(trip, "outbound");
+  const [visible, setVisible] = useState(() => Date.now() < new Date(trip.phaseStartsAt).getTime());
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   React.useEffect(() => {
     const updateCountdown = () => {
       const now = dayjs().tz("Asia/Seoul");
-      const target = dayjs(OUTBOUND_DEPARTURE).tz("Asia/Seoul");
+      const target = dayjs(trip.phaseStartsAt).tz("Asia/Seoul");
 
       if (!now.isBefore(target)) {
         setVisible(false);
@@ -377,9 +382,9 @@ const BangkokDepartureCard: React.FC = () => {
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [trip.phaseStartsAt]);
 
-  if (!visible) return null;
+  if (!visible || !flight) return null;
 
   return (
     <section style={{ fontFamily: "var(--font-korean-air)" }} className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-[#F8FAFC] text-slate-900 shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-white">
@@ -394,12 +399,12 @@ const BangkokDepartureCard: React.FC = () => {
             <span className="text-[10px] font-black uppercase tracking-[0.14em] text-cyan-300 sm:text-[11px] sm:tracking-widest">
               BOARDING PASS
             </span>
-            <span className="shrink-0 text-[10px] font-mono text-blue-200/70 tabular-nums">KE657</span>
+            <span className="shrink-0 text-[10px] font-mono text-blue-200/70 tabular-nums">{flight.flightNumber}</span>
           </div>
           <div className="flex shrink-0 items-center gap-1 whitespace-nowrap text-[11px] font-bold sm:gap-1.5 sm:text-xs">
-            <span>인천 ICN</span>
+            <span>{flight.departure.city} {flight.departure.code}</span>
             <span className="text-cyan-400" aria-hidden="true">✈️</span>
-            <span>방콕 BKK</span>
+            <span>{flight.arrival.city} {flight.arrival.code}</span>
           </div>
         </div>
       </AnimatedContent>
@@ -410,11 +415,11 @@ const BangkokDepartureCard: React.FC = () => {
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-b border-slate-200/60 pb-3 dark:border-slate-800">
             <div>
               <p className="text-[10px] uppercase font-bold text-slate-400">출발일시</p>
-              <p className="font-semibold text-slate-800 dark:text-slate-200">2026.08.29 (토) 09:45</p>
+              <p className="font-semibold text-slate-800 dark:text-slate-200">{formatFlightDeparture(flight)}</p>
             </div>
             <div className="text-right">
               <p className="text-[10px] uppercase font-bold text-slate-400">항공편</p>
-              <p className="font-semibold text-slate-800 dark:text-slate-200">대한항공 A330-300</p>
+              <p className="font-semibold text-slate-800 dark:text-slate-200">{flight.detail ?? flight.flightNumber}</p>
             </div>
           </div>
         </AnimatedContent>
@@ -493,15 +498,21 @@ const BangkokDepartureCard: React.FC = () => {
   );
 };
 
+/** 여행을 바꾸면 단계 탭 같은 화면 상태가 새 여행 기준으로 다시 시작되도록 key로 분리한다. */
 export const HomeActivity: React.FC = () => {
+  const { trip } = useTrip();
+  return <HomeScreen key={trip.id} trip={trip} />;
+};
+
+const HomeScreen: React.FC<{ trip: TripConfig }> = ({ trip }) => {
   const { push } = useFlow();
-  const phaseRef = useRef(getTripPhase());
-  const [tripState, setTripState] = useState<"before" | "during" | "after">(() => getTripPhase());
+  const phaseRef = useRef(getTripPhase(trip));
+  const [tripState, setTripState] = useState<"before" | "during" | "after">(() => getTripPhase(trip));
   const activeStayId = useActiveAccommodationId(tripState === "during");
 
   useEffect(() => {
     const syncTripPhase = () => {
-      const phase = getTripPhase();
+      const phase = getTripPhase(trip);
       phaseRef.current = phase;
       setTripState(phase);
     };
@@ -509,7 +520,7 @@ export const HomeActivity: React.FC = () => {
     syncTripPhase();
 
     const interval = window.setInterval(() => {
-      const phase = getTripPhase();
+      const phase = getTripPhase(trip);
       if (phase === phaseRef.current) return;
       phaseRef.current = phase;
       setTripState(phase);
@@ -526,7 +537,7 @@ export const HomeActivity: React.FC = () => {
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, []);
+  }, [trip]);
   const {
     data: checklistItems = [],
     isLoading: isChecklistLoading,
@@ -552,7 +563,7 @@ export const HomeActivity: React.FC = () => {
   };
 
   return (
-    <AppScreen appBar={{ title: "태국을 점령하라!", renderRight: () => <TripSwitcherButton /> }}>
+    <AppScreen appBar={{ title: trip.copy.homeTitle, renderRight: () => <TripSwitcherButton /> }}>
       <div
         className={
           tripState === "after"
@@ -561,7 +572,7 @@ export const HomeActivity: React.FC = () => {
         }
       >
         <TripBackdrop className="pointer-events-none absolute inset-x-0 top-0 h-72" />
-        {tripState !== "after" && <WorldClockCard />}
+        {tripState !== "after" && hasTimeDifferenceFromSeoul(trip.timeZone) && <WorldClockCard trip={trip} />}
         <Tabs
           className="w-full"
           onSelectionChange={(key) => setTripState(String(key) as typeof tripState)}
@@ -584,7 +595,7 @@ export const HomeActivity: React.FC = () => {
                 <div className="flex flex-col gap-4">
                   <BeforeTripWeatherTicker />
 
-                  <BangkokDepartureCard />
+                  <DepartureBoardingCard trip={trip} />
 
                   <ChecklistBattleCard
                     stats={checklistBattleStats}

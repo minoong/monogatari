@@ -3,6 +3,7 @@
 import { useStack } from "@stackflow/react";
 import { useMemo } from "react";
 
+import { useTrip } from "@/components/providers/trip-provider";
 import { SlidingText } from "@/components/core/sliding-text";
 import { resolveActivityAppBarTitle } from "@/lib/activity-app-bar-titles";
 
@@ -22,13 +23,14 @@ function getTopVisibleActivity(
 
 export function AppBarTitleAnimator() {
   const { activities } = useStack();
+  const { trip } = useTrip();
 
   const title = useMemo(() => {
     const topActivity = getTopVisibleActivity(activities);
     if (!topActivity) return "";
 
-    return resolveActivityAppBarTitle(topActivity.name, topActivity.params);
-  }, [activities]);
+    return resolveActivityAppBarTitle(topActivity.name, topActivity.params, trip.copy);
+  }, [activities, trip.copy]);
 
   if (!title) {
     return null;

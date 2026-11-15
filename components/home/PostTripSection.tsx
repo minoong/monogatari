@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { PostTripScrollExperience } from "@/components/home/PostTripScrollExperience";
-import { isBeforeReturnBoarding } from "@/lib/trip-phase";
+import { useTrip } from "@/components/providers/trip-provider";
+import { getTripPhase } from "@/lib/trips";
 
 const SCROLL_HEIGHT = "calc(100svh - 10rem)";
 const WAITING_MEDIA_SRC = "/home/213121.gif";
@@ -28,19 +29,21 @@ function PostTripWaitingMedia() {
 
 export function PostTripSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [isWaiting, setIsWaiting] = useState(isBeforeReturnBoarding);
+  const { trip } = useTrip();
+  // 오는 편 출발 전이면 아직 여행이 끝나지 않았으므로 대기 화면을 보여준다.
+  const [isWaiting, setIsWaiting] = useState(() => getTripPhase(trip) !== "after");
 
   useEffect(() => {
     if (!isWaiting) return;
 
     const sync = () => {
-      if (!isBeforeReturnBoarding()) setIsWaiting(false);
+      if (getTripPhase(trip) === "after") setIsWaiting(false);
     };
 
     sync();
     const timer = window.setInterval(sync, 1_000);
     return () => window.clearInterval(timer);
-  }, [isWaiting]);
+  }, [isWaiting, trip]);
 
   if (isWaiting) {
     return <PostTripWaitingMedia />;

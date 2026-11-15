@@ -1,4 +1,5 @@
 import { resolveActivityAppBarTitle } from "@/lib/activity-app-bar-titles";
+import type { TripCopy } from "@/lib/trips";
 
 type QueueSnapshot = {
   queue: readonly string[];
@@ -27,9 +28,10 @@ export function enqueueAppBarTitle(title: string) {
 
 export function enqueueActivityAppBarTitle(
   activityName: string,
-  params: Record<string, unknown> = {},
+  params: Record<string, unknown>,
+  copy: TripCopy,
 ) {
-  enqueueAppBarTitle(resolveActivityAppBarTitle(activityName, params));
+  enqueueAppBarTitle(resolveActivityAppBarTitle(activityName, params, copy));
 }
 
 export function shiftAppBarTitleQueue() {

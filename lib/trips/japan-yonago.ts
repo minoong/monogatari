@@ -22,6 +22,7 @@ export const JAPAN_YONAGO_TRIP: TripConfig = {
   utcOffset: "+09:00",
   phaseStartsAt: "2026-12-18T13:20:00+09:00",
   phaseEndsAt: "2026-12-21T15:50:00+09:00",
+  copy: { homeTitle: "온천과 사구를 만끽하라!", dictionaryTitle: "일본어 사전... 당황하지 말라고!" },
   // 온천 테마: 김이 오르는 따뜻한 복숭아·살구빛에 온천수의 옅은 청록을 섞는다.
   theme: {
     id: "onsen",
@@ -46,15 +47,15 @@ export const JAPAN_YONAGO_TRIP: TripConfig = {
       id: "outbound",
       flightNumber: "RS471",
       date: "2026-12-18",
-      departure: { code: "ICN", airport: "서울 인천", time: "13:20" },
-      arrival: { code: "YGJ", airport: "돗토리 요나고", time: "14:50" },
+      departure: { code: "ICN", city: "인천", airport: "서울 인천", time: "13:20" },
+      arrival: { code: "YGJ", city: "요나고", airport: "돗토리 요나고", time: "14:50" },
     },
     {
       id: "return",
       flightNumber: "RS472",
       date: "2026-12-21",
-      departure: { code: "YGJ", airport: "돗토리 요나고", time: "15:50" },
-      arrival: { code: "ICN", airport: "서울 인천", time: "17:40" },
+      departure: { code: "YGJ", city: "요나고", airport: "돗토리 요나고", time: "15:50" },
+      arrival: { code: "ICN", city: "인천", airport: "서울 인천", time: "17:40" },
     },
   ],
   stays: [
