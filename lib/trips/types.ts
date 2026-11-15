@@ -62,6 +62,23 @@ export interface TripDayTripSeed {
   longitude: number;
 }
 
+export interface TripFlightEndpoint {
+  /** IATA 공항 코드 */
+  code: string;
+  airport: string;
+  /** 해당 공항 현지 시각(HH:mm) */
+  time: string;
+}
+
+export interface TripFlightSeed {
+  id: "outbound" | "return";
+  flightNumber: string;
+  /** 출발일 (출발 공항 현지 날짜, YYYY-MM-DD) */
+  date: string;
+  departure: TripFlightEndpoint;
+  arrival: TripFlightEndpoint;
+}
+
 export interface TripConfig {
   id: TripId;
   slug: TripSlug;
@@ -84,6 +101,8 @@ export interface TripConfig {
   currency: TripCurrency;
   language: TripLanguage;
   weatherPlaces: readonly TripWeatherPlace[];
+  /** 가는 편과 오는 편. 항공편이 없는 여행은 빈 배열. */
+  flights: readonly TripFlightSeed[];
   /** 숙소 초기 데이터. 상세(주소, 시설 등)는 확정되는 대로 채운다. */
   stays: readonly TripStaySeed[];
   dayTrips: readonly TripDayTripSeed[];

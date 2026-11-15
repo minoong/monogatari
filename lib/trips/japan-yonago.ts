@@ -4,8 +4,8 @@ import type { TripConfig } from "./types";
  * 2026-12-18 ~ 12-21 일본 요나고(돗토리현) 온천과 돗토리 사구 여행.
  *
  * - 일본(JST, UTC+9)은 한국(KST)과 시차가 없다.
- * - 항공편이 확정되지 않아 단계 전환 시각은 현지 날짜 경계(첫날 00:00 ~ 마지막 날 24:00)로 둔다.
- *   항공편이 정해지면 phaseStartsAt/phaseEndsAt을 출발 시각으로 바꾼다.
+ * - 여행 단계는 가는 편 출발(인천 12/18 13:20)부터 오는 편 출발(요나고 12/21 15:50)까지를 during으로 본다.
+ *   두 공항 모두 UTC+9라 시각 계산에 시차 보정이 필요 없다.
  * - 숙소 정보는 2026-11-15 아고다 상세 페이지에서 확인한 값이다. 객실 타입, 식사 포함 여부 등은
  *   예약 내역과 다를 수 있어 포함하지 않았다. 한글 숙소명은 직접 옮긴 표기다.
  */
@@ -20,13 +20,29 @@ export const JAPAN_YONAGO_TRIP: TripConfig = {
   endDate: "2026-12-21",
   timeZone: "Asia/Tokyo",
   utcOffset: "+09:00",
-  phaseStartsAt: "2026-12-18T00:00:00+09:00",
-  phaseEndsAt: "2026-12-22T00:00:00+09:00",
+  phaseStartsAt: "2026-12-18T13:20:00+09:00",
+  phaseEndsAt: "2026-12-21T15:50:00+09:00",
   currency: { code: "JPY", label: "엔", symbol: "¥", fractionDigits: 0, displayUnit: 100 },
   language: { code: "ja", label: "일본어", speechLang: "ja-JP" },
   weatherPlaces: [
     { id: "yonago", label: "요나고", latitude: 35.4235, longitude: 133.3352 },
     { id: "tottori-dunes", label: "돗토리 사구", latitude: 35.5416, longitude: 134.2286 },
+  ],
+  flights: [
+    {
+      id: "outbound",
+      flightNumber: "RS471",
+      date: "2026-12-18",
+      departure: { code: "ICN", airport: "서울 인천", time: "13:20" },
+      arrival: { code: "YGJ", airport: "돗토리 요나고", time: "14:50" },
+    },
+    {
+      id: "return",
+      flightNumber: "RS472",
+      date: "2026-12-21",
+      departure: { code: "YGJ", airport: "돗토리 요나고", time: "15:50" },
+      arrival: { code: "ICN", airport: "서울 인천", time: "17:40" },
+    },
   ],
   stays: [
     {

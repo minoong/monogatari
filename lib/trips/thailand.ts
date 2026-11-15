@@ -27,6 +27,7 @@ export const THAILAND_TRIP: TripConfig = {
     { id: "pattaya", label: "팟타야", latitude: 12.9236, longitude: 100.8825 },
     { id: "koh-sichang", label: "코시창", latitude: 13.161, longitude: 100.808 },
   ],
+  flights: [],
   stays: [],
   dayTrips: [],
 };
