@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import NumberFlow from "@number-flow/react";
 import { AnimatedContent } from "../components/ui/animated-content";
 import { useFlow } from "@stackflow/react";
@@ -9,7 +9,7 @@ import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { Button, Tabs } from "@heroui/react";
 import { ChevronRight, Hotel } from "lucide-react";
 import { MinimalCardExpand } from "../components/ui/minimal-card-expand";
-import { ACCOMMODATIONS, getActiveAccommodationId, type Accommodation } from "../lib/accommodations";
+import { getAccommodations, getActiveAccommodationId, getStaysSummary, type Accommodation } from "../lib/accommodations";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { SlidingNumber } from "../components/core/sliding-number";
 import dayjs from "dayjs";
@@ -218,33 +218,35 @@ const AutoImageRoll: React.FC<{ imageUrls: readonly (string | null)[] } & Automa
 
 type StaySelection = "all" | Accommodation["id"];
 
-const useActiveAccommodationId = (enabled: boolean) => {
+const useActiveAccommodationId = (enabled: boolean, trip: TripConfig, stays: readonly Accommodation[]) => {
   const [activeStayId, setActiveStayId] = useState<Accommodation["id"] | null>(() =>
-    enabled ? getActiveAccommodationId() : null,
+    enabled ? getActiveAccommodationId(trip, stays) : null,
   );
 
   useEffect(() => {
     if (!enabled) return;
 
     const syncActiveStay = () => {
-      setActiveStayId(getActiveAccommodationId());
+      setActiveStayId(getActiveAccommodationId(trip, stays));
     };
 
     syncActiveStay();
     const interval = window.setInterval(syncActiveStay, 60_000);
     return () => window.clearInterval(interval);
-  }, [enabled]);
+  }, [enabled, trip, stays]);
 
   return activeStayId;
 };
 
 const ReservationStayCard: React.FC<{
+  stays: readonly Accommodation[];
   activeStayId?: Accommodation["id"] | null;
   autoSelectStay?: boolean;
   onOpen: (stayId: StaySelection) => void;
-}> = ({ activeStayId = null, autoSelectStay = false, onOpen }) => {
-  const automaticRoll = useAutomaticRoll(ACCOMMODATIONS.length + 1);
-  const activeStay = ACCOMMODATIONS.find((stay) => stay.id === activeStayId) ?? null;
+}> = ({ stays, activeStayId = null, autoSelectStay = false, onOpen }) => {
+  const automaticRoll = useAutomaticRoll(stays.length + 1);
+  const summary = getStaysSummary(stays);
+  const activeStay = stays.find((stay) => stay.id === activeStayId) ?? null;
   const ctaLabel = activeStay?.name ?? "HP! 위치 찾기!";
   const ctaImageUrl = activeStay?.imageUrl ?? "/accommodation-overview.jpg";
   const openStayId: StaySelection = activeStay?.id ?? "all";
@@ -256,7 +258,7 @@ const ReservationStayCard: React.FC<{
           <span className="flex size-8 items-center justify-center rounded-xl bg-gray-100 text-gray-600"><Hotel size={17} /></span>
           <div>
             <p className="text-sm font-bold text-gray-900">HP!</p>
-            <p className="text-[11px] text-gray-400">8/29–9/1 · 3곳</p>
+            <p className="text-[11px] text-gray-400">{summary.rangeShort} · {summary.count}곳</p>
           </div>
         </div>
         <DotLottieReact
@@ -273,49 +275,27 @@ const ReservationStayCard: React.FC<{
         activeExpandedId={autoSelectStay ? activeStayId : undefined}
         onExpandedClick={(id) => onOpen(id === "stay-summary" ? "all" : id as Accommodation["id"])}
         items={[
-          {
-            id: ACCOMMODATIONS[0].id,
-            title: ACCOMMODATIONS[0].city,
-            value: `${ACCOMMODATIONS[0].date} · ${ACCOMMODATIONS[0].checkIn}`,
+          ...stays.map((stay) => ({
+            id: stay.id,
+            title: stay.city,
+            value: `${stay.date} · ${stay.checkIn}`,
             colorClassName: "bg-slate-800",
-            imageUrl: ACCOMMODATIONS[0].imageUrl,
+            imageUrl: stay.imageUrl,
             expandedActions: {
-              primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[0].name}</span>,
-              secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[0].checkOut}</span>,
+              primary: <span className="max-w-44 truncate text-sm font-semibold">{stay.name}</span>,
+              secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {stay.checkOut}</span>,
             },
-          },
-          {
-            id: ACCOMMODATIONS[1].id,
-            title: ACCOMMODATIONS[1].city,
-            value: `${ACCOMMODATIONS[1].date} · ${ACCOMMODATIONS[1].checkIn}`,
-            colorClassName: "bg-slate-800",
-            imageUrl: ACCOMMODATIONS[1].imageUrl,
-            expandedActions: {
-              primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[1].name}</span>,
-              secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[1].checkOut}</span>,
-            },
-          },
-          {
-            id: ACCOMMODATIONS[2].id,
-            title: ACCOMMODATIONS[2].city,
-            value: `${ACCOMMODATIONS[2].date} · ${ACCOMMODATIONS[2].checkIn}`,
-            colorClassName: "bg-slate-800",
-            imageUrl: ACCOMMODATIONS[2].imageUrl,
-            expandedActions: {
-              primary: <span className="max-w-44 truncate text-sm font-semibold">{ACCOMMODATIONS[2].name}</span>,
-              secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">체크아웃 {ACCOMMODATIONS[2].checkOut}</span>,
-            },
-          },
+          })),
           {
             id: "stay-summary",
             title: "숙소 전체",
-            value: "3곳 예약 완료",
+            value: `${summary.count}곳 예약 완료`,
             icon: <Hotel size={24} aria-hidden="true" />,
             colorClassName: "bg-indigo-600",
             imageUrl: "/accommodation-overview.jpg",
             expandedActions: {
-              primary: <span className="text-sm font-semibold">8월 29일 – 9월 1일</span>,
-              secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">3박 4일</span>,
+              primary: <span className="text-sm font-semibold">{summary.rangeLong}</span>,
+              secondary: <span className="rounded-full bg-white/20 px-3 py-1.5 text-sm font-semibold">{summary.nightsLabel}</span>,
             },
           },
         ]}
@@ -332,13 +312,13 @@ const ReservationStayCard: React.FC<{
               }}
             />
           ) : (
-            <AutoImageRoll imageUrls={["/accommodation-overview.jpg", ...ACCOMMODATIONS.map((stay) => stay.imageUrl)]} {...automaticRoll} />
+            <AutoImageRoll imageUrls={["/accommodation-overview.jpg", ...stays.map((stay) => stay.imageUrl)]} {...automaticRoll} />
           )}
           <span className="relative z-10 flex w-64 max-w-[calc(100%-1rem)] items-center gap-1 drop-shadow-sm">
             {autoSelectStay ? (
               <span className="min-w-0 flex-1 truncate text-center leading-none">{ctaLabel}</span>
             ) : (
-              <AutoTextRoll labels={["HP! 위치 찾기!", ...ACCOMMODATIONS.map((stay) => stay.name)]} {...automaticRoll} />
+              <AutoTextRoll labels={["HP! 위치 찾기!", ...stays.map((stay) => stay.name)]} {...automaticRoll} />
             )}
             <ChevronRight size={17} className="shrink-0" />
           </span>
@@ -508,7 +488,8 @@ const HomeScreen: React.FC<{ trip: TripConfig }> = ({ trip }) => {
   const { push } = useFlow();
   const phaseRef = useRef(getTripPhase(trip));
   const [tripState, setTripState] = useState<"before" | "during" | "after">(() => getTripPhase(trip));
-  const activeStayId = useActiveAccommodationId(tripState === "during");
+  const stays = useMemo(() => getAccommodations(trip), [trip]);
+  const activeStayId = useActiveAccommodationId(tripState === "during", trip, stays);
 
   useEffect(() => {
     const syncTripPhase = () => {
@@ -607,7 +588,7 @@ const HomeScreen: React.FC<{ trip: TripConfig }> = ({ trip }) => {
 
                   <FlightWidget onOpen={({ passengerId, segmentId }) => push("FlightActivity", { passengerId, segmentId })} />
 
-                  <ReservationStayCard onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
+                  <ReservationStayCard stays={stays} onOpen={(stayId) => push("AccommodationActivity", { stayId })} />
                 </div>
               )}
             </Tabs.Panel>
@@ -629,6 +610,7 @@ const HomeScreen: React.FC<{ trip: TripConfig }> = ({ trip }) => {
                   />
 
                   <ReservationStayCard
+                    stays={stays}
                     activeStayId={activeStayId}
                     autoSelectStay
                     onOpen={(stayId) => push("AccommodationActivity", { stayId })}

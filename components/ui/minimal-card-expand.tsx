@@ -22,12 +22,8 @@ export interface MinimalCardExpandItem {
 }
 
 interface MinimalCardExpandProps {
-  items: readonly [
-    MinimalCardExpandItem,
-    MinimalCardExpandItem,
-    MinimalCardExpandItem,
-    MinimalCardExpandItem,
-  ];
+  /** 2~4개. 4개면 2x2(펼치면 3열), 3개면 마지막 카드가 한 줄을 차지하고 펼치면 2열이 된다. */
+  items: readonly MinimalCardExpandItem[];
   className?: string;
   initialExpandedId?: string | null;
   activeExpandedId?: string | null;
@@ -40,6 +36,10 @@ interface CardProps {
   item: MinimalCardExpandItem;
   expanded: boolean;
   condensed: boolean;
+  /** 펼쳤을 때 펼친 카드가 차지하는 열 수(전체 열 수와 같다). */
+  expandedColSpan: 2 | 3;
+  /** 접힌 상태에서 한 줄을 다 쓰는 마지막 카드(항목이 홀수일 때) */
+  fullWidthWhenCollapsed: boolean;
   activeCardRef: React.RefObject<HTMLButtonElement | null>;
   onUserExpand: (id: string) => void;
   prefersReducedMotion: boolean | null;
@@ -49,6 +49,8 @@ const SkiperCard = ({
   item,
   expanded,
   condensed,
+  expandedColSpan,
+  fullWidthWhenCollapsed,
   activeCardRef,
   onUserExpand,
   prefersReducedMotion,
@@ -73,10 +75,12 @@ const SkiperCard = ({
     } : undefined}
     className={`relative flex min-w-0 cursor-pointer flex-col items-start justify-between overflow-hidden rounded-[24px] p-3 text-left text-white outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${item.colorClassName} ${
       expanded
-        ? "col-span-3 row-start-1 h-[180px] w-full"
+        ? `${expandedColSpan === 3 ? "col-span-3" : "col-span-2"} row-start-1 h-[180px] w-full`
         : condensed
           ? "col-span-1 row-start-2 h-[100px] w-full"
-          : "col-span-1 h-[125px] w-full"
+          : fullWidthWhenCollapsed
+            ? "col-span-2 h-[125px] w-full"
+            : "col-span-1 h-[125px] w-full"
     }`}
   >
     <div className="flex w-full items-start justify-between gap-3">
@@ -244,17 +248,23 @@ export function MinimalCardExpand({
     return () => document.removeEventListener("pointerdown", handleOutsidePointerDown);
   }, [expandedId, setExpanded]);
 
+  // 4개일 때만 3열로 펼친다. 그 외(2~3개)는 2열 그대로 펼쳐 카드가 한 칸 비지 않게 한다.
+  const expandedColSpan: 2 | 3 = items.length === 4 ? 3 : 2;
+  const hasOddCount = items.length % 2 === 1;
+
   return (
     <div
       ref={containerRef}
       className={`grid h-[300px] w-full min-w-0 max-w-none gap-4 ${
         expandedId
-          ? "grid-cols-3 grid-rows-[180px_100px]"
+          ? expandedColSpan === 3
+            ? "grid-cols-3 grid-rows-[180px_100px]"
+            : "grid-cols-2 grid-rows-[180px_100px]"
           : "grid-cols-2 grid-rows-[125px_125px]"
       } ${className ?? ""}`}
       aria-label="확장 카드 데모"
     >
-      {items.map((item) => {
+      {items.map((item, index) => {
         const expanded = expandedId === item.id;
         return (
           <SkiperCard
@@ -262,6 +272,8 @@ export function MinimalCardExpand({
             item={item}
             expanded={expanded}
             condensed={expandedId !== null && !expanded}
+            expandedColSpan={expandedColSpan}
+            fullWidthWhenCollapsed={hasOddCount && index === items.length - 1}
             activeCardRef={activeCardRef}
             onUserExpand={handleUserExpand}
             prefersReducedMotion={prefersReducedMotion}

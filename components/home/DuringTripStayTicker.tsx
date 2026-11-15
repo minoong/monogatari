@@ -7,6 +7,7 @@ import { Button } from "@heroui/react";
 import { X } from "lucide-react";
 import {
   dismissDuringTripStayTicker,
+  getAccommodations,
   getDuringTripStayTickerInfo,
   isDuringTripStayTickerDismissed,
   type DuringTripStayTickerInfo,
@@ -195,15 +196,17 @@ export function DuringTripStayTicker() {
     queryFn: () => fetchSchedule(trip.slug),
   });
 
+  const stays = useMemo(() => getAccommodations(trip), [trip]);
+
   const sync = useCallback(() => {
-    const nextInfo = getDuringTripStayTickerInfo();
+    const nextInfo = getDuringTripStayTickerInfo(trip, stays);
     if (nextInfo?.tripDate !== tripDateRef.current) {
       tripDateRef.current = nextInfo?.tripDate ?? null;
       setCurrentIndex(0);
     }
     setInfo(nextInfo);
     setDismissed(nextInfo ? isDuringTripStayTickerDismissed(nextInfo.tripDate) : false);
-  }, []);
+  }, [trip, stays]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage는 클라이언트 전용이라 마운트 직후 1회 동기화가 필요하다.

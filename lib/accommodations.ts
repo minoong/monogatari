@@ -1,7 +1,13 @@
+import type { TripConfig } from "./trips";
+
 export interface Accommodation {
-  id: "bangkok" | "pattaya" | "koh-sichang";
+  id: string;
   city: string;
+  /** 체크인 날짜 "M/D" */
   date: string;
+  /** 체크아웃 날짜 "M/D" */
+  checkOutDate: string;
+  nights: number;
   dateLabel: string;
   name: string;
   englishName: string;
@@ -10,14 +16,18 @@ export interface Accommodation {
   checkOut: string;
   imageUrl: string;
   mapQuery: string;
+  /** 있으면 "Google 지도" 버튼이 이 링크를 연다. */
+  googleMapsUrl?: string;
   agodaUrl: string;
   score: string;
   highlights: string[];
+  /** 확인된 시설만. 없으면 편의시설 영역을 숨긴다. */
   facilityGroups: Array<{
     title: string;
     items: string[];
   }>;
-  dining: {
+  /** 식사 정보가 확인된 경우에만 있다. */
+  dining?: {
     primary: string;
     details: string[];
   };
@@ -34,11 +44,14 @@ export interface Accommodation {
   notice?: string;
 }
 
-export const ACCOMMODATIONS: Accommodation[] = [
+/** 태국 여행 숙소 3곳(방콕, 파타야, 코시창). */
+export const THAILAND_ACCOMMODATIONS: Accommodation[] = [
   {
     id: "bangkok",
     city: "방콕",
     date: "8/29",
+    checkOutDate: "8/30",
+    nights: 1,
     dateLabel: "8월 29일 · 1박",
     name: "방콕 리버 로카 호텔",
     englishName: "Bangkok River Loka Hotel",
@@ -71,6 +84,8 @@ export const ACCOMMODATIONS: Accommodation[] = [
     id: "pattaya",
     city: "팟타야",
     date: "8/30",
+    checkOutDate: "8/31",
+    nights: 1,
     dateLabel: "8월 30일 · 1박",
     name: "더 그라스 서비스드 스위트 바이 앳 마인드",
     englishName: "The Grass Serviced Suites by At Mind",
@@ -105,6 +120,8 @@ export const ACCOMMODATIONS: Accommodation[] = [
     id: "koh-sichang",
     city: "코시창",
     date: "8/31",
+    checkOutDate: "9/1",
+    nights: 1,
     dateLabel: "8월 31일 · 1박",
     name: "섬웨어 코 시창",
     englishName: "Somewhere Koh Sichang",
@@ -146,37 +163,37 @@ export const ACCOMMODATIONS: Accommodation[] = [
   },
 ];
 
-const TRIP_YEAR = 2026;
-const BANGKOK_TIME_ZONE = "Asia/Bangkok";
+/** 숙소 날짜 계산에 필요한 여행 정보. 연도는 여행 시작일, 시각은 여행지 현지 UTC 오프셋 기준. */
+type StayTripContext = Pick<TripConfig, "startDate" | "utcOffset" | "timeZone">;
 
-const parseStayMdDate = (date: string) => {
+const tripYear = (trip: StayTripContext) => Number(trip.startDate.slice(0, 4));
+
+const parseStayMdDate = (date: string, year: number) => {
   const [month, day] = date.split("/").map(Number);
-  return new Date(TRIP_YEAR, month - 1, day);
+  return new Date(year, month - 1, day);
 };
 
-const toBangkokIsoDateTime = (month: number, day: number, hour: number, minute: number) => {
-  const pad = (value: number) => String(value).padStart(2, "0");
-  return new Date(`${TRIP_YEAR}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}:00+07:00`);
-};
+const pad = (value: number) => String(value).padStart(2, "0");
 
-/** Bangkok 현지 시각으로 숙소 체크인/체크아웃 시점을 만든다. */
-export function parseStayDateTime(date: string, time: string) {
+/** 여행지 현지 시각으로 숙소 체크인/체크아웃 시점을 만든다. */
+export function parseStayDateTime(trip: StayTripContext, date: string, time: string) {
   const [month, day] = date.split("/").map(Number);
   const [hour, minute] = time.split(":").map(Number);
-  return toBangkokIsoDateTime(month, day, hour, minute);
+  return new Date(`${tripYear(trip)}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}:00${trip.utcOffset}`);
 }
 
-export function getStayCheckInAt(stay: Accommodation) {
-  return parseStayDateTime(stay.date, stay.checkIn);
+export function getStayCheckInAt(trip: StayTripContext, stay: Accommodation) {
+  return parseStayDateTime(trip, stay.date, stay.checkIn);
 }
 
-export function getStayCheckOutAt(stay: Accommodation) {
-  return parseStayDateTime(getStayCheckoutDate(stay.date), stay.checkOut);
+export function getStayCheckOutAt(trip: StayTripContext, stay: Accommodation) {
+  return parseStayDateTime(trip, stay.checkOutDate, stay.checkOut);
 }
 
-export function getActiveTripDate(now = new Date()) {
+/** 여행지 현지 기준 오늘 날짜(YYYY-MM-DD). */
+export function getActiveTripDate(trip: StayTripContext, now = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: BANGKOK_TIME_ZONE,
+    timeZone: trip.timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -189,55 +206,53 @@ export function getActiveTripDate(now = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
-export function getActiveAccommodationId(now = new Date()): Accommodation["id"] | null {
-  for (let index = 0; index < ACCOMMODATIONS.length; index += 1) {
-    const stay = ACCOMMODATIONS[index];
-    const checkInAt = getStayCheckInAt(stay);
-    const checkOutAt = getStayCheckOutAt(stay);
+/** 지금 머무는 숙소. 체크인 전이면 첫 숙소, 숙소 사이 공백이면 다음 숙소, 마지막 체크아웃 뒤에는 null. */
+export function getActiveAccommodationId(trip: StayTripContext, stays: readonly Accommodation[], now = new Date()): Accommodation["id"] | null {
+  for (const stay of stays) {
+    if (now >= getStayCheckInAt(trip, stay) && now < getStayCheckOutAt(trip, stay)) return stay.id;
+  }
 
-    if (now >= checkInAt && now < checkOutAt) {
-      return stay.id;
+  const firstStay = stays[0];
+  if (!firstStay) return null;
+  if (now < getStayCheckInAt(trip, firstStay)) return firstStay.id;
+
+  for (let index = 0; index < stays.length - 1; index += 1) {
+    if (now >= getStayCheckOutAt(trip, stays[index]) && now < getStayCheckInAt(trip, stays[index + 1])) {
+      return stays[index + 1].id;
     }
-  }
-
-  const firstStay = ACCOMMODATIONS[0];
-  if (now < getStayCheckInAt(firstStay)) {
-    return firstStay.id;
-  }
-
-  for (let index = 0; index < ACCOMMODATIONS.length - 1; index += 1) {
-    const currentStay = ACCOMMODATIONS[index];
-    const nextStay = ACCOMMODATIONS[index + 1];
-    const checkOutAt = getStayCheckOutAt(currentStay);
-    const nextCheckInAt = getStayCheckInAt(nextStay);
-
-    if (now >= checkOutAt && now < nextCheckInAt) {
-      return nextStay.id;
-    }
-  }
-
-  const lastStay = ACCOMMODATIONS[ACCOMMODATIONS.length - 1];
-  if (now >= getStayCheckOutAt(lastStay)) {
-    return null;
   }
 
   return null;
 }
 
-export const formatStayDateWithWeekday = (date: string) =>
+export const formatStayDateWithWeekday = (trip: StayTripContext, date: string) =>
   new Intl.DateTimeFormat("ko-KR", {
     month: "long",
     day: "numeric",
     weekday: "short",
-  }).format(parseStayMdDate(date));
+  }).format(parseStayMdDate(date, tripYear(trip)));
 
-export const formatStayCheckDateTime = (date: string, time: string) =>
-  `${formatStayDateWithWeekday(date)} · ${time}`;
+export const formatStayCheckDateTime = (trip: StayTripContext, date: string, time: string) =>
+  `${formatStayDateWithWeekday(trip, date)} · ${time}`;
 
-export const getStayCheckoutDate = (checkInDate: string) => {
-  const checkout = parseStayMdDate(checkInDate);
-  checkout.setDate(checkout.getDate() + 1);
-  return `${checkout.getMonth() + 1}/${checkout.getDate()}`;
+/** "8/29" -> "8월 29일" */
+export const formatStayMonthDay = (date: string) => {
+  const [month, day] = date.split("/").map(Number);
+  return `${month}월 ${day}일`;
+};
+
+/** 모든 숙소를 합친 기간. 예: 첫 체크인 8/29, 마지막 체크아웃 9/1 -> 3박 4일 */
+export const getStaysSummary = (stays: readonly Accommodation[]) => {
+  const first = stays[0];
+  const last = stays[stays.length - 1];
+  const nights = stays.reduce((total, stay) => total + stay.nights, 0);
+  return {
+    count: stays.length,
+    nights,
+    rangeShort: first && last ? `${first.date}–${last.checkOutDate}` : "",
+    rangeLong: first && last ? `${formatStayMonthDay(first.date)} – ${formatStayMonthDay(last.checkOutDate)}` : "",
+    nightsLabel: `${nights}박 ${nights + 1}일`,
+  };
 };
 
 const TICKER_START_TIME = "23:00";
@@ -251,32 +266,30 @@ export interface DuringTripStayTickerInfo {
   nextCheckInTime: string | null;
 }
 
-const getStayTickerStartAt = (stay: Accommodation) => {
-  const checkoutDateMd = getStayCheckoutDate(stay.date);
-  const previousDay = parseStayMdDate(checkoutDateMd);
+const getStayTickerStartAt = (trip: StayTripContext, stay: Accommodation) => {
+  const previousDay = parseStayMdDate(stay.checkOutDate, tripYear(trip));
   previousDay.setDate(previousDay.getDate() - 1);
   const previousDayMd = `${previousDay.getMonth() + 1}/${previousDay.getDate()}`;
-  return parseStayDateTime(previousDayMd, TICKER_START_TIME);
+  return parseStayDateTime(trip, previousDayMd, TICKER_START_TIME);
 };
 
-const getCheckoutTripDate = (stay: Accommodation) => {
-  const [month, day] = getStayCheckoutDate(stay.date).split("/").map(Number);
-  const pad = (value: number) => String(value).padStart(2, "0");
-  return `${TRIP_YEAR}-${pad(month)}-${pad(day)}`;
+const getCheckoutTripDate = (trip: StayTripContext, stay: Accommodation) => {
+  const [month, day] = stay.checkOutDate.split("/").map(Number);
+  return `${tripYear(trip)}-${pad(month)}-${pad(day)}`;
 };
 
-/** Bangkok 기준 체크아웃 전날 23:00 ~ 체크아웃 시각 사이에만 숙소 전환 안내를 반환한다. */
-export function getDuringTripStayTickerInfo(now = new Date()): DuringTripStayTickerInfo | null {
-  for (let index = 0; index < ACCOMMODATIONS.length; index += 1) {
-    const stay = ACCOMMODATIONS[index];
-    const startAt = getStayTickerStartAt(stay);
-    const checkOutAt = getStayCheckOutAt(stay);
+/** 여행지 현지 기준 체크아웃 전날 23:00 ~ 체크아웃 시각 사이에만 숙소 전환 안내를 반환한다. */
+export function getDuringTripStayTickerInfo(trip: StayTripContext, stays: readonly Accommodation[], now = new Date()): DuringTripStayTickerInfo | null {
+  for (let index = 0; index < stays.length; index += 1) {
+    const stay = stays[index];
+    const startAt = getStayTickerStartAt(trip, stay);
+    const checkOutAt = getStayCheckOutAt(trip, stay);
 
     if (now < startAt || now >= checkOutAt) continue;
 
-    const nextStay = ACCOMMODATIONS[index + 1] ?? null;
+    const nextStay = stays[index + 1] ?? null;
     return {
-      tripDate: getCheckoutTripDate(stay),
+      tripDate: getCheckoutTripDate(trip, stay),
       currentStay: stay,
       checkoutTime: stay.checkOut,
       nextStay,
@@ -314,3 +327,35 @@ export function dismissDuringTripStayTicker(tripDate: string) {
     // localStorage 에러 무시
   }
 }
+
+/** 일본처럼 확인된 정보가 적은 여행의 숙소를 설정(trip.stays)에서 만든다. 모르는 정보는 만들지 않는다. */
+const toAccommodation = (trip: TripConfig, stay: TripConfig["stays"][number]): Accommodation => {
+  const [, inMonth, inDay] = stay.checkInDate.split("-").map(Number);
+  const [, outMonth, outDay] = stay.checkOutDate.split("-").map(Number);
+  const nights = Math.round((new Date(`${stay.checkOutDate}T00:00:00Z`).getTime() - new Date(`${stay.checkInDate}T00:00:00Z`).getTime()) / 86_400_000);
+  void trip;
+  return {
+    id: stay.id,
+    city: stay.city,
+    date: `${inMonth}/${inDay}`,
+    checkOutDate: `${outMonth}/${outDay}`,
+    nights,
+    dateLabel: `${inMonth}월 ${inDay}일 · ${nights}박`,
+    name: stay.name,
+    englishName: stay.englishName,
+    address: stay.address,
+    checkIn: stay.checkInTime,
+    checkOut: stay.checkOutTime,
+    imageUrl: stay.imageUrl,
+    mapQuery: `${stay.englishName}, ${stay.address}`,
+    googleMapsUrl: stay.googleMapsUrl,
+    agodaUrl: stay.agodaUrl,
+    score: stay.score.toFixed(1),
+    highlights: [...stay.highlights],
+    facilityGroups: [],
+  };
+};
+
+/** 여행의 숙소 목록. 태국은 확인된 상세 정보를 그대로 쓰고, 그 외에는 trip.stays에서 만든다. */
+export const getAccommodations = (trip: TripConfig): Accommodation[] =>
+  trip.slug === "thailand-2026-08" ? THAILAND_ACCOMMODATIONS : trip.stays.map((stay) => toAccommodation(trip, stay));

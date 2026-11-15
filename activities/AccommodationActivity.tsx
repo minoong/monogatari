@@ -7,7 +7,8 @@ import { Accessibility, AirVent, AlarmClock, Armchair, Baby, Banknote, Bath, Bed
 import { Tabs } from "@heroui/react";
 import { triggerHapticFeedback } from "../components/BottomNav";
 import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
-import { ACCOMMODATIONS, formatStayCheckDateTime, getStayCheckoutDate, type Accommodation } from "../lib/accommodations";
+import { useTrip } from "@/components/providers/trip-provider";
+import { formatStayCheckDateTime, getAccommodations, type Accommodation } from "../lib/accommodations";
 import { cn } from "../lib/utils";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -111,18 +112,21 @@ interface AccommodationActivityProps {
   params: { stayId?: string };
 }
 
-const getInitialStayFilter = (stayId?: string): StayFilter =>
-  stayId === "all" || ACCOMMODATIONS.some((stay) => stay.id === stayId)
+const getInitialStayFilter = (stayId: string | undefined, stays: readonly Accommodation[]): StayFilter =>
+  stayId === "all" || stays.some((stay) => stay.id === stayId)
     ? stayId as StayFilter
     : "all";
 
 export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ params }) => {
-  const initialFilter = getInitialStayFilter(params.stayId);
-  const [activeFilter, setActiveFilter] = React.useState<StayFilter>(initialFilter);
+  const { trip } = useTrip();
+  const stays = React.useMemo(() => getAccommodations(trip), [trip]);
+  const [selectedFilter, setActiveFilter] = React.useState<StayFilter>(() => getInitialStayFilter(params.stayId, stays));
+  // 여행을 바꿔서 선택했던 숙소가 없어지면 전체로 돌아간다.
+  const activeFilter: StayFilter = selectedFilter === "all" || stays.some((stay) => stay.id === selectedFilter) ? selectedFilter : "all";
   const amenitiesRef = React.useRef<HTMLDivElement>(null);
   const visibleStays = activeFilter === "all"
-    ? ACCOMMODATIONS
-    : ACCOMMODATIONS.filter((stay) => stay.id === activeFilter);
+    ? stays
+    : stays.filter((stay) => stay.id === activeFilter);
 
   useGSAP(() => {
     const media = gsap.matchMedia();
@@ -181,7 +185,7 @@ export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ pa
             listClassName="mx-auto w-full max-w-lg"
             items={[
               { id: "all", label: "전체" },
-              ...ACCOMMODATIONS.map((stay) => ({ id: stay.id, label: stay.city })),
+              ...stays.map((stay) => ({ id: stay.id, label: stay.city })),
             ]}
           />
 
@@ -207,14 +211,21 @@ export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ pa
               </div>
 
               <div className="divide-y divide-gray-100 dark:divide-white/10">
+                {stay.highlights.length > 0 && (
+                  <ul aria-label="숙소 특징" className="flex flex-wrap gap-1.5 px-4 py-3.5">
+                    {stay.highlights.map((highlight) => (
+                      <li key={highlight} className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600 dark:bg-white/10 dark:text-gray-300">{highlight}</li>
+                    ))}
+                  </ul>
+                )}
                 <div className="grid grid-cols-2 gap-4 px-4 py-3.5">
                   <div className="min-w-0">
                     <span className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><CalendarDays size={13} /> 체크인</span>
-                    <p className="mt-1 text-sm font-bold leading-5 text-gray-900 dark:text-gray-100">{formatStayCheckDateTime(stay.date, stay.checkIn)}</p>
+                    <p className="mt-1 text-sm font-bold leading-5 text-gray-900 dark:text-gray-100">{formatStayCheckDateTime(trip, stay.date, stay.checkIn)}</p>
                   </div>
                   <div className="min-w-0">
                     <span className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><Clock3 size={13} /> 체크아웃</span>
-                    <p className="mt-1 text-sm font-bold leading-5 text-gray-900 dark:text-gray-100">{formatStayCheckDateTime(getStayCheckoutDate(stay.date), stay.checkOut)}</p>
+                    <p className="mt-1 text-sm font-bold leading-5 text-gray-900 dark:text-gray-100">{formatStayCheckDateTime(trip, stay.checkOutDate, stay.checkOut)}</p>
                   </div>
                 </div>
 
@@ -250,6 +261,7 @@ export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ pa
                   </>
                 ) : null}
 
+                {stay.dining && (
                 <div className="flex gap-3 px-4 py-3.5">
                   <span className="flex size-8 shrink-0 items-center justify-center text-gray-400 dark:text-gray-500"><Coffee size={16} /></span>
                   <div className="min-w-0 flex-1">
@@ -258,9 +270,10 @@ export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ pa
                     <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">{stay.dining.details.join(" · ")}</p>
                   </div>
                 </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-2 px-4 py-3.5">
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stay.mapQuery)}`} target="_blank" rel="noreferrer" className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700 transition-transform active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.05] dark:text-gray-100">
+                  <a href={stay.googleMapsUrl ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stay.mapQuery)}`} target="_blank" rel="noreferrer" className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700 transition-transform active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.05] dark:text-gray-100">
                     Google 지도 <ExternalLink size={14} />
                   </a>
                   <a href={stay.agodaUrl} target="_blank" rel="noreferrer" className="flex h-11 items-center justify-center gap-1.5 rounded-xl bg-[#5392f9] text-xs font-bold text-white transition-transform active:scale-[0.98]">
@@ -268,6 +281,7 @@ export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ pa
                   </a>
                 </div>
 
+                {stay.facilityGroups.length > 0 && (
                 <section className="px-4 py-4">
                   <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">편의시설 · 서비스</h2>
                   <div className="mt-4 flex flex-col gap-5">
@@ -286,6 +300,7 @@ export const AccommodationActivity: React.FC<AccommodationActivityProps> = ({ pa
                     ))}
                   </div>
                 </section>
+                )}
 
                 {stay.notice ? <p className="px-4 pb-4 text-xs leading-5 text-amber-800 dark:text-amber-200">{stay.notice}</p> : null}
               </div>
