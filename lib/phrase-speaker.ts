@@ -5,7 +5,7 @@ export type SpeakerGender = "male" | "female";
 export const SPEAKER_GENDER_STORAGE_KEY = "monogatari_phrase_speaker_gender";
 
 export type GenderPhraseLine = {
-  th: string;
+  text: string;
   pron: string;
 };
 
@@ -47,23 +47,34 @@ function appendPoliteParticle(th: string, gender: SpeakerGender) {
   return `${th}${particle}`;
 }
 
-export function resolvePhraseForSpeaker(item: PhraseItem, gender: SpeakerGender): GenderPhraseLine & { hasGenderVariant: boolean } {
+/**
+ * 말하는 사람 성별에 맞춰 회화를 고른다. 성별에 따라 공손 어미가 달라지는 언어(태국어)만 변형을 적용하고,
+ * 그렇지 않은 언어(일본어)는 원문과 독음을 그대로 돌려준다. 일본어 독음에도 "카"가 흔히 들어가므로
+ * 언어를 확인하지 않고 태국어 규칙을 적용하면 안 된다.
+ */
+export function resolvePhraseForSpeaker(
+  item: PhraseItem,
+  gender: SpeakerGender,
+  genderedPoliteness: boolean,
+): GenderPhraseLine & { hasGenderVariant: boolean } {
+  if (!genderedPoliteness) return { text: item.text, pron: item.pron, hasGenderVariant: false };
+
   const { male, female, hasVariant } = parsePronVariants(item.pron);
   const pron = gender === "male" ? male : female;
-  const th = shouldAppendPoliteParticle(item.pron, hasVariant)
-    ? appendPoliteParticle(item.th, gender)
-    : item.th;
+  const text = shouldAppendPoliteParticle(item.pron, hasVariant)
+    ? appendPoliteParticle(item.text, gender)
+    : item.text;
 
-  return { th, pron, hasGenderVariant: hasVariant };
+  return { text, pron, hasGenderVariant: hasVariant };
 }
 
-export function getPhraseGenderVariants(item: PhraseItem): PhraseGenderVariants {
-  const male = resolvePhraseForSpeaker(item, "male");
-  const female = resolvePhraseForSpeaker(item, "female");
+export function getPhraseGenderVariants(item: PhraseItem, genderedPoliteness: boolean): PhraseGenderVariants {
+  const male = resolvePhraseForSpeaker(item, "male", genderedPoliteness);
+  const female = resolvePhraseForSpeaker(item, "female", genderedPoliteness);
 
   return {
-    male: { th: male.th, pron: male.pron },
-    female: { th: female.th, pron: female.pron },
+    male: { text: male.text, pron: male.pron },
+    female: { text: female.text, pron: female.pron },
     hasGenderVariant: male.hasGenderVariant,
   };
 }

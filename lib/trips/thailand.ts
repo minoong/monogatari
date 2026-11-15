@@ -23,7 +23,7 @@ export const THAILAND_TRIP: TripConfig = {
   copy: { homeTitle: "태국을 점령하라!", dictionaryTitle: "태국어 사전... 당황하지 말라고!" },
   theme: { id: "bangkok", accent: "#0a84ff", tint: "#ffffff", backdrop: { kind: "none" } },
   currency: { code: "THB", displayUnit: 1 },
-  language: { code: "th", label: "태국어", speechLang: "th-TH" },
+  language: { code: "th", label: "태국어", speechLang: "th-TH", genderedPoliteness: true },
   expenseCategories: ["food", "transport", "shopping", "stay", "activity", "massage", "convenience", "other"],
   paymentMethods: ["cash", "card", "qr", "other"],
   weatherPlaces: [

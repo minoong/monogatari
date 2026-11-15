@@ -36,7 +36,7 @@ export const JAPAN_YONAGO_TRIP: TripConfig = {
     },
   },
   currency: { code: "JPY", displayUnit: 100 },
-  language: { code: "ja", label: "일본어", speechLang: "ja-JP" },
+  language: { code: "ja", label: "일본어", speechLang: "ja-JP", genderedPoliteness: false },
   expenseCategories: ["food", "transport", "shopping", "stay", "activity", "onsen", "convenience", "other"],
   paymentMethods: ["cash", "card", "qr", "ic_card", "other"],
   weatherPlaces: [

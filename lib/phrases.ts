@@ -1,11 +1,17 @@
 import { getChoseong } from "es-hangul";
+import { JAPANESE_PHRASES } from "./phrases-ja";
+import type { TripConfig } from "./trips";
+
+export type PhraseCategory = "기본" | "이동" | "식당" | "쇼핑" | "마사지" | "온천" | "긴급";
 
 export interface PhraseItem {
   id: number;
-  category: "기본" | "이동" | "식당" | "쇼핑" | "마사지" | "긴급";
+  category: PhraseCategory;
   importance: "최고" | "높음" | "보통";
   ko: string;
-  th: string;
+  /** 현지어 원문(태국어, 일본어 등) */
+  text: string;
+  /** 한글 독음 */
   pron: string;
 }
 
@@ -16,7 +22,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "기본",
     importance: "최고",
     ko: "안녕하세요 / 안녕 / 좋은 아침·저녁",
-    th: "สวัสดี",
+    text: "สวัสดี",
     pron: "사왓디 크럽 / 사왓디 카",
   },
   {
@@ -24,7 +30,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "기본",
     importance: "최고",
     ko: "감사합니다 / 고맙습니다",
-    th: "ขอบคุณ",
+    text: "ขอบคุณ",
     pron: "컵쿤 크럽 / 컵쿤 카",
   },
   {
@@ -32,7 +38,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "기본",
     importance: "최고",
     ko: "죄송합니다 / 실례합니다 / 잠시만요",
-    th: "ขอโทษ",
+    text: "ขอโทษ",
     pron: "코톳 크럽 / 코톳 카",
   },
   {
@@ -40,7 +46,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "기본",
     importance: "최고",
     ko: "괜찮습니다 / 문제없어요 / 천만에요",
-    th: "ไม่เป็นไร",
+    text: "ไม่เป็นไร",
     pron: "마이 펜 라이",
   },
   {
@@ -48,7 +54,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "기본",
     importance: "최고",
     ko: "네 / 맞아요",
-    th: "ใช่",
+    text: "ใช่",
     pron: "차이 (또는 존칭어 '크럽/카'만 단독 사용)",
   },
   {
@@ -56,7 +62,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "기본",
     importance: "최고",
     ko: "아니요 / 아닙니다",
-    th: "ไม่ใช่",
+    text: "ไม่ใช่",
     pron: "마이 차이",
   },
 
@@ -66,7 +72,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "이동",
     importance: "높음",
     ko: "화장실은 어디인가요? / 화장실 어디에 있나요?",
-    th: "ห้องน้ำอยู่ที่ไหน",
+    text: "ห้องน้ำอยู่ที่ไหน",
     pron: "헝남 유 티나이 크럽/카?",
   },
   {
@@ -74,7 +80,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "이동",
     importance: "높음",
     ko: "~에 있나요? / 어디에 있나요?",
-    th: "อยู่ที่ไหน",
+    text: "อยู่ที่ไหน",
     pron: "(~위치~) 유 티나이 크럽/카?",
   },
   {
@@ -82,7 +88,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "이동",
     importance: "높음",
     ko: "어디로 가야 하나요? / ~로 가주세요",
-    th: "ไป~",
+    text: "ไป~",
     pron: "파이 (~장소~) 크럽/카",
   },
   {
@@ -90,7 +96,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "이동",
     importance: "높음",
     ko: "여기서 세워주세요 / 내려주세요",
-    th: "จอดที่นี่",
+    text: "จอดที่นี่",
     pron: "쩟 티니 크럽/카",
   },
   {
@@ -98,7 +104,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "이동",
     importance: "높음",
     ko: "(택시) 미터기 켜주세요",
-    th: "เปิดมิเตอร์ด้วย",
+    text: "เปิดมิเตอร์ด้วย",
     pron: "쁘엇 미터 두아이 크럽/카",
   },
   {
@@ -106,7 +112,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "이동",
     importance: "높음",
     ko: "얼마나 걸리나요?",
-    th: "ใช้เวลานานเท่าไหร่",
+    text: "ใช้เวลานานเท่าไหร่",
     pron: "차이 웨라 난 타오라이 크럽/카?",
   },
 
@@ -116,7 +122,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "높음",
     ko: "고수 많이 주세요",
-    th: "ใส่ผักชีเยอะๆ",
+    text: "ใส่ผักชีเยอะๆ",
     pron: "싸이 팍치 여여 크럽/카",
   },
   {
@@ -124,7 +130,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "높음",
     ko: "고수 빼주세요 / 고수 넣지 마세요",
-    th: "ไม่ใส่ผักชี",
+    text: "ไม่ใส่ผักชี",
     pron: "마이 싸이 팍치 크럽/카",
   },
   {
@@ -132,7 +138,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "높음",
     ko: "이거 주세요 / 이걸로 할게요",
-    th: "เอาอันนี้",
+    text: "เอาอันนี้",
     pron: "아오 안니 크럽/카",
   },
   {
@@ -140,7 +146,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "높음",
     ko: "메뉴판 주세요 / 메뉴판 보여주세요",
-    th: "ขอเมนู",
+    text: "ขอเมนู",
     pron: "코 메누 크럽/카",
   },
   {
@@ -148,7 +154,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "높음",
     ko: "계산해 주세요 / 정산해 주세요",
-    th: "เก็บเงินด้วย / เช็คบิล",
+    text: "เก็บเงินด้วย / เช็คบิล",
     pron: "껩땀 크럽/카 (또는 체크빌 크럽/카)",
   },
   {
@@ -156,7 +162,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "높음",
     ko: "안 매운 것으로 해주세요 / 맵지 않게 해주세요",
-    th: "ไม่เผ็ด",
+    text: "ไม่เผ็ด",
     pron: "마이 펫 크럽/카",
   },
   {
@@ -164,7 +170,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "높음",
     ko: "물 / 얼음 주세요",
-    th: "ขอน้ำเปล่า / น้ำแข็ง",
+    text: "ขอน้ำเปล่า / น้ำแข็ง",
     pron: "코 남쁠라오(물) / 코 남캥(얼음) 크럽/카",
   },
   {
@@ -172,7 +178,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "높음",
     ko: "맛있어요 / 진짜 맛있네요",
-    th: "อร่อยมาก",
+    text: "อร่อยมาก",
     pron: "아로이 막 크럽/카",
   },
   {
@@ -180,7 +186,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "높음",
     ko: "포장해 주세요 / 싸주세요",
-    th: "ใส่ถุง",
+    text: "ใส่ถุง",
     pron: "싸이 퉁 크럽/카",
   },
 
@@ -190,7 +196,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "쇼핑",
     importance: "보통",
     ko: "얼마예요? / 가격이 어떻게 되나요?",
-    th: "เท่าไหร่",
+    text: "เท่าไหร่",
     pron: "타오라이 크럽/카?",
   },
   {
@@ -198,7 +204,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "쇼핑",
     importance: "보통",
     ko: "가격 깎아주세요 / 싸게 해주세요 / 할인해 주세요",
-    th: "ลดหน่อยได้ไหม",
+    text: "ลดหน่อยได้ไหม",
     pron: "롯 노이 다이 마이 크럽/카?",
   },
   {
@@ -206,7 +212,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "쇼핑",
     importance: "보통",
     ko: "너무 비싸요",
-    th: "แพงมาก",
+    text: "แพงมาก",
     pron: "패앙 막 크럽/카",
   },
   {
@@ -214,7 +220,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "쇼핑",
     importance: "보통",
     ko: "안 사요 / 필요 없어요 / 괜찮아요",
-    th: "ไม่เอา",
+    text: "ไม่เอา",
     pron: "마이 아오 크럽/카",
   },
 
@@ -224,7 +230,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "긴급",
     importance: "보통",
     ko: "도와주세요! / 좀 도와주실 수 있나요?",
-    th: "ช่วยด้วย",
+    text: "ช่วยด้วย",
     pron: "쭈아이 두아이 크럽/카",
   },
   {
@@ -232,7 +238,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "긴급",
     importance: "보통",
     ko: "영어 할 수 있나요?",
-    th: "พูดภาษาอังกฤษได้ไหม",
+    text: "พูดภาษาอังกฤษได้ไหม",
     pron: "풋 파사 앙끄릿 다이 마이 크럽/카?",
   },
   {
@@ -240,7 +246,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "긴급",
     importance: "보통",
     ko: "이해하지 못했어요 / 잘 모르겠어요",
-    th: "ไม่เข้าใจ",
+    text: "ไม่เข้าใจ",
     pron: "마이 카오짜이 크럽/카",
   },
   {
@@ -248,7 +254,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "긴급",
     importance: "보통",
     ko: "사진 좀 찍어주실 수 있나요?",
-    th: "ถ่ายรูปให้หน่อยได้ไหม",
+    text: "ถ่ายรูปให้หน่อยได้ไหม",
     pron: "타이룹 하이 노이 다이 마이 크럽/카?",
   },
   {
@@ -256,7 +262,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "보통",
     ko: "추천해 주세요 / 추천해줘",
-    th: "แนะนำหน่อย",
+    text: "แนะนำหน่อย",
     pron: "내남 노이 크럽/카?",
   },
   {
@@ -264,7 +270,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "보통",
     ko: "얼음 주세요",
-    th: "น้ำแข็ง",
+    text: "น้ำแข็ง",
     pron: "남깽 크럽/카",
   },
   {
@@ -272,7 +278,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "보통",
     ko: "콜라 제로 주세요",
-    th: "โค้กซีโร่",
+    text: "โค้กซีโร่",
     pron: "콕 씨 로 크럽/카",
   },
   {
@@ -280,7 +286,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "높음",
     ko: "배고파요!",
-    th: "หิวมาก",
+    text: "หิวมาก",
     pron: "히우 막",
   },
   {
@@ -288,7 +294,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "식당",
     importance: "보통",
     ko: "배불러요!",
-    th: "อิ่มจัง",
+    text: "อิ่มจัง",
     pron: "임 짱",
   },
   {
@@ -296,7 +302,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "이동",
     importance: "높음",
     ko: "빨리 가 주세요",
-    th: "เร็วๆ",
+    text: "เร็วๆ",
     pron: "래우 래우 크럽/카",
   },
   {
@@ -304,7 +310,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "이동",
     importance: "보통",
     ko: "천천히 가 주세요",
-    th: "ช้าๆ",
+    text: "ช้าๆ",
     pron: "차 차 크럽/카",
   },
   {
@@ -312,7 +318,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "이동",
     importance: "높음",
     ko: "계속 가 주세요 / 직진해 주세요",
-    th: "ตรงไป",
+    text: "ตรงไป",
     pron: "뜨롱 빠이 크럽/카",
   },
   {
@@ -320,7 +326,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "마사지",
     importance: "높음",
     ko: "아파요",
-    th: "เจ็บ",
+    text: "เจ็บ",
     pron: "쩹",
   },
   {
@@ -328,7 +334,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "마사지",
     importance: "보통",
     ko: "세게 해주세요",
-    th: "หนักๆ",
+    text: "หนักๆ",
     pron: "낙 낙 크럽/카",
   },
   {
@@ -336,7 +342,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "마사지",
     importance: "보통",
     ko: "약하게 해주세요",
-    th: "เบาๆ",
+    text: "เบาๆ",
     pron: "바오 바오 크럽/카",
   },
   {
@@ -344,7 +350,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "마사지",
     importance: "보통",
     ko: "좋아요 / 편안해요",
-    th: "สบาย",
+    text: "สบาย",
     pron: "사바이",
   },
   {
@@ -352,7 +358,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "마사지",
     importance: "보통",
     ko: "간지러워요",
-    th: "จั๊กกะจี้",
+    text: "จั๊กกะจี้",
     pron: "짝까찌",
   },
   {
@@ -360,7 +366,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "기본",
     importance: "보통",
     ko: "추워요",
-    th: "หนาว",
+    text: "หนาว",
     pron: "나오",
   },
   {
@@ -368,7 +374,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "기본",
     importance: "보통",
     ko: "더워요",
-    th: "ร้อน",
+    text: "ร้อน",
     pron: "론",
   },
   {
@@ -376,7 +382,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "쇼핑",
     importance: "높음",
     ko: "돈 없어요.",
-    th: "ไม่มีเงิน",
+    text: "ไม่มีเงิน",
     pron: "마이 미 응언",
   },
   {
@@ -384,7 +390,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "쇼핑",
     importance: "높음",
     ko: "돈이 부족해요.",
-    th: "เงินไม่พอ",
+    text: "เงินไม่พอ",
     pron: "응언 마이 포",
   },
   {
@@ -392,7 +398,7 @@ export const THAI_PHRASES: PhraseItem[] = [
     category: "쇼핑",
     importance: "높음",
     ko: "가격 깍아주세요.",
-    th: "ลดราคาให้หน่อยได้ไหม",
+    text: "ลดราคาให้หน่อยได้ไหม",
     pron: "롯 라카 하이 너이 다이 마이 크럽/카?",
   },
 ];
@@ -414,8 +420,8 @@ export function matchKoreanSearch(item: PhraseItem, rawQuery: string): boolean {
     return true;
   }
 
-  // 2. 태국어 원문 검사
-  if (item.th.toLowerCase().includes(query.toLowerCase())) {
+  // 2. 현지어 원문 검사
+  if (item.text.toLowerCase().includes(query.toLowerCase())) {
     return true;
   }
 
@@ -432,3 +438,15 @@ export function matchKoreanSearch(item: PhraseItem, rawQuery: string): boolean {
 
   return false;
 }
+
+const PHRASE_CATEGORIES: Record<TripConfig["language"]["code"], readonly ("전체" | PhraseCategory)[]> = {
+  th: ["전체", "기본", "이동", "식당", "쇼핑", "마사지", "긴급"],
+  ja: ["전체", "기본", "이동", "식당", "쇼핑", "온천", "긴급"],
+};
+
+/** 여행지 언어의 회화 목록. */
+export const getPhrases = (trip: Pick<TripConfig, "language">): PhraseItem[] =>
+  trip.language.code === "ja" ? JAPANESE_PHRASES : THAI_PHRASES;
+
+/** 회화 화면의 카테고리 필터. 여행지 언어마다 구성이 다르다(마사지 / 온천). */
+export const getPhraseCategories = (trip: Pick<TripConfig, "language">) => PHRASE_CATEGORIES[trip.language.code];

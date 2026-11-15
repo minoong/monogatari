@@ -19,6 +19,8 @@ export interface TripLanguage {
   label: string;
   /** Web Speech API 언어 태그 */
   speechLang: "th-TH" | "ja-JP";
+  /** 말하는 사람의 성별에 따라 공손 어미가 달라지는 언어인지(태국어의 크랍/카). 일본어는 false. */
+  genderedPoliteness: boolean;
 }
 
 export interface TripWeatherPlace {

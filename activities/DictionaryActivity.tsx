@@ -26,6 +26,7 @@ import {
   GlassWater,
   Gauge,
   Hand,
+  Bath,
   HeartPulse,
   Heart,
   Languages,
@@ -49,7 +50,7 @@ import {
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useTrip } from "@/components/providers/trip-provider";
-import { matchKoreanSearch, PhraseItem, THAI_PHRASES } from "@/lib/phrases";
+import { getPhraseCategories, getPhrases, matchKoreanSearch, type PhraseCategory, type PhraseItem } from "@/lib/phrases";
 import {
   getSpeakerGenderLabel,
   readStoredSpeakerGender,
@@ -117,6 +118,14 @@ const CATEGORY_META = {
     stripClass: "bg-emerald-500",
     panelClass: "border-emerald-200/80 bg-emerald-50/80 dark:border-emerald-900/70 dark:bg-emerald-950/25",
   },
+  온천: {
+    icon: Bath,
+    label: "온천·숙소",
+    railClass: "bg-sky-50 text-sky-800 ring-sky-200/80 dark:bg-sky-950/40 dark:text-sky-200 dark:ring-sky-800/70",
+    activeClass: "bg-sky-500 text-white shadow-sky-500/25",
+    stripClass: "bg-sky-500",
+    panelClass: "border-sky-200/80 bg-sky-50/80 dark:border-sky-900/70 dark:bg-sky-950/25",
+  },
   긴급: {
     icon: CircleHelp,
     label: "긴급",
@@ -134,11 +143,10 @@ const CATEGORY_META = {
   panelClass: string;
 }>;
 
-const CATEGORY_FILTERS = ["전체", "기본", "이동", "식당", "쇼핑", "마사지", "긴급"] as const;
 
-function hasNextVisiblePhrase(fromIndex: number, visibleIds: ReadonlySet<number>) {
-  for (let index = fromIndex + 1; index < THAI_PHRASES.length; index += 1) {
-    if (visibleIds.has(THAI_PHRASES[index].id)) return true;
+function hasNextVisiblePhrase(phrases: readonly PhraseItem[], fromIndex: number, visibleIds: ReadonlySet<number>) {
+  for (let index = fromIndex + 1; index < phrases.length; index += 1) {
+    if (visibleIds.has(phrases[index].id)) return true;
   }
   return false;
 }
@@ -186,8 +194,21 @@ const PHRASE_THUMBNAILS: Record<number, { icon: LucideIcon; background: string; 
   47: { icon: BadgePercent, background: "#ffe8ef", foreground: "#d85a81" },
 };
 
-function PhraseThumbnail({ id }: { id: number }) {
-  const thumbnail = PHRASE_THUMBNAILS[id] ?? PHRASE_THUMBNAILS[1];
+/** 태국어 회화는 문구마다 고른 아이콘을 쓰고, 그 외 언어는 카테고리 아이콘을 쓴다. */
+const CATEGORY_THUMBNAILS: Record<PhraseCategory, { icon: LucideIcon; background: string; foreground: string }> = {
+  기본: { icon: Hand, background: "#fff3d7", foreground: "#d78b08" },
+  이동: { icon: MapPin, background: "#dcf6f2", foreground: "#0f8f82" },
+  식당: { icon: Utensils, background: "#ffe9d6", foreground: "#d9731a" },
+  쇼핑: { icon: ShoppingBag, background: "#ffe6ec", foreground: "#d9446a" },
+  마사지: { icon: HeartPulse, background: "#e1f8ec", foreground: "#25985e" },
+  온천: { icon: Bath, background: "#e3f3ff", foreground: "#2586be" },
+  긴급: { icon: CircleHelp, background: "#ffe8e8", foreground: "#d64c4c" },
+};
+
+function PhraseThumbnail({ item, languageCode }: { item: PhraseItem; languageCode: string }) {
+  const thumbnail = languageCode === "th"
+    ? (PHRASE_THUMBNAILS[item.id] ?? PHRASE_THUMBNAILS[1])
+    : CATEGORY_THUMBNAILS[item.category];
   const Icon = thumbnail.icon;
 
   return (
@@ -309,10 +330,11 @@ function DictionaryPhraseDetail({
   prefersReducedMotion: boolean | null;
   speakerGender: SpeakerGender;
 }) {
+  const { trip } = useTrip();
   const [isRotated, setIsRotated] = useState(true);
   const rotateIconRef = useRef<RotateCwIconHandle>(null);
   const volumeIconRef = useRef<Volume2IconHandle>(null);
-  const resolved = resolvePhraseForSpeaker(item, speakerGender);
+  const resolved = resolvePhraseForSpeaker(item, speakerGender, trip.language.genderedPoliteness);
 
   useEffect(() => {
     onOpen();
@@ -327,7 +349,7 @@ function DictionaryPhraseDetail({
   const handlePlayAudio = () => {
     triggerHapticFeedback(12);
     volumeIconRef.current?.startAnimation();
-    onPlayAudio(resolved.th);
+    onPlayAudio(resolved.text);
   };
 
   return (
@@ -343,7 +365,7 @@ function DictionaryPhraseDetail({
           <div className="min-w-0 flex-1">
             <h2 className="text-[17px] font-semibold leading-[22px] tracking-[-0.01em]">현지인에게 보여주기</h2>
             <p className="mt-0.5 text-[13px] leading-[18px] text-[#3c3c4399] dark:text-[#ebebf599]">
-              {isRotated ? "상대방 쪽으로 돌려 태국어를 보여주세요." : "정방향으로 확인 중이에요."}
+              {isRotated ? `상대방 쪽으로 돌려 ${trip.language.label}를 보여주세요.` : "정방향으로 확인 중이에요."}
             </p>
           </div>
           <Button
@@ -362,12 +384,12 @@ function DictionaryPhraseDetail({
           <motion.h2
             className={cn(
               "font-thai max-w-full break-words font-semibold leading-[1.08] tracking-wide text-slate-950 dark:text-white",
-              getShowLocallyThaiFontSize(resolved.th),
+              getShowLocallyThaiFontSize(resolved.text),
             )}
             animate={{ rotate: isRotated ? 180 : 0 }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.38, ease: [0.22, 1, 0.36, 1] }}
           >
-            {resolved.th}
+            {resolved.text}
           </motion.h2>
           <p className="mt-4 max-w-full break-words text-[17px] font-medium leading-[24px] tracking-[0.01em] text-[#3c3c43] dark:text-[#ebebf5]">
             {resolved.pron}
@@ -422,7 +444,8 @@ const DictionaryPhraseRow = React.memo(function DictionaryPhraseRow({
   speakerGender: SpeakerGender;
   hidden?: boolean;
 }) {
-  const resolved = resolvePhraseForSpeaker(item, speakerGender);
+  const { trip } = useTrip();
+  const resolved = resolvePhraseForSpeaker(item, speakerGender, trip.language.genderedPoliteness);
 
   return (
     <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.42 }}>
@@ -431,7 +454,7 @@ const DictionaryPhraseRow = React.memo(function DictionaryPhraseRow({
           ariaLabel={`${item.ko} 현지인에게 보여주기`}
           className="flex w-full items-start gap-3 px-4 py-3.5 text-left outline-none transition-colors active:bg-black/[0.04] focus-visible:bg-black/[0.03] dark:active:bg-white/[0.06] dark:focus-visible:bg-white/[0.04]"
         >
-          <PhraseThumbnail id={item.id} />
+          <PhraseThumbnail item={item} languageCode={trip.language.code} />
 
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex min-w-0 items-start justify-between gap-3">
@@ -443,7 +466,7 @@ const DictionaryPhraseRow = React.memo(function DictionaryPhraseRow({
 
             <MorphingDialogTitle className="min-w-0">
               <p className="font-thai text-[17px] font-semibold leading-[22px] tracking-[-0.02em] text-slate-900 dark:text-white">
-                {resolved.th}
+                {resolved.text}
               </p>
               <p className="mt-1 text-[15px] font-medium leading-[20px] text-[#636366] dark:text-[#d1d1d6]">
                 {resolved.pron}
@@ -478,6 +501,8 @@ const DictionaryPhraseRow = React.memo(function DictionaryPhraseRow({
 
 export const DictionaryActivity: React.FC = () => {
   const { trip } = useTrip();
+  const phrases = useMemo(() => getPhrases(trip), [trip]);
+  const categoryFilters = getPhraseCategories(trip);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("전체");
@@ -574,7 +599,7 @@ export const DictionaryActivity: React.FC = () => {
   // 필터링된 회화 데이터
   const visiblePhraseIds = useMemo(() => {
     const ids = new Set<number>();
-    for (const phrase of THAI_PHRASES) {
+    for (const phrase of phrases) {
       const matchesCat =
         selectedCategory === "전체" || phrase.category === selectedCategory;
       const matchesSearch = matchKoreanSearch(phrase, searchQuery);
@@ -583,11 +608,11 @@ export const DictionaryActivity: React.FC = () => {
       }
     }
     return ids;
-  }, [searchQuery, selectedCategory]);
+  }, [phrases, searchQuery, selectedCategory]);
 
   const filteredPhrases = useMemo(
-    () => THAI_PHRASES.filter((phrase) => visiblePhraseIds.has(phrase.id)),
-    [visiblePhraseIds],
+    () => phrases.filter((phrase) => visiblePhraseIds.has(phrase.id)),
+    [phrases, visiblePhraseIds],
   );
 
   // 카드 탭 시 최근 검색어 저장 및 햅틱 피드백
@@ -605,7 +630,7 @@ export const DictionaryActivity: React.FC = () => {
     storeSpeakerGender(gender);
   };
 
-  // 태국어 음성 읽기 (TTS)
+  // 여행지 언어 음성 읽기 (TTS)
   const playAudio = useCallback((text: string, e?: React.MouseEvent | unknown) => {
     if (e && typeof e === "object" && "stopPropagation" in e) {
       (e as React.MouseEvent).stopPropagation();
@@ -616,12 +641,12 @@ export const DictionaryActivity: React.FC = () => {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       const voices = window.speechSynthesis.getVoices();
-      const thaiVoice = voices.find((v) => v.lang.includes("th"));
-      if (thaiVoice) utterance.voice = thaiVoice;
-      utterance.lang = "th-TH";
+      const localVoice = voices.find((v) => v.lang.toLowerCase().startsWith(trip.language.code));
+      if (localVoice) utterance.voice = localVoice;
+      utterance.lang = trip.language.speechLang;
       window.speechSynthesis.speak(utterance);
     }
-  }, []);
+  }, [trip.language.code, trip.language.speechLang]);
 
   return (
     <AppScreen className="dictionary-screen captured-scroll-screen" appBar={{ title: trip.copy.dictionaryTitle }}>
@@ -637,7 +662,7 @@ export const DictionaryActivity: React.FC = () => {
             className="-mx-5 flex gap-2 overflow-x-auto px-5 no-scrollbar"
             aria-label="회화 카테고리"
           >
-            {CATEGORY_FILTERS.map((category) => {
+            {categoryFilters.map((category) => {
               const isSelected = selectedCategory === category;
               const meta = category === "전체" ? null : CATEGORY_META[category];
 
@@ -665,14 +690,14 @@ export const DictionaryActivity: React.FC = () => {
             })}
           </div>
 
-          <SpeakerGenderToggle value={speakerGender} onChange={handleSpeakerGenderChange} />
+          {trip.language.genderedPoliteness && <SpeakerGenderToggle value={speakerGender} onChange={handleSpeakerGenderChange} />}
 
           <div className="flex items-center justify-between px-1 text-xs font-medium text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1.5 font-medium">
               <span>{searchQuery || selectedCategory !== "전체" ? "검색/필터 결과" : "전체"}</span>
               <span className="font-extrabold tabular-nums text-slate-900 dark:text-white">{filteredPhrases.length}개</span>
               {(searchQuery || selectedCategory !== "전체") && (
-                <span className="text-[11px] text-slate-400">(총 {THAI_PHRASES.length}개)</span>
+                <span className="text-[11px] text-slate-400">(총 {phrases.length}개)</span>
               )}
             </div>
             {(searchQuery || selectedCategory !== "전체") && (
@@ -739,7 +764,7 @@ export const DictionaryActivity: React.FC = () => {
                 <p className="mt-1 text-[15px] text-[#3c3c4399] dark:text-[#ebebf599]">다른 단어 또는 초성으로 다시 찾아보세요.</p>
               </div>
             ) : (
-              THAI_PHRASES.map((item, index) => (
+              phrases.map((item, index) => (
                 <DictionaryPhraseRow
                   key={item.id}
                   hidden={!visiblePhraseIds.has(item.id)}
@@ -748,7 +773,7 @@ export const DictionaryActivity: React.FC = () => {
                   onOpen={handlePhraseOpen}
                   onPlayAudio={playAudio}
                   prefersReducedMotion={prefersReducedMotion}
-                  showDivider={visiblePhraseIds.has(item.id) && hasNextVisiblePhrase(index, visiblePhraseIds)}
+                  showDivider={visiblePhraseIds.has(item.id) && hasNextVisiblePhrase(phrases, index, visiblePhraseIds)}
                   speakerGender={speakerGender}
                 />
               ))
