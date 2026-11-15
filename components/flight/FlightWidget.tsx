@@ -4,7 +4,8 @@ import React from "react";
 import { Button, Card, Tabs } from "@heroui/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { ArrowUpRight } from "lucide-react";
-import { FLIGHT_PASSENGERS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, getDefaultFlightSegmentId, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, getDefaultFlightSegmentId, getFlightTicketNumber, getFlightTickets, type FlightPassengerId, type FlightSegment } from "@/lib/flights";
+import { useTrip } from "@/components/providers/trip-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StateTextRoll } from "@/components/core/state-text-roll";
 import { SlidingNumber } from "@/components/core/sliding-number";
@@ -38,14 +39,16 @@ function FlightTime({ value, align = "left" }: { value: string; align?: "left" |
 }
 
 export function FlightWidget({ defaultSegmentId, onOpen }: FlightWidgetProps) {
+  const { trip } = useTrip();
   const selectedPassenger: FlightPassengerId = "gahyun";
-  const tickets = FLIGHT_TICKETS[selectedPassenger];
+  const tickets = getFlightTickets(trip)[selectedPassenger];
   const [selectedFlight, setSelectedFlight] = React.useState(
-    () => defaultSegmentId ?? getDefaultFlightSegmentId(),
+    () => defaultSegmentId ?? getDefaultFlightSegmentId(trip),
   );
   const [transitionKey, setTransitionKey] = React.useState(0);
   const flight = tickets.find((item) => item.id === selectedFlight) ?? tickets[0];
-  const ticketNumber = FLIGHT_TICKET_NUMBERS[selectedPassenger];
+  const ticketNumber = getFlightTicketNumber(trip, selectedPassenger);
+  const koreanAir = flight.koreanAir;
   const duration = getDurationParts(flight.duration);
   const [previousFlight, setPreviousFlight] = React.useState(flight);
 
@@ -60,8 +63,12 @@ export function FlightWidget({ defaultSegmentId, onOpen }: FlightWidgetProps) {
       <Card.Content className="p-0">
         <div className="px-3 pb-4 pt-3 sm:px-5">
           <div className="mb-0.5 flex h-10 items-center justify-between">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
+            {koreanAir ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
+            ) : (
+              <span className="text-sm font-black text-[#0b3478]">{trip.name}</span>
+            )}
             <DotLottieReact
               src="/korean-air/airplane.lottie"
               autoplay
@@ -84,10 +91,12 @@ export function FlightWidget({ defaultSegmentId, onOpen }: FlightWidgetProps) {
             <Tabs.Panel id={selectedFlight} className="!px-0 !pb-0 !pt-3">
               <div className="flex items-start justify-between gap-3">
                 <p className="text-[11px] font-bold text-[#5b83ab]"><StateTextRoll value={`${flight.date.slice(0, 4)}년 ${flight.date.slice(5)} (${flight.day})`} previousValue={`${previousFlight.date.slice(0, 4)}년 ${previousFlight.date.slice(5)} (${previousFlight.day})`} transitionKey={transitionKey} className="min-w-[10.5em]" /></p>
+                {ticketNumber && (
                 <div className="flex flex-col items-end gap-1">
-                  <p className="text-[9px] font-bold tracking-[0.12em] text-[#7995b4]">항공권 번호</p>
-                  <p className="font-mono text-[10px] font-bold text-[#0b3478]" aria-label={`항공권 번호 ${ticketNumber}`}>{ticketNumber}</p>
-                </div>
+                    <p className="text-[9px] font-bold tracking-[0.12em] text-[#7995b4]">항공권 번호</p>
+                    <p className="font-mono text-[10px] font-bold text-[#0b3478]" aria-label={`항공권 번호 ${ticketNumber}`}>{ticketNumber}</p>
+                  </div>
+                )}
               </div>
               <div className="relative mt-3 space-y-3 pl-12 md:hidden" aria-label={`${flight.duration} 비행`}>
                 <div className="absolute bottom-4 left-2 top-3 border-l-2 border-dotted border-[#91b7da]" aria-hidden="true" />
@@ -140,20 +149,24 @@ export function FlightWidget({ defaultSegmentId, onOpen }: FlightWidgetProps) {
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 rounded-xl bg-[#f5f6f7] px-3 py-2 text-[#0b3478]">
                 <span className="inline-flex items-center gap-1 text-[11px] font-black">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={KOREAN_AIR_MARK_URL} alt="대한항공" className="size-3.5" />
+                  {koreanAir && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={KOREAN_AIR_MARK_URL} alt="대한항공" className="size-3.5" />
+                  )}
                   {flight.flightNumber}
                 </span>
+                {koreanAir && (
                 <a
                   href={A330_SEAT_MAP_URL}
                   target="_blank"
                   rel="noreferrer"
                   className="text-[11px] font-bold underline decoration-1 underline-offset-3 transition-colors hover:text-[#2778be] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2778be] focus-visible:ring-offset-2"
                 >
-                  {flight.aircraft}
+                  {koreanAir.aircraft}
                 </a>
-                <span className="text-[11px] font-bold">{flight.cabin}</span>
-                <span className="rounded-full bg-[#e1f3fd] px-2 py-0.5 text-[10px] font-bold">{flight.fareFamily}</span>
+                )}
+                {koreanAir && <span className="text-[11px] font-bold">{koreanAir.cabin}</span>}
+                {koreanAir && <span className="rounded-full bg-[#e1f3fd] px-2 py-0.5 text-[10px] font-bold">{koreanAir.fareFamily}</span>}
               </div>
               <div className="mt-3 flex items-center justify-between gap-3 border-t border-dashed border-[#d8e5f1] pt-3">
                 <div className="flex items-center gap-2" aria-label="탑승객 가현짱, 미누쿤">

@@ -66,6 +66,8 @@ export interface TripFlightEndpoint {
   /** 짧은 도시명. 보딩패스 카드 등 좁은 곳에 쓴다. */
   city: string;
   airport: string;
+  /** 해당 공항의 UTC 오프셋("+09:00"). 비행시간과 다음날 도착 여부를 계산하는 데 쓴다. */
+  utcOffset: string;
   /** 해당 공항 현지 시각(HH:mm) */
   time: string;
 }

@@ -4,7 +4,9 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { MonitorPlay, Plug, Plus, Sparkles, Ticket } from "lucide-react";
 import { Tabs } from "@heroui/react";
-import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, FLIGHT_TICKETS, FLIGHT_TICKET_NUMBERS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, getDefaultFlightSegmentId, type FlightSegment } from "@/lib/flights";
+import { FLIGHT_PASSENGERS, FLIGHT_PASSENGER_DETAILS, KOREAN_AIR_LOGO_URL, KOREAN_AIR_MARK_URL, getDefaultFlightSegmentId, getFlightTicketNumber, getFlightTickets, hasKoreanAirBooking, type FlightSegment } from "@/lib/flights";
+import { useTrip } from "@/components/providers/trip-provider";
+import type { TripConfig } from "@/lib/trips";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 gsap.registerPlugin(useGSAP);
@@ -28,8 +30,10 @@ const FlightTime: React.FC<{ value: string; align?: "left" | "right" }> = ({ val
   );
 };
 
-const PassengerTicket: React.FC<{ flight: FlightSegment }> = ({ flight }) => {
-  const ticketNumber = FLIGHT_TICKET_NUMBERS.gahyun;
+const PassengerTicket: React.FC<{ flight: FlightSegment; trip: TripConfig }> = ({ flight, trip }) => {
+  const ticketNumber = getFlightTicketNumber(trip, "gahyun");
+  const hasBooking = hasKoreanAirBooking(trip);
+  const koreanAir = flight.koreanAir;
   const detail = FLIGHT_PASSENGER_DETAILS.gahyun;
 
   return <article data-passenger-ticket className="relative overflow-hidden rounded-[26px] border border-[#d7e5f2] bg-white shadow-[0_18px_38px_-30px_rgba(7,47,100,0.66)]">
@@ -43,7 +47,7 @@ const PassengerTicket: React.FC<{ flight: FlightSegment }> = ({ flight }) => {
             </Avatar>
           ))}
         </div>
-        <p className="text-sm font-black">OH GAHYUN · LEE MINWOO</p>
+        <p className="text-sm font-black">{hasBooking ? "OH GAHYUN · LEE MINWOO" : "가현짱 · 미누쿤"}</p>
       </div>
       <Ticket className="size-5 text-[#8ac7f0]" aria-hidden="true" />
     </div>
@@ -53,14 +57,16 @@ const PassengerTicket: React.FC<{ flight: FlightSegment }> = ({ flight }) => {
         <div>
           <p className="text-[11px] font-bold text-[#5d82a9]">{flight.date} ({flight.day})</p>
         </div>
+        {koreanAir && ticketNumber && (
         <div className="flex flex-col items-end gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
-          <div className="text-right leading-none">
-            <p className="text-[9px] font-bold tracking-[0.12em] text-[#7995b4]">항공권 번호</p>
-            <p className="mt-1 font-mono text-[11px] font-bold text-[#0b3478]" aria-label={`항공권 번호 ${ticketNumber}`}>{ticketNumber}</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={KOREAN_AIR_LOGO_URL} alt="대한항공" className="h-5 w-auto" />
+            <div className="text-right leading-none">
+              <p className="text-[9px] font-bold tracking-[0.12em] text-[#7995b4]">항공권 번호</p>
+              <p className="mt-1 font-mono text-[11px] font-bold text-[#0b3478]" aria-label={`항공권 번호 ${ticketNumber}`}>{ticketNumber}</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="relative mt-5 space-y-4 pl-12 md:hidden" aria-label={`${flight.duration} 비행`}>
@@ -103,32 +109,39 @@ const PassengerTicket: React.FC<{ flight: FlightSegment }> = ({ flight }) => {
 
       <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-[#f5f6f7] px-4 py-3 text-[#0b3478]">
         <span className="inline-flex items-center gap-1.5 text-sm font-black">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={KOREAN_AIR_MARK_URL} alt="대한항공" className="size-4" />
+          {koreanAir && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={KOREAN_AIR_MARK_URL} alt="대한항공" className="size-4" />
+          )}
           {flight.flightNumber}
         </span>
+        {koreanAir && (
         <a
           href={A330_SEAT_MAP_URL}
           target="_blank"
           rel="noreferrer"
           className="text-sm font-bold underline decoration-1 underline-offset-4 transition-colors hover:text-[#2778be] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2778be] focus-visible:ring-offset-2"
         >
-          {flight.aircraft}
+          {koreanAir.aircraft}
         </a>
-        <span className="text-sm font-bold">{flight.cabin}</span>
-        <span className="rounded-full bg-[#e1f3fd] px-2.5 py-1 text-xs font-bold">{flight.fareFamily}</span>
+        )}
+        {koreanAir && <span className="text-sm font-bold">{koreanAir.cabin}</span>}
+        {koreanAir && <span className="rounded-full bg-[#e1f3fd] px-2.5 py-1 text-xs font-bold">{koreanAir.fareFamily}</span>}
       </div>
 
+      {koreanAir && koreanAir.inFlightServices.length > 0 && (
       <section className="mt-5 border-t border-[#e3edf6] pt-4">
         <h3 className="text-sm font-black text-[#12366f]">기내 서비스</h3>
         <div className="mt-3 grid grid-cols-2 gap-2">
-          {flight.inFlightServices.map((service, index) => {
+          {koreanAir.inFlightServices.map((service, index) => {
             const Icon = SERVICE_ICONS[index] ?? Plus;
             return <div key={service} className="flex min-h-12 items-center gap-2 rounded-xl bg-[#f5f9fd] px-3 text-[11px] font-bold leading-4 text-[#315b8f]"><Icon className="size-4 shrink-0 text-[#2778be]" aria-hidden="true" />{service}</div>;
           })}
         </div>
       </section>
+      )}
 
+      {hasBooking && (
       <section className="mt-5 border-t border-[#e3edf6] pt-4">
         <h3 className="text-sm font-black text-[#12366f]">좌석 및 서비스 신청</h3>
         {"serviceApplications" in detail && Array.isArray(detail.serviceApplications) ? (
@@ -143,18 +156,20 @@ const PassengerTicket: React.FC<{ flight: FlightSegment }> = ({ flight }) => {
           </div>
         ) : <p className="mt-3 rounded-2xl bg-[#f5f9fd] px-4 py-3 text-xs font-semibold leading-5 text-slate-500">{detail.serviceNote}</p>}
       </section>
+      )}
     </div>
   </article>;
 };
 
 export const FlightActivity: React.FC<{ params: { passengerId?: string; segmentId?: string } }> = ({ params }) => {
   const screenRef = React.useRef<HTMLDivElement>(null);
+  const { trip } = useTrip();
   const initialSegmentId =
     params.segmentId === "outbound" || params.segmentId === "return"
       ? params.segmentId
-      : getDefaultFlightSegmentId();
+      : getDefaultFlightSegmentId(trip);
   const [selectedFlight, setSelectedFlight] = React.useState(initialSegmentId);
-  const outboundTickets = FLIGHT_TICKETS["gahyun"];
+  const outboundTickets = getFlightTickets(trip)["gahyun"];
 
   useGSAP(() => {
     const media = gsap.matchMedia();
@@ -190,11 +205,13 @@ export const FlightActivity: React.FC<{ params: { passengerId?: string; segmentI
                 const flight = outboundTickets.find((f) => f.id === selectedFlight) ?? outboundTickets[0];
                 return (
                   <section className="space-y-4" aria-label="항공권 티켓 상세">
-                    <PassengerTicket flight={flight} />
+                    <PassengerTicket flight={flight} trip={trip} />
                     <div className="flex items-center gap-2 rounded-2xl border border-[#dce9f5] bg-white px-4 py-3 text-xs font-semibold text-slate-500">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={KOREAN_AIR_MARK_URL} alt="" className="size-4" />
-                      가현짱과 미누쿤의 태국 여행 항공권 상세 정보입니다.
+                      {hasKoreanAirBooking(trip) && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={KOREAN_AIR_MARK_URL} alt="" className="size-4" />
+                      )}
+                      가현짱과 미누쿤의 {trip.shortName} 여행 항공권 상세 정보입니다.
                     </div>
                   </section>
                 );
