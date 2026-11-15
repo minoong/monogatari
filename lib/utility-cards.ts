@@ -1,4 +1,6 @@
-export const UTILITY_CARDS = [
+import type { TripCopy } from "./trips";
+
+const UTILITY_CARDS_BASE = [
   {
     activity: "ExpenseActivity" as const,
     title: "가현짱, 렌탈 영수증 발행!",
@@ -25,4 +27,12 @@ export const UTILITY_CARDS = [
   },
 ] as const;
 
-export type UtilityActivity = (typeof UTILITY_CARDS)[number]["activity"];
+export type UtilityActivity = (typeof UTILITY_CARDS_BASE)[number]["activity"];
+
+/** 여행별 문구(환율 카드 설명, 사전 제목)를 반영한 유틸 카드 목록. */
+export const getUtilityCards = (copy: Pick<TripCopy, "exchangeCardDescription" | "dictionaryCardTitle">) =>
+  UTILITY_CARDS_BASE.map((card) => {
+    if (card.activity === "ExchangeActivity") return { ...card, description: copy.exchangeCardDescription };
+    if (card.activity === "DictionaryActivity") return { ...card, title: copy.dictionaryCardTitle };
+    return card;
+  });

@@ -93,6 +93,12 @@ export interface TripFlightSeed {
 export interface TripCopy {
   homeTitle: string;
   dictionaryTitle: string;
+  /** 유틸 화면 맨 위 한 줄 */
+  utilsIntro: string;
+  /** 유틸 카드: 환율 계산기 설명 */
+  exchangeCardDescription: string;
+  /** 유틸 카드: 사전 제목 */
+  dictionaryCardTitle: string;
 }
 
 /** 여행별 분위기. 색은 `--trip-accent`, `--trip-tint` CSS 변수로 노출된다. */

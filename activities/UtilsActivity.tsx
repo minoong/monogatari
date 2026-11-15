@@ -12,7 +12,7 @@ import { AnimatedContent } from "@/components/ui/animated-content";
 import { cardNavButtonClass } from "@/components/ui/drawer-form";
 import { useTrip } from "@/components/providers/trip-provider";
 import { formatRatePreview, getLocalToKrwRate, useExchangeRates } from "@/lib/exchange-rates";
-import { UTILITY_CARDS } from "@/lib/utility-cards";
+import { getUtilityCards } from "@/lib/utility-cards";
 
 export const UtilsActivity: React.FC = () => {
   const { push } = useFlow();
@@ -36,13 +36,13 @@ export const UtilsActivity: React.FC = () => {
               delay={0.04}
             >
               <p className="text-base sm:text-lg font-black tracking-tight text-[#00256C] dark:text-cyan-400" style={{ fontFamily: "var(--font-korean-air)" }}>
-                방콕에서 바가지 쓰거나 당황하지 말라고!
+                {trip.copy.utilsIntro}
               </p>
             </AnimatedContent>
           </header>
 
           <div className="mt-5 flex shrink-0 flex-col gap-4">
-            {UTILITY_CARDS.map((card) => {
+            {getUtilityCards(trip.copy).map((card) => {
               const base = card.baseDelay;
 
               return (

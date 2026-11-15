@@ -10,7 +10,7 @@ import { triggerHapticFeedback } from "@/components/BottomNav";
 import { useFabEnterAnimation } from "@/components/ui/activity-register-fab";
 import { useTrip } from "@/components/providers/trip-provider";
 import { formatRatePreview, getLocalToKrwRate, useExchangeRates } from "@/lib/exchange-rates";
-import { UTILITY_CARDS, type UtilityActivity } from "@/lib/utility-cards";
+import { getUtilityCards, type UtilityActivity } from "@/lib/utility-cards";
 import { cn } from "@/lib/utils";
 
 const FAB_IMAGE_SRC = "/home/quick-menu-fab.jpg";
@@ -269,7 +269,7 @@ export function HomeQuickGooeyMenu({ onNavigate }: HomeQuickGooeyMenuProps) {
                     transition: prefersReducedMotion ? { duration: 0 } : { ...SPRING, delay: 0 },
                   }}
                 >
-                  {UTILITY_CARDS.map((card) => (
+                  {getUtilityCards(trip.copy).map((card) => (
                     <UtilityMenuItem
                       key={card.activity}
                       title={card.title}

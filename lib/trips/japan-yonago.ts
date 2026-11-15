@@ -23,7 +23,13 @@ export const JAPAN_YONAGO_TRIP: TripConfig = {
   utcOffset: "+09:00",
   phaseStartsAt: "2026-12-18T13:20:00+09:00",
   phaseEndsAt: "2026-12-21T15:50:00+09:00",
-  copy: { homeTitle: "온천과 사구를 만끽하라!", dictionaryTitle: "일본어 사전... 당황하지 말라고!" },
+  copy: {
+    homeTitle: "온천과 사구를 만끽하라!",
+    dictionaryTitle: "일본어 사전... 당황하지 말라고!",
+    utilsIntro: "요나고에서 바가지 쓰거나 당황하지 말라고!",
+    exchangeCardDescription: "엔화 계산 헷갈려서 손해 보지 않도록 원화랑 달러로 똑바로 확인해!",
+    dictionaryCardTitle: "당황 금지! 현지 일본어 사전",
+  },
   // 온천 테마: 김이 오르는 따뜻한 복숭아·살구빛에 온천수의 옅은 청록을 섞는다.
   theme: {
     id: "onsen",

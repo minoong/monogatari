@@ -13,7 +13,9 @@ import { Flip } from "gsap/Flip";
 import { useGSAP } from "@gsap/react";
 import { StateTextRoll } from "@/components/core/state-text-roll";
 
-import { useExchangeRates } from "@/lib/exchange-rates";
+import { useTrip } from "@/components/providers/trip-provider";
+import { CURRENCY_INFO } from "@/lib/currency";
+import { getLocalToKrwRate, useExchangeRates } from "@/lib/exchange-rates";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(Flip, useGSAP);
@@ -22,18 +24,24 @@ if (typeof window !== "undefined") {
 export const ExchangeActivity: React.FC = () => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const { trip } = useTrip();
+  const localCode = trip.currency.code;
+  const local = CURRENCY_INFO[localCode];
+  const localLabel = `${local.label} (${localCode})`;
   const { data: exchangeData, isLoading: loading } = useExchangeRates();
-  const [customRates, setCustomRates] = useState<{ THB?: number; USD?: number }>({});
+  // 직접 입력한 환율은 이 화면에서만 쓴다. "local"은 여행 통화(바트, 엔)의 1단위당 원화.
+  const [customRates, setCustomRates] = useState<{ local?: number; USD?: number }>({});
 
   const rates = {
-    THB: customRates.THB ?? exchangeData?.THB ?? 42.8,
+    local: customRates.local ?? getLocalToKrwRate(exchangeData, localCode),
     USD: customRates.USD ?? exchangeData?.USD ?? 1380,
   };
   const lastUpdatedTime = exchangeData?.lastUpdatedText ?? null;
 
   const [thb, setThb] = useState<number | undefined>(0);
-  const [inputCurrency, setInputCurrency] = useState<"THB" | "KRW">("THB");
-  const [previousInputCurrency, setPreviousInputCurrency] = useState<"THB" | "KRW">("THB");
+  // 입력 통화: "LOCAL"은 여행 통화, "KRW"는 원화
+  const [inputCurrency, setInputCurrency] = useState<"LOCAL" | "KRW">("LOCAL");
+  const [previousInputCurrency, setPreviousInputCurrency] = useState<"LOCAL" | "KRW">("LOCAL");
   const [currencyTransitionKey, setCurrencyTransitionKey] = useState(0);
   const isClearing = useRef(false);
   const [inputKey, setInputKey] = useState(0);
@@ -58,25 +66,25 @@ export const ExchangeActivity: React.FC = () => {
     }
   }, { dependencies: [isFocused] });
 
-  const handleManualSave = (currency: 'THB' | 'USD', valStr: string) => {
+  const handleManualSave = (currency: 'local' | 'USD', valStr: string) => {
     const val = parseFloat(valStr);
     if (!isNaN(val) && val > 0) {
       setCustomRates((prev) => ({ ...prev, [currency]: val }));
-      alert(`${currency} 환율이 수동 변경되었습니다! (${val}원)`);
+      alert(`${currency === "local" ? localCode : currency} 환율이 수동 변경되었습니다! (${val}원)`);
     }
   };
 
   const isKrwInput = inputCurrency === "KRW";
-  const krwValue = isKrwInput ? (thb ?? 0) : (thb ? thb * rates.THB : 0);
-  const thbValue = isKrwInput ? ((thb ?? 0) / rates.THB) : (thb ?? 0);
+  const krwValue = isKrwInput ? (thb ?? 0) : (thb ? thb * rates.local : 0);
+  const localValue = isKrwInput ? ((thb ?? 0) / rates.local) : (thb ?? 0);
   const usdValue = krwValue ? krwValue / rates.USD : 0;
 
   const toggleInputCurrency = () => {
-    const currentKrw = isKrwInput ? (thb ?? 0) : (thb ?? 0) * rates.THB;
-    const nextCurrency = isKrwInput ? "THB" : "KRW";
+    const currentKrw = isKrwInput ? (thb ?? 0) : (thb ?? 0) * rates.local;
+    const nextCurrency = isKrwInput ? "LOCAL" : "KRW";
 
     setPreviousInputCurrency(inputCurrency);
-    setThb(nextCurrency === "KRW" ? Math.round(currentKrw) : Number((currentKrw / rates.THB).toFixed(2)));
+    setThb(nextCurrency === "KRW" ? Math.round(currentKrw) : Number((currentKrw / rates.local).toFixed(local.fractionDigits)));
     setInputCurrency(nextCurrency);
     setCurrencyTransitionKey((key) => key + 1);
   };
@@ -105,7 +113,7 @@ export const ExchangeActivity: React.FC = () => {
         <motion.div layout className={`flex flex-col px-4 pb-4 gap-3 max-w-lg mx-auto w-full ${isFocused ? 'pt-2' : 'pt-6'}`}>
           <LayoutGroup id="exchange-currency-cards">
           
-          {/* 메인 입력 (THB) 카드 */}
+          {/* 메인 입력 (여행 통화) 카드 */}
           <motion.div layout layoutId={`exchange-currency-${inputCurrency}`} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
             <div className="thb-flip-container border border-white/60 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] bg-white/70 dark:bg-black/40 backdrop-blur-xl rounded-3xl overflow-hidden">
               <div className={`relative ${isFocused ? 'py-1.5 px-3' : 'px-4 py-3'}`}>
@@ -128,8 +136,8 @@ export const ExchangeActivity: React.FC = () => {
                       <AnimatePresence initial={false} mode="popLayout">
                         <motion.img
                           key={inputCurrency}
-                          src={isKrwInput ? "https://flagcdn.com/w80/kr.png" : "https://flagcdn.com/w80/th.png"}
-                          alt={isKrwInput ? "South Korea Flag" : "Thailand Flag"}
+                          src={`https://flagcdn.com/w80/${isKrwInput ? "kr" : local.flagCode}.png`}
+                          alt={isKrwInput ? "South Korea Flag" : `${local.label} 국기`}
                           initial={{ opacity: 0, y: 8, scale: 0.82, rotate: -8 }}
                           animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
                           exit={{ opacity: 0, y: -8, scale: 1.12, rotate: 8 }}
@@ -142,13 +150,13 @@ export const ExchangeActivity: React.FC = () => {
                     {/* The disappearing text */}
                     <div className={`thb-flip-text flex justify-center w-full shrink-0 overflow-hidden ${isFocused ? 'absolute opacity-0 h-0 mb-0 pointer-events-none' : 'relative opacity-100 h-[20px] mb-8'}`}>
                       <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                        <StateTextRoll value={isKrwInput ? "대한민국 원 (KRW)" : "태국 바트 (THB)"} previousValue={previousInputCurrency === "KRW" ? "대한민국 원 (KRW)" : "태국 바트 (THB)"} transitionKey={currencyTransitionKey} />
+                        <StateTextRoll value={isKrwInput ? "대한민국 원 (KRW)" : localLabel} previousValue={previousInputCurrency === "KRW" ? "대한민국 원 (KRW)" : localLabel} transitionKey={currencyTransitionKey} />
                       </p>
                     </div>
 
                     {/* The Input Row */}
                     <div className={`thb-flip-target flex items-center ${getFontSize(thb)}`}>
-                      <span className="font-bold text-slate-400 dark:text-slate-600 mr-2">{isKrwInput ? "₩" : "฿"}</span>
+                      <span className="font-bold text-slate-400 dark:text-slate-600 mr-2">{isKrwInput ? "₩" : local.symbol}</span>
                       <NumberFlowInput
                         key={`input-reset-${inputKey}`}
                         ref={inputRef}
@@ -223,12 +231,12 @@ export const ExchangeActivity: React.FC = () => {
           <div className="grid grid-cols-1 gap-3 mt-2">
             
             {/* 입력 통화와 반대편 환산 카드 */}
-            <motion.div layout layoutId={`exchange-currency-${isKrwInput ? "THB" : "KRW"}`} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
+            <motion.div layout layoutId={`exchange-currency-${isKrwInput ? "LOCAL" : "KRW"}`} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
               <Card
                 role="button"
                 tabIndex={0}
                 aria-pressed={isKrwInput}
-                aria-label={isKrwInput ? "태국 바트 입력으로 전환" : "대한민국 원 입력으로 전환"}
+                aria-label={isKrwInput ? `${local.label} 입력으로 전환` : "대한민국 원 입력으로 전환"}
                 onClick={(event) => {
                   if ((event.target as HTMLElement).closest("input, button")) return;
                   toggleInputCurrency();
@@ -248,8 +256,8 @@ export const ExchangeActivity: React.FC = () => {
                         <AnimatePresence initial={false} mode="popLayout">
                           <motion.img
                             key={`result-flag-${inputCurrency}`}
-                            src={isKrwInput ? "https://flagcdn.com/w80/th.png" : "https://flagcdn.com/w80/kr.png"}
-                            alt={isKrwInput ? "Thailand Flag" : "South Korea Flag"}
+                            src={`https://flagcdn.com/w80/${isKrwInput ? local.flagCode : "kr"}.png`}
+                            alt={isKrwInput ? `${local.label} 국기` : "South Korea Flag"}
                             initial={{ opacity: 0, y: 6, scale: 0.85 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -6, scale: 1.1 }}
@@ -259,24 +267,24 @@ export const ExchangeActivity: React.FC = () => {
                         </AnimatePresence>
                       </div>
                       <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                        <StateTextRoll value={isKrwInput ? "태국 바트 (THB)" : "대한민국 원 (KRW)"} previousValue={previousInputCurrency === "KRW" ? "태국 바트 (THB)" : "대한민국 원 (KRW)"} transitionKey={currencyTransitionKey} />
+                        <StateTextRoll value={isKrwInput ? localLabel : "대한민국 원 (KRW)"} previousValue={previousInputCurrency === "KRW" ? localLabel : "대한민국 원 (KRW)"} transitionKey={currencyTransitionKey} />
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
-                      <span>1 THB =</span>
+                      <span>1 {localCode} =</span>
                       <input 
                         className="w-12 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-md px-1.5 py-1 text-right text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 transition-all" 
-                        value={rates.THB}
-                        onChange={(e) => setCustomRates((prev) => ({ ...prev, THB: parseFloat(e.target.value) || 0 }))}
+                        value={rates.local}
+                        onChange={(e) => setCustomRates((prev) => ({ ...prev, local: parseFloat(e.target.value) || 0 }))}
                       />
-                      <Button className="ml-0.5 p-1" isIconOnly onPress={() => handleManualSave('THB', rates.THB.toString())} size="sm" variant="ghost"><Save className="w-3.5 h-3.5"/></Button>
+                      <Button className="ml-0.5 p-1" isIconOnly onPress={() => handleManualSave('local', rates.local.toString())} size="sm" variant="ghost"><Save className="w-3.5 h-3.5"/></Button>
                     </div>
                   </div>
                   <div className="text-3xl font-bold tracking-tight flex items-center justify-end gap-1.5 mt-0.5">
-                    <span className="text-slate-400 dark:text-slate-500 text-2xl font-semibold mt-0.5">{isKrwInput ? "฿" : "₩"}</span>
+                    <span className="text-slate-400 dark:text-slate-500 text-2xl font-semibold mt-0.5">{isKrwInput ? local.symbol : "₩"}</span>
                     <NumberFlow 
-                      value={isKrwInput ? thbValue : krwValue}
-                      format={{ notation: 'standard', minimumFractionDigits: 0, maximumFractionDigits: 2 }}
+                      value={isKrwInput ? localValue : krwValue}
+                      format={{ notation: 'standard', minimumFractionDigits: 0, maximumFractionDigits: isKrwInput ? local.fractionDigits : 2 }}
                       className={`text-slate-800 dark:text-slate-100 ${loading ? "opacity-50" : ""}`}
                     />
                   </div>
@@ -327,7 +335,7 @@ export const ExchangeActivity: React.FC = () => {
                   <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
                 </span>
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-200">실시간 환율</span>
-                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">1 THB = {rates.THB}원</span>
+                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">1 {localCode} = {rates.local}원</span>
               </div>
               {lastUpdatedTime && (
                 <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-500">{lastUpdatedTime}</span>

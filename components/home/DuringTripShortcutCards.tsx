@@ -9,15 +9,13 @@ import { ExpenseShortcutAmounts } from "@/components/expense/animated-expense-am
 import { useTrip } from "@/components/providers/trip-provider";
 import { formatRatePreview, getLocalToKrwRate, useExchangeRates } from "@/lib/exchange-rates";
 import { getExpenseShortcutAmounts, type Expense } from "@/lib/expenses";
-import { UTILITY_CARDS } from "@/lib/utility-cards";
+import { getUtilityCards } from "@/lib/utility-cards";
 
 type DuringTripShortcutCardsProps = {
   onOpenExpense: () => void;
   onOpenExchange: () => void;
 };
 
-const expenseUtilityCard = UTILITY_CARDS.find((card) => card.activity === "ExpenseActivity")!;
-const exchangeUtilityCard = UTILITY_CARDS.find((card) => card.activity === "ExchangeActivity")!;
 
 type ShortcutRowProps = {
   title: string;
@@ -58,6 +56,9 @@ const fetchExpenses = async (tripSlug: string): Promise<Expense[]> => {
 export function DuringTripShortcutCards({ onOpenExpense, onOpenExchange }: DuringTripShortcutCardsProps) {
   const { data: exchangeData } = useExchangeRates();
   const { trip } = useTrip();
+  const utilityCards = getUtilityCards(trip.copy);
+  const expenseUtilityCard = utilityCards.find((card) => card.activity === "ExpenseActivity")!;
+  const exchangeUtilityCard = utilityCards.find((card) => card.activity === "ExchangeActivity")!;
   const { data: expenses = [] } = useQuery({
     queryKey: ["expenses", trip.id],
     queryFn: () => fetchExpenses(trip.slug),
