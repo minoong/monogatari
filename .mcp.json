@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=ksdxhftbiaiunhynfeem&read_only=true"
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com"
+    },
+    "heroui": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@heroui/react-mcp@latest"
+      ],
+      "env": {}
+    }
+  }
+}
