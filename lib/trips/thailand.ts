@@ -20,6 +20,7 @@ export const THAILAND_TRIP: TripConfig = {
   utcOffset: "+07:00",
   phaseStartsAt: "2026-08-29T09:45:00+09:00",
   phaseEndsAt: "2026-09-01T21:40:00+07:00",
+  theme: { id: "bangkok", accent: "#0a84ff", tint: "#ffffff", backdrop: { kind: "none" } },
   currency: { code: "THB", displayUnit: 1 },
   language: { code: "th", label: "태국어", speechLang: "th-TH" },
   expenseCategories: ["food", "transport", "shopping", "stay", "activity", "massage", "convenience", "other"],

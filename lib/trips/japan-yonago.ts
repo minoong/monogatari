@@ -22,6 +22,17 @@ export const JAPAN_YONAGO_TRIP: TripConfig = {
   utcOffset: "+09:00",
   phaseStartsAt: "2026-12-18T13:20:00+09:00",
   phaseEndsAt: "2026-12-21T15:50:00+09:00",
+  // 온천 테마: 김이 오르는 따뜻한 복숭아·살구빛에 온천수의 옅은 청록을 섞는다.
+  theme: {
+    id: "onsen",
+    accent: "#e07a5f",
+    tint: "#fff7f0",
+    backdrop: {
+      kind: "steam",
+      gradient: "radial-gradient(120% 80% at 50% 0%, #ffd9c0 0%, #fbe3d6 38%, rgba(155,220,210,0.35) 70%, rgba(255,255,255,0) 100%)",
+      puffColors: ["#ffc9a8", "#ffe3d2", "#a6e0d6"],
+    },
+  },
   currency: { code: "JPY", displayUnit: 100 },
   language: { code: "ja", label: "일본어", speechLang: "ja-JP" },
   expenseCategories: ["food", "transport", "shopping", "stay", "activity", "onsen", "convenience", "other"],

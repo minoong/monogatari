@@ -77,6 +77,25 @@ export interface TripFlightSeed {
   arrival: TripFlightEndpoint;
 }
 
+/** 여행별 분위기. 색은 `--trip-accent`, `--trip-tint` CSS 변수로 노출된다. */
+export interface TripTheme {
+  id: "bangkok" | "onsen";
+  /** 강조색(hex) */
+  accent: string;
+  /** 아주 연한 배경 틴트(hex) */
+  tint: string;
+  /** 홈 상단 배경. none이면 아무것도 그리지 않는다. */
+  backdrop:
+    | { kind: "none" }
+    | {
+        /** 바탕 그라디언트 위로 흐린 빛 덩어리가 천천히 피어오르는 CSS 전용 효과. WebGL을 쓰지 않는다. */
+        kind: "steam";
+        gradient: string;
+        /** 피어오르는 빛 덩어리 색상(3개 권장) */
+        puffColors: readonly string[];
+      };
+}
+
 export interface TripConfig {
   id: TripId;
   slug: TripSlug;
@@ -96,6 +115,7 @@ export interface TripConfig {
   phaseStartsAt: string;
   /** 여행 단계(during -> after)가 바뀌는 시각. 보통 오는 항공편 출발 시각. */
   phaseEndsAt: string;
+  theme: TripTheme;
   currency: TripCurrency;
   language: TripLanguage;
   /** 지출 등록에서 추천하는 카테고리 (이미 저장된 다른 카테고리도 계속 표시된다). */

@@ -414,3 +414,31 @@ pre {
   opacity: 1;
   transform: scale(1);
 }
+
+
+/* 여행 테마(온천): 흐린 빛 덩어리가 천천히 피어올랐다 사라지는 김 효과 */
+.trip-steam-puff {
+  position: absolute;
+  bottom: -30%;
+  width: 55%;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  filter: blur(18px);
+  opacity: 0;
+  animation: trip-steam-rise 18s ease-in-out infinite;
+}
+
+@keyframes trip-steam-rise {
+  0% { transform: translate3d(0, 20%, 0) scale(0.9); opacity: 0; }
+  25% { opacity: 0.85; }
+  70% { opacity: 0.55; }
+  100% { transform: translate3d(6%, -85%, 0) scale(1.25); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trip-steam-puff {
+    animation: none;
+    opacity: 0.5;
+    transform: translate3d(0, -25%, 0);
+  }
+}

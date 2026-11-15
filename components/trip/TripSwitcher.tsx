@@ -104,13 +104,14 @@ function TripTicket({ trip, selected, now, onSelect }: { trip: TripConfig; selec
       aria-pressed={selected}
       className={cn(
         "group relative flex w-full min-w-0 overflow-hidden rounded-2xl border bg-white text-left shadow-sm transition-[transform,box-shadow] active:scale-[0.985] motion-reduce:transition-none dark:bg-slate-900",
-        selected ? "border-blue-500 ring-2 ring-blue-500/20" : "border-slate-200 dark:border-slate-700",
+        !selected && "border-slate-200 dark:border-slate-700",
       )}
       onClick={onSelect}
+      style={selected ? { borderColor: trip.theme.accent, boxShadow: `0 0 0 3px ${trip.theme.accent}33` } : undefined}
       type="button"
     >
       {/* 왼쪽 스텁: 국기와 도시 */}
-      <div className="flex w-24 shrink-0 flex-col items-center justify-center gap-1 bg-slate-50 px-2 py-5 dark:bg-white/5">
+      <div className="flex w-24 shrink-0 flex-col items-center justify-center gap-1 px-2 py-5" style={{ backgroundColor: trip.theme.tint }}>
         <span aria-hidden className="text-3xl leading-none">{trip.flag}</span>
         <span className="text-sm font-extrabold text-slate-800 dark:text-slate-100">{trip.shortName}</span>
         <span className="text-[10px] font-semibold tracking-wide text-slate-400">{trip.currency.code}</span>
@@ -126,7 +127,7 @@ function TripTicket({ trip, selected, now, onSelect }: { trip: TripConfig; selec
         <div className="flex items-center gap-2">
           <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-extrabold", style.className)}>{style.label}</span>
           {dDay && <span className="text-[11px] font-extrabold tabular-nums text-sky-600 dark:text-sky-300">{dDay}</span>}
-          {selected && <Check aria-label="선택됨" className="ml-auto size-4 shrink-0 text-blue-600" />}
+          {selected && <Check aria-label="선택됨" className="ml-auto size-4 shrink-0" style={{ color: trip.theme.accent }} />}
         </div>
         <p className="truncate text-[15px] font-extrabold tracking-[-0.01em] text-slate-900 dark:text-white">{trip.name}</p>
         <div className="flex min-w-0 flex-col gap-1 text-[11px] font-semibold tabular-nums text-slate-500 dark:text-slate-400">

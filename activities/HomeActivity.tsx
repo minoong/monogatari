@@ -3,6 +3,7 @@ import NumberFlow from "@number-flow/react";
 import { AnimatedContent } from "../components/ui/animated-content";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
+import { TripBackdrop } from "@/components/trip/TripBackdrop";
 import { TripSwitcherButton } from "@/components/trip/TripSwitcher";
 import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { Button, Tabs } from "@heroui/react";
@@ -555,10 +556,11 @@ export const HomeActivity: React.FC = () => {
       <div
         className={
           tripState === "after"
-            ? "flex min-h-full w-full flex-col overflow-hidden pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))]"
-            : "flex min-h-full w-full flex-col overflow-y-auto pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))]"
+            ? "relative flex min-h-full w-full flex-col overflow-hidden pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))]"
+            : "relative flex min-h-full w-full flex-col overflow-y-auto pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))]"
         }
       >
+        <TripBackdrop className="pointer-events-none absolute inset-x-0 top-0 h-72" />
         {tripState !== "after" && <WorldClockCard />}
         <Tabs
           className="w-full"
