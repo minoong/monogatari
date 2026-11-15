@@ -11,6 +11,7 @@ import {
   isDuringTripStayTickerDismissed,
   type DuringTripStayTickerInfo,
 } from "@/lib/accommodations";
+import { useTrip } from "@/components/providers/trip-provider";
 import { formatTripDate, getFirstScheduleOnDate, type ScheduleItem, type TripDate } from "@/lib/schedule";
 import { ArrowRightIcon } from "@/components/ui/arrow-right";
 import { CalendarDaysIcon } from "@/components/ui/calendar-days";
@@ -54,8 +55,8 @@ const TICKER_ICONS = {
   arrow: ArrowRightIcon,
 } satisfies Record<string, AnimatedIconComponent>;
 
-const fetchSchedule = async (): Promise<ScheduleItem[]> => {
-  const response = await fetch("/api/schedule");
+const fetchSchedule = async (tripSlug: string): Promise<ScheduleItem[]> => {
+  const response = await fetch(`/api/schedule?trip=${encodeURIComponent(tripSlug)}`);
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error ?? "일정을 불러오지 못했어요.");
   return payload.data;
@@ -188,9 +189,10 @@ export function DuringTripStayTicker() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const tripDateRef = useRef<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
+  const { trip } = useTrip();
   const { data: scheduleItems = [] } = useQuery({
-    queryKey: ["schedule"],
-    queryFn: fetchSchedule,
+    queryKey: ["schedule", trip.id],
+    queryFn: () => fetchSchedule(trip.slug),
   });
 
   const sync = useCallback(() => {

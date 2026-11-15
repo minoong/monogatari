@@ -14,6 +14,7 @@ import { GalleryThumbnailsIcon } from "@/components/ui/gallery-thumbnails";
 import { LinkIcon } from "@/components/ui/link";
 import { ScanTextIcon } from "@/components/ui/scan-text";
 import { TripDateCalendarSheet } from "@/components/schedule/TripDateCalendarSheet";
+import { useTrip } from "@/components/providers/trip-provider";
 import {
   Drawer,
   DrawerFooter,
@@ -27,8 +28,8 @@ import { DrawerFieldLabel, DrawerIntro, drawerCancelButtonClass, drawerPrimaryBu
 import {
   formatLongTripDate,
   isGoogleMapsUrl,
+  getTripToday,
   normalizeExternalUrl,
-  TRIP_DATES,
   type ScheduleItem,
   type TripDate,
 } from "@/lib/schedule";
@@ -69,8 +70,14 @@ export function ScheduleDrawer({
   item?: ScheduleItem | null;
 }) {
   const client = useQueryClient();
+  const { trip } = useTrip();
   const editing = Boolean(item);
-  const [date, setDate] = useState<TripDate>(item?.schedule_date ?? TRIP_DATES[0]);
+  // 새 일정의 기본 날짜: 여행 기간 중이면 오늘, 아니면 여행 첫날.
+  const [date, setDate] = useState<TripDate>(() => {
+    if (item) return item.schedule_date;
+    const today = getTripToday(trip.timeZone);
+    return today >= trip.startDate && today <= trip.endDate ? today : trip.startDate;
+  });
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [dateInteraction, setDateInteraction] = useState(0);
   const [timeInteraction, setTimeInteraction] = useState(0);
@@ -128,6 +135,7 @@ export function ScheduleDrawer({
         method: item ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          trip: trip.slug,
           schedule_date: date,
           start_time: `${String((Number(hour) % 12) + (amPm === "pm" ? 12 : 0)).padStart(2, "0")}:${minute}`,
           title,
@@ -150,7 +158,7 @@ export function ScheduleDrawer({
       return payload.data as ScheduleItem;
     },
     onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: ["schedule"] });
+      await client.invalidateQueries({ queryKey: ["schedule", trip.id] });
       onOpenChange(false);
     },
     onError: (cause) =>
@@ -260,7 +268,7 @@ export function ScheduleDrawer({
           </DrawerFooter>
         </form>
       </DrawerPopup>
-      <TripDateCalendarSheet open={calendarOpen} value={date} mode="editor" onConfirm={(value) => {
+      <TripDateCalendarSheet open={calendarOpen} value={date} mode="editor" tripStartDate={trip.startDate} tripEndDate={trip.endDate} onConfirm={(value) => {
         if (!value) return;
         if (value !== date) setDateInteraction((count) => count + 1);
         setDate(value);

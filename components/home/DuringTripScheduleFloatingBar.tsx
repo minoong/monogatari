@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
+import { useTrip } from "@/components/providers/trip-provider";
 import { getTodayScheduleFocus, type ScheduleItem } from "@/lib/schedule";
 import { CalendarDaysIcon, type CalendarDaysIconHandle } from "@/components/ui/calendar-days";
 import { cn } from "@/lib/utils";
@@ -11,8 +12,8 @@ import { cn } from "@/lib/utils";
 const ICON_REPLAY_INTERVAL = 3_200;
 const SYNC_INTERVAL_MS = 60_000;
 
-const fetchSchedule = async (): Promise<ScheduleItem[]> => {
-  const response = await fetch("/api/schedule");
+const fetchSchedule = async (tripSlug: string): Promise<ScheduleItem[]> => {
+  const response = await fetch(`/api/schedule?trip=${encodeURIComponent(tripSlug)}`);
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error ?? "일정을 불러오지 못했어요.");
   return payload.data;
@@ -44,19 +45,20 @@ export function DuringTripScheduleFloatingBar({ onOpenSchedule }: { onOpenSchedu
   const animationRef = useRef<CalendarDaysIconHandle>(null);
   const prefersReducedMotion = useReducedMotion();
   const [now, setNow] = useState(() => new Date());
+  const { trip } = useTrip();
   const { data: scheduleItems = [] } = useQuery({
-    queryKey: ["schedule"],
-    queryFn: fetchSchedule,
+    queryKey: ["schedule", trip.id],
+    queryFn: () => fetchSchedule(trip.slug),
   });
 
-  const focus = useMemo(() => getTodayScheduleFocus(scheduleItems, now), [now, scheduleItems]);
+  const focus = useMemo(() => getTodayScheduleFocus(scheduleItems, trip, now), [now, scheduleItems, trip]);
 
   const syncNow = useCallback(() => {
     setNow(new Date());
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Bangkok 시각 기준 일정 포커스는 마운트 직후 1회 동기화가 필요하다.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 여행지 현지 시각 기준 일정 포커스는 마운트 직후 1회 동기화가 필요하다.
     syncNow();
     const interval = window.setInterval(syncNow, SYNC_INTERVAL_MS);
     return () => window.clearInterval(interval);

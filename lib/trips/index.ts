@@ -20,7 +20,7 @@ const addDays = (date: string, days: number) => {
 };
 
 /** 여행 첫날부터 마지막 날까지의 날짜(YYYY-MM-DD) 목록. */
-export const getTripDates = (trip: TripConfig): string[] => {
+export const getTripDates = (trip: Pick<TripConfig, "startDate" | "endDate">): string[] => {
   const dates: string[] = [];
   for (let date = trip.startDate; date <= trip.endDate; date = addDays(date, 1)) {
     dates.push(date);
@@ -28,7 +28,7 @@ export const getTripDates = (trip: TripConfig): string[] => {
   return dates;
 };
 
-export const isTripDate = (trip: TripConfig, value: unknown): value is string =>
+export const isTripDate = (trip: Pick<TripConfig, "startDate" | "endDate">, value: unknown): value is string =>
   typeof value === "string" && value >= trip.startDate && value <= trip.endDate && getTripDates(trip).includes(value);
 
 /**

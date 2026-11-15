@@ -16,7 +16,8 @@ import { Button } from "@heroui/react";
 import { AlertDialog, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { drawerCancelButtonClass, drawerDangerButtonClass } from "@/components/ui/drawer-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatLongTripDate, getBangkokTripDate, getScheduleItemsForDate, getScheduleNow, getScheduleSegmentProgress, hasScheduleTimelineProgress, type ScheduleItem, type TripDate } from "@/lib/schedule";
+import { useTrip } from "@/components/providers/trip-provider";
+import { formatLongTripDate, getTripToday, getScheduleItemsForDate, getScheduleNow, getScheduleSegmentProgress, hasScheduleTimelineProgress, type ScheduleItem, type TripDate } from "@/lib/schedule";
 import { findScrollContainer } from "@/lib/scroll-container";
 import { supabase } from "@/lib/supabase";
 
@@ -32,8 +33,8 @@ const STAGGER_CHILD = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
-const fetchSchedule = async (): Promise<ScheduleItem[]> => {
-  const response = await fetch("/api/schedule");
+const fetchSchedule = async (tripSlug: string): Promise<ScheduleItem[]> => {
+  const response = await fetch(`/api/schedule?trip=${encodeURIComponent(tripSlug)}`);
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error ?? "일정을 불러오지 못했어요.");
   return payload.data;
@@ -41,8 +42,11 @@ const fetchSchedule = async (): Promise<ScheduleItem[]> => {
 
 export const ScheduleActivity: React.FC = () => {
   const client = useQueryClient();
+  const { trip } = useTrip();
   const [progressTick, setProgressTick] = useState(0);
-  const tripToday = useMemo(() => getBangkokTripDate(getScheduleNow()), [progressTick]);
+  // progressTick: 분 단위로 오늘 날짜를 다시 계산한다.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const tripToday = useMemo(() => getTripToday(trip.timeZone, getScheduleNow()), [progressTick, trip.timeZone]);
   const todayRef = useRef(tripToday);
   const prefersReducedMotion = useReducedMotion();
   const [filter, setFilter] = useState<Filter>(null);
@@ -55,7 +59,7 @@ export const ScheduleActivity: React.FC = () => {
   const mainRef = useRef<HTMLElement>(null);
   const activeRef = useRef<HTMLDivElement>(null);
   const didScroll = useRef(false);
-  const { data: items = [], isLoading, isError, refetch } = useQuery({ queryKey: ["schedule"], queryFn: fetchSchedule });
+  const { data: items = [], isLoading, isError, refetch } = useQuery({ queryKey: ["schedule", trip.id], queryFn: () => fetchSchedule(trip.slug) });
   const showInitialLoader = useMinimumInitialLoading(isLoading);
 
   const tabDates = useMemo(() => Array.from(new Set(items.map((item) => item.schedule_date))).sort(), [items]);
@@ -63,7 +67,7 @@ export const ScheduleActivity: React.FC = () => {
 
   useEffect(() => {
     const syncToday = () => {
-      const nextToday = getBangkokTripDate(getScheduleNow());
+      const nextToday = getTripToday(trip.timeZone, getScheduleNow());
       const dayChanged = nextToday !== todayRef.current;
       todayRef.current = nextToday;
       setProgressTick((tick) => tick + 1);
@@ -87,20 +91,20 @@ export const ScheduleActivity: React.FC = () => {
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, []);
+  }, [trip.timeZone]);
 
   useEffect(() => {
-    const channel = supabase.channel("schedule_items_changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "schedule_items" }, () => client.invalidateQueries({ queryKey: ["schedule"] }))
+    const channel = supabase.channel(`schedule_items_changes_${trip.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "schedule_items", filter: `trip_id=eq.${trip.id}` }, () => client.invalidateQueries({ queryKey: ["schedule", trip.id] }))
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [client]);
+  }, [client, trip.id]);
 
   const dayStatus = useMemo(() => {
     if (!activeDate) return null;
-    return getScheduleSegmentProgress(items, activeDate, getScheduleNow());
+    return getScheduleSegmentProgress(items, activeDate, trip, getScheduleNow());
     // progressTick: 분 단위로 구간 진행률 갱신
-  }, [activeDate, items, progressTick]);
+  }, [activeDate, items, progressTick, trip]);
 
   const liveProgress = useMemo(() => {
     if (!dayStatus || !hasScheduleTimelineProgress(dayStatus)) return null;
@@ -134,7 +138,7 @@ export const ScheduleActivity: React.FC = () => {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "일정을 삭제하지 못했어요.");
     },
-    onSuccess: async () => { setDeleting(null); await client.invalidateQueries({ queryKey: ["schedule"] }); },
+    onSuccess: async () => { setDeleting(null); await client.invalidateQueries({ queryKey: ["schedule", trip.id] }); },
   });
   // 날짜를 바꾸면 이전 날짜에서 내려둔 스크롤이 그대로 남아 새 타임라인 중간이 보인다.
   const selectDate = (date: TripDate) => {

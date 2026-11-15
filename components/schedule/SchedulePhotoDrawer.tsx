@@ -18,6 +18,7 @@ import {
 import { NativeHapticSwitch } from "@/components/ui/native-haptic-switch";
 import { WishImagePicker, type WishImageDraft } from "@/components/wish/WishImagePicker";
 import { DrawerFieldLabel, DrawerIntro, drawerCancelButtonClass, drawerPrimaryButtonClass } from "@/components/ui/drawer-form";
+import { useTrip } from "@/components/providers/trip-provider";
 import type { ScheduleItem } from "@/lib/schedule";
 
 const compression = {
@@ -41,6 +42,7 @@ export function SchedulePhotoDrawer({
   item: ScheduleItem | null;
 }) {
   const client = useQueryClient();
+  const { trip } = useTrip();
   const formRef = useRef<HTMLFormElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [images, setImages] = useState<WishImageDraft[]>(() => toDrafts(item));
@@ -118,7 +120,7 @@ export function SchedulePhotoDrawer({
     },
     onSuccess: async () => {
       setSuccess(true);
-      await client.invalidateQueries({ queryKey: ["schedule"] });
+      await client.invalidateQueries({ queryKey: ["schedule", trip.id] });
       closeTimerRef.current = setTimeout(() => onOpenChange(false), 800);
     },
     onError: (cause) =>

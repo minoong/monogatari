@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isGoogleMapsUrl, isScheduleDate, isTimeValue, type ScheduleImage, type ScheduleImageKind, type ScheduleItem } from "@/lib/schedule";
 import { supabase } from "@/lib/supabase";
+import { getTripBySlug, isTripDate, TRIPS, type TripConfig } from "@/lib/trips";
 
 const IMAGE_PATH = /^schedule\/[0-9a-f-]+\.(?:jpe?g|png|webp)$/i;
 type ScheduleImageRow = { id: string; storage_path: string; sort_order: number; kind?: string };
@@ -30,6 +31,8 @@ const withImages = (row: ScheduleRow): ScheduleItem => ({
 
 const parseId = (value: string | null) => value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value) ? value : null;
 const selectSchedule = "*, schedule_images(id, storage_path, sort_order, kind)";
+const getTripById = (id: unknown) => TRIPS.find((trip) => trip.id === id) ?? null;
+const invalidTrip = () => NextResponse.json({ error: "Invalid trip" }, { status: 400 });
 
 const optionalText = (value: unknown, maxLength: number) => {
   if (value === undefined || value === null || value === "") return null;
@@ -44,13 +47,13 @@ function parsePaths(value: unknown) {
   return { data: value as string[] } as const;
 }
 
-function parseInput(body: unknown, mode: "create" | "update") {
+function parseInput(body: unknown, mode: "create" | "update", trip: TripConfig) {
   if (!body || typeof body !== "object") return { error: "Invalid request" } as const;
   const { schedule_date, start_time, title, subtitle, google_maps_url, image_paths, trip_image_paths, trip_memo } = body as Record<string, unknown>;
   const normalizedTitle = typeof title === "string" ? title.trim() : "";
   const normalizedSubtitle = typeof subtitle === "string" && subtitle.trim() ? subtitle.trim() : null;
   const normalizedMap = typeof google_maps_url === "string" && google_maps_url.trim() ? google_maps_url.trim() : null;
-  if (!isScheduleDate(schedule_date) || !isTimeValue(start_time) || !normalizedTitle || normalizedTitle.length > 100) return { error: "Invalid date, time, or title" } as const;
+  if (!isScheduleDate(schedule_date) || !isTripDate(trip, schedule_date) || !isTimeValue(start_time) || !normalizedTitle || normalizedTitle.length > 100) return { error: "Invalid date, time, or title" } as const;
   if (normalizedSubtitle && normalizedSubtitle.length > 500) return { error: "Subtitle is too long" } as const;
   if (normalizedMap && !isGoogleMapsUrl(normalizedMap)) return { error: "Google Maps URL is invalid" } as const;
 
@@ -101,17 +104,22 @@ async function saveImages(scheduleItemId: string, paths: string[], kind: Schedul
   }
 }
 
-export async function GET() {
-  const { data, error } = await supabase.from("schedule_items").select(selectSchedule).order("schedule_date").order("start_time").order("created_at");
+export async function GET(request: Request) {
+  const trip = getTripBySlug(new URL(request.url).searchParams.get("trip") ?? "");
+  if (!trip) return invalidTrip();
+  const { data, error } = await supabase.from("schedule_items").select(selectSchedule).eq("trip_id", trip.id).order("schedule_date").order("start_time").order("created_at");
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ data: (data as ScheduleRow[] ?? []).map(withImages) });
 }
 
 export async function POST(request: Request) {
   try {
-    const parsed = parseInput(await request.json(), "create"); if (!parsed.data) return NextResponse.json({ error: parsed.error }, { status: 400 });
+    const body: unknown = await request.json();
+    const trip = body && typeof body === "object" ? getTripBySlug(String((body as Record<string, unknown>).trip ?? "")) : null;
+    if (!trip) return invalidTrip();
+    const parsed = parseInput(body, "create", trip); if (!parsed.data) return NextResponse.json({ error: parsed.error }, { status: 400 });
     const { coverPaths, tripPaths, ...item } = parsed.data;
-    const { data, error } = await supabase.from("schedule_items").insert(item).select("id").single(); if (error) throw error;
+    const { data, error } = await supabase.from("schedule_items").insert({ ...item, trip_id: trip.id }).select("id").single(); if (error) throw error;
     await saveImages(data.id, coverPaths ?? [], "cover");
     if (tripPaths) await saveImages(data.id, tripPaths, "trip");
     const { data: saved, error: readError } = await supabase.from("schedule_items").select(selectSchedule).eq("id", data.id).single(); if (readError) throw readError;
@@ -122,7 +130,11 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const id = parseId(new URL(request.url).searchParams.get("id")); if (!id) return NextResponse.json({ error: "Invalid schedule id" }, { status: 400 });
-    const parsed = parseInput(await request.json(), "update"); if (!parsed.data) return NextResponse.json({ error: parsed.error }, { status: 400 });
+    // 날짜는 저장된 일정이 속한 여행의 기간으로 검증한다. 요청이 보낸 여행 정보는 신뢰하지 않는다.
+    const current = await supabase.from("schedule_items").select("trip_id").eq("id", id).single();
+    if (current.error) return NextResponse.json({ error: "Schedule not found" }, { status: 404 });
+    const trip = getTripById(current.data.trip_id); if (!trip) return invalidTrip();
+    const parsed = parseInput(await request.json(), "update", trip); if (!parsed.data) return NextResponse.json({ error: parsed.error }, { status: 400 });
     const { coverPaths, tripPaths, ...item } = parsed.data;
     const { error } = await supabase.from("schedule_items").update({ ...item, updated_at: new Date().toISOString() }).eq("id", id); if (error) throw error;
     if (coverPaths) await saveImages(id, coverPaths, "cover");

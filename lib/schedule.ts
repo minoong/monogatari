@@ -1,9 +1,7 @@
-export const TRIP_DATES = ["2026-08-29", "2026-08-30", "2026-08-31", "2026-09-01", "2026-09-02"] as const;
+import { getTripDates, type TripConfig } from "./trips";
 
+/** 여행지 현지 날짜(YYYY-MM-DD). 여행 기간은 trips 설정이 정한다. */
 export type TripDate = string;
-
-export const TRIP_START_DATE: TripDate = TRIP_DATES[0];
-export const TRIP_END_DATE: TripDate = TRIP_DATES[TRIP_DATES.length - 1];
 
 export type ScheduleImageKind = "cover" | "trip";
 
@@ -16,6 +14,7 @@ export interface ScheduleImage {
 
 export interface ScheduleItem {
   id: string;
+  trip_id: string;
   schedule_date: TripDate;
   start_time: string;
   title: string;
@@ -27,9 +26,6 @@ export interface ScheduleItem {
   images: ScheduleImage[];
   tripImages: ScheduleImage[];
 }
-
-export const isTripDate = (value: unknown): value is TripDate =>
-  typeof value === "string" && TRIP_DATES.some((date) => date === value);
 
 export const isScheduleDate = (value: unknown): value is TripDate =>
   typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T12:00:00Z`).getTime());
@@ -56,10 +52,11 @@ export const formatTripDate = (date: TripDate) => {
   return `${Number(month)}/${Number(day)}`;
 };
 
-export const formatLongTripDate = (date: TripDate) => {
-  const local = new Date(`${date}T12:00:00+07:00`);
-  return new Intl.DateTimeFormat("ko-KR", { month: "long", day: "numeric", weekday: "short" }).format(local);
-};
+/** 달력 날짜 그대로 보여준다. UTC 정오로 만들어 실행 환경의 시간대와 무관하게 같은 날짜가 나온다. */
+export const formatLongTripDate = (date: TripDate) =>
+  new Intl.DateTimeFormat("ko-KR", { month: "long", day: "numeric", weekday: "short", timeZone: "UTC" }).format(
+    new Date(`${date}T12:00:00Z`),
+  );
 
 export type ScheduleDateGroup = {
   date: TripDate;
@@ -76,14 +73,14 @@ export const groupScheduleByDate = (items: ScheduleItem[]): ScheduleDateGroup[] 
   }));
 };
 
-export const getTripDayLabel = (date: TripDate) => {
-  const index = TRIP_DATES.findIndex((tripDate) => tripDate === date);
+export const getTripDayLabel = (trip: Pick<TripConfig, "startDate" | "endDate">, date: TripDate) => {
+  const index = getTripDates(trip).indexOf(date);
   return index >= 0 ? `Day ${index + 1}` : formatTripDate(date);
 };
 
-const getBangkokNowParts = (now = new Date()) =>
+const getTripNowParts = (timeZone: string, now = new Date()) =>
   new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Bangkok",
+    timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -94,12 +91,13 @@ const getBangkokNowParts = (now = new Date()) =>
     .formatToParts(now)
     .reduce<Record<string, string>>((result, part) => ({ ...result, [part.type]: part.value }), {});
 
-export const getBangkokTripDate = (now = new Date()) => {
-  const parts = getBangkokNowParts(now);
+/** 여행지 현지 기준 오늘 날짜. */
+export const getTripToday = (timeZone: string, now = new Date()) => {
+  const parts = getTripNowParts(timeZone, now);
   return `${parts.year}-${parts.month}-${parts.day}` as TripDate;
 };
 
-/** 개발 미리보기 시각 (Bangkok). null이면 실제 시각. URL `?scheduleAt=`으로도 지정 가능. */
+/** 개발 미리보기 시각. null이면 실제 시각. URL `?scheduleAt=`으로도 지정 가능. */
 export const SCHEDULE_PREVIEW_AT: string | null = null;
 
 export const getScheduleNow = (): Date => {
@@ -111,8 +109,9 @@ export const getScheduleNow = (): Date => {
   return new Date();
 };
 
-export const getBangkokTime = (now = new Date()) => {
-  const parts = getBangkokNowParts(now);
+/** 여행지 현지 기준 현재 시각(HH:mm). */
+export const getTripClock = (timeZone: string, now = new Date()) => {
+  const parts = getTripNowParts(timeZone, now);
   return `${parts.hour}:${parts.minute}`;
 };
 
@@ -148,13 +147,14 @@ const waitAtFirstSchedule = (dayItems: ScheduleItem[]): ScheduleSegmentProgress 
 export const hasScheduleTimelineProgress = (progress: ScheduleSegmentProgress) =>
   Boolean(progress.activeItemId || progress.waitingAtItemId || progress.pastItemIds.length > 0);
 
-/** Bangkok 기준 해당 날짜에서 현재 시간이 속한 일정 구간과 구간 내 진행률을 반환한다. */
+/** 여행지 현지 기준 해당 날짜에서 현재 시간이 속한 일정 구간과 구간 내 진행률을 반환한다. */
 export const getScheduleSegmentProgress = (
   items: ScheduleItem[],
   date: TripDate,
+  trip: Pick<TripConfig, "timeZone" | "startDate">,
   now = getScheduleNow(),
 ): ScheduleSegmentProgress => {
-  const tripDate = getBangkokTripDate(now);
+  const tripDate = getTripToday(trip.timeZone, now);
   const dayItems = sortDayItems(items, date);
   if (dayItems.length === 0) return { activeItemId: null, segmentProgress: 0, pastItemIds: [] };
 
@@ -167,13 +167,13 @@ export const getScheduleSegmentProgress = (
   }
 
   if (date > tripDate) {
-    if (date === TRIP_START_DATE) {
+    if (date === trip.startDate) {
       return waitAtFirstSchedule(dayItems);
     }
     return { activeItemId: null, segmentProgress: 0, pastItemIds: [] };
   }
 
-  const currentTime = getBangkokTime(now);
+  const currentTime = getTripClock(trip.timeZone, now);
   const currentMinutes = timeToMinutes(currentTime);
   const active = dayItems.filter((item) => item.start_time <= currentTime).at(-1);
   if (!active) {
@@ -213,8 +213,8 @@ export const getFirstScheduleOnDate = (items: ScheduleItem[], date: TripDate) =>
     .filter((item) => item.schedule_date === date)
     .sort((a, b) => a.start_time.localeCompare(b.start_time) || a.created_at.localeCompare(b.created_at))[0] ?? null;
 
-export const getUpcomingSchedulePreview = (items: ScheduleItem[], now = new Date()) => {
-  const parts = getBangkokNowParts(now);
+export const getUpcomingSchedulePreview = (items: ScheduleItem[], timeZone: string, now = new Date()) => {
+  const parts = getTripNowParts(timeZone, now);
   const today = `${parts.year}-${parts.month}-${parts.day}`;
   const currentTime = `${parts.hour}:${parts.minute}`;
 
@@ -244,16 +244,17 @@ export type TodayScheduleFocus = {
   nextIsTomorrow?: boolean;
 };
 
-const getNextTripDate = (date: TripDate): TripDate | null => {
-  const index = TRIP_DATES.findIndex((tripDate) => tripDate === date);
-  if (index < 0 || index >= TRIP_DATES.length - 1) return null;
-  return TRIP_DATES[index + 1];
+const getNextTripDate = (trip: TripConfig, date: TripDate): TripDate | null => {
+  const dates = getTripDates(trip);
+  const index = dates.indexOf(date);
+  if (index < 0 || index >= dates.length - 1) return null;
+  return dates[index + 1];
 };
 
-/** Bangkok 기준 오늘 일정에서 진행 중·다음 일정을 반환한다. */
-export const getTodayScheduleFocus = (items: ScheduleItem[], now = new Date()): TodayScheduleFocus | null => {
-  const date = getBangkokTripDate(now);
-  const currentTime = getBangkokTime(now);
+/** 여행지 현지 기준 오늘 일정에서 진행 중·다음 일정을 반환한다. */
+export const getTodayScheduleFocus = (items: ScheduleItem[], trip: TripConfig, now = new Date()): TodayScheduleFocus | null => {
+  const date = getTripToday(trip.timeZone, now);
+  const currentTime = getTripClock(trip.timeZone, now);
   const todayItems = items
     .filter((item) => item.schedule_date === date)
     .sort((a, b) => a.start_time.localeCompare(b.start_time) || a.created_at.localeCompare(b.created_at));
@@ -265,7 +266,7 @@ export const getTodayScheduleFocus = (items: ScheduleItem[], now = new Date()): 
   let nextIsTomorrow = false;
 
   if (!next) {
-    const nextDate = getNextTripDate(date);
+    const nextDate = getNextTripDate(trip, date);
     if (nextDate) {
       const tomorrowFirst = getFirstScheduleOnDate(items, nextDate);
       if (tomorrowFirst) {

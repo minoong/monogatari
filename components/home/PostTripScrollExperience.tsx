@@ -9,6 +9,7 @@ import { PostTripPrepPhotoParallax } from "@/components/home/PostTripPrepPhotoPa
 import { PostTripScheduleDriftWall } from "@/components/home/PostTripScheduleDriftWall";
 import { PostTripWishPinIndicator } from "@/components/home/PostTripWishPinIndicator";
 import ScrollFloat from "@/components/ScrollFloat";
+import { useTrip } from "@/components/providers/trip-provider";
 import type { ScheduleItem } from "@/lib/schedule";
 import { TRIP_RETURN_FLIGHT } from "@/lib/trip-phase";
 import type { WishItem } from "@/lib/wishes";
@@ -483,8 +484,8 @@ const fetchWishes = async (): Promise<WishItem[]> => {
   return payload.data;
 };
 
-const fetchSchedule = async (): Promise<ScheduleItem[]> => {
-  const response = await fetch("/api/schedule");
+const fetchSchedule = async (tripSlug: string): Promise<ScheduleItem[]> => {
+  const response = await fetch(`/api/schedule?trip=${encodeURIComponent(tripSlug)}`);
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error ?? "일정을 불러오지 못했어요.");
   return payload.data;
@@ -495,10 +496,11 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
   const heroTrackRef = useRef<HTMLDivElement>(null);
   const panelRefs = useRef<(HTMLElement | null)[]>([]);
   const returnFlight = TRIP_RETURN_FLIGHT;
+  const { trip } = useTrip();
   const { data: wishes = [], isFetched: isWishesFetched } = useQuery({ queryKey: ["wishes"], queryFn: fetchWishes });
   const { data: scheduleItems = [], isFetched: isScheduleFetched } = useQuery({
-    queryKey: ["schedule"],
-    queryFn: fetchSchedule,
+    queryKey: ["schedule", trip.id],
+    queryFn: () => fetchSchedule(trip.slug),
   });
   const tripPhotoCount = scheduleItems.reduce((count, item) => count + item.tripImages.length, 0);
   const tripMemoCount = scheduleItems.reduce(

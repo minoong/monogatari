@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Button as HeroButton } from "@heroui/react";
 import { ChevronLeft } from "lucide-react";
@@ -15,16 +15,15 @@ import {
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import {
-  TRIP_END_DATE,
-  TRIP_START_DATE,
-  type TripDate,
-} from "@/lib/schedule";
+import type { TripDate } from "@/lib/schedule";
 
 type TripDateCalendarSheetProps = {
   open: boolean;
   value: TripDate | null;
   mode: "filter" | "editor";
+  /** 여행 첫날과 마지막 날. 달력 범위와 일정 날짜 강조 표시에 쓴다. */
+  tripStartDate: TripDate;
+  tripEndDate: TripDate;
   onConfirm: (value: TripDate | null) => void;
   onOpenChange: (open: boolean) => void;
 };
@@ -55,51 +54,45 @@ const differenceInMonths = (start: Date, end: Date) =>
   end.getMonth() -
   start.getMonth();
 
-const TRIP_MONTH = dateFromValue(TRIP_START_DATE);
-const FIRST_MONTH = addMonths(TRIP_MONTH, -12);
-const LAST_MONTH = addMonths(dateFromValue(TRIP_END_DATE), 12);
-const SCHEDULE_HIGHLIGHT_START = "2026-08-29";
-const SCHEDULE_HIGHLIGHT_END = "2026-09-02";
-const MONTHS = Array.from(
-  { length: differenceInMonths(FIRST_MONTH, LAST_MONTH) + 1 },
-  (_, index) => addMonths(FIRST_MONTH, index),
-);
-
-const getMonthIndex = (value: TripDate | null) => {
-  const month = value ? dateFromValue(value) : TRIP_MONTH;
-  return Math.max(
-    0,
-    Math.min(MONTHS.length - 1, differenceInMonths(FIRST_MONTH, month)),
+/** 여행 기간의 앞뒤 12개월을 보여주는 월 목록과 위치 계산 도구. */
+const createMonthRange = (startDate: TripDate, endDate: TripDate) => {
+  const tripMonth = dateFromValue(startDate);
+  const firstMonth = addMonths(tripMonth, -12);
+  const lastMonth = addMonths(dateFromValue(endDate), 12);
+  const months = Array.from(
+    { length: differenceInMonths(firstMonth, lastMonth) + 1 },
+    (_, index) => addMonths(firstMonth, index),
   );
+  const getMonthIndex = (value: TripDate | null) => {
+    const month = value ? dateFromValue(value) : tripMonth;
+    return Math.max(0, Math.min(months.length - 1, differenceInMonths(firstMonth, month)));
+  };
+  const getMonthSize = (index: number) => {
+    const month = months[index];
+    const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+    const weeks = Math.ceil((month.getDay() + days) / 7);
+    return 152 + weeks * 40;
+  };
+  const getMonthOffset = (index: number) =>
+    months.slice(0, index).reduce((offset, _month, monthIndex) => offset + getMonthSize(monthIndex), 0);
+  return { months, getMonthIndex, getMonthSize, getMonthOffset };
 };
 
-const getMonthSize = (index: number) => {
-  const month = MONTHS[index];
-  const days = new Date(
-    month.getFullYear(),
-    month.getMonth() + 1,
-    0,
-  ).getDate();
-  const weeks = Math.ceil((month.getDay() + days) / 7);
-  return 152 + weeks * 40;
-};
-
-const getMonthOffset = (index: number) =>
-  MONTHS.slice(0, index).reduce(
-    (offset, _month, monthIndex) => offset + getMonthSize(monthIndex),
-    0,
-  );
+type MonthRange = ReturnType<typeof createMonthRange>;
 
 export function TripDateCalendarSheet({
   open,
   value,
   mode,
+  tripStartDate,
+  tripEndDate,
   onConfirm,
   onOpenChange,
 }: TripDateCalendarSheetProps) {
+  const range = useMemo(() => createMonthRange(tripStartDate, tripEndDate), [tripStartDate, tripEndDate]);
   const [draft, setDraft] = useState<TripDate | null>(value);
   const [visibleMonth, setVisibleMonth] = useState(
-    MONTHS[getMonthIndex(value)],
+    range.months[range.getMonthIndex(value)],
   );
   const [todayJumpRequest, setTodayJumpRequest] = useState(0);
   const openerRef = useRef<HTMLElement | null>(null);
@@ -109,7 +102,7 @@ export function TripDateCalendarSheet({
     if (open && !wasOpenRef.current) {
       openerRef.current = document.activeElement as HTMLElement | null;
       setDraft(value);
-      setVisibleMonth(MONTHS[getMonthIndex(value)]);
+      setVisibleMonth(range.months[range.getMonthIndex(value)]);
     }
 
     if (!open && wasOpenRef.current) {
@@ -117,7 +110,7 @@ export function TripDateCalendarSheet({
     }
 
     wasOpenRef.current = open;
-  }, [open, value]);
+  }, [open, value, range]);
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) setDraft(value);
@@ -132,7 +125,7 @@ export function TripDateCalendarSheet({
   const selectToday = () => {
     const today = formatDateValue(new Date());
     setDraft(today);
-    setVisibleMonth(MONTHS[getMonthIndex(today)]);
+    setVisibleMonth(range.months[range.getMonthIndex(today)]);
     setTodayJumpRequest((request) => request + 1);
   };
 
@@ -183,6 +176,9 @@ export function TripDateCalendarSheet({
           {open && (
             <VirtualMonthList
               key={value ?? "all"}
+              range={range}
+              highlightStart={tripStartDate}
+              highlightEnd={tripEndDate}
               selected={draft}
               initialValue={value}
               todayJumpRequest={todayJumpRequest}
@@ -219,12 +215,18 @@ export function TripDateCalendarSheet({
 }
 
 function VirtualMonthList({
+  range,
+  highlightStart,
+  highlightEnd,
   selected,
   initialValue,
   todayJumpRequest,
   onSelect,
   onVisibleMonthChange,
 }: {
+  range: MonthRange;
+  highlightStart: TripDate;
+  highlightEnd: TripDate;
   selected: TripDate | null;
   initialValue: TripDate | null;
   todayJumpRequest: number;
@@ -232,12 +234,13 @@ function VirtualMonthList({
   onVisibleMonthChange: (month: Date) => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { months, getMonthIndex, getMonthSize, getMonthOffset } = range;
   const initialMonthIndex = getMonthIndex(initialValue);
   // TanStack Virtual exposes imperative functions by design; React Compiler
   // correctly leaves this component un-memoized.
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
-    count: MONTHS.length,
+    count: months.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: getMonthSize,
     initialOffset: getMonthOffset(initialMonthIndex),
@@ -256,11 +259,11 @@ function VirtualMonthList({
       align: "start",
       behavior: "smooth",
     });
-  }, [todayJumpRequest, virtualizer]);
+  }, [todayJumpRequest, virtualizer, getMonthIndex]);
 
   useEffect(() => {
-    onVisibleMonthChange(MONTHS[visibleMonthIndex]);
-  }, [onVisibleMonthChange, visibleMonthIndex]);
+    onVisibleMonthChange(months[visibleMonthIndex]);
+  }, [onVisibleMonthChange, visibleMonthIndex, months]);
 
   return (
     <div
@@ -273,7 +276,7 @@ function VirtualMonthList({
         style={{ height: virtualizer.getTotalSize() }}
       >
         {virtualMonths.map((virtualMonth) => {
-          const month = MONTHS[virtualMonth.index];
+          const month = months[virtualMonth.index];
           return (
             <section
               key={`${month.getFullYear()}-${month.getMonth()}`}
@@ -298,8 +301,8 @@ function VirtualMonthList({
                 selected={selected ? dateFromValue(selected) : undefined}
                 modifiers={{
                   tripSchedule: (date) =>
-                    formatDateValue(date) >= SCHEDULE_HIGHLIGHT_START &&
-                    formatDateValue(date) <= SCHEDULE_HIGHLIGHT_END,
+                    formatDateValue(date) >= highlightStart &&
+                    formatDateValue(date) <= highlightEnd,
                 }}
                 modifiersClassNames={{
                   selected:
