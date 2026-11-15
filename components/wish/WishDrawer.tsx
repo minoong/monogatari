@@ -93,7 +93,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   const [title, setTitle] = useState(wish?.title ?? "");
   const [categories, setCategories] = useState<string[]>(wish?.categories ?? []);
   const [categoryDraft, setCategoryDraft] = useState("");
-  const [targetPrice, setTargetPrice] = useState(wish?.target_price_thb?.toString() ?? "");
+  const [targetPrice, setTargetPrice] = useState(wish?.target_price_local?.toString() ?? "");
   const [inputCurrency, setInputCurrency] = useState<InputCurrency>("THB");
   const [vendor, setVendor] = useState(wish?.vendor ?? "");
   const [memo, setMemo] = useState(wish?.memo ?? "");
@@ -117,8 +117,8 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   });
   const numericInput = toFiniteAmount(Number(targetPrice) || 0);
   const isKrwInput = inputCurrency === "KRW";
-  const targetPriceThb = isKrwInput ? convertKrwToThb(numericInput, thbToKrwRate) : numericInput;
-  const targetPriceKrw = convertThbToKrw(targetPriceThb, thbToKrwRate);
+  const targetPriceLocal = isKrwInput ? convertKrwToThb(numericInput, thbToKrwRate) : numericInput;
+  const targetPriceKrw = convertThbToKrw(targetPriceLocal, thbToKrwRate);
 
   const toggleInputCurrency = () => {
     const { nextCurrency, nextAmount } = toggleCurrencyAmount(numericInput, thbToKrwRate, inputCurrency, targetPrice);
@@ -236,7 +236,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
             type,
             title,
             categories: submittedCategories,
-            target_price_thb: isDiningType(type) ? null : (targetPrice.trim() ? targetPriceThb : ""),
+            target_price_local: isDiningType(type) ? null : (targetPrice.trim() ? targetPriceLocal : ""),
             vendor,
             memo,
             locations: submittedLocations,
@@ -410,7 +410,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                 <Label htmlFor="wish-target-price"><DrawerFieldLabel icon={WalletIcon} active={open}>현지 적정 가격</DrawerFieldLabel></Label>
                 <CurrencyAmountField
                   amount={targetPrice}
-                  convertedValue={isKrwInput ? targetPriceThb : targetPriceKrw}
+                  convertedValue={isKrwInput ? targetPriceLocal : targetPriceKrw}
                   currency={inputCurrency}
                   inputId="wish-target-price"
                   name="targetPrice"

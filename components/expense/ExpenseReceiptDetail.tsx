@@ -40,7 +40,7 @@ interface ExpenseReceiptDetailProps {
 
 export function ExpenseReceiptDetail({ expense, categoryColor, onDelete, onEdit }: ExpenseReceiptDetailProps) {
   const categoryLabel = getExpenseCategoryLabel(expense);
-  const users = EXPENSE_PEOPLE.filter((person) => (person === "gahyun" ? expense.share_gahyun_thb > 0 : expense.share_minu_thb > 0));
+  const users = EXPENSE_PEOPLE.filter((person) => (person === "gahyun" ? expense.share_gahyun_local > 0 : expense.share_minu_local > 0));
   const receiptNo = expense.id.slice(0, 8).toUpperCase();
   const effectiveKrw = getEffectiveKrw(expense);
   const [zoomOpen, setZoomOpen] = useState(false);
@@ -96,7 +96,7 @@ export function ExpenseReceiptDetail({ expense, categoryColor, onDelete, onEdit 
             </p>
             <div className="flex shrink-0 flex-col items-end tabular-nums">
               <ExpenseCurrencyAmount currency="KRW" size="inline" value={effectiveKrw} />
-              <ExpenseCurrencyAmount className="mt-0.5" currency="THB" size="inline" value={expense.amount_thb} />
+              <ExpenseCurrencyAmount className="mt-0.5" currency="THB" size="inline" value={expense.amount_local} />
             </div>
           </div>
         </section>
@@ -105,10 +105,10 @@ export function ExpenseReceiptDetail({ expense, categoryColor, onDelete, onEdit 
 
         <section aria-label="금액 요약" className="space-y-1.5 text-right text-[11px] text-slate-500 dark:text-slate-400">
           <div className="tabular-nums">
-            바트 합계 <ExpenseCurrencyAmount className="ml-1" currency="THB" size="inline" value={expense.amount_thb} />
+            바트 합계 <ExpenseCurrencyAmount className="ml-1" currency="THB" size="inline" value={expense.amount_local} />
           </div>
           <p className="tabular-nums">
-            적용 환율 ฿1 = ₩{expense.exchange_rate_krw_per_thb.toLocaleString()}
+            적용 환율 ฿1 = ₩{expense.exchange_rate_krw_per_unit.toLocaleString()}
           </p>
           <div className="text-[12px] font-semibold text-slate-700 tabular-nums dark:text-slate-300">
             원화 합계 <ExpenseCurrencyAmount className="ml-1" currency="KRW" size="inline" value={effectiveKrw} />
@@ -116,7 +116,7 @@ export function ExpenseReceiptDetail({ expense, categoryColor, onDelete, onEdit 
           <p className="text-[10px] tabular-nums">{expense.exchange_rate_date} 기준</p>
         </section>
 
-        <ReceiptTotalBlock krw={effectiveKrw} thb={expense.amount_thb} />
+        <ReceiptTotalBlock krw={effectiveKrw} thb={expense.amount_local} />
 
         <section aria-label="결제 정보" className="space-y-2">
           <ReceiptKeyValue label="결제 수단" value={EXPENSE_PAYMENT_META[expense.payment_method]} />
@@ -319,7 +319,7 @@ function PersonValue({ person }: { person: ExpensePerson }) {
 }
 
 function ReceiptShareRow({ expense, person }: { expense: Expense; person: ExpensePerson }) {
-  const thb = person === "gahyun" ? expense.share_gahyun_thb : expense.share_minu_thb;
+  const thb = person === "gahyun" ? expense.share_gahyun_local : expense.share_minu_local;
   const krw = person === "gahyun" ? expense.share_gahyun_krw : expense.share_minu_krw;
   return (
     <ReceiptKeyValue

@@ -15,11 +15,11 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const IMAGE_PATH = /^expenses\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:jpe?g|png|webp)$/i;
 const SELECT_EXPENSE = "*, expense_images(id, storage_path, sort_order)";
 
-type ExpenseRow = Omit<Expense, "amount_thb" | "exchange_rate_krw_per_thb" | "share_gahyun_thb" | "share_minu_thb" | "images"> & {
-  amount_thb: number | string;
-  exchange_rate_krw_per_thb: number | string;
-  share_gahyun_thb: number | string;
-  share_minu_thb: number | string;
+type ExpenseRow = Omit<Expense, "amount_local" | "exchange_rate_krw_per_unit" | "share_gahyun_local" | "share_minu_local" | "images"> & {
+  amount_local: number | string;
+  exchange_rate_krw_per_unit: number | string;
+  share_gahyun_local: number | string;
+  share_minu_local: number | string;
   expense_images?: { id: string; storage_path: string; sort_order: number }[];
 };
 
@@ -27,10 +27,10 @@ const toExpense = (row: ExpenseRow): Expense => {
   const { expense_images: expenseImages = [], ...data } = row;
   return {
   ...data,
-  amount_thb: Number(data.amount_thb),
-  exchange_rate_krw_per_thb: Number(data.exchange_rate_krw_per_thb),
-  share_gahyun_thb: Number(data.share_gahyun_thb),
-  share_minu_thb: Number(data.share_minu_thb),
+  amount_local: Number(data.amount_local),
+  exchange_rate_krw_per_unit: Number(data.exchange_rate_krw_per_unit),
+  share_gahyun_local: Number(data.share_gahyun_local),
+  share_minu_local: Number(data.share_minu_local),
   images: expenseImages.sort((a, b) => a.sort_order - b.sort_order).map((image): ExpenseImage => ({
     id: image.id,
     path: image.storage_path,
@@ -78,23 +78,23 @@ const parseInput = (body: Record<string, unknown>) => {
   const customCategory = optionalText(body.custom_category, 30);
   const merchant = optionalText(body.merchant, 100);
   const memo = optionalText(body.memo, 500);
-  const amountThb = money(body.amount_thb);
-  const rate = Number(body.exchange_rate_krw_per_thb);
+  const amountLocal = money(body.amount_local);
+  const rate = Number(body.exchange_rate_krw_per_unit);
   const actualKrw = integerMoney(body.actual_amount_krw, true);
   const rateDate = typeof body.exchange_rate_date === "string" && isRealDate(body.exchange_rate_date) ? body.exchange_rate_date : null;
   const payer = body.payer;
   const participants = Array.isArray(body.participants) ? body.participants : null;
-  const shares = body.shares_thb && typeof body.shares_thb === "object" ? body.shares_thb as Record<string, unknown> : null;
-  const gahyunThb = shares ? money(shares.gahyun, true) : undefined;
-  const minuThb = shares ? money(shares.minu, true) : undefined;
+  const shares = body.shares_local && typeof body.shares_local === "object" ? body.shares_local as Record<string, unknown> : null;
+  const gahyunLocal = shares ? money(shares.gahyun, true) : undefined;
+  const minuLocal = shares ? money(shares.minu, true) : undefined;
   const paths = Array.isArray(body.image_paths) ? body.image_paths : null;
 
   if (!purchasedAt || !itemName || customCategory === undefined || merchant === undefined || memo === undefined || !isExpenseCategory(body.category)
-    || !isExpensePaymentMethod(body.payment_method) || amountThb === undefined || !Number.isFinite(rate) || rate <= 0
+    || !isExpensePaymentMethod(body.payment_method) || amountLocal === undefined || !Number.isFinite(rate) || rate <= 0
     || Math.round(rate * 1_000_000) !== rate * 1_000_000 || actualKrw === undefined || !rateDate
     || !isExpensePerson(payer) || !participants || participants.length < 1 || participants.length > 2
     || participants.some((person) => !isExpensePerson(person)) || new Set(participants).size !== participants.length
-    || gahyunThb === undefined || minuThb === undefined || !paths || paths.length > 5
+    || gahyunLocal === undefined || minuLocal === undefined || !paths || paths.length > 5
     || paths.some((path) => typeof path !== "string" || !IMAGE_PATH.test(path)) || new Set(paths).size !== paths.length
     || (body.payment_method !== "card" && actualKrw !== null)
     || (purchasedDate && rateDate && rateDate > bangkokDate(purchasedDate))
@@ -102,25 +102,25 @@ const parseInput = (body: Record<string, unknown>) => {
     return { error: "입력 내용을 확인해 주세요." } as const;
   }
   const selected = new Set<ExpensePerson>(participants as ExpensePerson[]);
-  if ((!selected.has("gahyun") && gahyunThb !== 0) || (!selected.has("minu") && minuThb !== 0)
-    || (selected.has("gahyun") && gahyunThb <= 0) || (selected.has("minu") && minuThb <= 0)
-    || Math.round((gahyunThb + minuThb) * 100) !== Math.round(amountThb * 100)) {
+  if ((!selected.has("gahyun") && gahyunLocal !== 0) || (!selected.has("minu") && minuLocal !== 0)
+    || (selected.has("gahyun") && gahyunLocal <= 0) || (selected.has("minu") && minuLocal <= 0)
+    || Math.round((gahyunLocal + minuLocal) * 100) !== Math.round(amountLocal * 100)) {
     return { error: "비용 사용자별 분담액 합계가 결제 금액과 달라요." } as const;
   }
 
-  const amountKrw = Math.round(amountThb * rate);
+  const amountKrw = Math.round(amountLocal * rate);
   if (amountKrw <= 0) return { error: "환산 금액을 확인해 주세요." } as const;
   const effectiveKrw = actualKrw ?? amountKrw;
-  const krwShares = splitKrwByThb({ effectiveKrw, payer, totalThb: amountThb, gahyunThb });
+  const krwShares = splitKrwByThb({ effectiveKrw, payer, totalLocal: amountLocal, gahyunLocal });
   return {
     data: {
       purchased_at: new Date(purchasedAt).toISOString(), item_name: itemName, category: body.category,
       custom_category: customCategory,
-      merchant, payment_method: body.payment_method, amount_thb: amountThb,
-      exchange_rate_krw_per_thb: rate, exchange_rate_date: rateDate,
+      merchant, payment_method: body.payment_method, amount_local: amountLocal,
+      exchange_rate_krw_per_unit: rate, exchange_rate_date: rateDate,
       exchange_rate_source: body.rate_manually_edited === true ? "manual_override" : "frankfurter",
       amount_krw: amountKrw, actual_amount_krw: actualKrw, payer,
-      share_gahyun_thb: gahyunThb, share_minu_thb: minuThb,
+      share_gahyun_local: gahyunLocal, share_minu_local: minuLocal,
       share_gahyun_krw: krwShares.gahyun, share_minu_krw: krwShares.minu,
       memo, image_paths: paths as string[],
     },

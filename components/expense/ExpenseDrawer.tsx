@@ -104,9 +104,9 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const [customCategoryMode, setCustomCategoryMode] = useState(Boolean(expense?.custom_category));
   const [customCategory, setCustomCategory] = useState(expense?.custom_category ?? "");
   const [categoryDraft, setCategoryDraft] = useState("");
-  const [amount, setAmount] = useState(expense ? String(expense.amount_thb) : "");
+  const [amount, setAmount] = useState(expense ? String(expense.amount_local) : "");
   const [inputCurrency, setInputCurrency] = useState<InputCurrency>("THB");
-  const [rate, setRate] = useState(expense ? String(expense.exchange_rate_krw_per_thb) : "");
+  const [rate, setRate] = useState(expense ? String(expense.exchange_rate_krw_per_unit) : "");
   const [rateDate, setRateDate] = useState(expense?.exchange_rate_date ?? initial.date);
   const [manualRate, setManualRate] = useState(expense?.exchange_rate_source === "manual_override");
   const [payer, setPayer] = useState<ExpensePerson | null>(() => {
@@ -116,11 +116,11 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
     return saved === "gahyun" || saved === "minu" ? saved : null;
   });
   const [participants, setParticipants] = useState<ExpensePerson[]>(() => expense
-    ? EXPENSE_PEOPLE.filter((person) => person === "gahyun" ? expense.share_gahyun_thb > 0 : expense.share_minu_thb > 0)
+    ? EXPENSE_PEOPLE.filter((person) => person === "gahyun" ? expense.share_gahyun_local > 0 : expense.share_minu_local > 0)
     : [...EXPENSE_PEOPLE]);
   const [manualSplit, setManualSplit] = useState(false);
-  const [gahyunShare, setGahyunShare] = useState(expense ? String(expense.share_gahyun_thb) : "");
-  const [minuShare, setMinuShare] = useState(expense ? String(expense.share_minu_thb) : "");
+  const [gahyunShare, setGahyunShare] = useState(expense ? String(expense.share_gahyun_local) : "");
+  const [minuShare, setMinuShare] = useState(expense ? String(expense.share_minu_local) : "");
   const [merchant, setMerchant] = useState(expense?.merchant ?? "");
   const [paymentMethod, setPaymentMethod] = useState<ExpensePaymentMethod>(expense?.payment_method ?? "cash");
   const [actualKrw, setActualKrw] = useState(expense?.actual_amount_krw ? String(expense.actual_amount_krw) : "");
@@ -154,9 +154,9 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const effectiveRate = rate || autoRate;
   const effectiveRateDate = shouldLoadRate && rateQuery.data ? rateQuery.data.observedDate : rateDate;
   const numericRate = Number(effectiveRate) || 0;
-  const numericAmountThb = roundThb(isKrwInput ? convertKrwToThb(numericInput, numericRate) : numericInput);
-  const convertedKrw = convertThbToKrw(numericAmountThb, numericRate);
-  const automaticShares = equalShares(numericAmountThb, participants, payer);
+  const numericAmountLocal = roundThb(isKrwInput ? convertKrwToThb(numericInput, numericRate) : numericInput);
+  const convertedKrw = convertThbToKrw(numericAmountLocal, numericRate);
+  const automaticShares = equalShares(numericAmountLocal, participants, payer);
 
   const toggleInputCurrency = () => {
     const { nextCurrency, nextAmount } = toggleCurrencyAmount(numericInput, numericRate, inputCurrency, amount);
@@ -185,7 +185,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
     setDate(nextDate);
     if (manualRate) setRateDate(nextDate);
     else if (expense && nextDate === initial.date) {
-      setRate(String(expense.exchange_rate_krw_per_thb));
+      setRate(String(expense.exchange_rate_krw_per_unit));
       setRateDate(expense.exchange_rate_date);
     } else setRate("");
   };
@@ -263,11 +263,11 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
             item_name: itemName, category,
             custom_category: customCategoryMode ? customCategory.trim() : null,
             merchant, payment_method: paymentMethod,
-            amount_thb: numericAmountThb, exchange_rate_krw_per_thb: numericRate,
+            amount_local: numericAmountLocal, exchange_rate_krw_per_unit: numericRate,
             exchange_rate_date: effectiveRateDate, rate_manually_edited: manualRate || rateQuery.data?.source === "supabase_fallback",
             actual_amount_krw: paymentMethod === "card" && actualKrw ? Number(actualKrw) : null,
             payer, participants,
-            shares_thb: {
+            shares_local: {
               gahyun: roundThb(Number(effectiveGahyunShare) || 0),
               minu: roundThb(Number(effectiveMinuShare) || 0),
             },
@@ -294,7 +294,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setSubmitError(null);
-    if (!itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmountThb <= 0 || numericRate <= 0 || !payer) {
+    if (!itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmountLocal <= 0 || numericRate <= 0 || !payer) {
       setSubmitError("필수 입력과 결제자를 확인해 주세요.");
       return;
     }
@@ -363,7 +363,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
             <Label htmlFor="expense-amount"><DrawerFieldLabel icon={WalletIcon} active={open}>결제 금액</DrawerFieldLabel></Label>
             <CurrencyAmountField
               amount={amount}
-              convertedValue={isKrwInput ? numericAmountThb : convertedKrw}
+              convertedValue={isKrwInput ? numericAmountLocal : convertedKrw}
               currency={inputCurrency}
               inputId="expense-amount"
               onAmountChange={setAmount}
@@ -410,7 +410,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
         </DrawerPanel>
         <DrawerFooter className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-popover px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pt-4">
           <Button fullWidth className={drawerCancelButtonClass} isDisabled={mutation.isPending || scanning} onPress={() => onOpenChange(false)} size="lg" type="button">취소</Button>
-          <Button fullWidth className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || scanning || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmountThb <= 0 || numericRate <= 0 || !payer} size="lg" type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
+          <Button fullWidth className={drawerPrimaryButtonClass} isDisabled={mutation.isPending || scanning || !itemName.trim() || (customCategoryMode && !customCategory.trim()) || numericAmountLocal <= 0 || numericRate <= 0 || !payer} size="lg" type="submit">{mutation.isPending ? "저장 중…" : expense ? "변경 저장" : "등록하기"}</Button>
         </DrawerFooter>
       </form>
     </DrawerPopup>

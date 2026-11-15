@@ -133,7 +133,7 @@ export const ExpenseActivity: React.FC = () => {
   }, [expenses]);
   const filtered = useMemo(() => expenses.filter((expense) => {
     const date = formatBangkokDateKey(expense.purchased_at);
-    const matchesPerson = person === "all" || expense.payer === person || (person === "gahyun" ? expense.share_gahyun_thb > 0 : expense.share_minu_thb > 0);
+    const matchesPerson = person === "all" || expense.payer === person || (person === "gahyun" ? expense.share_gahyun_local > 0 : expense.share_minu_local > 0);
     const matchesCategory = category === "all" || getExpenseCategoryKey(expense) === category;
     const matchesDate = (!from || date >= from) && (!to || date <= to);
     const matchesSearch = !deferredSearch || [expense.item_name, expense.custom_category, expense.merchant, expense.memo].some((value) => value?.toLocaleLowerCase("ko-KR").includes(deferredSearch));
@@ -214,14 +214,14 @@ function ExpenseDayHeader({ items }: { items: Expense[] }) {
   const summary = summarizeExpenses(items);
   return <header className="expense-day-header sticky z-20 flex min-w-0 items-center justify-between gap-3 bg-white py-2 dark:bg-slate-950">
     <h2 className="min-w-0 truncate text-[13px] font-extrabold tracking-[-0.01em] text-slate-800 dark:text-slate-100">{formatBangkokDate(items[0].purchased_at)}</h2>
-    <ExpenseDaySummary count={summary.count} krw={summary.totalKrw} thb={summary.totalThb} />
+    <ExpenseDaySummary count={summary.count} krw={summary.totalKrw} thb={summary.totalLocal} />
   </header>;
 }
 
 function ExpenseRow({ expense, onEdit, onDelete }: { expense: Expense; onEdit: () => void; onDelete: () => void }) {
   const categoryLabel = getExpenseCategoryLabel(expense);
   const categoryColor = getExpenseCategoryColor(expense);
-  const users = EXPENSE_PEOPLE.filter((person) => person === "gahyun" ? expense.share_gahyun_thb > 0 : expense.share_minu_thb > 0);
+  const users = EXPENSE_PEOPLE.filter((person) => person === "gahyun" ? expense.share_gahyun_local > 0 : expense.share_minu_local > 0);
   const coverImage = expense.images[0];
   return <MorphingDialog transition={{ type: "spring", bounce: 0.08, duration: 0.42 }}>
     <MorphingDialogTrigger ariaLabel={`${expense.item_name} 상세 보기`} className="group relative block w-full max-w-full text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500">
@@ -244,7 +244,7 @@ function ExpenseRow({ expense, onEdit, onDelete }: { expense: Expense; onEdit: (
           </div>
         </div>
         <div className="flex shrink-0 self-stretch flex-col items-end py-0.5 text-right">
-          <ExpenseCurrencyPair krw={getEffectiveKrw(expense)} thb={expense.amount_thb} />
+          <ExpenseCurrencyPair krw={getEffectiveKrw(expense)} thb={expense.amount_local} />
           <div aria-label={`구매 시간 ${formatBangkokTime(expense.purchased_at)}`} className="mt-auto flex items-center gap-1 text-[10px] font-semibold tabular-nums text-slate-400"><ClockIcon aria-hidden="true" size={10} /><span>{formatBangkokTime(expense.purchased_at)}</span></div>
         </div>
       </article>

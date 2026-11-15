@@ -60,7 +60,7 @@ export function ExpenseSummaryHeader({ expenses, scrollRef, scrollTrackingEnable
           </div>
 
           <p className="expense-summary-thb tabular-nums text-slate-500">
-            <AnimatedThb value={summary.totalThb} />
+            <AnimatedThb value={summary.totalLocal} />
           </p>
 
           <div aria-hidden className="expense-summary-perforation">

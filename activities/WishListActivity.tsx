@@ -427,10 +427,10 @@ function WishListItem({
 }) {
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
   const [zoomImageIndex, setZoomImageIndex] = useState(0);
-  const priceKrw = wish.target_price_thb === null
+  const priceKrw = wish.target_price_local === null
     ? null
-    : Math.round(wish.target_price_thb * thbToKrwRate);
-  const hasPrice = wish.target_price_thb !== null && priceKrw !== null;
+    : Math.round(wish.target_price_local * thbToKrwRate);
+  const hasPrice = wish.target_price_local !== null && priceKrw !== null;
   const detailLine = [wish.vendor, wish.memo].filter(Boolean).join(" · ");
 
   const stopTogglePropagation = (event: React.SyntheticEvent) => {
@@ -510,7 +510,7 @@ function WishListItem({
 
             {hasPrice && (
               <div className="flex shrink-0 self-stretch flex-col items-end py-0.5 text-right">
-                <ExpenseCurrencyPair krw={priceKrw} thb={wish.target_price_thb!} />
+                <ExpenseCurrencyPair krw={priceKrw} thb={wish.target_price_local!} />
               </div>
             )}
           </MorphingDialogTrigger>
@@ -553,7 +553,7 @@ function WishListItem({
                     krw={priceKrw}
                     mainSize="hero"
                     secondarySize="secondary"
-                    thb={wish.target_price_thb!}
+                    thb={wish.target_price_local!}
                   />
                 </div>
               )}

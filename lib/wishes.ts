@@ -7,7 +7,7 @@ export interface WishItem {
   type: WishType;
   title: string;
   categories: string[];
-  target_price_thb: number | null;
+  target_price_local: number | null;
   memo: string | null;
   vendor: string | null;
   images: WishImage[];

@@ -43,7 +43,7 @@ export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
   return <div className="flex w-full min-w-0 max-w-full flex-col gap-4 overflow-x-hidden">
     <section className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800">
       <Metric currency="KRW" label="총 지출" value={formatKrw(summary.totalKrw)} />
-      <Metric currency="THB" label="태국 바트" value={formatThb(summary.totalThb)} />
+      <Metric currency="THB" label="태국 바트" value={formatThb(summary.totalLocal)} />
       <Metric label="지출 건수" value={`${summary.count}건`} />
       <Metric currency="KRW" label="일평균" value={formatKrw(average)} />
     </section>

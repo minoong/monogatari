@@ -76,15 +76,15 @@ export interface Expense {
   custom_category: string | null;
   merchant: string | null;
   payment_method: ExpensePaymentMethod;
-  amount_thb: number;
-  exchange_rate_krw_per_thb: number;
+  amount_local: number;
+  exchange_rate_krw_per_unit: number;
   exchange_rate_date: string;
   exchange_rate_source: ExpenseRateSource;
   amount_krw: number;
   actual_amount_krw: number | null;
   payer: ExpensePerson;
-  share_gahyun_thb: number;
-  share_minu_thb: number;
+  share_gahyun_local: number;
+  share_minu_local: number;
   share_gahyun_krw: number;
   share_minu_krw: number;
   memo: string | null;
@@ -100,14 +100,14 @@ export interface ExpenseInput {
   custom_category: string | null;
   merchant: string | null;
   payment_method: ExpensePaymentMethod;
-  amount_thb: number;
-  exchange_rate_krw_per_thb: number;
+  amount_local: number;
+  exchange_rate_krw_per_unit: number;
   exchange_rate_date: string;
   rate_manually_edited: boolean;
   actual_amount_krw: number | null;
   payer: ExpensePerson;
   participants: ExpensePerson[];
-  shares_thb: Record<ExpensePerson, number>;
+  shares_local: Record<ExpensePerson, number>;
   memo: string | null;
   image_paths: string[];
 }
@@ -185,7 +185,7 @@ export const formatBangkokTime = (value: string) =>
 const sum = (values: number[]) => values.reduce((total, value) => total + value, 0);
 
 export const summarizeExpenses = (expenses: Expense[]) => {
-  const totalThb = sum(expenses.map((expense) => expense.amount_thb));
+  const totalLocal = sum(expenses.map((expense) => expense.amount_local));
   const totalKrw = sum(expenses.map(getEffectiveKrw));
   const paid = {
     gahyun: sum(expenses.filter((expense) => expense.payer === "gahyun").map(getEffectiveKrw)),
@@ -202,7 +202,7 @@ export const summarizeExpenses = (expenses: Expense[]) => {
       ? { from: "minu" as const, to: "gahyun" as const, amount: Math.round(gahyunBalance) }
       : { from: "gahyun" as const, to: "minu" as const, amount: Math.round(-gahyunBalance) };
 
-  return { totalThb, totalKrw, count: expenses.length, paid, used, settlement };
+  return { totalLocal, totalKrw, count: expenses.length, paid, used, settlement };
 };
 
 /** 여행 중 숏컷용 — Bangkok 기준 오늘·총 지출 원화 */
@@ -244,17 +244,17 @@ export const aggregateExpensesByCategory = (expenses: Expense[]) => {
 export const splitKrwByThb = ({
   effectiveKrw,
   payer,
-  totalThb,
-  gahyunThb,
+  totalLocal,
+  gahyunLocal,
 }: {
   effectiveKrw: number;
   payer: ExpensePerson;
-  totalThb: number;
-  gahyunThb: number;
+  totalLocal: number;
+  gahyunLocal: number;
 }) => {
-  if (gahyunThb <= 0) return { gahyun: 0, minu: effectiveKrw };
-  if (gahyunThb >= totalThb) return { gahyun: effectiveKrw, minu: 0 };
-  const exactGahyun = (effectiveKrw * gahyunThb) / totalThb;
+  if (gahyunLocal <= 0) return { gahyun: 0, minu: effectiveKrw };
+  if (gahyunLocal >= totalLocal) return { gahyun: effectiveKrw, minu: 0 };
+  const exactGahyun = (effectiveKrw * gahyunLocal) / totalLocal;
   const floorGahyun = Math.floor(exactGahyun);
   const floorMinu = Math.floor(effectiveKrw - exactGahyun);
   const remaining = effectiveKrw - floorGahyun - floorMinu;

@@ -55,11 +55,11 @@ const wishInputValue = (body: Record<string, unknown>) => {
   const type = body.type; const title = optionalText(body.title, 100); const categories = categoriesValue(body.categories);
   const locations = locationsValue(body.locations); const links = linksValue(body.links); const memo = optionalText(body.memo, 500);
   const vendor = optionalText(body.vendor, 100); const imagePaths = imagePathsValue(body.image_paths);
-  const targetPrice = body.target_price_thb === "" || body.target_price_thb == null ? null : Number(body.target_price_thb);
+  const targetPrice = body.target_price_local === "" || body.target_price_local == null ? null : Number(body.target_price_local);
   if (!isWishType(type) || !title) return { error: "type and title are required" };
   if ([categories, locations, links, imagePaths].some((value) => value === undefined) || [memo, vendor].some((value) => value === undefined)) return { error: "Invalid field" };
   if (!Number.isFinite(targetPrice) && targetPrice !== null || targetPrice !== null && targetPrice < 0) return { error: "Invalid target price" };
-  return { data: { type, title, categories, target_price_thb: targetPrice, memo, vendor, locations, links, image_paths: imagePaths! } };
+  return { data: { type, title, categories, target_price_local: targetPrice, memo, vendor, locations, links, image_paths: imagePaths! } };
 };
 
 const selectWish = "*, wish_images(id, storage_path, sort_order)";
