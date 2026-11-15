@@ -4,6 +4,7 @@ import {
   type ExpenseCategory,
   type ExpensePaymentMethod,
 } from "@/lib/expenses";
+import { CURRENCY_INFO, type LocalCurrencyCode } from "@/lib/currency";
 import { type InputCurrency } from "@/lib/exchange-rates";
 
 export const RECEIPT_SCAN_MODEL = "qwen/qwen3.6-27b";
@@ -38,14 +39,18 @@ const optionalText = (value: unknown, max: number) => {
   return trimmed.length <= max ? trimmed : undefined;
 };
 
-const bangkokToday = () => new Intl.DateTimeFormat("en-CA", {
-  timeZone: "Asia/Bangkok",
+const tripToday = (timeZone: string) => new Intl.DateTimeFormat("en-CA", {
+  timeZone,
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
 }).format(new Date());
 
-export const parseReceiptScanJson = (raw: string): { data?: ReceiptScanResult; error?: string } => {
+/** AI가 읽은 영수증 JSON을 검증한다. 통화는 여행 통화(localCurrency)와 원화만 허용한다. */
+export const parseReceiptScanJson = (
+  raw: string,
+  trip: { timeZone: string; localCurrency: LocalCurrencyCode },
+): { data?: ReceiptScanResult; error?: string } => {
   const stripped = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
   const jsonText = stripped.includes("{")
     ? stripped.slice(stripped.indexOf("{"), stripped.lastIndexOf("}") + 1)
@@ -68,14 +73,17 @@ export const parseReceiptScanJson = (raw: string): { data?: ReceiptScanResult; e
     return { error: "영수증 내용을 확인해 주세요." };
   }
 
-  const currency = body.currency === "THB" || body.currency === "KRW" ? body.currency : body.currency == null || body.currency === "" ? null : undefined;
+  const allowedCurrencies: string[] = [trip.localCurrency, "KRW"];
+  const currency: InputCurrency | null | undefined = typeof body.currency === "string" && allowedCurrencies.includes(body.currency)
+    ? (body.currency as InputCurrency)
+    : body.currency == null || body.currency === "" ? null : undefined;
   if (currency === undefined) return { error: "영수증 내용을 확인해 주세요." };
 
   let amount: number | null = null;
   if (body.amount != null && body.amount !== "") {
     const number = typeof body.amount === "number" || typeof body.amount === "string" ? Number(body.amount) : Number.NaN;
     if (!Number.isFinite(number) || number <= 0) return { error: "영수증 내용을 확인해 주세요." };
-    amount = currency === "KRW" ? Math.round(number) : Number(number.toFixed(2));
+    amount = Number(number.toFixed(CURRENCY_INFO[currency ?? trip.localCurrency].fractionDigits));
     if (amount <= 0) return { error: "영수증 내용을 확인해 주세요." };
   }
 
@@ -84,7 +92,7 @@ export const parseReceiptScanJson = (raw: string): { data?: ReceiptScanResult; e
     if (typeof body.purchased_date !== "string" || !isRealDate(body.purchased_date)) {
       return { error: "영수증 내용을 확인해 주세요." };
     }
-    if (body.purchased_date <= bangkokToday()) purchasedDate = body.purchased_date;
+    if (body.purchased_date <= tripToday(trip.timeZone)) purchasedDate = body.purchased_date;
   }
 
   const purchasedTime = typeof body.purchased_time === "string" && TIME_PATTERN.test(body.purchased_time)

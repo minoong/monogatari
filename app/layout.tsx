@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { IosStatusBarScrollToTop } from "@/components/ios-status-bar-scroll-to-top";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { TripProvider } from "@/components/providers/trip-provider";
 
 const koreanAirSans = localFont({
   src: [
@@ -78,9 +79,11 @@ export default function RootLayout({
         />
         <div className="fixed inset-0 isolate flex flex-col overflow-hidden overscroll-none bg-white">
           <QueryProvider>
-            {children}
-            <IosStatusBarScrollToTop />
-            <Toaster position="top-center" />
+            <TripProvider>
+              {children}
+              <IosStatusBarScrollToTop />
+              <Toaster position="top-center" />
+            </TripProvider>
           </QueryProvider>
         </div>
       </body>

@@ -9,6 +9,7 @@ import { Button, Label, Radio, RadioGroup, Tabs } from "@heroui/react";
 import { Filter, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { ExpenseDrawer } from "@/components/expense/ExpenseDrawer";
+import { useTrip } from "@/components/providers/trip-provider";
 import { ExpenseChartSkeleton, ExpenseListSkeleton } from "@/components/expense/ExpenseListSkeleton";
 import { ExpenseCurrencyPair, ExpenseDaySummary } from "@/components/expense/currency-display";
 import { ExpenseReceiptDetail } from "@/components/expense/ExpenseReceiptDetail";
@@ -53,9 +54,9 @@ import {
   EXPENSE_CATEGORY_META,
   EXPENSE_PEOPLE,
   EXPENSE_PERSON_META,
-  formatBangkokDate,
-  formatBangkokDateKey,
-  formatBangkokTime,
+  formatTripDate,
+  formatTripDateKey,
+  formatTripTime,
   getEffectiveKrw,
   getExpenseCategoryColor,
   getExpenseCategoryKey,
@@ -74,8 +75,8 @@ const ExpenseCharts = dynamic(() => import("@/components/expense/ExpenseCharts")
   loading: () => <ExpenseChartSkeleton />,
 });
 
-const fetchExpenses = async (): Promise<Expense[]> => {
-  const response = await fetch("/api/expenses");
+const fetchExpenses = async (tripSlug: string): Promise<Expense[]> => {
+  const response = await fetch(`/api/expenses?trip=${encodeURIComponent(tripSlug)}`);
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error ?? "지출 내역을 불러오지 못했어요.");
   return payload.data;
@@ -87,6 +88,7 @@ type CategoryOption = { value: CategoryFilter; label: string };
 
 export const ExpenseActivity: React.FC = () => {
   const queryClient = useQueryClient();
+  const { trip } = useTrip();
   const [selectedTab, setSelectedTab] = useState("list");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerSession, setDrawerSession] = useState(0);
@@ -100,7 +102,7 @@ export const ExpenseActivity: React.FC = () => {
   const [to, setTo] = useState("");
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search.trim().toLocaleLowerCase("ko-KR"));
-  const query = useQuery({ queryKey: ["expenses"], queryFn: fetchExpenses });
+  const query = useQuery({ queryKey: ["expenses", trip.id], queryFn: () => fetchExpenses(trip.slug) });
   const listScrollRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   const enterDone = useStackflowEnterDone(mainRef);
@@ -117,11 +119,11 @@ export const ExpenseActivity: React.FC = () => {
   }, [enterDone]);
 
   useEffect(() => {
-    const channel = supabase.channel("expenses_changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "expenses" }, () => queryClient.invalidateQueries({ queryKey: ["expenses"] }))
+    const channel = supabase.channel(`expenses_changes_${trip.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "expenses", filter: `trip_id=eq.${trip.id}` }, () => queryClient.invalidateQueries({ queryKey: ["expenses", trip.id] }))
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
-  }, [queryClient]);
+  }, [queryClient, trip.id]);
 
   const expenses = useMemo(() => query.data ?? [], [query.data]);
   const categoryOptions = useMemo<CategoryOption[]>(() => {
@@ -132,21 +134,21 @@ export const ExpenseActivity: React.FC = () => {
     ];
   }, [expenses]);
   const filtered = useMemo(() => expenses.filter((expense) => {
-    const date = formatBangkokDateKey(expense.purchased_at);
+    const date = formatTripDateKey(expense.purchased_at, trip.timeZone);
     const matchesPerson = person === "all" || expense.payer === person || (person === "gahyun" ? expense.share_gahyun_local > 0 : expense.share_minu_local > 0);
     const matchesCategory = category === "all" || getExpenseCategoryKey(expense) === category;
     const matchesDate = (!from || date >= from) && (!to || date <= to);
     const matchesSearch = !deferredSearch || [expense.item_name, expense.custom_category, expense.merchant, expense.memo].some((value) => value?.toLocaleLowerCase("ko-KR").includes(deferredSearch));
     return matchesPerson && matchesCategory && matchesDate && matchesSearch;
-  }), [category, deferredSearch, expenses, from, person, to]);
+  }), [category, deferredSearch, expenses, from, person, to, trip.timeZone]);
   const grouped = useMemo(() => {
     const groups = new Map<string, Expense[]>();
     filtered.forEach((expense) => {
-      const key = formatBangkokDateKey(expense.purchased_at);
+      const key = formatTripDateKey(expense.purchased_at, trip.timeZone);
       groups.set(key, [...(groups.get(key) ?? []), expense]);
     });
     return Array.from(groups, ([date, items]) => ({ date, items }));
-  }, [filtered]);
+  }, [filtered, trip.timeZone]);
   const filtersActive = person !== "all" || category !== "all" || Boolean(from) || Boolean(to);
   const initialError = query.isError && !query.data;
   const showListContent = !query.isLoading && enterDone;
@@ -160,7 +162,7 @@ export const ExpenseActivity: React.FC = () => {
     },
     onSuccess: async (data) => {
       setDeleting(null);
-      await queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      await queryClient.invalidateQueries({ queryKey: ["expenses", trip.id] });
       toast.success(data.storage_cleanup_warning ? "내역은 삭제했지만 일부 사진 정리가 지연되고 있어요." : "지출을 삭제했어요.");
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : "잠시 후 다시 시도해 주세요."),
@@ -211,14 +213,16 @@ export const ExpenseActivity: React.FC = () => {
 };
 
 function ExpenseDayHeader({ items }: { items: Expense[] }) {
+  const { trip } = useTrip();
   const summary = summarizeExpenses(items);
   return <header className="expense-day-header sticky z-20 flex min-w-0 items-center justify-between gap-3 bg-white py-2 dark:bg-slate-950">
-    <h2 className="min-w-0 truncate text-[13px] font-extrabold tracking-[-0.01em] text-slate-800 dark:text-slate-100">{formatBangkokDate(items[0].purchased_at)}</h2>
-    <ExpenseDaySummary count={summary.count} krw={summary.totalKrw} thb={summary.totalLocal} />
+    <h2 className="min-w-0 truncate text-[13px] font-extrabold tracking-[-0.01em] text-slate-800 dark:text-slate-100">{formatTripDate(items[0].purchased_at, trip.timeZone)}</h2>
+    <ExpenseDaySummary count={summary.count} krw={summary.totalKrw} local={summary.totalLocal} />
   </header>;
 }
 
 function ExpenseRow({ expense, onEdit, onDelete }: { expense: Expense; onEdit: () => void; onDelete: () => void }) {
+  const { trip } = useTrip();
   const categoryLabel = getExpenseCategoryLabel(expense);
   const categoryColor = getExpenseCategoryColor(expense);
   const users = EXPENSE_PEOPLE.filter((person) => person === "gahyun" ? expense.share_gahyun_local > 0 : expense.share_minu_local > 0);
@@ -244,8 +248,8 @@ function ExpenseRow({ expense, onEdit, onDelete }: { expense: Expense; onEdit: (
           </div>
         </div>
         <div className="flex shrink-0 self-stretch flex-col items-end py-0.5 text-right">
-          <ExpenseCurrencyPair krw={getEffectiveKrw(expense)} thb={expense.amount_local} />
-          <div aria-label={`구매 시간 ${formatBangkokTime(expense.purchased_at)}`} className="mt-auto flex items-center gap-1 text-[10px] font-semibold tabular-nums text-slate-400"><ClockIcon aria-hidden="true" size={10} /><span>{formatBangkokTime(expense.purchased_at)}</span></div>
+          <ExpenseCurrencyPair krw={getEffectiveKrw(expense)} local={expense.amount_local} />
+          <div aria-label={`구매 시간 ${formatTripTime(expense.purchased_at, trip.timeZone)}`} className="mt-auto flex items-center gap-1 text-[10px] font-semibold tabular-nums text-slate-400"><ClockIcon aria-hidden="true" size={10} /><span>{formatTripTime(expense.purchased_at, trip.timeZone)}</span></div>
         </div>
       </article>
     </MorphingDialogTrigger>
@@ -300,5 +304,5 @@ function FilterPersonAvatar({ person, compact = false }: { person: ExpensePerson
   return <Avatar className={compact ? "!size-4 shrink-0 ring-1 ring-white dark:ring-slate-900" : undefined} color={person === "gahyun" ? "accent" : "success"} size="sm"><AvatarImage alt="" src={meta.image} /><AvatarFallback>{person === "gahyun" ? "G" : "M"}</AvatarFallback></Avatar>;
 }
 
-function EmptyState({ onCreate }: { onCreate: () => void }) { return <div className="flex min-h-72 flex-col items-center justify-center text-center"><div className="grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-900"><ReceiptIcon animateOnMount aria-hidden="true" size={24} /></div><h2 className="mt-4 font-extrabold">아직 지출 내역이 없어요</h2><p className="mt-1 text-sm text-slate-500">태국에서 쓴 첫 비용을 기록해 보세요.</p><Button className="mt-5" onPress={onCreate}><Plus className="size-4" />첫 지출 등록</Button></div>; }
+function EmptyState({ onCreate }: { onCreate: () => void }) { const { trip } = useTrip(); return <div className="flex min-h-72 flex-col items-center justify-center text-center"><div className="grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-900"><ReceiptIcon animateOnMount aria-hidden="true" size={24} /></div><h2 className="mt-4 font-extrabold">아직 지출 내역이 없어요</h2><p className="mt-1 text-sm text-slate-500">{trip.shortName}에서 쓴 첫 비용을 기록해 보세요.</p><Button className="mt-5" onPress={onCreate}><Plus className="size-4" />첫 지출 등록</Button></div>; }
 function LoadError({ onRetry }: { onRetry: () => void }) { return <div className="mx-auto flex min-h-80 max-w-lg flex-col items-center justify-center px-4 text-center"><p className="font-extrabold">지출 내역을 불러오지 못했어요.</p><p className="mt-1 text-sm text-slate-500">기존 데이터가 있다면 화면에 유지되고 다시 연결을 시도할 수 있어요.</p><Button className="mt-4" onPress={onRetry} variant="secondary"><RefreshCw className="size-4" />다시 시도</Button></div>; }

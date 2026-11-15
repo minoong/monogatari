@@ -1,3 +1,5 @@
+import type { ExpenseCategory, ExpensePaymentMethod } from "../expenses";
+
 /** DB `trips.id`와 반드시 같은 값이어야 한다. (supabase/migrations/20261115100000_create_trips.sql) */
 export type TripId = string;
 
@@ -7,10 +9,6 @@ export type TripCurrencyCode = "THB" | "JPY";
 
 export interface TripCurrency {
   code: TripCurrencyCode;
-  label: string;
-  symbol: string;
-  /** 소수점 자릿수. 엔화는 0, 바트는 2. */
-  fractionDigits: number;
   /** 환율을 화면에 보여줄 때의 기준 수량. 엔화는 보통 100엔당 원화로 본다. 내부 계산은 항상 1단위 기준. */
   displayUnit: number;
 }
@@ -100,6 +98,9 @@ export interface TripConfig {
   phaseEndsAt: string;
   currency: TripCurrency;
   language: TripLanguage;
+  /** 지출 등록에서 추천하는 카테고리 (이미 저장된 다른 카테고리도 계속 표시된다). */
+  expenseCategories: readonly ExpenseCategory[];
+  paymentMethods: readonly ExpensePaymentMethod[];
   weatherPlaces: readonly TripWeatherPlace[];
   /** 가는 편과 오는 편. 항공편이 없는 여행은 빈 배열. */
   flights: readonly TripFlightSeed[];

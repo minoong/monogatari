@@ -1,21 +1,28 @@
 import { NextResponse } from "next/server";
-import { EXPENSE_CATEGORY_META, EXPENSE_CATEGORIES } from "@/lib/expenses";
+import { EXPENSE_CATEGORY_META } from "@/lib/expenses";
 import { isAcceptedImageFile, MAX_IMAGE_FILE_SIZE, MAX_IMAGE_FILE_SIZE_MB, normalizeImageMimeType } from "@/lib/image-upload";
 import { parseReceiptScanJson, RECEIPT_SCAN_MODEL } from "@/lib/receipt-scan";
+import { getTripBySlug, type TripConfig } from "@/lib/trips";
 
-const CATEGORY_GUIDE = EXPENSE_CATEGORIES
-  .map((value) => `${value}=${EXPENSE_CATEGORY_META[value].label}`)
-  .join(", ");
+const RECEIPT_HINTS = {
+  THB: { description: "a Thai receipt (THB, baht, ฿, VAT, PromptPay/QR)", currency: "THB", hint: "Use THB for Thai baht receipts." },
+  JPY: { description: "a Japanese receipt (JPY, yen, 円, ¥, 税込, 消費税, レシート, PayPay/IC card)", currency: "JPY", hint: "Use JPY for Japanese yen receipts. Prefer the tax-included (税込) total." },
+} as const;
 
-const RECEIPT_PROMPT = `Extract expense fields from this receipt or payment slip photo.
-The photo may be a Thai receipt (THB, baht, ฿, VAT, PromptPay/QR) or a Korean card slip (KRW, 원, ₩).
+const buildReceiptPrompt = (trip: TripConfig) => {
+  const hints = RECEIPT_HINTS[trip.currency.code];
+  const categoryGuide = trip.expenseCategories
+    .map((value) => `${value}=${EXPENSE_CATEGORY_META[value].label}`)
+    .join(", ");
+  return `Extract expense fields from this receipt or payment slip photo.
+The photo may be ${hints.description} or a Korean card slip (KRW, 원, ₩).
 Reply with a JSON object only, using exactly these keys:
 {
   "is_receipt": true,
   "item_name": "short Korean name of the main purchase, max 100 chars, or null",
   "merchant": "store name, max 100 chars, or null",
   "amount": 0,
-  "currency": "THB",
+  "currency": "${hints.currency}",
   "purchased_date": "YYYY-MM-DD",
   "purchased_time": "HH:mm",
   "payment_method": "cash",
@@ -25,13 +32,14 @@ Reply with a JSON object only, using exactly these keys:
 }
 Rules:
 - amount is the grand total as a number, or null. Prefer the final payable total, not a subtotal.
-- currency is "THB" or "KRW" or null. Use THB for Thai baht receipts.
+- currency is "${hints.currency}" or "KRW" or null. ${hints.hint}
 - purchased_date is "YYYY-MM-DD" or null. purchased_time is "HH:mm" 24-hour or null.
-- payment_method is "cash" | "card" | "qr" | "other" or null.
-- category is one of ${CATEGORY_GUIDE}, or null.
+- payment_method is ${trip.paymentMethods.map((method) => `"${method}"`).join(" | ")} or null.
+- category is one of ${categoryGuide}, or null.
 - custom_category is a Korean tag max 30 chars only if no preset fits, otherwise null.
 - If the image is not a receipt or invoice, set is_receipt to false and all other fields to null.
 - Do not invent amounts, dates, or merchants that are not visible.`;
+};
 
 const toDataUrl = async (file: File, mimeType: string) => {
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -49,7 +57,7 @@ const groqContent = (payload: unknown) => {
   return (payload as { choices?: { message?: { content?: unknown } }[] }).choices?.[0]?.message?.content;
 };
 
-const requestGroq = async (apiKey: string, imageUrl: string, jsonMode: boolean) => {
+const requestGroq = async (apiKey: string, imageUrl: string, jsonMode: boolean, prompt: string) => {
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -67,7 +75,7 @@ const requestGroq = async (apiKey: string, imageUrl: string, jsonMode: boolean) 
         {
           role: "user",
           content: [
-            { type: "text", text: RECEIPT_PROMPT },
+            { type: "text", text: prompt },
             { type: "image_url", image_url: { url: imageUrl } },
           ],
         },
@@ -85,16 +93,20 @@ export async function POST(request: Request) {
   }
 
   try {
-    const file = (await request.formData()).get("image");
+    const formData = await request.formData();
+    const trip = getTripBySlug(String(formData.get("trip") ?? ""));
+    if (!trip) return NextResponse.json({ error: "여행 정보를 확인해 주세요." }, { status: 400 });
+    const prompt = buildReceiptPrompt(trip);
+    const file = formData.get("image");
     if (!(file instanceof File)) return NextResponse.json({ error: "사진이 필요해요." }, { status: 400 });
     if (!isAcceptedImageFile(file)) return NextResponse.json({ error: "JPG, PNG, WEBP, HEIC 사진만 인식할 수 있어요." }, { status: 400 });
     if (file.size > MAX_IMAGE_FILE_SIZE) return NextResponse.json({ error: `사진은 장당 ${MAX_IMAGE_FILE_SIZE_MB}MB 이하여야 해요.` }, { status: 400 });
 
     const mimeType = normalizeImageMimeType(file);
     const imageUrl = await toDataUrl(file, mimeType);
-    let { response: groqResponse, payload: groqPayload } = await requestGroq(apiKey, imageUrl, true);
+    let { response: groqResponse, payload: groqPayload } = await requestGroq(apiKey, imageUrl, true, prompt);
     if (!groqResponse.ok && groqErrorCode(groqPayload) === "json_validate_failed") {
-      ({ response: groqResponse, payload: groqPayload } = await requestGroq(apiKey, imageUrl, false));
+      ({ response: groqResponse, payload: groqPayload } = await requestGroq(apiKey, imageUrl, false, prompt));
     }
     if (!groqResponse.ok) {
       console.error("Groq receipt scan failed", groqResponse.status, groqPayload);
@@ -106,7 +118,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "영수증을 읽지 못했어요." }, { status: 502 });
     }
 
-    const parsed = parseReceiptScanJson(content);
+    const parsed = parseReceiptScanJson(content, { timeZone: trip.timeZone, localCurrency: trip.currency.code });
     if (parsed.error || !parsed.data) {
       return NextResponse.json({ error: parsed.error ?? "영수증을 읽지 못했어요." }, { status: 422 });
     }

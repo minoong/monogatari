@@ -5,14 +5,8 @@ import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { useId, useState, type FocusEvent } from "react";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CURRENCY_INFO, type CurrencyCode, type LocalCurrencyCode } from "@/lib/currency";
 import { cn } from "@/lib/utils";
-
-export type CurrencyCode = "THB" | "KRW";
-
-const CURRENCY_META: Record<CurrencyCode, { label: string; symbol: string; flagCode: string; fractionDigits: number }> = {
-  THB: { label: "태국 바트", symbol: "฿", flagCode: "th", fractionDigits: 2 },
-  KRW: { label: "대한민국 원", symbol: "₩", flagCode: "kr", fractionDigits: 0 },
-};
 
 const SPRING = { type: "spring", stiffness: 420, damping: 34, mass: 0.9 } as const;
 
@@ -20,6 +14,8 @@ interface CurrencyAmountFieldProps {
   amount: string;
   convertedValue: number;
   currency: CurrencyCode;
+  /** 입력 통화와 짝이 되는 여행지 현지 통화. 입력이 KRW일 때 환산 대상이 된다. */
+  localCurrency: LocalCurrencyCode;
   inputId: string;
   name?: string;
   onAmountChange: (value: string) => void;
@@ -32,6 +28,7 @@ export function CurrencyAmountField({
   amount,
   convertedValue,
   currency,
+  localCurrency,
   inputId,
   name,
   onAmountChange,
@@ -43,9 +40,10 @@ export function CurrencyAmountField({
   const reduceMotion = useReducedMotion();
   const [turns, setTurns] = useState(0);
 
-  const target: CurrencyCode = currency === "THB" ? "KRW" : "THB";
-  const source = CURRENCY_META[currency];
-  const converted = CURRENCY_META[target];
+  const target: CurrencyCode = currency === "KRW" ? localCurrency : "KRW";
+  const source = CURRENCY_INFO[currency];
+  const converted = CURRENCY_INFO[target];
+  const stepValue = source.fractionDigits === 0 ? "1" : String(10 ** -source.fractionDigits);
 
   const handleToggle = () => {
     triggerHapticFeedback(12);
@@ -64,13 +62,13 @@ export function CurrencyAmountField({
               id={inputId}
               aria-label={`${source.label} 금액`}
               className="w-full min-w-0 bg-transparent text-right text-lg font-bold tabular-nums outline-none placeholder:font-semibold placeholder:text-slate-300"
-              inputMode={currency === "KRW" ? "numeric" : "decimal"}
-              min={currency === "KRW" ? "1" : "0.01"}
+              inputMode={source.fractionDigits === 0 ? "numeric" : "decimal"}
+              min={stepValue}
               name={name}
               onChange={(event) => onAmountChange(event.target.value)}
               onFocus={onInputFocus}
               placeholder="0"
-              step={currency === "KRW" ? "1" : "0.01"}
+              step={stepValue}
               type="number"
               value={amount}
             />
@@ -129,7 +127,7 @@ function CurrencyBadge({
   muted?: boolean;
   reduceMotion: boolean | null;
 }) {
-  const meta = CURRENCY_META[code];
+  const meta = CURRENCY_INFO[code];
 
   return (
     <motion.span

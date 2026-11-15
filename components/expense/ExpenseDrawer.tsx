@@ -8,20 +8,25 @@ import { useEffect, useRef, useState, type FocusEvent, type FormEvent } from "re
 import { toast } from "sonner";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import {
-  convertKrwToThb,
-  convertThbToKrw,
+  convertKrwToLocal,
+  convertLocalToKrw,
   toggleCurrencyAmount,
   toFiniteAmount,
   formatCurrencyInputAmount,
   type InputCurrency,
 } from "@/lib/exchange-rates";
+import { useTrip } from "@/components/providers/trip-provider";
+import { CURRENCY_INFO, type LocalCurrencyCode } from "@/lib/currency";
 import { type ReceiptScanResult } from "@/lib/receipt-scan";
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_META,
   EXPENSE_PEOPLE,
   EXPENSE_PERSON_META,
-  roundThb,
+  getCurrencyStep,
+  getTripLocalParts,
+  roundLocalAmount,
+  tripLocalToIso,
   type ExchangeRateSnapshot,
   type Expense,
   type ExpenseCategory,
@@ -52,22 +57,6 @@ import { ExpenseReceiptPicker, type ReceiptScanStatus } from "@/components/expen
 import { ExpensePaymentMethodField } from "@/components/expense/ExpensePaymentMethodField";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 
-const nowInBangkok = () => {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", hourCycle: "h23",
-  }).formatToParts(new Date()).reduce<Record<string, string>>((result, part) => ({ ...result, [part.type]: part.value }), {});
-  return { date: `${parts.year}-${parts.month}-${parts.day}`, time: `${parts.hour}:${parts.minute}` };
-};
-
-const bangkokParts = (value: string) => {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", hourCycle: "h23",
-  }).formatToParts(new Date(value)).reduce<Record<string, string>>((result, part) => ({ ...result, [part.type]: part.value }), {});
-  return { date: `${parts.year}-${parts.month}-${parts.day}`, time: `${parts.hour}:${parts.minute}` };
-};
-
 const formatDateInputValue = (value: string) => {
   const [year, month, day] = value.split("-").map(Number);
   return year && month && day ? `${year}. ${month}. ${day}.` : "날짜 선택";
@@ -78,25 +67,30 @@ const formatTimeInputValue = (value: string) => {
   return hour && minute ? `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}` : "시간 선택";
 };
 
-const fetchRate = async (date: string): Promise<ExchangeRateSnapshot> => {
-  const response = await fetch(`/api/exchange-rates?date=${date}`);
+const fetchRate = async (tripSlug: string, date: string): Promise<ExchangeRateSnapshot> => {
+  const response = await fetch(`/api/exchange-rates?trip=${encodeURIComponent(tripSlug)}&date=${date}`);
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error ?? "환율을 불러오지 못했어요.");
   return payload.data;
 };
 
-const equalShares = (amount: number, participants: ExpensePerson[], payer: ExpensePerson | null) => {
-  const total = roundThb(amount);
+/** 통화의 최소 단위(바트 0.01, 엔 1)로 나눠 반반으로 쪼갠다. 남는 1단위는 결제자 몫. */
+const equalShares = (amount: number, participants: ExpensePerson[], payer: ExpensePerson | null, currency: LocalCurrencyCode) => {
+  const total = roundLocalAmount(amount, currency);
   if (participants.length === 1) return { gahyun: participants[0] === "gahyun" ? total : 0, minu: participants[0] === "minu" ? total : 0 };
-  const cents = Math.round(total * 100);
-  const lower = Math.floor(cents / 2) / 100;
-  const upper = (cents - Math.floor(cents / 2)) / 100;
+  const scale = 10 ** CURRENCY_INFO[currency].fractionDigits;
+  const cents = Math.round(total * scale);
+  const lower = Math.floor(cents / 2) / scale;
+  const upper = (cents - Math.floor(cents / 2)) / scale;
   return payer === "gahyun" ? { gahyun: upper, minu: lower } : { gahyun: lower, minu: upper };
 };
 
 export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; expense: Expense | null; onOpenChange: (open: boolean) => void }) {
   const queryClient = useQueryClient();
-  const initial = expense ? bangkokParts(expense.purchased_at) : nowInBangkok();
+  const { trip } = useTrip();
+  const localCurrency = trip.currency.code;
+  const localInfo = CURRENCY_INFO[localCurrency];
+  const initial = expense ? getTripLocalParts(expense.purchased_at, trip.timeZone) : getTripLocalParts(new Date(), trip.timeZone);
   const [date, setDate] = useState(initial.date);
   const [time, setTime] = useState(initial.time);
   const [itemName, setItemName] = useState(expense?.item_name ?? "");
@@ -105,7 +99,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const [customCategory, setCustomCategory] = useState(expense?.custom_category ?? "");
   const [categoryDraft, setCategoryDraft] = useState("");
   const [amount, setAmount] = useState(expense ? String(expense.amount_local) : "");
-  const [inputCurrency, setInputCurrency] = useState<InputCurrency>("THB");
+  const [inputCurrency, setInputCurrency] = useState<InputCurrency>(localCurrency);
   const [rate, setRate] = useState(expense ? String(expense.exchange_rate_krw_per_unit) : "");
   const [rateDate, setRateDate] = useState(expense?.exchange_rate_date ?? initial.date);
   const [manualRate, setManualRate] = useState(expense?.exchange_rate_source === "manual_override");
@@ -141,8 +135,8 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const isKrwInput = inputCurrency === "KRW";
   const shouldLoadRate = open && !manualRate && (!expense || date !== initial.date);
   const rateQuery = useQuery({
-    queryKey: ["expense-exchange-rate", date],
-    queryFn: () => fetchRate(date),
+    queryKey: ["expense-exchange-rate", trip.id, date],
+    queryFn: () => fetchRate(trip.slug, date),
     enabled: shouldLoadRate,
     staleTime: 1000 * 60 * 60 * 6,
     retry: 1,
@@ -154,19 +148,19 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
   const effectiveRate = rate || autoRate;
   const effectiveRateDate = shouldLoadRate && rateQuery.data ? rateQuery.data.observedDate : rateDate;
   const numericRate = Number(effectiveRate) || 0;
-  const numericAmountLocal = roundThb(isKrwInput ? convertKrwToThb(numericInput, numericRate) : numericInput);
-  const convertedKrw = convertThbToKrw(numericAmountLocal, numericRate);
-  const automaticShares = equalShares(numericAmountLocal, participants, payer);
+  const numericAmountLocal = roundLocalAmount(isKrwInput ? convertKrwToLocal(numericInput, numericRate, localCurrency) : numericInput, localCurrency);
+  const convertedKrw = convertLocalToKrw(numericAmountLocal, numericRate);
+  const automaticShares = equalShares(numericAmountLocal, participants, payer, localCurrency);
 
   const toggleInputCurrency = () => {
-    const { nextCurrency, nextAmount } = toggleCurrencyAmount(numericInput, numericRate, inputCurrency, amount);
+    const { nextCurrency, nextAmount } = toggleCurrencyAmount(numericInput, numericRate, inputCurrency, localCurrency, amount);
     setAmount(nextAmount);
     setInputCurrency(nextCurrency);
   };
   const effectiveGahyunShare = manualSplit ? gahyunShare : String(automaticShares.gahyun);
   const effectiveMinuShare = manualSplit ? minuShare : String(automaticShares.minu);
   const selectedCategoryTag = customCategoryMode ? customCategory : EXPENSE_CATEGORY_META[category].label;
-  const categorySuggestions = EXPENSE_CATEGORIES.map((value) => EXPENSE_CATEGORY_META[value].label);
+  const categorySuggestions = trip.expenseCategories.map((value) => EXPENSE_CATEGORY_META[value].label);
   const visibleCategorySuggestions = selectedCategoryTag && !categorySuggestions.includes(selectedCategoryTag)
     ? [selectedCategoryTag, ...categorySuggestions]
     : categorySuggestions;
@@ -221,6 +215,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
       const compressed = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: "image/jpeg" });
       const formData = new FormData();
       formData.append("image", compressed);
+      formData.append("trip", trip.slug);
       const response = await fetch("/api/expenses/receipt-scan", { method: "POST", body: formData });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "영수증을 스캔하지 못했어요.");
@@ -259,7 +254,8 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
           method: expense ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            purchased_at: new Date(`${date}T${time}:00+07:00`).toISOString(),
+            trip: trip.slug,
+            purchased_at: tripLocalToIso(date, time, trip.utcOffset),
             item_name: itemName, category,
             custom_category: customCategoryMode ? customCategory.trim() : null,
             merchant, payment_method: paymentMethod,
@@ -268,8 +264,8 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
             actual_amount_krw: paymentMethod === "card" && actualKrw ? Number(actualKrw) : null,
             payer, participants,
             shares_local: {
-              gahyun: roundThb(Number(effectiveGahyunShare) || 0),
-              minu: roundThb(Number(effectiveMinuShare) || 0),
+              gahyun: roundLocalAmount(Number(effectiveGahyunShare) || 0, localCurrency),
+              minu: roundLocalAmount(Number(effectiveMinuShare) || 0, localCurrency),
             },
             memo, image_paths: imagePaths,
           }),
@@ -284,7 +280,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
     },
     onSuccess: async () => {
       if (payer) localStorage.setItem("expense-last-payer", payer);
-      await queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      await queryClient.invalidateQueries({ queryKey: ["expenses", trip.id] });
       toast.success(expense ? "지출을 수정했어요." : "지출을 등록했어요.");
       onOpenChange(false);
     },
@@ -320,7 +316,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
               <Label htmlFor="expense-date"><DrawerFieldLabel icon={CalendarDaysIcon} active={open}>날짜</DrawerFieldLabel></Label>
               <div className="relative flex h-11 w-full min-w-0 items-center rounded-xl border border-slate-200 bg-white px-3 pr-9 text-[15px] tabular-nums transition-colors focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-900">
                 <span aria-hidden="true" className="min-w-0 truncate">{formatDateInputValue(date)}</span>
-                <input id="expense-date" aria-label="구매 날짜" className="absolute inset-0 z-10 block size-full min-w-0 cursor-pointer opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:m-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" max={nowInBangkok().date} onChange={(event) => applyPurchasedDate(event.target.value)} type="date" value={date} />
+                <input id="expense-date" aria-label="구매 날짜" className="absolute inset-0 z-10 block size-full min-w-0 cursor-pointer opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:m-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" max={getTripLocalParts(new Date(), trip.timeZone).date} onChange={(event) => applyPurchasedDate(event.target.value)} type="date" value={date} />
                 <CalendarDaysIcon aria-hidden="true" className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={17} />
               </div>
             </Field>
@@ -334,7 +330,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
             </Field>
           </section>
 
-          <TextField isRequired value={itemName} onChange={setItemName}><Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>품목</DrawerFieldLabel></Label><Input maxLength={100} onFocus={handleFieldFocus} placeholder="예: 팟타이, 볼트 택시" /><FieldError /></TextField>
+          <TextField isRequired value={itemName} onChange={setItemName}><Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>품목</DrawerFieldLabel></Label><Input maxLength={100} onFocus={handleFieldFocus} placeholder={trip.countryCode === "JP" ? "예: 가이센동, 택시" : "예: 팟타이, 볼트 택시"} /><FieldError /></TextField>
 
           <div className="flex flex-col gap-2">
             <div className="flex items-end gap-2">
@@ -365,6 +361,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
               amount={amount}
               convertedValue={isKrwInput ? numericAmountLocal : convertedKrw}
               currency={inputCurrency}
+              localCurrency={localCurrency}
               inputId="expense-amount"
               onAmountChange={setAmount}
               onInputFocus={handleFieldFocus}
@@ -375,7 +372,7 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
 
           <Field className="gap-2"><Label htmlFor="expense-rate"><DrawerFieldLabel icon={WalletIcon} active={open}>구매일 환율</DrawerFieldLabel></Label>
             <InputGroup className="h-12 min-w-0 rounded-2xl">
-              <InputGroupAddon><InputGroupText className="text-sm font-semibold">฿1 =</InputGroupText></InputGroupAddon>
+              <InputGroupAddon><InputGroupText className="text-sm font-semibold">{localInfo.symbol}1 =</InputGroupText></InputGroupAddon>
               <InputGroupInput id="expense-rate" aria-label="원화 환율" className="min-w-0 text-right font-bold tabular-nums" inputMode="decimal" onChange={(event) => { setRate(event.target.value); setRateDate(date); setManualRate(true); }} onFocus={handleFieldFocus} step="0.000001" style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }} type="number" value={effectiveRate} />
               <InputGroupAddon align="inline-end"><InputGroupText className="text-xs font-semibold">KRW</InputGroupText></InputGroupAddon>
             </InputGroup>
@@ -386,9 +383,9 @@ export function ExpenseDrawer({ open, expense, onOpenChange }: { open: boolean; 
           <RadioGroup className="gap-2" name="expense-payer" value={payer ?? undefined} onChange={(value) => setPayer(value as ExpensePerson)}><Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>결제자</DrawerFieldLabel></Label><div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">{EXPENSE_PEOPLE.map((person) => <Radio key={person} value={person}><Radio.Content><Radio.Control><Radio.Indicator /></Radio.Control><PersonAvatar person={person} /><span>{EXPENSE_PERSON_META[person].label}</span></Radio.Content></Radio>)}</div></RadioGroup>
           <CheckboxGroup className="gap-2" name="expense-participants" value={participants} onChange={(value) => { const next = value as ExpensePerson[]; if (next.length) setParticipants(next); }}><Label><DrawerFieldLabel icon={UsersRoundIcon} active={open}>비용 사용자</DrawerFieldLabel></Label><div className="flex flex-row flex-wrap gap-x-6 gap-y-3 pt-1">{EXPENSE_PEOPLE.map((person) => <Checkbox key={person} value={person}><Checkbox.Content><Checkbox.Control><Checkbox.Indicator /></Checkbox.Control><PersonAvatar person={person} /><span>{EXPENSE_PERSON_META[person].label}</span></Checkbox.Content></Checkbox>)}</div></CheckboxGroup>
 
-          {participants.length === 2 && <Field className="gap-2"><DrawerFieldLabel icon={UsersRoundIcon} active={open}>공동 지출 분담</DrawerFieldLabel><div className="flex items-center justify-between gap-2"><p className="min-w-0 text-xs text-slate-500">기본은 반반, 1사땅 잔액은 결제자 몫이에요.</p><Button className="min-h-11 shrink-0 whitespace-nowrap px-1 text-[11px] font-bold text-blue-600" onPress={() => { if (!manualSplit) { setGahyunShare(String(automaticShares.gahyun)); setMinuShare(String(automaticShares.minu)); } setManualSplit((value) => !value); }} size="sm" type="button" variant="ghost">{manualSplit ? "반반으로" : "직접 나누기"}</Button></div>{manualSplit && <div className="mt-2 grid grid-cols-2 gap-2"><ShareInput label="가현쨩" value={gahyunShare} onChange={setGahyunShare} /><ShareInput label="미누쿤" value={minuShare} onChange={setMinuShare} /></div>}</Field>}
+          {participants.length === 2 && <Field className="gap-2"><DrawerFieldLabel icon={UsersRoundIcon} active={open}>공동 지출 분담</DrawerFieldLabel><div className="flex items-center justify-between gap-2"><p className="min-w-0 text-xs text-slate-500">기본은 반반, 1사땅 잔액은 결제자 몫이에요.</p><Button className="min-h-11 shrink-0 whitespace-nowrap px-1 text-[11px] font-bold text-blue-600" onPress={() => { if (!manualSplit) { setGahyunShare(String(automaticShares.gahyun)); setMinuShare(String(automaticShares.minu)); } setManualSplit((value) => !value); }} size="sm" type="button" variant="ghost">{manualSplit ? "반반으로" : "직접 나누기"}</Button></div>{manualSplit && <div className="mt-2 grid grid-cols-2 gap-2"><ShareInput currency={localCurrency} label="가현쨩" value={gahyunShare} onChange={setGahyunShare} /><ShareInput currency={localCurrency} label="미누쿤" value={minuShare} onChange={setMinuShare} /></div>}</Field>}
 
-          <TextField value={merchant} onChange={setMerchant}><Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>상호 · 매장 (선택)</DrawerFieldLabel></Label><Input maxLength={100} onFocus={handleFieldFocus} placeholder="예: Terminal 21" /></TextField>
+          <TextField value={merchant} onChange={setMerchant}><Label><DrawerFieldLabel icon={ScanTextIcon} active={open}>상호 · 매장 (선택)</DrawerFieldLabel></Label><Input maxLength={100} onFocus={handleFieldFocus} placeholder={trip.countryCode === "JP" ? "예: 세븐일레븐" : "예: Terminal 21"} /></TextField>
           <ExpensePaymentMethodField open={open} value={paymentMethod} onChange={setPaymentMethod} />
           {paymentMethod === "card" && <TextField value={actualKrw} onChange={setActualKrw}><Label><DrawerFieldLabel icon={WalletIcon} active={open}>실제 카드 청구 원화 (선택)</DrawerFieldLabel></Label><Input inputMode="numeric" min="1" onFocus={handleFieldFocus} placeholder="승인 내역 확인 후 입력" type="number" /></TextField>}
 
@@ -422,6 +419,6 @@ function PersonAvatar({ person }: { person: ExpensePerson }) {
   return <Avatar color={person === "gahyun" ? "accent" : "success"} size="sm"><AvatarImage alt="" src={meta.image} /><AvatarFallback>{person === "gahyun" ? "G" : "M"}</AvatarFallback></Avatar>;
 }
 
-function ShareInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return <label className="rounded-xl border border-slate-200 p-3 text-xs font-semibold dark:border-slate-700"><span>{label}</span><span className="mt-2 flex items-center gap-1"><span>฿</span><input aria-label={`${label} 분담액`} className="min-w-0 flex-1 bg-transparent text-right text-base font-bold outline-none" inputMode="decimal" min="0" onChange={(event) => onChange(event.target.value)} onFocus={scrollDrawerFieldIntoView} step="0.01" type="number" value={value} /></span></label>;
+function ShareInput({ label, value, currency, onChange }: { label: string; value: string; currency: LocalCurrencyCode; onChange: (value: string) => void }) {
+  return <label className="rounded-xl border border-slate-200 p-3 text-xs font-semibold dark:border-slate-700"><span>{label}</span><span className="mt-2 flex items-center gap-1"><span>{CURRENCY_INFO[currency].symbol}</span><input aria-label={`${label} 분담액`} className="min-w-0 flex-1 bg-transparent text-right text-base font-bold outline-none" inputMode={CURRENCY_INFO[currency].fractionDigits === 0 ? "numeric" : "decimal"} min="0" onChange={(event) => onChange(event.target.value)} onFocus={scrollDrawerFieldIntoView} step={getCurrencyStep(currency)} type="number" value={value} /></span></label>;
 }

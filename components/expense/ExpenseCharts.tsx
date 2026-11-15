@@ -19,19 +19,23 @@ import {
   aggregateExpensesByCategory,
   aggregateExpensesByDate,
   formatKrw,
-  formatThb,
+  formatLocalAmount,
   summarizeExpenses,
   type Expense,
 } from "@/lib/expenses";
 import { Button } from "@heroui/react";
+import { useTrip } from "@/components/providers/trip-provider";
+import { CURRENCY_INFO } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
   const reduceMotion = useReducedMotion();
+  const { trip } = useTrip();
+  const localCurrency = trip.currency.code;
   const [personMode, setPersonMode] = useState<"used" | "paid">("used");
   const summary = useMemo(() => summarizeExpenses(expenses), [expenses]);
-  const daily = useMemo(() => aggregateExpensesByDate(expenses), [expenses]);
+  const daily = useMemo(() => aggregateExpensesByDate(expenses, trip.timeZone), [expenses, trip.timeZone]);
   const categories = useMemo(() => aggregateExpensesByCategory(expenses), [expenses]);
   const people = [
     { name: "가현쨩", value: summary[personMode].gahyun },
@@ -42,14 +46,14 @@ export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
 
   return <div className="flex w-full min-w-0 max-w-full flex-col gap-4 overflow-x-hidden">
     <section className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800">
-      <Metric currency="KRW" label="총 지출" value={formatKrw(summary.totalKrw)} />
-      <Metric currency="THB" label="태국 바트" value={formatThb(summary.totalLocal)} />
+      <Metric label="총 지출" value={formatKrw(summary.totalKrw)} />
+      <Metric isLocal label={CURRENCY_INFO[localCurrency].label} value={formatLocalAmount(summary.totalLocal, localCurrency)} />
       <Metric label="지출 건수" value={`${summary.count}건`} />
-      <Metric currency="KRW" label="일평균" value={formatKrw(average)} />
+      <Metric label="일평균" value={formatKrw(average)} />
     </section>
 
     <Card className="w-full min-w-0 max-w-full gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white py-0 dark:border-slate-800 dark:bg-slate-900">
-      <CardHeader className="mb-3 px-4 pt-4"><div className="min-w-0"><h2 className="truncate text-sm font-extrabold">날짜별 지출</h2><p className="mt-0.5 truncate text-[11px] text-slate-400">태국 현지 날짜 기준 원화</p></div></CardHeader>
+      <CardHeader className="mb-3 px-4 pt-4"><div className="min-w-0"><h2 className="truncate text-sm font-extrabold">날짜별 지출</h2><p className="mt-0.5 truncate text-[11px] text-slate-400">{trip.shortName} 현지 날짜 기준 원화</p></div></CardHeader>
       <CardContent className="px-4 pb-4">
       <div className="h-48 w-full min-w-0 max-w-full overflow-hidden" aria-hidden="true"><ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 320, height: 192 }}><BarChart data={daily} margin={{ top: 8, right: 0, bottom: 0, left: -20 }}><CartesianGrid vertical={false} stroke="#e2e8f0" strokeDasharray="3 3" /><XAxis dataKey="date" tickFormatter={(value) => String(value).slice(5).replace("-", "/")} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(value) => `${Math.round(Number(value) / 1000)}천`} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><Tooltip formatter={(value) => formatKrw(Number(value))} labelFormatter={(label) => `${label} 지출`} /><Bar dataKey="amount" fill="#0a84ff" radius={[6, 6, 2, 2]} isAnimationActive={!reduceMotion} animationDuration={animationDuration} /></BarChart></ResponsiveContainer></div>
       <AccessibleTable caption="날짜별 원화 지출" rows={daily.map((item) => [item.date, formatKrw(item.amount)])} />
@@ -82,11 +86,11 @@ export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
   </div>;
 }
 
-function Metric({ label, value, currency }: { label: string; value: string; currency?: "KRW" | "THB" }) {
+function Metric({ label, value, isLocal = false }: { label: string; value: string; isLocal?: boolean }) {
   return (
     <div className="bg-white p-4 dark:bg-slate-900">
       <p className="text-[11px] font-semibold text-slate-400">{label}</p>
-      <p className={cn("mt-1 text-lg font-extrabold tabular-nums", currency === "THB" ? "text-slate-500 dark:text-slate-400" : undefined)}>{value}</p>
+      <p className={cn("mt-1 text-lg font-extrabold tabular-nums", isLocal ? "text-slate-500 dark:text-slate-400" : undefined)}>{value}</p>
     </div>
   );
 }

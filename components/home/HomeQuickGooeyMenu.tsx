@@ -8,7 +8,8 @@ import { useStack } from "@stackflow/react";
 import { ChevronRight } from "lucide-react";
 import { triggerHapticFeedback } from "@/components/BottomNav";
 import { useFabEnterAnimation } from "@/components/ui/activity-register-fab";
-import { useExchangeRates } from "@/lib/exchange-rates";
+import { useTrip } from "@/components/providers/trip-provider";
+import { formatRatePreview, getLocalToKrwRate, useExchangeRates } from "@/lib/exchange-rates";
 import { UTILITY_CARDS, type UtilityActivity } from "@/lib/utility-cards";
 import { cn } from "@/lib/utils";
 
@@ -143,7 +144,9 @@ export function HomeQuickGooeyMenu({ onNavigate }: HomeQuickGooeyMenuProps) {
   const filterUrl = useSvgFilterUrl(filterId);
   const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const { data: exchangeData } = useExchangeRates();
-  const thbRate = exchangeData?.THB ?? 42.8;
+  const { trip } = useTrip();
+  const localCurrency = trip.currency.code;
+  const localRate = getLocalToKrwRate(exchangeData, localCurrency);
   useFabEnterAnimation(fabRef, homeOnTop);
 
   const close = useCallback(() => setOpen(false), []);
@@ -161,7 +164,7 @@ export function HomeQuickGooeyMenu({ onNavigate }: HomeQuickGooeyMenuProps) {
 
   const getSubtitle = (activity: UtilityActivity, meta: string) => {
     if (activity === "ExchangeActivity") {
-      return `฿100 ≈ ₩${Math.round(thbRate * 100).toLocaleString("ko-KR")}`;
+      return formatRatePreview(localRate, localCurrency, 100);
     }
     return meta;
   };

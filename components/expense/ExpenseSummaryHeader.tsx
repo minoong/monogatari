@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useMemo, type RefObject } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WalletIcon } from "@/components/ui/wallet";
-import { AnimatedKrw, AnimatedThb } from "@/components/expense/animated-expense-amount";
+import { AnimatedKrw, AnimatedLocal } from "@/components/expense/animated-expense-amount";
 import { useScrollProgressVar } from "@/hooks/use-scroll-progress-var";
 import {
   EXPENSE_PERSON_META,
@@ -60,7 +60,7 @@ export function ExpenseSummaryHeader({ expenses, scrollRef, scrollTrackingEnable
           </div>
 
           <p className="expense-summary-thb tabular-nums text-slate-500">
-            <AnimatedThb value={summary.totalLocal} />
+            <AnimatedLocal value={summary.totalLocal} />
           </p>
 
           <div aria-hidden className="expense-summary-perforation">

@@ -510,7 +510,7 @@ function WishListItem({
 
             {hasPrice && (
               <div className="flex shrink-0 self-stretch flex-col items-end py-0.5 text-right">
-                <ExpenseCurrencyPair krw={priceKrw} thb={wish.target_price_local!} />
+                <ExpenseCurrencyPair currency="THB" krw={priceKrw} local={wish.target_price_local!} />
               </div>
             )}
           </MorphingDialogTrigger>
@@ -550,10 +550,11 @@ function WishListItem({
               {hasPrice && (
                 <div className="mt-2 flex justify-end">
                   <ExpenseCurrencyPair
+                    currency="THB"
                     krw={priceKrw}
+                    local={wish.target_price_local!}
                     mainSize="hero"
                     secondarySize="secondary"
-                    thb={wish.target_price_local!}
                   />
                 </div>
               )}

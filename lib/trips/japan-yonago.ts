@@ -22,8 +22,10 @@ export const JAPAN_YONAGO_TRIP: TripConfig = {
   utcOffset: "+09:00",
   phaseStartsAt: "2026-12-18T13:20:00+09:00",
   phaseEndsAt: "2026-12-21T15:50:00+09:00",
-  currency: { code: "JPY", label: "엔", symbol: "¥", fractionDigits: 0, displayUnit: 100 },
+  currency: { code: "JPY", displayUnit: 100 },
   language: { code: "ja", label: "일본어", speechLang: "ja-JP" },
+  expenseCategories: ["food", "transport", "shopping", "stay", "activity", "onsen", "convenience", "other"],
+  paymentMethods: ["cash", "card", "qr", "ic_card", "other"],
   weatherPlaces: [
     { id: "yonago", label: "요나고", latitude: 35.4235, longitude: 133.3352 },
     { id: "tottori-dunes", label: "돗토리 사구", latitude: 35.5416, longitude: 134.2286 },

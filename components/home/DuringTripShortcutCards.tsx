@@ -6,7 +6,8 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
 import { ExpenseShortcutAmounts } from "@/components/expense/animated-expense-amount";
-import { useExchangeRates } from "@/lib/exchange-rates";
+import { useTrip } from "@/components/providers/trip-provider";
+import { formatRatePreview, getLocalToKrwRate, useExchangeRates } from "@/lib/exchange-rates";
 import { getExpenseShortcutAmounts, type Expense } from "@/lib/expenses";
 import { UTILITY_CARDS } from "@/lib/utility-cards";
 
@@ -47,8 +48,8 @@ function ShortcutRow({ title, imageSrc, description, onPress }: ShortcutRowProps
   );
 }
 
-const fetchExpenses = async (): Promise<Expense[]> => {
-  const response = await fetch("/api/expenses");
+const fetchExpenses = async (tripSlug: string): Promise<Expense[]> => {
+  const response = await fetch(`/api/expenses?trip=${encodeURIComponent(tripSlug)}`);
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error ?? "지출을 불러오지 못했어요.");
   return payload.data;
@@ -56,13 +57,14 @@ const fetchExpenses = async (): Promise<Expense[]> => {
 
 export function DuringTripShortcutCards({ onOpenExpense, onOpenExchange }: DuringTripShortcutCardsProps) {
   const { data: exchangeData } = useExchangeRates();
+  const { trip } = useTrip();
   const { data: expenses = [] } = useQuery({
-    queryKey: ["expenses"],
-    queryFn: fetchExpenses,
+    queryKey: ["expenses", trip.id],
+    queryFn: () => fetchExpenses(trip.slug),
   });
-  const thbRate = exchangeData?.THB ?? 42.8;
-  const exchangePreview = `실시간 · ฿10 ≈ ₩${Math.round(thbRate * 10).toLocaleString("ko-KR")}`;
-  const expenseAmounts = useMemo(() => getExpenseShortcutAmounts(expenses), [expenses]);
+  const localCurrency = trip.currency.code;
+  const exchangePreview = `실시간 · ${formatRatePreview(getLocalToKrwRate(exchangeData, localCurrency), localCurrency)}`;
+  const expenseAmounts = useMemo(() => getExpenseShortcutAmounts(expenses, trip.timeZone), [expenses, trip.timeZone]);
 
   return (
     <div className="flex flex-col gap-3">

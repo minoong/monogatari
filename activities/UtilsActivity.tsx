@@ -10,13 +10,16 @@ import { triggerHapticFeedback } from "../components/BottomNav";
 import { ClearCacheUtilityCard } from "@/components/utils/ClearCacheUtilityCard";
 import { AnimatedContent } from "@/components/ui/animated-content";
 import { cardNavButtonClass } from "@/components/ui/drawer-form";
-import { useExchangeRates } from "@/lib/exchange-rates";
+import { useTrip } from "@/components/providers/trip-provider";
+import { formatRatePreview, getLocalToKrwRate, useExchangeRates } from "@/lib/exchange-rates";
 import { UTILITY_CARDS } from "@/lib/utility-cards";
 
 export const UtilsActivity: React.FC = () => {
   const { push } = useFlow();
   const { data: exchangeData } = useExchangeRates();
-  const thbRate = exchangeData?.THB ?? 42.8;
+  const { trip } = useTrip();
+  const localCurrency = trip.currency.code;
+  const localRate = getLocalToKrwRate(exchangeData, localCurrency);
 
   return (
     <AppScreen appBar={{ title: "유틸 도구... 실수하지 마!" }}>
@@ -97,7 +100,7 @@ export const UtilsActivity: React.FC = () => {
                               {card.activity === "ExchangeActivity" ? (
                                 <div className="mt-0.5 inline-flex items-center gap-1 text-xs font-bold text-cyan-600 dark:text-cyan-400">
                                   <span>실시간 ·</span>
-                                  <span>฿10 ≈ ₩{Math.round(thbRate * 10).toLocaleString()}</span>
+                                  <span>{formatRatePreview(localRate, localCurrency)}</span>
                                 </div>
                               ) : (
                                 <p className="mt-0.5 text-xs font-bold text-cyan-600 dark:text-cyan-400">{card.meta}</p>

@@ -3,12 +3,15 @@ import {
   isExpenseCategory,
   isExpensePaymentMethod,
   isExpensePerson,
-  splitKrwByThb,
+  formatTripDateKey,
+  splitKrwByLocal,
   type Expense,
   type ExpenseImage,
   type ExpensePerson,
 } from "@/lib/expenses";
+import { CURRENCY_INFO } from "@/lib/currency";
 import { supabase } from "@/lib/supabase";
+import { getTripBySlug, TRIPS, type TripConfig } from "@/lib/trips";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -46,9 +49,9 @@ const isRealDate = (value: string) => {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 };
 
-const bangkokDate = (value: Date) => new Intl.DateTimeFormat("en-CA", {
-  timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit",
-}).format(value);
+const getTripBySlugParam = (value: unknown) => (typeof value === "string" ? getTripBySlug(value) : null);
+const getTripById = (id: unknown) => TRIPS.find((trip) => trip.id === id) ?? null;
+const invalidTrip = () => NextResponse.json({ error: "여행 정보를 확인해 주세요." }, { status: 400 });
 
 const optionalText = (value: unknown, max: number) => {
   if (value == null || value === "") return null;
@@ -57,11 +60,13 @@ const optionalText = (value: unknown, max: number) => {
   return trimmed.length <= max ? trimmed || null : undefined;
 };
 
-const money = (value: unknown, allowZero = false) => {
+/** 여행 통화의 소수점 자릿수로 반올림한 금액. 최소 단위(바트 0.01, 엔 1) 미만이면 undefined. */
+const money = (value: unknown, fractionDigits: number, allowZero = false) => {
   const number = typeof value === "number" || typeof value === "string" ? Number(value) : Number.NaN;
   if (!Number.isFinite(number)) return undefined;
-  const rounded = Math.round(number * 100) / 100;
-  if (rounded < (allowZero ? 0 : 0.01)) return undefined;
+  const factor = 10 ** fractionDigits;
+  const rounded = Math.round(number * factor) / factor;
+  if (rounded < (allowZero ? 0 : 1 / factor)) return undefined;
   return rounded;
 };
 
@@ -71,22 +76,24 @@ const integerMoney = (value: unknown, optional = false) => {
   return Number.isSafeInteger(number) && number > 0 ? number : undefined;
 };
 
-const parseInput = (body: Record<string, unknown>) => {
+const parseInput = (body: Record<string, unknown>, trip: TripConfig) => {
+  const digits = CURRENCY_INFO[trip.currency.code].fractionDigits;
+  const scale = 10 ** digits;
   const purchasedDate = typeof body.purchased_at === "string" ? new Date(body.purchased_at) : null;
   const purchasedAt = purchasedDate && Number.isFinite(purchasedDate.getTime()) && purchasedDate.getTime() <= Date.now() + 5 * 60 * 1000 ? body.purchased_at as string : null;
   const itemName = optionalText(body.item_name, 100);
   const customCategory = optionalText(body.custom_category, 30);
   const merchant = optionalText(body.merchant, 100);
   const memo = optionalText(body.memo, 500);
-  const amountLocal = money(body.amount_local);
+  const amountLocal = money(body.amount_local, digits);
   const rate = Number(body.exchange_rate_krw_per_unit);
   const actualKrw = integerMoney(body.actual_amount_krw, true);
   const rateDate = typeof body.exchange_rate_date === "string" && isRealDate(body.exchange_rate_date) ? body.exchange_rate_date : null;
   const payer = body.payer;
   const participants = Array.isArray(body.participants) ? body.participants : null;
   const shares = body.shares_local && typeof body.shares_local === "object" ? body.shares_local as Record<string, unknown> : null;
-  const gahyunLocal = shares ? money(shares.gahyun, true) : undefined;
-  const minuLocal = shares ? money(shares.minu, true) : undefined;
+  const gahyunLocal = shares ? money(shares.gahyun, digits, true) : undefined;
+  const minuLocal = shares ? money(shares.minu, digits, true) : undefined;
   const paths = Array.isArray(body.image_paths) ? body.image_paths : null;
 
   if (!purchasedAt || !itemName || customCategory === undefined || merchant === undefined || memo === undefined || !isExpenseCategory(body.category)
@@ -97,23 +104,24 @@ const parseInput = (body: Record<string, unknown>) => {
     || gahyunLocal === undefined || minuLocal === undefined || !paths || paths.length > 5
     || paths.some((path) => typeof path !== "string" || !IMAGE_PATH.test(path)) || new Set(paths).size !== paths.length
     || (body.payment_method !== "card" && actualKrw !== null)
-    || (purchasedDate && rateDate && rateDate > bangkokDate(purchasedDate))
+    || (purchasedDate && rateDate && rateDate > formatTripDateKey(purchasedDate.toISOString(), trip.timeZone))
     || (customCategory !== null && body.category !== "other")) {
     return { error: "입력 내용을 확인해 주세요." } as const;
   }
   const selected = new Set<ExpensePerson>(participants as ExpensePerson[]);
   if ((!selected.has("gahyun") && gahyunLocal !== 0) || (!selected.has("minu") && minuLocal !== 0)
     || (selected.has("gahyun") && gahyunLocal <= 0) || (selected.has("minu") && minuLocal <= 0)
-    || Math.round((gahyunLocal + minuLocal) * 100) !== Math.round(amountLocal * 100)) {
+    || Math.round((gahyunLocal + minuLocal) * scale) !== Math.round(amountLocal * scale)) {
     return { error: "비용 사용자별 분담액 합계가 결제 금액과 달라요." } as const;
   }
 
   const amountKrw = Math.round(amountLocal * rate);
   if (amountKrw <= 0) return { error: "환산 금액을 확인해 주세요." } as const;
   const effectiveKrw = actualKrw ?? amountKrw;
-  const krwShares = splitKrwByThb({ effectiveKrw, payer, totalLocal: amountLocal, gahyunLocal });
+  const krwShares = splitKrwByLocal({ effectiveKrw, payer, totalLocal: amountLocal, gahyunLocal });
   return {
     data: {
+      trip_id: trip.id, currency: trip.currency.code,
       purchased_at: new Date(purchasedAt).toISOString(), item_name: itemName, category: body.category,
       custom_category: customCategory,
       merchant, payment_method: body.payment_method, amount_local: amountLocal,
@@ -141,8 +149,10 @@ const saveImages = async (expenseId: string, paths: string[]) => {
   if (error) throw error;
 };
 
-export async function GET() {
-  const { data, error } = await supabase.from("expenses").select(SELECT_EXPENSE).order("purchased_at", { ascending: false });
+export async function GET(request: Request) {
+  const trip = getTripBySlugParam(new URL(request.url).searchParams.get("trip"));
+  if (!trip) return invalidTrip();
+  const { data, error } = await supabase.from("expenses").select(SELECT_EXPENSE).eq("trip_id", trip.id).order("purchased_at", { ascending: false });
   if (error) {
     console.error("Expense list failed", error);
     return NextResponse.json({ error: "지출 내역을 불러오지 못했어요." }, { status: 500 });
@@ -156,7 +166,9 @@ export async function POST(request: Request) {
   try {
     const body: unknown = await request.json();
     if (!body || typeof body !== "object") return NextResponse.json({ error: "입력 내용을 확인해 주세요." }, { status: 400 });
-    const input = parseInput(body as Record<string, unknown>);
+    const trip = getTripBySlugParam((body as Record<string, unknown>).trip);
+    if (!trip) return invalidTrip();
+    const input = parseInput(body as Record<string, unknown>, trip);
     if (!input.data) return NextResponse.json({ error: input.error }, { status: 400 });
     const { image_paths, ...row } = input.data;
     newPaths = image_paths;
@@ -186,10 +198,13 @@ export async function PATCH(request: Request) {
   try {
     const body: unknown = await request.json();
     if (!body || typeof body !== "object") return NextResponse.json({ error: "입력 내용을 확인해 주세요." }, { status: 400 });
-    const input = parseInput(body as Record<string, unknown>);
-    if (!input.data) return NextResponse.json({ error: input.error }, { status: 400 });
-    const current = await supabase.from("expenses").select("expense_images(storage_path)").eq("id", id).single();
+    // 수정은 저장된 지출이 속한 여행의 통화와 시간대로 검증한다. 요청이 보낸 여행 정보는 신뢰하지 않는다.
+    const current = await supabase.from("expenses").select("trip_id, expense_images(storage_path)").eq("id", id).single();
     if (current.error) return NextResponse.json({ error: "지출 내역을 찾지 못했어요." }, { status: 404 });
+    const trip = getTripById(current.data.trip_id);
+    if (!trip) return invalidTrip();
+    const input = parseInput(body as Record<string, unknown>, trip);
+    if (!input.data) return NextResponse.json({ error: input.error }, { status: 400 });
     const oldPaths = (current.data.expense_images ?? []).map((image: { storage_path: string }) => image.storage_path);
     const { image_paths, ...row } = input.data;
     const { error } = await supabase.from("expenses").update({ ...row, updated_at: new Date().toISOString() }).eq("id", id);

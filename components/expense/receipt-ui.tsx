@@ -1,4 +1,7 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useLocalCurrency } from "@/components/providers/trip-provider";
 import { ExpenseCurrencyAmount } from "@/components/expense/currency-display";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -36,26 +39,28 @@ export function ReceiptKeyValue({
 export function ReceiptAmountRow({
   label,
   krw,
-  thb,
+  local,
   className,
 }: {
   label: string;
   krw: number;
-  thb: number;
+  local: number;
   className?: string;
 }) {
+  const localCurrency = useLocalCurrency();
   return (
     <div className={cn("flex items-start justify-between gap-3 text-[12px]", className)}>
       <span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">{label}</span>
       <div className="flex flex-col items-end tabular-nums">
         <ExpenseCurrencyAmount currency="KRW" size="inline" value={krw} />
-        <ExpenseCurrencyAmount className="mt-0.5" currency="THB" size="inline" value={thb} />
+        <ExpenseCurrencyAmount className="mt-0.5" currency={localCurrency} size="inline" value={local} />
       </div>
     </div>
   );
 }
 
-export function ReceiptTotalBlock({ krw, thb }: { krw: number; thb: number }) {
+export function ReceiptTotalBlock({ krw, local }: { krw: number; local: number }) {
+  const localCurrency = useLocalCurrency();
   return (
     <section aria-label="결제금액" className="py-3">
       <ReceiptSolidRule />
@@ -63,7 +68,7 @@ export function ReceiptTotalBlock({ krw, thb }: { krw: number; thb: number }) {
         <span className="text-[15px] font-bold text-slate-900 dark:text-white">결제금액</span>
         <div className="flex flex-col items-end tabular-nums">
           <ExpenseCurrencyAmount currency="KRW" size="hero" value={krw} />
-          <ExpenseCurrencyAmount className="mt-1" currency="THB" size="secondary" value={thb} />
+          <ExpenseCurrencyAmount className="mt-1" currency={localCurrency} size="secondary" value={local} />
         </div>
       </div>
       <ReceiptSolidRule />

@@ -20,8 +20,10 @@ export const THAILAND_TRIP: TripConfig = {
   utcOffset: "+07:00",
   phaseStartsAt: "2026-08-29T09:45:00+09:00",
   phaseEndsAt: "2026-09-01T21:40:00+07:00",
-  currency: { code: "THB", label: "바트", symbol: "฿", fractionDigits: 2, displayUnit: 1 },
+  currency: { code: "THB", displayUnit: 1 },
   language: { code: "th", label: "태국어", speechLang: "th-TH" },
+  expenseCategories: ["food", "transport", "shopping", "stay", "activity", "massage", "convenience", "other"],
+  paymentMethods: ["cash", "card", "qr", "other"],
   weatherPlaces: [
     { id: "bangkok", label: "방콕", latitude: 13.7563, longitude: 100.5018 },
     { id: "pattaya", label: "팟타야", latitude: 12.9236, longitude: 100.8825 },

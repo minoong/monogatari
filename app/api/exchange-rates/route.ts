@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { getTripBySlug } from "@/lib/trips";
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -15,9 +16,9 @@ const shiftDate = (value: string, days: number) => {
   return date.toISOString().slice(0, 10);
 };
 
-const bangkokToday = () =>
+const tripToday = (timeZone: string) =>
   new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Bangkok",
+    timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -26,15 +27,20 @@ const bangkokToday = () =>
 type FrankfurterRate = { date?: unknown; base?: unknown; quote?: unknown; rate?: unknown };
 
 export async function GET(request: Request) {
-  const requestedDate = new URL(request.url).searchParams.get("date") ?? "";
-  if (!isRealDate(requestedDate) || requestedDate > bangkokToday()) {
+  const params = new URL(request.url).searchParams;
+  const trip = getTripBySlug(params.get("trip") ?? "");
+  if (!trip) return NextResponse.json({ error: "여행 정보를 확인해 주세요." }, { status: 400 });
+  const currency = trip.currency.code;
+  const requestedDate = params.get("date") ?? "";
+  const today = tripToday(trip.timeZone);
+  if (!isRealDate(requestedDate) || requestedDate > today) {
     return NextResponse.json({ error: "구매 날짜를 확인해 주세요." }, { status: 400 });
   }
 
   for (let offset = 0; offset >= -7; offset -= 1) {
     const candidate = shiftDate(requestedDate, offset);
     try {
-      const response = await fetch(`https://api.frankfurter.dev/v2/rate/THB/KRW?date=${candidate}`, {
+      const response = await fetch(`https://api.frankfurter.dev/v2/rate/${currency}/KRW?date=${candidate}`, {
         headers: { Accept: "application/json" },
         next: { revalidate: 60 * 60 * 6 },
       });
@@ -51,11 +57,11 @@ export async function GET(request: Request) {
     }
   }
 
-  if (requestedDate === bangkokToday()) {
+  if (requestedDate === today) {
     const { data, error } = await supabase
       .from("exchange_rates")
       .select("rate_to_krw")
-      .eq("currency", "THB")
+      .eq("currency", currency)
       .maybeSingle();
     const rate = Number(data?.rate_to_krw);
     if (!error && Number.isFinite(rate) && rate > 0) {

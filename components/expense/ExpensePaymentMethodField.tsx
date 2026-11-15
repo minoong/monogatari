@@ -2,27 +2,31 @@
 
 import { useState } from "react";
 import { Avatar, Description, Label, ListBox } from "@heroui/react";
-import { Banknote, CreditCard, Ellipsis, QrCode, type LucideIcon } from "lucide-react";
+import { Banknote, CreditCard, Ellipsis, QrCode, TrainFront, type LucideIcon } from "lucide-react";
+import { useTrip } from "@/components/providers/trip-provider";
+import { CURRENCY_INFO } from "@/lib/currency";
+import type { TripConfig } from "@/lib/trips";
 import { DrawerFieldLabel } from "@/components/ui/drawer-form";
 import { WalletIcon } from "@/components/ui/wallet";
 import {
   EXPENSE_PAYMENT_META,
-  EXPENSE_PAYMENT_METHODS,
   type ExpensePaymentMethod,
 } from "@/lib/expenses";
 import { cn } from "@/lib/utils";
 
-const PAYMENT_DESCRIPTIONS: Record<ExpensePaymentMethod, string> = {
-  cash: "현금·바트 직접 결제",
-  card: "신용·체크카드",
-  qr: "PromptPay 등 QR 결제",
-  other: "그 외 결제 수단",
+const PAYMENT_DESCRIPTIONS: Record<ExpensePaymentMethod, (trip: TripConfig) => string> = {
+  cash: (trip) => `현금·${CURRENCY_INFO[trip.currency.code].label.split(" ").pop()} 직접 결제`,
+  card: () => "신용·체크카드",
+  qr: (trip) => (trip.countryCode === "JP" ? "PayPay 등 QR 결제" : "PromptPay 등 QR 결제"),
+  ic_card: () => "스이카, 이코카 등 교통 IC카드",
+  other: () => "그 외 결제 수단",
 };
 
 const PAYMENT_ICONS: Record<ExpensePaymentMethod, LucideIcon> = {
   cash: Banknote,
   card: CreditCard,
   qr: QrCode,
+  ic_card: TrainFront,
   other: Ellipsis,
 };
 
@@ -36,6 +40,9 @@ export function ExpensePaymentMethodField({
   onChange: (value: ExpensePaymentMethod) => void;
 }) {
   const [interaction, setInteraction] = useState(0);
+  const { trip } = useTrip();
+  // 이미 저장된 결제수단이 이 여행의 목록에 없어도 수정 화면에서 선택 상태가 유지되도록 포함한다.
+  const methods = trip.paymentMethods.includes(value) ? trip.paymentMethods : [...trip.paymentMethods, value];
 
   return (
     <div
@@ -50,7 +57,7 @@ export function ExpensePaymentMethodField({
       </Label>
       <ListBox
         aria-label="결제 수단"
-        className="grid w-full grid-cols-2 gap-2 min-[440px]:grid-cols-4"
+        className="grid w-full grid-cols-2 gap-2 min-[440px]:grid-cols-3"
         disallowEmptySelection
         selectedKeys={new Set([value])}
         selectionMode="single"
@@ -61,7 +68,7 @@ export function ExpensePaymentMethodField({
           onChange(next);
         }}
       >
-        {EXPENSE_PAYMENT_METHODS.map((method) => {
+        {methods.map((method) => {
           const Icon = PAYMENT_ICONS[method];
           const selected = value === method;
 
@@ -83,7 +90,7 @@ export function ExpensePaymentMethodField({
               <div className="flex min-w-0 flex-1 flex-col">
                 <Label className="truncate text-sm">{EXPENSE_PAYMENT_META[method]}</Label>
                 <Description className="line-clamp-2 text-[10px] leading-4 text-slate-500! dark:text-slate-400!">
-                  {PAYMENT_DESCRIPTIONS[method]}
+                  {PAYMENT_DESCRIPTIONS[method](trip)}
                 </Description>
               </div>
               <ListBox.ItemIndicator className="shrink-0" />

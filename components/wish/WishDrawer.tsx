@@ -44,8 +44,8 @@ import { WishImagePicker, type WishImageDraft } from "@/components/wish/WishImag
 import {
   DEFAULT_THB_TO_KRW_RATE,
   EXCHANGE_RATE_QUERY_KEY,
-  convertKrwToThb,
-  convertThbToKrw,
+  convertKrwToLocal,
+  convertLocalToKrw,
   fetchThbToKrwRate,
   toggleCurrencyAmount,
   toFiniteAmount,
@@ -117,11 +117,12 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   });
   const numericInput = toFiniteAmount(Number(targetPrice) || 0);
   const isKrwInput = inputCurrency === "KRW";
-  const targetPriceLocal = isKrwInput ? convertKrwToThb(numericInput, thbToKrwRate) : numericInput;
-  const targetPriceKrw = convertThbToKrw(targetPriceLocal, thbToKrwRate);
+  // 위시 가격은 아직 태국 바트 기준이다. 위시를 여행별로 전환할 때 여행 통화로 바꾼다.
+  const targetPriceLocal = isKrwInput ? convertKrwToLocal(numericInput, thbToKrwRate, "THB") : numericInput;
+  const targetPriceKrw = convertLocalToKrw(targetPriceLocal, thbToKrwRate);
 
   const toggleInputCurrency = () => {
-    const { nextCurrency, nextAmount } = toggleCurrencyAmount(numericInput, thbToKrwRate, inputCurrency, targetPrice);
+    const { nextCurrency, nextAmount } = toggleCurrencyAmount(numericInput, thbToKrwRate, inputCurrency, "THB", targetPrice);
     setTargetPrice(nextAmount);
     setInputCurrency(nextCurrency);
   };
@@ -412,6 +413,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                   amount={targetPrice}
                   convertedValue={isKrwInput ? targetPriceLocal : targetPriceKrw}
                   currency={inputCurrency}
+                  localCurrency="THB"
                   inputId="wish-target-price"
                   name="targetPrice"
                   onAmountChange={setTargetPrice}

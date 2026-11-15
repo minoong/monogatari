@@ -3,7 +3,9 @@
 import NumberFlow from "@number-flow/react";
 import { useInView, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { formatKrw, formatThb } from "@/lib/expenses";
+import { useLocalCurrency } from "@/components/providers/trip-provider";
+import { CURRENCY_INFO } from "@/lib/currency";
+import { formatKrw, formatLocalAmount } from "@/lib/expenses";
 import { cn } from "@/lib/utils";
 
 const NUMBER_FLOW_SPIN_TIMING = { duration: 900, easing: "cubic-bezier(0.16, 1, 0.3, 1)" } as const;
@@ -55,26 +57,29 @@ export function AnimatedKrw({ value, animate = true, className }: AnimatedKrwPro
   );
 }
 
-type AnimatedThbProps = {
+type AnimatedLocalProps = {
   value: number;
   animate?: boolean;
   className?: string;
 };
 
-export function AnimatedThb({ value, animate = true, className }: AnimatedThbProps) {
+/** 여행지 현지 통화 금액. 통화 기호와 소수점 자릿수는 활성 여행을 따른다. */
+export function AnimatedLocal({ value, animate = true, className }: AnimatedLocalProps) {
   const reduceMotion = useReducedMotion();
   const shown = useCountUp(value, animate);
+  const currency = useLocalCurrency();
+  const info = CURRENCY_INFO[currency];
 
   if (reduceMotion) {
-    return <span className={cn("tabular-nums", className)}>{formatThb(value)}</span>;
+    return <span className={cn("tabular-nums", className)}>{formatLocalAmount(value, currency)}</span>;
   }
 
   return (
     <NumberFlow
       className={cn("number-flow-wrap inline tabular-nums", className)}
-      format={{ notation: "standard", minimumFractionDigits: 0, maximumFractionDigits: 2 }}
+      format={{ notation: "standard", minimumFractionDigits: 0, maximumFractionDigits: info.fractionDigits }}
       locales="ko-KR"
-      prefix="฿"
+      prefix={info.symbol}
       spinTiming={NUMBER_FLOW_SPIN_TIMING}
       transformTiming={NUMBER_FLOW_TRANSFORM_TIMING}
       value={shown}

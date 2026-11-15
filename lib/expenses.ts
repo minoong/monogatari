@@ -1,3 +1,5 @@
+import { CURRENCY_INFO, formatAmount, roundAmount, type LocalCurrencyCode } from "./currency";
+
 export const EXPENSE_PEOPLE = ["gahyun", "minu"] as const;
 export type ExpensePerson = (typeof EXPENSE_PEOPLE)[number];
 
@@ -9,11 +11,12 @@ export const EXPENSE_CATEGORIES = [
   "activity",
   "massage",
   "convenience",
+  "onsen",
   "other",
 ] as const;
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
 
-export const EXPENSE_PAYMENT_METHODS = ["cash", "card", "qr", "other"] as const;
+export const EXPENSE_PAYMENT_METHODS = ["cash", "card", "qr", "ic_card", "other"] as const;
 export type ExpensePaymentMethod = (typeof EXPENSE_PAYMENT_METHODS)[number];
 export type ExpenseRateSource = "frankfurter" | "manual_override";
 
@@ -30,6 +33,7 @@ export const EXPENSE_CATEGORY_META: Record<ExpenseCategory, { label: string; col
   activity: { label: "관광", color: "#30d158" },
   massage: { label: "마사지", color: "#ff375f" },
   convenience: { label: "편의점", color: "#64d2ff" },
+  onsen: { label: "온천", color: "#00c7be" },
   other: { label: "기타", color: "#8e8e93" },
 };
 
@@ -37,6 +41,7 @@ export const EXPENSE_PAYMENT_META: Record<ExpensePaymentMethod, string> = {
   cash: "현금",
   card: "카드",
   qr: "QR 결제",
+  ic_card: "교통 IC카드",
   other: "기타",
 };
 
@@ -57,6 +62,14 @@ export const EXPENSE_CURRENCY_META = {
     colorClass: "text-slate-600 dark:text-slate-300",
     mutedClass: "text-slate-400 dark:text-slate-500",
   },
+  JPY: {
+    code: "JPY" as const,
+    label: "엔",
+    symbol: "¥",
+    color: "#94a3b8",
+    colorClass: "text-slate-600 dark:text-slate-300",
+    mutedClass: "text-slate-400 dark:text-slate-500",
+  },
 } as const;
 
 export type ExpenseCurrencyCode = keyof typeof EXPENSE_CURRENCY_META;
@@ -70,6 +83,9 @@ export interface ExpenseImage {
 
 export interface Expense {
   id: string;
+  trip_id: string;
+  /** 결제 통화. amount_local과 share_*_local, exchange_rate_krw_per_unit이 이 통화 기준이다. */
+  currency: LocalCurrencyCode;
   purchased_at: string;
   item_name: string;
   category: ExpenseCategory;
@@ -148,39 +164,57 @@ export const formatKrw = (value: number) => {
   const safe = Number.isFinite(value) ? Math.round(value) : 0;
   return `₩${safe.toLocaleString("ko-KR")}`;
 };
-export const formatThb = (value: number) => {
-  const safe = Number.isFinite(value) ? value : 0;
-  return `฿${safe.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}`;
-};
+export const formatLocalAmount = (value: number, currency: LocalCurrencyCode) => formatAmount(value, currency);
 
-export const roundThb = (value: number) => {
-  if (!Number.isFinite(value)) return 0;
-  return Math.round(value * 100) / 100;
-};
+export const roundLocalAmount = (value: number, currency: LocalCurrencyCode) => roundAmount(value, currency);
 
-export const formatBangkokDateKey = (value: string) =>
+/** 통화의 최소 단위(바트 0.01, 엔 1). */
+export const getCurrencyStep = (currency: LocalCurrencyCode) => 10 ** -CURRENCY_INFO[currency].fractionDigits;
+
+/** 여행지 현지 시간대 기준 YYYY-MM-DD. */
+export const formatTripDateKey = (value: string, timeZone: string) =>
   new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Bangkok",
+    timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   }).format(new Date(value));
 
-export const formatBangkokDate = (value: string) =>
+export const formatTripDate = (value: string, timeZone: string) =>
   new Intl.DateTimeFormat("ko-KR", {
-    timeZone: "Asia/Bangkok",
+    timeZone,
     month: "long",
     day: "numeric",
     weekday: "short",
   }).format(new Date(value));
 
-export const formatBangkokTime = (value: string) =>
+export const formatTripTime = (value: string, timeZone: string) =>
   new Intl.DateTimeFormat("ko-KR", {
-    timeZone: "Asia/Bangkok",
+    timeZone,
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
   }).format(new Date(value));
+
+/** 시각을 여행지 현지 날짜(YYYY-MM-DD)와 시간(HH:mm)으로 나눈다. */
+export const getTripLocalParts = (value: Date | string, timeZone: string) => {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  })
+    .formatToParts(typeof value === "string" ? new Date(value) : value)
+    .reduce<Record<string, string>>((result, part) => ({ ...result, [part.type]: part.value }), {});
+  return { date: `${parts.year}-${parts.month}-${parts.day}`, time: `${parts.hour}:${parts.minute}` };
+};
+
+/** 여행지 현지 날짜·시간(예: 2026-12-19, 14:30)을 UTC ISO 문자열로 바꾼다. utcOffset은 "+09:00" 형식. */
+export const tripLocalToIso = (date: string, time: string, utcOffset: string) =>
+  new Date(`${date}T${time}:00${utcOffset}`).toISOString();
 
 const sum = (values: number[]) => values.reduce((total, value) => total + value, 0);
 
@@ -205,22 +239,22 @@ export const summarizeExpenses = (expenses: Expense[]) => {
   return { totalLocal, totalKrw, count: expenses.length, paid, used, settlement };
 };
 
-/** 여행 중 숏컷용 — Bangkok 기준 오늘·총 지출 원화 */
-export const getExpenseShortcutAmounts = (expenses: Expense[], now = new Date()) => {
-  const todayKey = formatBangkokDateKey(now.toISOString());
+/** 여행 중 숏컷용 — 여행지 현지 날짜 기준 오늘·총 지출 원화 */
+export const getExpenseShortcutAmounts = (expenses: Expense[], timeZone: string, now = new Date()) => {
+  const todayKey = formatTripDateKey(now.toISOString(), timeZone);
   const todayKrw = sum(
     expenses
-      .filter((expense) => formatBangkokDateKey(expense.purchased_at) === todayKey)
+      .filter((expense) => formatTripDateKey(expense.purchased_at, timeZone) === todayKey)
       .map(getEffectiveKrw),
   );
   const { totalKrw } = summarizeExpenses(expenses);
   return { todayKrw, totalKrw };
 };
 
-export const aggregateExpensesByDate = (expenses: Expense[]) => {
+export const aggregateExpensesByDate = (expenses: Expense[], timeZone: string) => {
   const totals = new Map<string, number>();
   expenses.forEach((expense) => {
-    const key = formatBangkokDateKey(expense.purchased_at);
+    const key = formatTripDateKey(expense.purchased_at, timeZone);
     totals.set(key, (totals.get(key) ?? 0) + getEffectiveKrw(expense));
   });
   return Array.from(totals, ([date, amount]) => ({ date, amount })).sort((a, b) => a.date.localeCompare(b.date));
@@ -241,7 +275,7 @@ export const aggregateExpensesByCategory = (expenses: Expense[]) => {
   return Array.from(totals.values()).sort((a, b) => b.amount - a.amount);
 };
 
-export const splitKrwByThb = ({
+export const splitKrwByLocal = ({
   effectiveKrw,
   payer,
   totalLocal,
