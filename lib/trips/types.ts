@@ -41,6 +41,17 @@ export interface TripStaySeed {
   checkOutDate: string;
   googleMapsUrl: string;
   agodaUrl: string;
+  address: string;
+  /** 체크인 가능 시작 시각 (HH:mm) */
+  checkInTime: string;
+  /** 체크아웃 마감 시각 (HH:mm) */
+  checkOutTime: string;
+  /** 아고다 평점 (10점 만점)과 후기 수 */
+  score: number;
+  reviewCount: number;
+  imageUrl: string;
+  /** 아고다 상세 페이지에서 확인된 사실만 적는다. */
+  highlights: readonly string[];
 }
 
 export interface TripDayTripSeed {
