@@ -115,6 +115,8 @@ const PassengerTicket: React.FC<{ flight: FlightSegment; trip: TripConfig }> = (
           )}
           {flight.flightNumber}
         </span>
+        {!koreanAir && flight.detail && <span className="text-sm font-bold">{flight.detail}</span>}
+        {!koreanAir && flight.seatStatus && <span className="rounded-full bg-[#e1f3fd] px-2.5 py-1 text-xs font-bold">{flight.seatStatus}</span>}
         {koreanAir && (
         <a
           href={A330_SEAT_MAP_URL}

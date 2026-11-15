@@ -155,6 +155,8 @@ export function FlightWidget({ defaultSegmentId, onOpen }: FlightWidgetProps) {
                   )}
                   {flight.flightNumber}
                 </span>
+                {!koreanAir && flight.detail && <span className="text-[11px] font-bold">{flight.detail}</span>}
+                {!koreanAir && flight.seatStatus && <span className="rounded-full bg-[#e1f3fd] px-2 py-0.5 text-[10px] font-bold">{flight.seatStatus}</span>}
                 {koreanAir && (
                 <a
                   href={A330_SEAT_MAP_URL}

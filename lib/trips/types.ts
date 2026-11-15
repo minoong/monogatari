@@ -81,6 +81,8 @@ export interface TripFlightSeed {
   arrival: TripFlightEndpoint;
   /** 항공사·기종처럼 확인된 부가 정보. 모르면 생략한다. */
   detail?: string;
+  /** 좌석 선택 상태 등 예약 진행 상황. 예: "좌석 선택 전". 바뀌면 직접 고친다. */
+  seatStatus?: string;
 }
 
 /** 앱바 제목처럼 여행마다 달라지는 문구 */

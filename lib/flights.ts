@@ -8,6 +8,10 @@ export type FlightSegment = {
   /** 요일 한 글자 */
   day: string;
   flightNumber: string;
+  /** 항공사 등 확인된 부가 정보. 대한항공 상세(koreanAir)가 없는 예약에서만 쓴다. */
+  detail?: string;
+  /** 좌석 선택 상태. 예: "좌석 선택 전" */
+  seatStatus?: string;
   /** "5시간 50분"처럼 시간과 분을 모두 적은 문자열 */
   duration: string;
   departure: {
@@ -130,6 +134,8 @@ const toSegment = (flight: TripFlightSeed): FlightSegment => {
     date: `${year}년 ${month}월 ${day}일`,
     day: new Intl.DateTimeFormat("ko-KR", { weekday: "short", timeZone: "UTC" }).format(new Date(`${flight.date}T12:00:00Z`)),
     flightNumber: flight.flightNumber,
+    detail: flight.detail,
+    seatStatus: flight.seatStatus,
     duration,
     departure: { time: flight.departure.time, code: flight.departure.code, airport: flight.departure.airport },
     arrival: { time: flight.arrival.time, code: flight.arrival.code, airport: flight.arrival.airport, ...(nextDay ? { nextDay } : {}) },
