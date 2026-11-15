@@ -18,6 +18,8 @@ export interface Accommodation {
   mapQuery: string;
   /** 있으면 "Google 지도" 버튼이 이 링크를 연다. */
   googleMapsUrl?: string;
+  /** 숙소 위치의 날씨 지점. 없으면 숙소 id가 곧 지점 id다. */
+  weatherPlaceId?: string;
   agodaUrl: string;
   score: string;
   highlights: string[];
@@ -349,6 +351,7 @@ const toAccommodation = (trip: TripConfig, stay: TripConfig["stays"][number]): A
     imageUrl: stay.imageUrl,
     mapQuery: `${stay.englishName}, ${stay.address}`,
     googleMapsUrl: stay.googleMapsUrl,
+    weatherPlaceId: stay.weatherPlaceId,
     agodaUrl: stay.agodaUrl,
     score: stay.score.toFixed(1),
     highlights: [...stay.highlights],

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, Droplets, RefreshCw, Umbrella } from "lucide-react";
 import { Button, Skeleton, Tabs } from "@heroui/react";
+import { useTrip } from "@/components/providers/trip-provider";
 import { getWeatherPresentation, useWeather, type WeatherCity, type WeatherPresentation } from "@/lib/weather";
 import { SunIcon } from "@/components/ui/sun";
 import { MoonIcon } from "@/components/ui/moon";
@@ -66,16 +67,16 @@ const WeatherIcon = ({ icon, size = 24, className, autoPlay = false, ...props }:
   return <Icon ref={autoPlay ? animationRef : undefined} size={size} className={className} {...props} />;
 };
 
-const formatUpdatedAt = (value: string) => new Intl.DateTimeFormat("ko-KR", {
-  timeZone: "Asia/Bangkok",
+const formatUpdatedAt = (value: string, timeZone: string) => new Intl.DateTimeFormat("ko-KR", {
+  timeZone,
   hour: "2-digit",
   minute: "2-digit",
   hour12: false,
 }).format(new Date(value));
 
-const formatCompactDate = (value: string) => {
+const formatCompactDate = (value: string, timeZone: string) => {
   const parts = new Intl.DateTimeFormat("ko-KR", {
-    timeZone: "Asia/Bangkok",
+    timeZone,
     month: "numeric",
     day: "numeric",
   }).formatToParts(new Date(value));
@@ -84,25 +85,25 @@ const formatCompactDate = (value: string) => {
   return `${month}/${day}`;
 };
 
-const formatSunTime = (value: string) => new Intl.DateTimeFormat("ko-KR", {
-  timeZone: "Asia/Bangkok",
+const formatSunTime = (value: string, timeZone: string) => new Intl.DateTimeFormat("ko-KR", {
+  timeZone,
   hour: "2-digit",
   minute: "2-digit",
   hour12: false,
 }).format(new Date(value));
 
-const formatForecastHour = (value: string) => new Intl.DateTimeFormat("ko-KR", {
-  timeZone: "Asia/Bangkok",
+const formatForecastHour = (value: string, timeZone: string) => new Intl.DateTimeFormat("ko-KR", {
+  timeZone,
   hour: "numeric",
   hour12: false,
 }).formatToParts(new Date(value)).find((part) => part.type === "hour")?.value ?? "";
 
-const formatForecastDay = (value: string, index: number) => ({
-  weekday: index === 0 ? "오늘" : new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Bangkok", weekday: "short" }).format(new Date(value)),
-  date: new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Bangkok", month: "numeric", day: "numeric" }).format(new Date(value)),
+const formatForecastDay = (value: string, index: number, timeZone: string) => ({
+  weekday: index === 0 ? "오늘" : new Intl.DateTimeFormat("ko-KR", { timeZone, weekday: "short" }).format(new Date(value)),
+  date: new Intl.DateTimeFormat("ko-KR", { timeZone, month: "numeric", day: "numeric" }).format(new Date(value)),
 });
 
-function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedChange }: { city: WeatherCity; isRefreshing: boolean; isDailyExpanded: boolean; onDailyExpandedChange: (expanded: boolean) => void }) {
+function WeatherDetails({ city, timeZone, isRefreshing, isDailyExpanded, onDailyExpandedChange }: { city: WeatherCity; timeZone: string; isRefreshing: boolean; isDailyExpanded: boolean; onDailyExpandedChange: (expanded: boolean) => void }) {
   const weather = getWeatherPresentation(city.weatherCode, city.isDay, { windSpeed: city.windSpeed, time: city.observedAt, sunrise: city.sunrise, sunset: city.sunset });
   const needsUmbrella = city.nextSixHourPrecipitationProbability >= 40;
 
@@ -112,7 +113,7 @@ function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedCh
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
             <h2 className="text-sm font-bold tracking-[-0.03em] text-slate-900">{city.city}</h2>
-            <span className="text-[9px] font-medium text-slate-400">{formatUpdatedAt(city.observedAt)} 업데이트</span>
+            <span className="text-[9px] font-medium text-slate-400">{formatUpdatedAt(city.observedAt, timeZone)} 업데이트</span>
           </div>
           <div className="mt-1 flex items-end gap-2">
             <p className="text-[42px] font-light leading-none tracking-[-0.08em] text-slate-900">{city.temperature}°</p>
@@ -127,8 +128,8 @@ function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedCh
       <div className="mt-2 flex items-center justify-between gap-2 text-[10px] font-semibold text-slate-500">
         <span className="whitespace-nowrap">체감 {city.apparentTemperature}°</span>
         <span className="flex items-center gap-1 whitespace-nowrap"><Droplets size={12} className="text-sky-500" aria-hidden="true" />6시간 비 {city.nextSixHourPrecipitationProbability}%</span>
-        <span className="flex items-center gap-1 whitespace-nowrap"><SunIcon size={13} className="text-amber-500" aria-hidden="true" />{formatSunTime(city.sunrise)}</span>
-        <span className="flex items-center gap-1 whitespace-nowrap"><SunsetIcon size={13} className="text-orange-500" aria-hidden="true" />{formatSunTime(city.sunset)}</span>
+        <span className="flex items-center gap-1 whitespace-nowrap"><SunIcon size={13} className="text-amber-500" aria-hidden="true" />{formatSunTime(city.sunrise, timeZone)}</span>
+        <span className="flex items-center gap-1 whitespace-nowrap"><SunsetIcon size={13} className="text-orange-500" aria-hidden="true" />{formatSunTime(city.sunset, timeZone)}</span>
       </div>
 
       <div className="mt-1.5 min-h-4">
@@ -145,7 +146,7 @@ function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedCh
             const forecastWeather = getWeatherPresentation(forecast.weatherCode, forecast.isDay, { windSpeed: forecast.windSpeed, time: forecast.time, sunrise: city.sunrise, sunset: city.sunset });
             return (
               <div key={forecast.time} className="min-w-0 rounded-lg px-1 py-1 text-center">
-                <p className="text-[10px] font-semibold text-slate-400">{formatForecastHour(forecast.time)}시</p>
+                <p className="text-[10px] font-semibold text-slate-400">{formatForecastHour(forecast.time, timeZone)}시</p>
                 <div className="mt-1 flex h-5 items-center justify-center"><WeatherIcon icon={forecastWeather.icon} size={20} className="text-sky-500" aria-label={forecastWeather.label} /></div>
                 <p className="mt-1 text-sm font-bold">{forecast.temperature}°</p>
                 <p className="mt-0.5 text-[10px] font-semibold text-sky-500">{forecast.precipitationProbability}%</p>
@@ -165,7 +166,7 @@ function WeatherDetails({ city, isRefreshing, isDailyExpanded, onDailyExpandedCh
             <div className="grid grid-cols-7 gap-1">
               {city.dailyForecast.map((forecast, index) => {
               const forecastWeather = getWeatherPresentation(forecast.weatherCode, true, { windSpeed: forecast.windSpeedMax });
-              const day = formatForecastDay(forecast.date, index);
+              const day = formatForecastDay(forecast.date, index, timeZone);
               return (
                 <div key={forecast.date} className="min-w-0 rounded-md px-0.5 py-1 text-center">
                   <p className="text-[10px] font-bold text-slate-700">{day.weekday}</p>
@@ -244,7 +245,8 @@ function WeatherSkeleton() {
 }
 
 export function BeforeTripWeatherTicker() {
-  const { data: cities, isPending, isError, refetch } = useWeather();
+  const { trip } = useTrip();
+  const { data: cities, isPending, isError, refetch } = useWeather(trip);
   const [currentIndex, setCurrentIndex] = useState(0);
   const prefersReducedMotion = useReducedMotion();
 
@@ -280,7 +282,7 @@ export function BeforeTripWeatherTicker() {
 
   return (
     <section className="flex h-12 items-center gap-1.5 overflow-hidden rounded-2xl border border-slate-200 bg-white px-3 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.45)]" aria-label="여행지 현재 날씨">
-      <span className="shrink-0 text-[10px] font-semibold tabular-nums text-slate-400">{formatCompactDate(cities[0].observedAt)}</span>
+      <span className="shrink-0 text-[10px] font-semibold tabular-nums text-slate-400">{formatCompactDate(cities[0].observedAt, trip.timeZone)}</span>
       <div className="relative h-7 min-w-0 flex-1 overflow-hidden">
         <AnimatePresence initial={false} mode="popLayout">
           <motion.div
@@ -306,7 +308,8 @@ export function BeforeTripWeatherTicker() {
 }
 
 export function TravelWeatherWidget({ preferredCityId = null }: { preferredCityId?: string | null }) {
-  const { data: cities, isPending, isError, isFetching, refetch } = useWeather();
+  const { trip } = useTrip();
+  const { data: cities, isPending, isError, isFetching, refetch } = useWeather(trip);
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
   const [isDailyExpanded, setIsDailyExpanded] = useState(false);
   const userPickedRef = useRef(false);
@@ -373,7 +376,7 @@ export function TravelWeatherWidget({ preferredCityId = null }: { preferredCityI
           />
         </Tabs>
         <div className="mt-3">
-          <WeatherDetails city={selectedCity} isRefreshing={isFetching} isDailyExpanded={isDailyExpanded} onDailyExpandedChange={setIsDailyExpanded} />
+          <WeatherDetails city={selectedCity} timeZone={trip.timeZone} isRefreshing={isFetching} isDailyExpanded={isDailyExpanded} onDailyExpandedChange={setIsDailyExpanded} />
         </div>
       </div>
     </section>

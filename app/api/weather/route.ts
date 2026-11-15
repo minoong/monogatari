@@ -1,14 +1,8 @@
 import { NextResponse } from "next/server";
-import type { DailyWeatherForecast, HourlyWeatherForecast, WeatherCity, WeatherCityId } from "@/lib/weather";
+import { getTripBySlug, type TripConfig } from "@/lib/trips";
+import type { DailyWeatherForecast, HourlyWeatherForecast, WeatherCity } from "@/lib/weather";
 
 const CACHE_SECONDS = 15 * 60;
-const THAILAND_UTC_OFFSET = "+07:00";
-
-const TRAVEL_DESTINATIONS: Array<{ id: WeatherCityId; city: string; latitude: number; longitude: number }> = [
-  { id: "bangkok", city: "방콕", latitude: 13.7563, longitude: 100.5018 },
-  { id: "pattaya", city: "팟타야", latitude: 12.9236, longitude: 100.8825 },
-  { id: "koh-sichang", city: "코시창", latitude: 13.161, longitude: 100.808 },
-];
 
 type OpenMeteoLocation = {
   current?: {
@@ -71,7 +65,7 @@ function getNextSixHourPrecipitationProbability(location: OpenMeteoLocation, cur
   return Math.max(0, ...nextSixHours.map((value) => Math.round(value)));
 }
 
-function getHourlyForecast(location: OpenMeteoLocation, currentTime: string): HourlyWeatherForecast[] {
+function getHourlyForecast(location: OpenMeteoLocation, currentTime: string, utcOffset: string): HourlyWeatherForecast[] {
   const hourly = location.hourly;
   const times = hourly?.time ?? [];
   const startIndex = Math.max(0, times.findIndex((time) => time >= currentTime));
@@ -86,7 +80,7 @@ function getHourlyForecast(location: OpenMeteoLocation, currentTime: string): Ho
     if (typeof temperature !== "number" || typeof weatherCode !== "number" || typeof precipitationProbability !== "number" || typeof windSpeed !== "number" || (isDay !== 0 && isDay !== 1)) return [];
 
     return [{
-      time: new Date(`${time}${THAILAND_UTC_OFFSET}`).toISOString(),
+      time: new Date(`${time}${utcOffset}`).toISOString(),
       temperature: Math.round(temperature),
       weatherCode,
       precipitationProbability: Math.round(precipitationProbability),
@@ -96,7 +90,7 @@ function getHourlyForecast(location: OpenMeteoLocation, currentTime: string): Ho
   });
 }
 
-function getDailyForecast(location: OpenMeteoLocation): DailyWeatherForecast[] {
+function getDailyForecast(location: OpenMeteoLocation, utcOffset: string): DailyWeatherForecast[] {
   const daily = location.daily;
   const dates = daily?.time ?? [];
 
@@ -111,43 +105,46 @@ function getDailyForecast(location: OpenMeteoLocation): DailyWeatherForecast[] {
     if (typeof temperatureMax !== "number" || typeof temperatureMin !== "number" || typeof weatherCode !== "number" || typeof precipitationProbability !== "number" || typeof windSpeedMax !== "number" || typeof sunrise !== "string" || typeof sunset !== "string") return [];
 
     return [{
-      date: new Date(`${date}T00:00:00${THAILAND_UTC_OFFSET}`).toISOString(),
+      date: new Date(`${date}T00:00:00${utcOffset}`).toISOString(),
       temperatureMax: Math.round(temperatureMax),
       temperatureMin: Math.round(temperatureMin),
       weatherCode,
       precipitationProbability: Math.round(precipitationProbability),
       windSpeedMax: Math.round(windSpeedMax),
-      sunrise: new Date(`${sunrise}${THAILAND_UTC_OFFSET}`).toISOString(),
-      sunset: new Date(`${sunset}${THAILAND_UTC_OFFSET}`).toISOString(),
+      sunrise: new Date(`${sunrise}${utcOffset}`).toISOString(),
+      sunset: new Date(`${sunset}${utcOffset}`).toISOString(),
     }];
   });
 }
 
-function normalizeWeather(locations: unknown): WeatherCity[] | null {
-  if (!Array.isArray(locations) || locations.length !== TRAVEL_DESTINATIONS.length) return null;
+function normalizeWeather(locations: unknown, trip: Pick<TripConfig, "weatherPlaces" | "utcOffset">): WeatherCity[] | null {
+  const { weatherPlaces, utcOffset } = trip;
+  // 지점이 하나면 Open-Meteo가 배열이 아닌 객체 하나를 돌려준다.
+  const list = weatherPlaces.length === 1 && !Array.isArray(locations) ? [locations] : locations;
+  if (!Array.isArray(list) || list.length !== weatherPlaces.length) return null;
 
-  const weather = locations.map((value, index) => {
+  const weather = list.map((value, index) => {
     const location = value as OpenMeteoLocation;
     if (!isValidCurrent(location)) return null;
 
-    const destination = TRAVEL_DESTINATIONS[index];
-    const dailyForecast = getDailyForecast(location);
+    const destination = weatherPlaces[index];
+    const dailyForecast = getDailyForecast(location, utcOffset);
     const today = dailyForecast[0];
     if (!today) return null;
 
     return {
       id: destination.id,
-      city: destination.city,
+      city: destination.label,
       temperature: Math.round(location.current.temperature_2m),
       apparentTemperature: Math.round(location.current.apparent_temperature),
       weatherCode: location.current.weather_code,
       isDay: location.current.is_day === 1,
       windSpeed: Math.round(location.current.wind_speed_10m),
-      observedAt: new Date(`${location.current.time}${THAILAND_UTC_OFFSET}`).toISOString(),
+      observedAt: new Date(`${location.current.time}${utcOffset}`).toISOString(),
       sunrise: today.sunrise,
       sunset: today.sunset,
       nextSixHourPrecipitationProbability: getNextSixHourPrecipitationProbability(location, location.current.time),
-      hourlyForecast: getHourlyForecast(location, location.current.time),
+      hourlyForecast: getHourlyForecast(location, location.current.time, utcOffset),
       dailyForecast,
     } satisfies WeatherCity;
   });
@@ -155,15 +152,18 @@ function normalizeWeather(locations: unknown): WeatherCity[] | null {
   return weather.every((item): item is WeatherCity => item !== null) ? weather : null;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const trip = getTripBySlug(new URL(request.url).searchParams.get("trip") ?? "");
+  if (!trip) return NextResponse.json({ error: "여행 정보를 확인해 주세요." }, { status: 400 });
+
   const parameters = new URLSearchParams({
-    latitude: TRAVEL_DESTINATIONS.map((destination) => destination.latitude).join(","),
-    longitude: TRAVEL_DESTINATIONS.map((destination) => destination.longitude).join(","),
+    latitude: trip.weatherPlaces.map((place) => place.latitude).join(","),
+    longitude: trip.weatherPlaces.map((place) => place.longitude).join(","),
     current: "temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day",
     hourly: "temperature_2m,weather_code,precipitation_probability,wind_speed_10m,is_day",
     daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset",
     forecast_days: "7",
-    timezone: "Asia/Bangkok",
+    timezone: trip.timeZone,
   });
 
   try {
@@ -172,7 +172,7 @@ export async function GET() {
     });
     if (!response.ok) throw new Error(`Weather provider returned ${response.status}`);
 
-    const weather = normalizeWeather(await response.json());
+    const weather = normalizeWeather(await response.json(), trip);
     if (!weather) throw new Error("Weather provider response was incomplete");
 
     return NextResponse.json(

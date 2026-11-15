@@ -490,6 +490,8 @@ const HomeScreen: React.FC<{ trip: TripConfig }> = ({ trip }) => {
   const [tripState, setTripState] = useState<"before" | "during" | "after">(() => getTripPhase(trip));
   const stays = useMemo(() => getAccommodations(trip), [trip]);
   const activeStayId = useActiveAccommodationId(tripState === "during", trip, stays);
+  const activeStay = stays.find((stay) => stay.id === activeStayId);
+  const activeWeatherPlaceId = activeStay ? (activeStay.weatherPlaceId ?? activeStay.id) : null;
 
   useEffect(() => {
     const syncTripPhase = () => {
@@ -598,7 +600,7 @@ const HomeScreen: React.FC<{ trip: TripConfig }> = ({ trip }) => {
                 <div className="flex flex-col gap-4 pb-24">
                   <DuringTripStayTicker />
 
-                  <TravelWeatherWidget preferredCityId={activeStayId} />
+                  <TravelWeatherWidget preferredCityId={activeWeatherPlaceId} />
 
                   {wishes.length > 0 && (
                     <WishGoalRings onTypePress={openWishType} wishes={wishes} />

@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
-export const WEATHER_QUERY_KEY = ["weather"] as const;
+export const weatherQueryKey = (tripId: string) => ["weather", tripId] as const;
 export const WEATHER_REFRESH_INTERVAL = 15 * 60 * 1000;
 
-export type WeatherCityId = "bangkok" | "pattaya" | "koh-sichang";
+/** 여행 설정(weatherPlaces)의 지점 id. 예: "bangkok", "yonago" */
+export type WeatherCityId = string;
 
 export interface HourlyWeatherForecast {
   time: string;
@@ -112,18 +113,18 @@ export function getWeatherPresentation(weatherCode: number, isDay: boolean, opti
   return { label, icon: "cloud-sun" };
 }
 
-export async function fetchWeather(): Promise<WeatherCity[]> {
-  const response = await fetch("/api/weather");
+export async function fetchWeather(tripSlug: string): Promise<WeatherCity[]> {
+  const response = await fetch(`/api/weather?trip=${encodeURIComponent(tripSlug)}`);
   if (!response.ok) throw new Error("날씨 정보를 불러오지 못했습니다.");
 
   const json = await response.json() as WeatherResponse;
   return json.data;
 }
 
-export function useWeather() {
+export function useWeather(trip: { id: string; slug: string }) {
   return useQuery({
-    queryKey: WEATHER_QUERY_KEY,
-    queryFn: fetchWeather,
+    queryKey: weatherQueryKey(trip.id),
+    queryFn: () => fetchWeather(trip.slug),
     staleTime: WEATHER_REFRESH_INTERVAL,
     refetchInterval: WEATHER_REFRESH_INTERVAL,
     refetchIntervalInBackground: false,

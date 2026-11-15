@@ -39,6 +39,8 @@ export interface TripStaySeed {
   checkOutDate: string;
   googleMapsUrl: string;
   agodaUrl: string;
+  /** 이 숙소의 날씨를 보여줄 weatherPlaces의 id. 없으면 숙소 id를 그대로 쓴다. */
+  weatherPlaceId?: string;
   address: string;
   /** 체크인 가능 시작 시각 (HH:mm) */
   checkInTime: string;
