@@ -18,11 +18,11 @@ import {
 } from "@/components/pwa/pwa-intro-photo-flash";
 
 const introImages = [
-  { alt: "방콕 여행 준비 장면 1", src: "/loading/fetch-01.jpg" },
-  { alt: "방콕 여행 준비 장면 2", src: "/loading/fetch-02.jpg" },
-  { alt: "방콕 여행 준비 장면 3", src: "/loading/fetch-03.jpg" },
-  { alt: "방콕 여행 준비 장면 4", src: "/loading/fetch-04.jpg" },
-  { alt: "방콕 여행 준비 장면 5", src: "/loading/fetch-05.jpg" },
+  { alt: "여행 준비 장면 1", src: "/loading/fetch-01.jpg" },
+  { alt: "여행 준비 장면 2", src: "/loading/fetch-02.jpg" },
+  { alt: "여행 준비 장면 3", src: "/loading/fetch-03.jpg" },
+  { alt: "여행 준비 장면 4", src: "/loading/fetch-04.jpg" },
+  { alt: "여행 준비 장면 5", src: "/loading/fetch-05.jpg" },
   { alt: "함께 손을 맞댄 순간", src: "/intro/couple-hands.jpg" },
 ] satisfies PwaIntroFlashImage[];
 

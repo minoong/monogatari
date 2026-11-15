@@ -2,7 +2,9 @@
 
 import * as React from "react";
 
+import { useTrip } from "@/components/providers/trip-provider";
 import { DottedMap, type Marker } from "@/components/ui/dotted-map";
+import type { TripConfig } from "@/lib/trips";
 
 const MAP_WIDTH = 150;
 const MAP_HEIGHT = 75;
@@ -14,35 +16,47 @@ type CountryMarker = Marker & {
   overlay: {
     badgeSide?: "left" | "right";
     cities: string[];
-    countryCode: "kr" | "th";
+    countryCode: "kr" | "th" | "jp";
     countryName: string;
   };
 };
 
-const countryMarkers = [
-  {
-    lat: 36.4,
-    lng: 127.9,
-    overlay: {
-      badgeSide: "left",
-      cities: ["일산", "서울", "인천"],
-      countryCode: "kr",
-      countryName: "대한민국",
-    },
-    size: COUNTRY_ICON_SIZE,
+const SEOUL_MARKER = {
+  lat: 36.4,
+  lng: 127.9,
+  overlay: {
+    badgeSide: "left",
+    cities: ["일산", "서울", "인천"],
+    countryCode: "kr",
+    countryName: "대한민국",
   },
-  {
-    lat: 12.9236,
-    lng: 100.8825,
-    overlay: {
-      badgeSide: "right",
-      cities: ["방콕", "파타야"],
-      countryCode: "th",
-      countryName: "태국",
+  size: COUNTRY_ICON_SIZE,
+} satisfies CountryMarker;
+
+const DESTINATION_COUNTRIES = {
+  TH: { code: "th", name: "태국" },
+  JP: { code: "jp", name: "일본" },
+} as const;
+
+/** 여행지 마커. 위치는 날씨 지점들의 중심, 도시 표기는 지점 이름을 쓴다. */
+function getCountryMarkers(trip: Pick<TripConfig, "countryCode" | "weatherPlaces">): CountryMarker[] {
+  const places = trip.weatherPlaces;
+  const destination = DESTINATION_COUNTRIES[trip.countryCode];
+  return [
+    SEOUL_MARKER,
+    {
+      lat: places.reduce((sum, place) => sum + place.latitude, 0) / places.length,
+      lng: places.reduce((sum, place) => sum + place.longitude, 0) / places.length,
+      overlay: {
+        badgeSide: "right",
+        cities: places.map((place) => place.label),
+        countryCode: destination.code,
+        countryName: destination.name,
+      },
+      size: COUNTRY_ICON_SIZE,
     },
-    size: COUNTRY_ICON_SIZE,
-  },
-] satisfies CountryMarker[];
+  ];
+}
 
 type RenderedCountryMarker = Omit<CountryMarker, "lat" | "lng"> & {
   r: number;
@@ -77,6 +91,7 @@ type BadgeLayout = BadgeMetrics & {
 const countryOrder: Record<CountryMarker["overlay"]["countryCode"], number> = {
   kr: 0,
   th: 1,
+  jp: 1,
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -239,17 +254,18 @@ function getBadgeLayouts(markers: RenderedCountryMarker[], scale: number, visibl
 }
 
 export function TravelDottedMap() {
+  const { trip } = useTrip();
   const id = React.useId();
   const [mapRef, mapWidth] = useElementWidth<HTMLDivElement>();
   const responsiveScale = getResponsiveScale(mapWidth);
   const visibleCityLimit = getVisibleCityLimit(mapWidth);
   const markers = React.useMemo(
     () =>
-      countryMarkers.map((marker) => ({
+      getCountryMarkers(trip).map((marker) => ({
         ...marker,
         size: mapWidth > 0 && mapWidth < 480 ? COMPACT_COUNTRY_ICON_SIZE : COUNTRY_ICON_SIZE,
       })),
-    [mapWidth],
+    [mapWidth, trip],
   );
 
   return (
@@ -262,7 +278,7 @@ export function TravelDottedMap() {
         <div>
           <p className="text-[10px] font-medium tracking-[0.24em] text-slate-400 uppercase">Travel map</p>
           <h2 id="travel-map-title" className="text-base font-semibold text-slate-900 dark:text-slate-100">
-            서울에서 방콕까지
+            서울에서 {trip.shortName}까지
           </h2>
         </div>
 

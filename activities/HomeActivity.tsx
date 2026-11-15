@@ -91,7 +91,7 @@ const TravelClock: React.FC<TravelClockProps> = ({ city, zone, flagCode }) => {
 const hasTimeDifferenceFromSeoul = (timeZone: string) => dayjs().tz(timeZone).utcOffset() !== dayjs().tz("Asia/Seoul").utcOffset();
 
 const WorldClockCard: React.FC<{ trip: TripConfig }> = ({ trip }) => (
-  <section className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 px-2 py-1 shadow-[0_6px_18px_-18px_rgba(15,23,42,0.55)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90" aria-label="한국과 태국의 현재 시각">
+  <section className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 px-2 py-1 shadow-[0_6px_18px_-18px_rgba(15,23,42,0.55)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90" aria-label={`한국과 ${trip.shortName}의 현재 시각`}>
     <div className="flex gap-2 px-2 py-1.5">
       <TravelClock city="서울" zone="Asia/Seoul" flagCode="KR" />
       <div className="w-px self-stretch bg-slate-200 dark:bg-slate-800" aria-hidden="true" />

@@ -1,16 +1,16 @@
 # Monogatari
 
-두 사람이 함께 방콕 여행을 준비하고 여행 중 필요한 정보를 확인할 수 있는 모바일 우선 웹 앱입니다. Next.js App Router 위에서 Stackflow를 사용해 네이티브 앱과 비슷한 화면 전환을 제공하며, 준비물 데이터는 Supabase와 실시간으로 동기화합니다.
+두 사람이 함께 여행을 준비하고 여행 중 필요한 정보를 확인할 수 있는 모바일 우선 웹 앱입니다. 여러 여행(태국 방콕 2026-08, 일본 요나고·돗토리 2026-12)을 만들어 두고 홈에서 골라 볼 수 있습니다. Next.js App Router 위에서 Stackflow를 사용해 네이티브 앱과 비슷한 화면 전환을 제공하며, 준비물 데이터는 Supabase와 실시간으로 동기화합니다.
 
 ## 주요 기능
 
-- 여행 전·중·후 상태별 홈 화면
+- 여행 선택(여행별 데이터·통화·시간대·테마)과 여행 전·중·후 상태별 홈 화면
 - 날짜별 여행 일정표
 - 담당자별 준비물 등록, 완료, 삭제 및 재촉
 - 준비물 전체/개인별 완료율과 Supabase Realtime 동기화
-- 태국어 여행 회화와 음성 인식 UI
-- 원화·바트·달러 환율 계산
-- 방콕 맛집 및 쇼핑 목록
+- 여행지 언어(태국어, 일본어) 회화와 음성 읽기
+- 원화·여행 통화(바트, 엔)·달러 환율 계산과 통화별 가계부
+- 여행별 맛집·쇼핑 위시 목록
 - 모바일 safe area와 standalone PWA 표시 지원
 
 ## 기술 스택
@@ -88,7 +88,7 @@ lib/                   Supabase 클라이언트와 공용 유틸리티
 - `HomeActivity`: 여행 상태별 대시보드
 - `ScheduleActivity`: 일정 타임라인
 - `ChecklistActivity`: 준비물 목록과 진행률
-- `DictionaryActivity`: 태국어 회화
+- `DictionaryActivity`: 여행지 언어 회화
 - `ExchangeActivity`: 환율 계산기
 - `DiscoverActivity`: 맛집 및 쇼핑 목록
 
@@ -135,3 +135,14 @@ Supabase Realtime을 사용하려면 `preparation_items` 테이블의 Postgres C
 - 자동화 테스트가 아직 없습니다.
 
 우선순위 작업은 [TASKS.md](./TASKS.md), 확인된 문제는 [BUGS.md](./BUGS.md)를 참고하세요.
+
+## 여행 추가하기
+
+여행별 설정은 코드(`lib/trips/`)에, 여행에 속한 데이터(일정, 지출, 위시, 준비물)는 DB의 `trip_id`에 둡니다.
+
+1. `lib/trips/<여행>.ts`에 `TripConfig`를 만듭니다. 날짜, 시간대, 통화, 언어, 날씨 지점, 항공편, 숙소, 지출 카테고리, 테마, 앱바 문구를 적고, 확인되지 않은 예약 정보는 비워 둡니다.
+2. `lib/trips/index.ts`의 `TRIPS`에 등록하고 `TripSlug` 타입에 슬러그를 추가합니다.
+3. `supabase/migrations/`에 `trips` 행을 추가하는 마이그레이션을 만듭니다. `id`는 설정 파일의 `id`와 같은 값이어야 합니다.
+4. 새 통화를 쓰면 `lib/currency.ts`에, 새 언어의 회화가 필요하면 `lib/phrases-*.ts`와 `getPhrases`에 추가합니다.
+
+`trips` 테이블과 `trip_id` 컬럼은 `supabase/migrations/20261115100000_create_trips.sql`, `20261115100100_add_trip_scope.sql`이 만들고, 지출·위시 금액 컬럼 이름 변경은 `20261115110000_rename_thb_columns_to_local.sql`이 처리합니다.

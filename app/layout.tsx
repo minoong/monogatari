@@ -37,8 +37,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "가현쨩과 미누쿤의 모노가타리 🇹🇭",
-  description: "두 사람이 함께 준비하는 방콕 여행 메이트 웹 앱",
+  // 메타데이터는 서버에서 만들어져 선택한 여행을 알 수 없으므로 특정 여행지를 넣지 않는다.
+  title: "가현쨩과 미누쿤의 모노가타리",
+  description: "두 사람이 함께 준비하는 여행 메이트 웹 앱",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
