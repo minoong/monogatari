@@ -477,8 +477,8 @@ type PostTripScrollExperienceProps = {
   scrollContainerRef: RefObject<HTMLDivElement | null>;
 };
 
-const fetchWishes = async (): Promise<WishItem[]> => {
-  const response = await fetch("/api/wishes");
+const fetchWishes = async (tripSlug: string): Promise<WishItem[]> => {
+  const response = await fetch(`/api/wishes?trip=${encodeURIComponent(tripSlug)}`);
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error ?? "위시를 불러오지 못했습니다.");
   return payload.data;
@@ -497,7 +497,7 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
   const panelRefs = useRef<(HTMLElement | null)[]>([]);
   const { trip } = useTrip();
   const returnFlight = getFlight(trip, "return");
-  const { data: wishes = [], isFetched: isWishesFetched } = useQuery({ queryKey: ["wishes"], queryFn: fetchWishes });
+  const { data: wishes = [], isFetched: isWishesFetched } = useQuery({ queryKey: ["wishes", trip.id], queryFn: () => fetchWishes(trip.slug) });
   const { data: scheduleItems = [], isFetched: isScheduleFetched } = useQuery({
     queryKey: ["schedule", trip.id],
     queryFn: () => fetchSchedule(trip.slug),

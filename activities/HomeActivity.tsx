@@ -530,9 +530,9 @@ const HomeScreen: React.FC<{ trip: TripConfig }> = ({ trip }) => {
   });
   const checklistBattleStats = getChecklistBattleStats(checklistItems);
   const { data: wishes = [] } = useQuery<WishItem[]>({
-    queryKey: ["wishes"],
+    queryKey: ["wishes", trip.id],
     queryFn: async () => {
-      const response = await fetch("/api/wishes");
+      const response = await fetch(`/api/wishes?trip=${encodeURIComponent(trip.slug)}`);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "위시를 불러오지 못했습니다.");
       return payload.data;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FocusEvent, type FormEvent, type ReactNode } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
 import {
   Avatar,
@@ -41,20 +41,20 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { WishImagePicker, type WishImageDraft } from "@/components/wish/WishImagePicker";
+import { useTrip } from "@/components/providers/trip-provider";
 import {
-  DEFAULT_THB_TO_KRW_RATE,
-  EXCHANGE_RATE_QUERY_KEY,
   convertKrwToLocal,
   convertLocalToKrw,
-  fetchThbToKrwRate,
+  getLocalToKrwRate,
   toggleCurrencyAmount,
   toFiniteAmount,
+  useExchangeRates,
   type InputCurrency,
 } from "@/lib/exchange-rates";
 import {
   isGoogleMapsUrl,
   normalizeExternalUrl,
-  WISH_CATEGORY_SUGGESTIONS,
+  getWishCategorySuggestions,
   WISH_COMPLETION_LABEL,
   WISH_TYPES,
   WISH_TYPE_META,
@@ -88,13 +88,15 @@ const IMAGE_COMPRESSION_OPTIONS = {
 
 export function WishDrawer({ open, initialType, onOpenChange, wish = null }: WishDrawerProps) {
   const queryClient = useQueryClient();
+  const { trip } = useTrip();
+  const localCurrency = trip.currency.code;
   const isEditing = wish !== null;
   const [type, setType] = useState<WishType>(wish?.type ?? initialType);
   const [title, setTitle] = useState(wish?.title ?? "");
   const [categories, setCategories] = useState<string[]>(wish?.categories ?? []);
   const [categoryDraft, setCategoryDraft] = useState("");
   const [targetPrice, setTargetPrice] = useState(wish?.target_price_local?.toString() ?? "");
-  const [inputCurrency, setInputCurrency] = useState<InputCurrency>("THB");
+  const [inputCurrency, setInputCurrency] = useState<InputCurrency>(localCurrency);
   const [vendor, setVendor] = useState(wish?.vendor ?? "");
   const [memo, setMemo] = useState(wish?.memo ?? "");
   const [locations, setLocations] = useState<string[]>(wish?.locations ?? []);
@@ -111,18 +113,16 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
   const panelRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleFieldFocus = (event: FocusEvent<HTMLElement>) => scrollDrawerFieldIntoView(event);
-  const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
-    queryKey: EXCHANGE_RATE_QUERY_KEY,
-    queryFn: fetchThbToKrwRate,
-  });
+  const { data: exchangeData } = useExchangeRates();
+  const localToKrwRate = getLocalToKrwRate(exchangeData, localCurrency);
   const numericInput = toFiniteAmount(Number(targetPrice) || 0);
   const isKrwInput = inputCurrency === "KRW";
-  // 위시 가격은 아직 태국 바트 기준이다. 위시를 여행별로 전환할 때 여행 통화로 바꾼다.
-  const targetPriceLocal = isKrwInput ? convertKrwToLocal(numericInput, thbToKrwRate, "THB") : numericInput;
-  const targetPriceKrw = convertLocalToKrw(targetPriceLocal, thbToKrwRate);
+  // 위시 가격은 활성 여행의 통화(바트, 엔)로 저장한다.
+  const targetPriceLocal = isKrwInput ? convertKrwToLocal(numericInput, localToKrwRate, localCurrency) : numericInput;
+  const targetPriceKrw = convertLocalToKrw(targetPriceLocal, localToKrwRate);
 
   const toggleInputCurrency = () => {
-    const { nextCurrency, nextAmount } = toggleCurrencyAmount(numericInput, thbToKrwRate, inputCurrency, "THB", targetPrice);
+    const { nextCurrency, nextAmount } = toggleCurrencyAmount(numericInput, localToKrwRate, inputCurrency, localCurrency, targetPrice);
     setTargetPrice(nextAmount);
     setInputCurrency(nextCurrency);
   };
@@ -137,7 +137,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
     setCategories([]);
     setCategoryDraft("");
     setTargetPrice("");
-    setInputCurrency("THB");
+    setInputCurrency(localCurrency);
     setVendor("");
     setMemo("");
     setLocations([]);
@@ -234,6 +234,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
           method: isEditing ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            trip: trip.slug,
             type,
             title,
             categories: submittedCategories,
@@ -257,7 +258,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
     },
     onSuccess: async () => {
       setSuccess(true);
-      await queryClient.invalidateQueries({ queryKey: ["wishes"] });
+      await queryClient.invalidateQueries({ queryKey: ["wishes", trip.id] });
       toast.success(isEditing ? "위시를 수정했어요." : "위시에 추가했어요.");
       closeTimerRef.current = setTimeout(() => handleOpenChange(false), 800);
     },
@@ -382,7 +383,7 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
               <div>
                 <p className="mb-2 text-xs font-medium text-gray-500">추천 태그</p>
                 <div className="flex flex-wrap gap-2">
-                  {WISH_CATEGORY_SUGGESTIONS[type].map((suggestion) => {
+                  {getWishCategorySuggestions(type, trip.countryCode).map((suggestion) => {
                     const isSelected = categories.includes(suggestion);
                     return (
                       <Button
@@ -413,17 +414,17 @@ export function WishDrawer({ open, initialType, onOpenChange, wish = null }: Wis
                   amount={targetPrice}
                   convertedValue={isKrwInput ? targetPriceLocal : targetPriceKrw}
                   currency={inputCurrency}
-                  localCurrency="THB"
+                  localCurrency={localCurrency}
                   inputId="wish-target-price"
                   name="targetPrice"
                   onAmountChange={setTargetPrice}
                   onInputFocus={handleFieldFocus}
                   onToggle={toggleInputCurrency}
-                  rateReady={thbToKrwRate > 0}
+                  rateReady={localToKrwRate > 0}
                 />
                 <p className="px-1 text-xs text-slate-400">가격을 모르면 비워 두어도 됩니다.</p>
                 <p className="text-right text-[11px] text-slate-400">
-                  1 THB = {Number.isFinite(thbToKrwRate) ? thbToKrwRate.toLocaleString("ko-KR") : "—"} KRW
+                  1 {localCurrency} = {Number.isFinite(localToKrwRate) ? localToKrwRate.toLocaleString("ko-KR") : "—"} KRW
                 </p>
               </div>
             )}

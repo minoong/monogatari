@@ -22,11 +22,8 @@ import {
   AlertDialogPopup,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  DEFAULT_THB_TO_KRW_RATE,
-  EXCHANGE_RATE_QUERY_KEY,
-  fetchThbToKrwRate,
-} from "@/lib/exchange-rates";
+import { useTrip } from "@/components/providers/trip-provider";
+import { getLocalToKrwRate, useExchangeRates } from "@/lib/exchange-rates";
 import {
   MorphingDialog,
   MorphingDialogClose,
@@ -52,8 +49,8 @@ import { useWishCompletionMutation } from "@/components/wish/use-wish-completion
 
 interface WishListActivityProps { params: { type?: string; filter?: string } }
 
-const fetchWishes = async (type: WishType): Promise<WishItem[]> => {
-  const response = await fetch(`/api/wishes?type=${type}`);
+const fetchWishes = async (tripSlug: string, type: WishType): Promise<WishItem[]> => {
+  const response = await fetch(`/api/wishes?trip=${encodeURIComponent(tripSlug)}&type=${type}`);
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error ?? "위시를 불러오지 못했습니다.");
   return payload.data;
@@ -68,6 +65,7 @@ const WISH_LOADING_MESSAGES: Record<WishType, readonly string[]> = {
 
 export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) => {
   const queryClient = useQueryClient();
+  const { trip } = useTrip();
   const type = isWishType(params.type) ? params.type : "shopping";
   const meta = WISH_TYPE_META[type];
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -82,7 +80,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
   );
   const completionMutation = useWishCompletionMutation();
   const mainRef = useRef<HTMLElement>(null);
-  const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes", type], queryFn: () => fetchWishes(type) });
+  const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes", trip.id, type], queryFn: () => fetchWishes(trip.slug, type) });
   const showInitialLoader = useMinimumInitialLoading(isLoading);
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
@@ -124,10 +122,8 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
       }),
     [completionFilter, deferredSearchQuery, selectedCategories, wishes],
   );
-  const { data: thbToKrwRate = DEFAULT_THB_TO_KRW_RATE } = useQuery({
-    queryKey: EXCHANGE_RATE_QUERY_KEY,
-    queryFn: fetchThbToKrwRate,
-  });
+  const { data: exchangeData } = useExchangeRates();
+  const localToKrwRate = getLocalToKrwRate(exchangeData, trip.currency.code);
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/wishes?id=${id}`, { method: "DELETE" });
@@ -137,7 +133,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
     },
     onSuccess: async () => {
       setDeletingWish(null);
-      await queryClient.invalidateQueries({ queryKey: ["wishes"] });
+      await queryClient.invalidateQueries({ queryKey: ["wishes", trip.id] });
       toast.success("위시에서 삭제했어요.");
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : "잠시 후 다시 시도해 주세요."),
@@ -334,7 +330,7 @@ export const WishListActivity: React.FC<WishListActivityProps> = ({ params }) =>
                     setDrawerSession((current) => current + 1);
                     setDrawerOpen(true);
                   }}
-                  thbToKrwRate={thbToKrwRate}
+                  localToKrwRate={localToKrwRate}
                   type={type}
                   wish={wish}
                 />
@@ -411,7 +407,7 @@ function wishMatchesSearch(wish: WishItem, query: string) {
 function WishListItem({
   wish,
   type,
-  thbToKrwRate,
+  localToKrwRate,
   onDelete,
   onEdit,
   onCompletionChange,
@@ -419,7 +415,7 @@ function WishListItem({
 }: {
   wish: WishItem;
   type: WishType;
-  thbToKrwRate: number;
+  localToKrwRate: number;
   onDelete: () => void;
   onEdit: () => void;
   onCompletionChange: (is_completed: boolean) => void;
@@ -429,7 +425,7 @@ function WishListItem({
   const [zoomImageIndex, setZoomImageIndex] = useState(0);
   const priceKrw = wish.target_price_local === null
     ? null
-    : Math.round(wish.target_price_local * thbToKrwRate);
+    : Math.round(wish.target_price_local * localToKrwRate);
   const hasPrice = wish.target_price_local !== null && priceKrw !== null;
   const detailLine = [wish.vendor, wish.memo].filter(Boolean).join(" · ");
 
@@ -510,7 +506,7 @@ function WishListItem({
 
             {hasPrice && (
               <div className="flex shrink-0 self-stretch flex-col items-end py-0.5 text-right">
-                <ExpenseCurrencyPair currency="THB" krw={priceKrw} local={wish.target_price_local!} />
+                <ExpenseCurrencyPair krw={priceKrw} local={wish.target_price_local!} />
               </div>
             )}
           </MorphingDialogTrigger>
@@ -550,7 +546,6 @@ function WishListItem({
               {hasPrice && (
                 <div className="mt-2 flex justify-end">
                   <ExpenseCurrencyPair
-                    currency="THB"
                     krw={priceKrw}
                     local={wish.target_price_local!}
                     mainSize="hero"

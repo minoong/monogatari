@@ -11,11 +11,12 @@ import { ActivityFetchLoader, useMinimumInitialLoading } from "@/components/ui/a
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cardNavButtonClass } from "@/components/ui/drawer-form";
 import { WishTypeIcon } from "@/components/wish/WishTypeIcon";
+import { useTrip } from "@/components/providers/trip-provider";
 import { getWishProgress, WISH_TYPES, WISH_TYPE_META, type WishItem, type WishType } from "@/lib/wishes";
 import { cn } from "@/lib/utils";
 
-const fetchWishes = async (): Promise<WishItem[]> => {
-  const response = await fetch("/api/wishes");
+const fetchWishes = async (tripSlug: string): Promise<WishItem[]> => {
+  const response = await fetch(`/api/wishes?trip=${encodeURIComponent(tripSlug)}`);
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error ?? "위시를 불러오지 못했습니다.");
   return payload.data;
@@ -23,10 +24,11 @@ const fetchWishes = async (): Promise<WishItem[]> => {
 
 export const DiscoverActivity: React.FC = () => {
   const { push } = useFlow();
+  const { trip } = useTrip();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerSession, setDrawerSession] = useState(0);
   const mainRef = useRef<HTMLElement>(null);
-  const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes"], queryFn: fetchWishes });
+  const { data: wishes = [], isError, isLoading, refetch } = useQuery({ queryKey: ["wishes", trip.id], queryFn: () => fetchWishes(trip.slug) });
   const showInitialLoader = useMinimumInitialLoading(isLoading);
   const openList = (type: WishType) => { triggerHapticFeedback(); push("WishListActivity", { type }); };
   const openCreateDrawer = () => {

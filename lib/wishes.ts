@@ -4,6 +4,7 @@ export type WishType = (typeof WISH_TYPES)[number];
 
 export interface WishItem {
   id: string;
+  trip_id: string;
   type: WishType;
   title: string;
   categories: string[];
@@ -107,15 +108,24 @@ export type WishCompletionFilter = "all" | "completed" | "pending";
 export const isWishCompletionFilter = (value: unknown): value is WishCompletionFilter =>
   value === "all" || value === "completed" || value === "pending";
 
-export const WISH_CATEGORY_SUGGESTIONS: Record<WishType, string[]> = {
-  shopping: ["기념품", "약국", "패션", "생활용품", "뷰티"],
-  restaurant: ["태국 음식", "국수", "길거리 음식", "카페", "해산물"],
-  menu: ["태국 음식", "국수", "길거리 음식", "해산물", "음료"],
-  snack: ["과일", "디저트", "음료", "편의점", "식재료"],
+const WISH_CATEGORY_SUGGESTIONS: Record<"TH" | "JP", Record<WishType, string[]>> = {
+  TH: {
+    shopping: ["기념품", "약국", "패션", "생활용품", "뷰티"],
+    restaurant: ["태국 음식", "국수", "길거리 음식", "카페", "해산물"],
+    menu: ["태국 음식", "국수", "길거리 음식", "해산물", "음료"],
+    snack: ["과일", "디저트", "음료", "편의점", "식재료"],
+  },
+  JP: {
+    shopping: ["기념품", "드럭스토어", "패션", "생활용품", "뷰티"],
+    restaurant: ["일본 음식", "라멘", "해산물", "게 요리", "카페"],
+    menu: ["일본 음식", "라멘", "해산물", "게 요리", "음료"],
+    snack: ["디저트", "음료", "편의점", "과자", "기념품"],
+  },
 };
 
-export const formatThaiBaht = (value: number | null) =>
-  value === null ? null : new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 }).format(value);
+/** 위시 등록에서 추천하는 카테고리 태그. 여행지(국가)에 맞춰 달라진다. */
+export const getWishCategorySuggestions = (type: WishType, countryCode: "TH" | "JP") =>
+  WISH_CATEGORY_SUGGESTIONS[countryCode][type];
 
 export const normalizeExternalUrl = (value: string) =>
   /^https?:\/\//i.test(value) ? value : `https://${value}`;

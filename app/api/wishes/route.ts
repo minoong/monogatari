@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { CURRENCY_INFO } from "@/lib/currency";
+import { getTripBySlug, TRIPS } from "@/lib/trips";
 import { isGoogleMapsUrl, isWishType, type WishImage, type WishItem } from "@/lib/wishes";
 
 const IMAGE_PATH = /^wishes\/[0-9a-f-]+\.(?:jpe?g|png|webp)$/i;
@@ -51,11 +53,21 @@ const imagePathsValue = (value: unknown) => {
 };
 const wishIdValue = (value: string | null) => value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value) ? value : null;
 
-const wishInputValue = (body: Record<string, unknown>) => {
+const getTripById = (id: unknown) => TRIPS.find((trip) => trip.id === id) ?? null;
+const invalidTrip = () => NextResponse.json({ error: "Invalid trip" }, { status: 400 });
+
+/** 가격은 여행 통화의 소수점 자릿수로 반올림해 저장한다(엔은 정수, 바트는 소수 둘째 자리). */
+const roundPrice = (value: number, fractionDigits: number) => {
+  const factor = 10 ** fractionDigits;
+  return Math.round(value * factor) / factor;
+};
+
+const wishInputValue = (body: Record<string, unknown>, fractionDigits: number) => {
   const type = body.type; const title = optionalText(body.title, 100); const categories = categoriesValue(body.categories);
   const locations = locationsValue(body.locations); const links = linksValue(body.links); const memo = optionalText(body.memo, 500);
   const vendor = optionalText(body.vendor, 100); const imagePaths = imagePathsValue(body.image_paths);
-  const targetPrice = body.target_price_local === "" || body.target_price_local == null ? null : Number(body.target_price_local);
+  const rawPrice = body.target_price_local === "" || body.target_price_local == null ? null : Number(body.target_price_local);
+  const targetPrice = rawPrice === null || !Number.isFinite(rawPrice) ? rawPrice : roundPrice(rawPrice, fractionDigits);
   if (!isWishType(type) || !title) return { error: "type and title are required" };
   if ([categories, locations, links, imagePaths].some((value) => value === undefined) || [memo, vendor].some((value) => value === undefined)) return { error: "Invalid field" };
   if (!Number.isFinite(targetPrice) && targetPrice !== null || targetPrice !== null && targetPrice < 0) return { error: "Invalid target price" };
@@ -84,14 +96,17 @@ const saveImages = async (wishId: string, paths: string[], oldPaths: string[] = 
 };
 
 export async function GET(request: Request) {
-  const type = new URL(request.url).searchParams.get("type");
+  const params = new URL(request.url).searchParams;
+  const trip = getTripBySlug(params.get("trip") ?? "");
+  if (!trip) return invalidTrip();
+  const type = params.get("type");
   if (type !== null && !isWishType(type)) return NextResponse.json({ error: "Invalid wish type" }, { status: 400 });
-  let query = supabase.from("wish_items").select(selectWish).order("created_at", { ascending: false });
+  let query = supabase.from("wish_items").select(selectWish).eq("trip_id", trip.id).order("created_at", { ascending: false });
   if (type) query = query.eq("type", type);
   let { data, error } = await query;
   // Deploys can briefly run newer app code before the SQL migration. Keep existing wishes readable.
   if (missingGalleryTable(error)) {
-    let legacyQuery = supabase.from("wish_items").select("*").order("created_at", { ascending: false });
+    let legacyQuery = supabase.from("wish_items").select("*").eq("trip_id", trip.id).order("created_at", { ascending: false });
     if (type) legacyQuery = legacyQuery.eq("type", type);
     const legacy = await legacyQuery;
     data = legacy.data as typeof data;
@@ -103,8 +118,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const input = wishInputValue(await request.json()); if (!input.data) return NextResponse.json({ error: input.error }, { status: 400 });
-    const { image_paths, ...wishData } = input.data;
+    const body = await request.json() as Record<string, unknown>;
+    const trip = getTripBySlug(String(body?.trip ?? "")); if (!trip) return invalidTrip();
+    const input = wishInputValue(body, CURRENCY_INFO[trip.currency.code].fractionDigits); if (!input.data) return NextResponse.json({ error: input.error }, { status: 400 });
+    const { image_paths, ...inputData } = input.data;
+    const wishData = { ...inputData, trip_id: trip.id };
     const galleryProbe = await supabase.from("wish_images").select("id").limit(1);
     if (galleryProbe.error && !galleryUnavailable(galleryProbe.error)) throw galleryProbe.error;
     const isLegacyGallery = galleryUnavailable(galleryProbe.error);
@@ -165,7 +183,6 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ data: withImages(saved as WishRow) });
     }
 
-    const input = wishInputValue(body); if (!input.data) return NextResponse.json({ error: input.error }, { status: 400 });
     let { data: current, error: currentError } = await supabase.from("wish_items").select(selectWish).eq("id", id).single();
     const isLegacyGallery = galleryUnavailable(currentError);
     if (isLegacyGallery) {
@@ -174,6 +191,9 @@ export async function PATCH(request: Request) {
       currentError = legacy.error;
     }
     if (currentError) return NextResponse.json({ error: currentError.code === "PGRST116" ? "Wish not found" : currentError.message }, { status: currentError.code === "PGRST116" ? 404 : 500 });
+    // 가격은 저장된 위시가 속한 여행의 통화로 검증한다. 요청이 보낸 여행 정보는 신뢰하지 않는다.
+    const trip = getTripById((current as { trip_id?: string }).trip_id); if (!trip) return invalidTrip();
+    const input = wishInputValue(body, CURRENCY_INFO[trip.currency.code].fractionDigits); if (!input.data) return NextResponse.json({ error: input.error }, { status: 400 });
     const { image_paths, ...wishData } = input.data;
     if (isLegacyGallery && image_paths.length > 1) return NextResponse.json({ error: legacyGalleryMessage }, { status: 409 });
     const legacyImagePath = (current as WishRow).image_path;
