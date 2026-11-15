@@ -24,7 +24,7 @@ export const JAPAN_YONAGO_TRIP: TripConfig = {
   phaseStartsAt: "2026-12-18T13:20:00+09:00",
   phaseEndsAt: "2026-12-21T15:50:00+09:00",
   copy: {
-    homeTitle: "온천과 사구를 만끽하라!",
+    homeTitle: "가현짱 때밀기 프로젝트!",
     dictionaryTitle: "일본어 사전... 당황하지 말라고!",
     utilsIntro: "요나고에서 바가지 쓰거나 당황하지 말라고!",
     exchangeCardDescription: "엔화 계산 헷갈려서 손해 보지 않도록 원화랑 달러로 똑바로 확인해!",
