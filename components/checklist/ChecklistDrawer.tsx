@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTrip } from "@/components/providers/trip-provider";
+import { checklistQueryKey } from "@/lib/checklist";
 import {
   Button,
   Checkbox,
@@ -42,6 +44,7 @@ const targetOptions = [
 
 export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
   const queryClient = useQueryClient();
+  const { trip } = useTrip();
   const [title, setTitle] = useState("");
   const [targets, setTargets] = useState<string[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -79,7 +82,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
       const response = await fetch("/api/checklist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, trip: trip.slug }),
       });
 
       if (!response.ok) throw new Error("준비물을 등록하지 못했습니다.");
@@ -87,7 +90,7 @@ export function ChecklistDrawer({ open, onOpenChange }: ChecklistDrawerProps) {
     },
     onSuccess: async () => {
       setSuccess(true);
-      await queryClient.invalidateQueries({ queryKey: ["checklist"] });
+      await queryClient.invalidateQueries({ queryKey: checklistQueryKey(trip.id) });
       closeTimerRef.current = setTimeout(() => onOpenChange(false), 800);
     },
     onError: (error) => {

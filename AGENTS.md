@@ -49,7 +49,7 @@ const { Stack } = stackflow({
 
 - `app/page.tsx` is the Next.js entry point; mobile navigation lives in Stackflow activities.
 - Register or rename activities through `components/stackflow.ts` and update all `useFlow` callers together.
-- Remote checklist state is owned by TanStack Query under the `['checklist']` query key.
+- Remote checklist state is owned by TanStack Query under the `['checklist', tripId]` query key (`checklistQueryKey(tripId)` in `lib/checklist.ts`).
 - Supabase Realtime handlers must update or invalidate the same query cache rather than creating duplicate local item state.
 
 ## UI

@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { FlightWidget } from "../components/flight/FlightWidget";
 import { useQuery } from "@tanstack/react-query";
 import { ChecklistBattleCard } from "../components/checklist/ChecklistBattleCard";
-import { fetchChecklist, getChecklistBattleStats, type PreparationItem } from "../lib/checklist";
+import { checklistQueryKey, fetchChecklist, getChecklistBattleStats, type PreparationItem } from "../lib/checklist";
 import { BeforeTripWeatherTicker, TravelWeatherWidget } from "../components/weather/TravelWeatherWidget";
 import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
 import { PostTripSection } from "@/components/home/PostTripSection";
@@ -525,8 +525,8 @@ const HomeScreen: React.FC<{ trip: TripConfig }> = ({ trip }) => {
     isError: isChecklistError,
     refetch: refetchChecklist,
   } = useQuery<PreparationItem[]>({
-    queryKey: ["checklist"],
-    queryFn: fetchChecklist,
+    queryKey: checklistQueryKey(trip.id),
+    queryFn: () => fetchChecklist(trip.slug),
   });
   const checklistBattleStats = getChecklistBattleStats(checklistItems);
   const { data: wishes = [] } = useQuery<WishItem[]>({

@@ -2,6 +2,7 @@ export type ChecklistUser = "gahyun" | "minu";
 
 export interface PreparationItem {
   id: string;
+  trip_id: string;
   title: string;
   type: "master" | "personal";
   assignees: string[];
@@ -91,8 +92,11 @@ export const getChecklistBattleStats = (
   };
 };
 
-export const fetchChecklist = async (): Promise<PreparationItem[]> => {
-  const response = await fetch("/api/checklist");
+/** 준비물 조회 키. Realtime·낙관적 업데이트도 모두 이 키의 캐시를 갱신한다. */
+export const checklistQueryKey = (tripId: string) => ["checklist", tripId] as const;
+
+export const fetchChecklist = async (tripSlug: string): Promise<PreparationItem[]> => {
+  const response = await fetch(`/api/checklist?trip=${encodeURIComponent(tripSlug)}`);
   if (!response.ok) {
     throw new Error("준비물 정보를 불러오지 못했습니다.");
   }

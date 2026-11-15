@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { triggerHapticFeedback } from "../components/BottomNav";
 import { Bell, ChevronDown, Trash2 } from "lucide-react";
+import { useTrip } from "@/components/providers/trip-provider";
 import { ChecklistDrawer } from "../components/checklist/ChecklistDrawer";
 import { ChecklistDeleteDrawer } from "../components/checklist/ChecklistDeleteDrawer";
 import { toast } from "sonner";
@@ -32,6 +33,7 @@ import { NativeHapticSwitch } from "../components/ui/native-haptic-switch";
 import { CompactSegmentedTabsList } from "../components/ui/compact-segmented-tabs";
 import { useFabEnterAnimation } from "@/components/ui/activity-register-fab";
 import {
+  checklistQueryKey,
   fetchChecklist,
   getChecklistBattleStats,
   getChecklistItemsForUser,
@@ -506,6 +508,8 @@ const SwipeableItem = ({
 
 export const ChecklistActivity: React.FC = () => {
   const queryClient = useQueryClient();
+  const { trip } = useTrip();
+  const checklistKey = useMemo(() => checklistQueryKey(trip.id), [trip.id]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
   const [packingTab, setPackingTab] = useState("gahyun");
@@ -530,27 +534,29 @@ export const ChecklistActivity: React.FC = () => {
 
 
   const { data: items = [], isLoading: loading } = useQuery<PreparationItem[]>({
-    queryKey: ["checklist"],
-    queryFn: fetchChecklist,
+    queryKey: checklistKey,
+    queryFn: () => fetchChecklist(trip.slug),
   });
   const showInitialLoader = useMinimumInitialLoading(loading);
 
   useEffect(() => {
     const channel = supabase
-      .channel('preparation_items_changes')
+      .channel(`preparation_items_changes_${trip.id}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'preparation_items' },
         (payload) => {
+          // INSERT/UPDATE는 다른 여행의 변경이면 무시한다. DELETE는 서버 필터가 없어 id로만 제거한다.
+          if (payload.eventType !== 'DELETE' && (payload.new as PreparationItem).trip_id !== trip.id) return;
           if (payload.eventType === 'INSERT') {
             const insertedItem = payload.new as PreparationItem;
-            queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
+            queryClient.setQueryData<PreparationItem[]>(checklistKey, (old = []) =>
               old.some((item) => item.id === insertedItem.id) ? old : [insertedItem, ...old],
             );
             toast("새로운 준비물이 등록되었습니다.", {
               action: {
                 label: "새로고침",
-                onClick: () => queryClient.invalidateQueries({ queryKey: ["checklist"] }),
+                onClick: () => queryClient.invalidateQueries({ queryKey: checklistKey }),
               },
               duration: 5000,
             });
@@ -562,7 +568,7 @@ export const ChecklistActivity: React.FC = () => {
             );
             const mergedItem = mergePendingUpdates(updatedItem);
 
-            queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
+            queryClient.setQueryData<PreparationItem[]>(checklistKey, (old = []) =>
               old.map((i) => (i.id === updatedItem.id ? mergedItem : i))
             );
             
@@ -586,7 +592,7 @@ export const ChecklistActivity: React.FC = () => {
                 locallyUpdatingKeys.current.delete(key);
               }
             }
-            queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
+            queryClient.setQueryData<PreparationItem[]>(checklistKey, (old = []) =>
               old.filter((i) => i.id !== deletedItem.id)
             );
           }
@@ -597,10 +603,10 @@ export const ChecklistActivity: React.FC = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [queryClient, checklistKey, trip.id]);
 
   const updateOptimisticToggle = (id: string, targetUser: string, isChecked: boolean) => {
-    queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
+    queryClient.setQueryData<PreparationItem[]>(checklistKey, (old = []) =>
       old.map((item) => {
         if (item.id !== id) return item;
         const completedBy = isChecked
@@ -616,7 +622,7 @@ export const ChecklistActivity: React.FC = () => {
     if (!entry || entry.inFlight) return;
 
     const item = queryClient
-      .getQueryData<PreparationItem[]>(["checklist"])
+      .getQueryData<PreparationItem[]>(checklistKey)
       ?.find((candidate) => candidate.id === entry.id);
     if (!item) {
       toggleEntriesRef.current.delete(key);
@@ -642,13 +648,13 @@ export const ChecklistActivity: React.FC = () => {
       const currentEntry = toggleEntriesRef.current.get(key);
       if (currentEntry && currentEntry.desired !== requestState) {
         if (payload.data) {
-          queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
+          queryClient.setQueryData<PreparationItem[]>(checklistKey, (old = []) =>
             old.map((candidate) => (
               candidate.id === payload.data?.id ? mergePendingUpdates(payload.data) : candidate
             )),
           );
         }
-        currentEntry.baseItems = queryClient.getQueryData<PreparationItem[]>(["checklist"]);
+        currentEntry.baseItems = queryClient.getQueryData<PreparationItem[]>(checklistKey);
         currentEntry.inFlight = false;
         updateOptimisticToggle(currentEntry.id, currentEntry.targetUser, currentEntry.desired);
         locallyUpdatingKeys.current.delete(key);
@@ -657,7 +663,7 @@ export const ChecklistActivity: React.FC = () => {
       }
 
       if (payload.data) {
-        queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) =>
+        queryClient.setQueryData<PreparationItem[]>(checklistKey, (old = []) =>
           old.map((candidate) => (
             candidate.id === payload.data?.id ? mergePendingUpdates(payload.data) : candidate
           )),
@@ -674,7 +680,7 @@ export const ChecklistActivity: React.FC = () => {
         return;
       }
       if (currentEntry?.baseItems) {
-        queryClient.setQueryData(["checklist"], currentEntry.baseItems);
+        queryClient.setQueryData(checklistKey, currentEntry.baseItems);
       }
       toggleEntriesRef.current.delete(key);
       locallyUpdatingKeys.current.delete(key);
@@ -694,7 +700,7 @@ export const ChecklistActivity: React.FC = () => {
 
   const toggleCheck = (id: string, targetUser: string, requestedState?: boolean) => {
     const key = `${targetUser}:${id}`;
-    const currentItems = queryClient.getQueryData<PreparationItem[]>(["checklist"]) ?? [];
+    const currentItems = queryClient.getQueryData<PreparationItem[]>(checklistKey) ?? [];
     const currentItem = currentItems.find((item) => item.id === id);
     if (!currentItem) return;
 
@@ -788,10 +794,10 @@ export const ChecklistActivity: React.FC = () => {
       }
     },
     onMutate: async ({ id, targetUser }) => {
-      await queryClient.cancelQueries({ queryKey: ["checklist"] });
-      const previousItems = queryClient.getQueryData<PreparationItem[]>(["checklist"]);
+      await queryClient.cancelQueries({ queryKey: checklistKey });
+      const previousItems = queryClient.getQueryData<PreparationItem[]>(checklistKey);
 
-      queryClient.setQueryData<PreparationItem[]>(["checklist"], (old = []) => {
+      queryClient.setQueryData<PreparationItem[]>(checklistKey, (old = []) => {
         return old.map((i) => {
           if (i.id === id) {
             const newAssignees = i.assignees.filter((a) => a !== targetUser && a !== "all");
@@ -805,12 +811,12 @@ export const ChecklistActivity: React.FC = () => {
     },
     onError: (err, variables, context) => {
       if (context?.previousItems) {
-        queryClient.setQueryData(["checklist"], context.previousItems);
+        queryClient.setQueryData(checklistKey, context.previousItems);
       }
       toast.error("항목 삭제에 실패했습니다.");
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["checklist"] });
+      queryClient.invalidateQueries({ queryKey: checklistKey });
     },
     onSuccess: () => {
       toast.success("항목이 삭제되었습니다.");
