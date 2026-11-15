@@ -34,8 +34,8 @@ const getRouteLabel = (trip: TripConfig) => {
   return trip.weatherPlaces.map((place) => place.label).join(" · ");
 };
 
-/** 홈 상단에 현재 여행을 보여주고, 눌러서 다른 여행으로 바꾸는 칩. */
-export function TripSwitcherChip({ className }: { className?: string }) {
+/** 앱바 오른쪽에 두는 작은 버튼. 현재 여행의 국기를 보여주고, 눌러서 다른 여행으로 바꾼다. */
+export function TripSwitcherButton({ className }: { className?: string }) {
   const { trip } = useTrip();
   const [open, setOpen] = useState(false);
 
@@ -45,7 +45,7 @@ export function TripSwitcherChip({ className }: { className?: string }) {
         aria-haspopup="dialog"
         aria-label={`${trip.shortName} 여행 선택`}
         className={cn(
-          "mx-auto flex max-w-sm items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-[13px] font-bold text-slate-800 shadow-sm transition-transform active:scale-[0.97] motion-reduce:transition-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100",
+          "mr-2 flex h-9 items-center gap-0.5 rounded-full bg-slate-100 pl-2.5 pr-1.5 text-lg leading-none transition-transform active:scale-90 motion-reduce:transition-none dark:bg-white/10",
           className,
         )}
         onClick={() => {
@@ -55,9 +55,7 @@ export function TripSwitcherChip({ className }: { className?: string }) {
         type="button"
       >
         <span aria-hidden>{trip.flag}</span>
-        <span className="truncate">{trip.name}</span>
-        <span className="shrink-0 font-semibold tabular-nums text-slate-400">{formatRange(trip)}</span>
-        <ChevronDown aria-hidden className="size-4 shrink-0 text-slate-400" />
+        <ChevronDown aria-hidden className="size-3.5 text-slate-400" />
       </button>
       <TripSwitcherDrawer open={open} onOpenChange={setOpen} />
     </>

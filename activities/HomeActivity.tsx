@@ -3,7 +3,7 @@ import NumberFlow from "@number-flow/react";
 import { AnimatedContent } from "../components/ui/animated-content";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { TripSwitcherChip } from "@/components/trip/TripSwitcher";
+import { TripSwitcherButton } from "@/components/trip/TripSwitcher";
 import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { Button, Tabs } from "@heroui/react";
 import { ChevronRight, Hotel } from "lucide-react";
@@ -551,7 +551,7 @@ export const HomeActivity: React.FC = () => {
   };
 
   return (
-    <AppScreen appBar={{ title: "태국을 점령하라!" }}>
+    <AppScreen appBar={{ title: "태국을 점령하라!", renderRight: () => <TripSwitcherButton /> }}>
       <div
         className={
           tripState === "after"
@@ -559,7 +559,6 @@ export const HomeActivity: React.FC = () => {
             : "flex min-h-full w-full flex-col overflow-y-auto pb-[calc(4rem+max(env(safe-area-inset-bottom,0px),12px))]"
         }
       >
-        <TripSwitcherChip className="mt-3 shrink-0" />
         {tripState !== "after" && <WorldClockCard />}
         <Tabs
           className="w-full"
