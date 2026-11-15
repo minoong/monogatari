@@ -26,6 +26,8 @@ export const THAILAND_TRIP: TripConfig = {
     utilsIntro: "방콕에서 바가지 쓰거나 당황하지 말라고!",
     exchangeCardDescription: "태국 바트 바가지 쓰지 않도록 원화랑 달러로 똑바로 확인해!",
     dictionaryCardTitle: "당황 금지! 현지 태국어 사전",
+    entryPaperwork: "태국 입국 카드 작성",
+    letterOpening: "방콕의 밤공기, 시장의 소란, 그리고 피곤해도 웃었던 우리의 얼굴. 이 여행은 완벽하지 않아도 충분히 좋았어.",
   },
   theme: { id: "bangkok", accent: "#0a84ff", tint: "#ffffff", backdrop: { kind: "none" } },
   currency: { code: "THB", displayUnit: 1 },

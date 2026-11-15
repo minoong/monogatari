@@ -1,6 +1,9 @@
 "use client";
 
-import { useRef, type ReactNode, type RefObject } from "react";
+import { useMemo, useRef, type ReactNode, type RefObject } from "react";
+import { useTrip } from "@/components/providers/trip-provider";
+import { CURRENCY_INFO } from "@/lib/currency";
+import { getTripEndMonthLabel, getTripNights, getTripNightsLabel, type TripConfig } from "@/lib/trips";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -17,11 +20,11 @@ type PanelSection = {
   body: ReactNode;
 };
 
-const PANEL_SECTIONS: PanelSection[] = [
+const getPanelSections = (trip: TripConfig): PanelSection[] => [
   {
     id: "schedule",
     label: "일정",
-    title: "4일의 리듬",
+    title: `${getTripNights(trip) + 1}일의 리듬`,
     tone: "sky",
     body: (
       <>
@@ -94,11 +97,11 @@ const PANEL_SECTIONS: PanelSection[] = [
         </p>
         <ul className="post-trip-panel-checklist">
           <li>여권 유효기간 확인</li>
-          <li>태국 바트 환전 · 카드 알림 설정</li>
+          <li>{CURRENCY_INFO[trip.currency.code].label} 환전 · 카드 알림 설정</li>
           <li>항공권 · 숙소 예약서 저장</li>
           <li>여행자 보험 가입</li>
           <li>짐 싸기 · 멀티탭 · 선크림</li>
-          <li>공항 이동 · 태국 입국 카드 작성</li>
+          <li>공항 이동 · {trip.copy.entryPaperwork}</li>
           <li>일정표 공유 · 비상 연락처 정리</li>
           <li>마지막으로, 설레는 마음 챙기기</li>
         </ul>
@@ -114,10 +117,7 @@ const PANEL_SECTIONS: PanelSection[] = [
     scrollable: true,
     body: (
       <>
-        <p className="post-trip-panel-letter">
-          방콕의 밤공기, 시장의 소란, 그리고 피곤해도 웃었던 우리의 얼굴. 이 여행은 완벽하지 않아도 충분히
-          좋았어.
-        </p>
+        <p className="post-trip-panel-letter">{trip.copy.letterOpening}</p>
         <p className="post-trip-panel-letter">
           다음에 다시 떠날 때를 생각하면, 오늘의 기억이 작은 나침반이 되어 줄 거야. 더 늦게 자도 괜찮고, 더
           멀리 걸어도 괜찮아.
@@ -125,8 +125,8 @@ const PANEL_SECTIONS: PanelSection[] = [
         <p className="post-trip-panel-letter">
           위시를 다 채우지 못했다면 그것도 여행의 일부야. 남은 목록은 다음 이야기의 첫 페이지가 될 테니까.
         </p>
-        <p className="post-trip-panel-letter">고맙다, 3박 4일. 그리고 함께 걸어준 너에게도.</p>
-        <p className="post-trip-panel-sign">— Monogatari, 2026.09</p>
+        <p className="post-trip-panel-letter">고맙다, {getTripNightsLabel(trip)}. 그리고 함께 걸어준 너에게도.</p>
+        <p className="post-trip-panel-sign">— Monogatari, {getTripEndMonthLabel(trip)}</p>
       </>
     ),
   },
@@ -182,6 +182,8 @@ export function PostTripPinnedPanels({
 }: {
   scrollContainerRef: RefObject<HTMLElement | null>;
 }) {
+  const { trip } = useTrip();
+  const sections = useMemo(() => getPanelSections(trip), [trip]);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const panelRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -197,7 +199,7 @@ export function PostTripPinnedPanels({
         const scroller = scrollContainerRef.current;
         const panels = panelRefs.current.filter((panel): panel is HTMLElement => panel !== null);
 
-        if (!scroller || scroller.clientHeight <= 0 || panels.length !== PANEL_SECTIONS.length) {
+        if (!scroller || scroller.clientHeight <= 0 || panels.length !== sections.length) {
           requestAnimationFrame(init);
           return;
         }
@@ -222,7 +224,7 @@ export function PostTripPinnedPanels({
 
   return (
     <div ref={wrapperRef} className="post-trip-pinned-panels w-full">
-      {PANEL_SECTIONS.map((section, index) => (
+      {sections.map((section, index) => (
         <section
           key={section.id}
           ref={(element) => {

@@ -41,15 +41,23 @@ export const formatFlightDate = (date: string) => {
   return `${year}년 ${month}월 ${day}일`;
 };
 
-/** 가는 편~오는 편 날짜 차이로 센 "3박 4일". 항공편이 없으면 여행 기간으로 센다. */
-export const getTripNightsLabel = (trip: TripConfig) => {
+/** 가는 편~오는 편 날짜 차이로 센 박 수. 항공편이 없으면 여행 기간으로 센다. */
+export const getTripNights = (trip: TripConfig) => {
   const outbound = getFlight(trip, "outbound");
   const inbound = getFlight(trip, "return");
   const start = outbound?.date ?? trip.startDate;
   const end = inbound?.date ?? trip.endDate;
-  const nights = Math.round((new Date(`${end}T00:00:00Z`).getTime() - new Date(`${start}T00:00:00Z`).getTime()) / 86_400_000);
+  return Math.round((new Date(`${end}T00:00:00Z`).getTime() - new Date(`${start}T00:00:00Z`).getTime()) / 86_400_000);
+};
+
+/** 예: 3 -> "3박 4일" */
+export const getTripNightsLabel = (trip: TripConfig) => {
+  const nights = getTripNights(trip);
   return `${nights}박 ${nights + 1}일`;
 };
+
+/** 여행이 끝난 달. 예: "2026.12" */
+export const getTripEndMonthLabel = (trip: Pick<TripConfig, "endDate">) => trip.endDate.slice(0, 7).replace("-", ".");
 
 /** 예: "2026.12.18 (금) 13:20". 요일은 달력 날짜 기준이라 실행 환경 시간대와 무관하다. */
 export const formatFlightDeparture = (flight: TripFlightSeed) => {

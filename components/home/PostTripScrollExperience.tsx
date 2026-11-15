@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, type ReactNode, type RefObject } from "react";
+import { useLayoutEffect, useMemo, useRef, type ReactNode, type RefObject } from "react";
 import { useQuery } from "@tanstack/react-query";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -11,7 +11,7 @@ import { PostTripWishPinIndicator } from "@/components/home/PostTripWishPinIndic
 import ScrollFloat from "@/components/ScrollFloat";
 import { useTrip } from "@/components/providers/trip-provider";
 import type { ScheduleItem } from "@/lib/schedule";
-import { formatFlightDate, getFlight, getTripNightsLabel } from "@/lib/trips";
+import { formatFlightDate, getFlight, getTripNights, getTripNightsLabel } from "@/lib/trips";
 import type { WishItem } from "@/lib/wishes";
 import "./post-trip-scroll-experience.css";
 import "./post-trip-wish-pin.css";
@@ -497,6 +497,11 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
   const panelRefs = useRef<(HTMLElement | null)[]>([]);
   const { trip } = useTrip();
   const returnFlight = getFlight(trip, "return");
+  // "4일의 리듬"처럼 여행 길이가 들어가는 제목은 여행 설정에서 계산한다.
+  const contentPanels = useMemo(
+    () => CONTENT_PANELS.map((panel) => (panel.id === "schedule" ? { ...panel, title: `${getTripNights(trip) + 1}일의 리듬` } : panel)),
+    [trip],
+  );
   const { data: wishes = [], isFetched: isWishesFetched } = useQuery({ queryKey: ["wishes", trip.id], queryFn: () => fetchWishes(trip.slug) });
   const { data: scheduleItems = [], isFetched: isScheduleFetched } = useQuery({
     queryKey: ["schedule", trip.id],
@@ -631,7 +636,7 @@ export function PostTripScrollExperience({ scrollContainerRef }: PostTripScrollE
       </div>
 
       <div className="post-trip-pinned-panels w-full">
-        {CONTENT_PANELS.map((section, index) => {
+        {contentPanels.map((section, index) => {
           const panel = (
             <section
               key={section.id}

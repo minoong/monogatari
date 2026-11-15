@@ -1,5 +1,7 @@
 "use client";
 
+import { useTrip } from "@/components/providers/trip-provider";
+import { getTripEndMonthLabel } from "@/lib/trips";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -25,6 +27,7 @@ export function PostTripLetterTimeline({
   scrollContainerRef,
 }: PostTripLetterTimelineProps) {
   const prefersReducedMotion = useReducedMotion();
+  const { trip } = useTrip();
   const headerRef = useRef<HTMLElement>(null);
   const entryRefs = useRef<(HTMLElement | null)[]>([]);
   const [activeEntryId, setActiveEntryId] = useState<string | null>(null);
@@ -169,7 +172,7 @@ export function PostTripLetterTimeline({
             );
           })
         )}
-        <p className="post-trip-letter-timeline__footer">— 태국을 점령하라!, 2026.09</p>
+        <p className="post-trip-letter-timeline__footer">— {trip.copy.homeTitle}, {getTripEndMonthLabel(trip)}</p>
         <div className="post-trip-letter-timeline__spacer" aria-hidden />
       </div>
     </div>

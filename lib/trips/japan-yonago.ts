@@ -29,6 +29,8 @@ export const JAPAN_YONAGO_TRIP: TripConfig = {
     utilsIntro: "요나고에서 바가지 쓰거나 당황하지 말라고!",
     exchangeCardDescription: "엔화 계산 헷갈려서 손해 보지 않도록 원화랑 달러로 똑바로 확인해!",
     dictionaryCardTitle: "당황 금지! 현지 일본어 사전",
+    entryPaperwork: "입국 서류 준비",
+    letterOpening: "낯선 길 위의 공기, 함께 나눠 먹은 것들, 그리고 피곤해도 웃었던 우리의 얼굴. 이 여행은 완벽하지 않아도 충분히 좋았어.",
   },
   // 온천 테마: 김이 오르는 따뜻한 복숭아·살구빛에 온천수의 옅은 청록을 섞는다.
   theme: {

@@ -99,6 +99,10 @@ export interface TripCopy {
   exchangeCardDescription: string;
   /** 유틸 카드: 사전 제목 */
   dictionaryCardTitle: string;
+  /** 여행 후 화면 "떠나기 전 우리" 목록의 입국 서류 항목 */
+  entryPaperwork: string;
+  /** 여행 후 편지의 첫 문장. 아직 겪지 않은 일은 구체적으로 적지 않는다. */
+  letterOpening: string;
 }
 
 /** 여행별 분위기. 색은 `--trip-accent`, `--trip-tint` CSS 변수로 노출된다. */
