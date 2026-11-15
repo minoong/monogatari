@@ -16,6 +16,8 @@ export function TripBackdrop({ className }: { className?: string }) {
       aria-hidden
       className={className}
       style={{
+        // 빛 덩어리가 화면 오른쪽 밖으로 나가도 홈이 가로로 스크롤되지 않도록 잘라낸다.
+        overflow: "hidden",
         background: backdrop.gradient,
         maskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
         WebkitMaskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
